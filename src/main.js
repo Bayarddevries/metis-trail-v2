@@ -66,6 +66,8 @@ export function bootstrap(seed = null) {
   render();
 }
 
+window.__METIS_BOOT__ = bootstrap;
+
 function render() {
   const game = window._metisGame;
   if (!game) return;
