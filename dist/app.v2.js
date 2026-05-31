@@ -554,6 +554,24 @@ var EVENT_POOLS = {
   ],
   river_valley: [
     {
+      id: "river_valley_sudden_rain",
+      text: "The heavy cloud bursts without warning. The trail turns to a slurry and the cart sinks to the naves.",
+      source: { quote: "Sudden storms of rain turned the valley trail into a bog that could trap a loaded cart for hours.", author: "Lacombe missionary journals, 1878" },
+      choices: [
+        { text: "Unhitch and pole the cart through", dc: 12, ok: "The oxen respond; you keep moving, soaked.", bad: "A wheel hub sinks axle-deep.", wear: 1, morale: -4 },
+        { text: "Wait it out on dry ground", dc: null, always: "Two hours of rain. The mud thickens.", time: 1 }
+      ]
+    },
+    {
+      id: "river_valley_broken_axle",
+      text: "A hidden washout has eaten into the bank. The cart slews and the axle groans.",
+      source: { quote: "Many a worn-out axle and broken wheel attest the power of its stumps and coulees.", author: "John C. Schultz", work: "The Old Crow Wing Trail, MHS Transactions, 1894" },
+      choices: [
+        { text: "Set a temporary truss with canvas and rope", dc: 11, ok: "A crude repair holds for the remaining miles.", bad: "The truss fails in the next gully.", wear: 1, time: 1 },
+        { text: "Spike the wheel and coast downhill", dc: null, always: "You save time but the wheel wobbles loose.", alwaysWear: 1, morale: -4 }
+      ]
+    },
+    {
       id: "river_high",
       text: "The river is running high and fast. The bank trail is muddy and narrow.",
       source: { quote: "The carts had indeed entered straight into the water... turned upstream to make the crossing in a horse shoe fashion.", author: "John C. Schultz", work: "The Old Crow Wing Trail, MHS Transactions, 1894" },
@@ -665,6 +683,33 @@ var EVENT_POOLS = {
         { text: "Drive through to firmer ground", dc: 11, ok: "You outpace the worst of the cloud.", bad: "The animals bolt; a strap snaps.", wear: 1, crew: "tired" },
         { text: "Let the oxen cool in the water", dc: null, always: "The delay costs time but saves nerves.", time: 1 }
       ]
+    },
+    {
+      id: "wooded_black_bear",
+      text: "A black bear crosses the trail thirty yards ahead, then stops and turns, taking the measure of the party.",
+      source: { quote: "Bears were common along the wooded corridors of the Carlton Trail and could be dangerous when surprised at close range.", author: "Brehaut, citing Fort Qu'Appelle accounts", work: "MHS Transactions, 1971-72" },
+      choices: [
+        { text: "Stand your ground and make noise", dc: 12, ok: "The bear veers away.", bad: "It charges and the oxen bolt.", wear: 1, morale: -6, crew: "tired" },
+        { text: "Back away quietly with the cart", dc: null, always: "The bear waits until you are clear, then moves on.", time: 1 }
+      ]
+    },
+    {
+      id: "wooded_rattlesnake",
+      text: "A rattlesnake hums in the grass beside the trail, still as a root until you are almost on it.",
+      source: { quote: "Rattlesnakes were common on the southern stretches of the trail and caused many a nervous night.", author: "Schultz, citing settler accounts", work: "The Old Crow Wing Trail, MHS Transactions, 1894" },
+      choices: [
+        { text: "Hook it clear with a pole and move on", dc: 10, ok: "The snake disappears into the brush.", bad: "It strikes at the lead ox.", wear: 1, morale: -2 },
+        { text: "Backtrack to a wider crossing", dc: null, always: "A slow detour, but nerves settle.", time: 1 }
+      ]
+    },
+    {
+      id: "wooded_axle_rut",
+      text: "A hidden washout drops the front wheel axle-deep. The cart tilts dangerously toward the ditch.",
+      source: { quote: "Many a worn-out axle and broken wheel attest the power of its stumps and coulees.", author: "John C. Schultz", work: "The Old Crow Wing Trail, MHS Transactions, 1894" },
+      choices: [
+        { text: "Spade and block the wheel", dc: 11, ok: "You free the cart without damage.", bad: "The soil gives way twice.", time: 1, morale: -3 },
+        { text: "Lighten and rock it free", dc: 9, ok: "A quick heave gets you out clean.", bad: "A crate lands in the muck.", food: -2, wear: 1 }
+      ]
     }
   ],
   uplands: [
@@ -683,6 +728,15 @@ var EVENT_POOLS = {
       choices: [
         { text: "Hug the ridge line to avoid low ground", dc: 11, ok: "Clear ground saves the cart.", bad: "A hidden stump catches the wheel hub.", wear: 1 },
         { text: "Take the direct trail", dc: null, always: "The going is rough but quick.", alwaysWear: 0 }
+      ]
+    },
+    {
+      id: "upland_thunderstorm",
+      text: "The ridge offers no shelter. Lightning finds the highest point and the rain comes down in sheets.",
+      source: { quote: "Sudden storms of hail and sleet were not uncommon on the uplands in late spring.", author: "Lacombe missionary journals, 1878" },
+      choices: [
+        { text: "Hobble the oxen and weather it under the cart", dc: 11, ok: "The canvas holds. You are soaked but intact.", bad: "A lightning-struck tree falls nearby.", morale: -6, time: -1 },
+        { text: "Run for the coulee bottom", dc: 9, ok: "Lower ground is safer.", bad: "A slipped wheel in the mud.", wear: 1 }
       ]
     }
   ],
@@ -728,6 +782,15 @@ var EVENT_POOLS = {
       choices: [
         { text: "Exchange dried fish and route talk", dc: 8, ok: "They share intelligence on the next water crossings.", bad: "The conversation is brief and businesslike.", morale: 6 },
         { text: "Hire a guide for the hard water ahead", dc: 10, ok: "A steady hand joins your crew for three days.", bad: "The boatman is competent but expensive.", food: -3, extraProgress: 2, addsRep: { key: "metis", delta: 1 } }
+      ]
+    },
+    {
+      id: "river_broken_wheel",
+      text: "The wheel bites into a submerged root and the rim splits with a crack.",
+      source: { quote: "Many a worn-out axle and broken wheel attest the power of riverbank obstacles.", author: "John C. Schultz", work: "The Old Crow Wing Trail, MHS Transactions, 1894" },
+      choices: [
+        { text: "Fell a nearby birch and fashion a new felly", dc: 12, ok: "A rough repair, but the wheel is round again.", bad: "The timber is green and splits by afternoon.", wear: 1, time: 1, morale: -3 },
+        { text: "Rig an axle skid and limp to the post", dc: null, always: "You arrive, but the cart is lopsided and the load is light.", alwaysWear: 1, food: -2 }
       ]
     }
   ]
