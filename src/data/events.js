@@ -5,6 +5,7 @@ export const EVENT_POOLS = {
     {
       id: 'plains_trader',
       text: 'A Metis freighter catches up to your cart. He eyes your load and offers a short-term deal.',
+      classification: 'Freight & Trade',
       source: { quote: 'The freighting trade along the Carlton Trail was dominated by Metis independent carters.', author: 'MMF Research', work: 'Research Vault' },
       choices: [
         { text: 'Hire him as a scout', dc: 11, ok: 'He rides ahead and spots a safer campsite.', bad: 'He takes the easy path and you lose a day.', wear: 0, time: -1, addsRep: { key: 'metis', delta: 1 }, branch: {
