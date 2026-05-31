@@ -1,0 +1,204 @@
+{"alternate_locations":{"servers":[{"server":"dn721604.ca.archive.org","dir":"/0/items/P000279"}],"workable":[{"server":"dn721604.ca.archive.org","dir":"/0/items/P000279"}]},"created":1780233628,"d1":"ia601302.us.archive.org","d2":"ia801302.us.archive.org","dir":"/3/items/P000279","files":[{"name":"P000279-new.xml","source":"original","mtime":"1742341056","size":"4825","md5":"79a2d7e3ba4e116951bb062893e3e36c","crc32":"2d801610","sha1":"c1269894625d1688f7f4376e4a632d6dfd795c30","format":"Metadata"},{"name":"P000279.pdf","source":"derivative","pdf_module_version":"0.0.25","pdf_degraded":"invalid-jp2-headers","format":"Text PDF","original":"P000279_page_numbers.json","mtime":"1742341460","size":"1052834","md5":"ffe6749ea3b16cc71980b6d3ee5a7d3d","crc32":"ffe2cb62","sha1":"cfe7f978e03e027417e9f641e69408d3028451f3"},{"name":"P000279_archive.torrent","source":"metadata","btih":"d3e802de7de89b23d6690ca6ea5b12573993d843","mtime":"1742341480","size":"3948","md5":"3553083ba62674b1afb67745ce433a40","crc32":"5b7bd3a3","sha1":"1b92d4446dba920fd1087e4d1c32592bfe574426","format":"Archive BitTorrent"},{"name":"P000279_chocr.html.gz","source":"derivative","ocr":"tesseract 5.3.0-6-g76ae","ocr_parameters":"lang-fra;two-pass-disabled;pass-dpi-disabled;autonomous-mode-disabled;binarisation-method-otsu","ocr_module_version":"0.0.21","ocr_detected_script":"Latin","ocr_detected_script_conf":"1.0000","ocr_detected_lang":"fr","ocr_detected_lang_conf":"1.0000","format":"chOCR","original":"P000279_jp2.zip","mtime":"1742341313","size":"702769","md5":"6e134bb1781b28be49f311a8e2635281","crc32":"0e43c536","sha1":"fea05f5032bd5baac62ae66b2ae2b47bc0abf4c3"},{"name":"P000279_djvu.txt","source":"derivative","format":"DjVuTXT","original":"P000279_djvu.xml","mtime":"1742341377","size":"51945","md5":"482c8e1c5351ebb7d4d07b824ca52137","crc32":"f340306b","sha1":"0f6e1410927a11cff92d53f4482148c48ba8b2b1"},{"name":"P000279_djvu.xml","source":"derivative","format":"Djvu XML","original":"P000279_hocr.html","mtime":"1742341344","size":"650035","md5":"486da83a978b001692a11ab6626f3fd3","crc32":"cf75a2e4","sha1":"2b102717fc929654ba46d9d6f703e5e4b18681f2"},{"name":"P000279_files.xml","source":"original","format":"Metadata","md5":"6b61685ed211daff6e28dd52289eda57","summation":"md5"},{"name":"P000279_hocr.html","source":"derivative","hocr_char_to_word_module_version":"1.3.0","hocr_char_to_word_hocr_version":"1.1.56","ocr_parameters":"lang-fra;two-pass-disabled;pass-dpi-disabled;autonomous-mode-disabled;binarisation-method-otsu","ocr_module_version":"0.0.21","ocr_detected_script":"Latin","ocr_detected_script_conf":"1.0000","ocr_detected_lang":"fr","ocr_detected_lang_conf":"1.0000","format":"hOCR","original":"P000279_chocr.html.gz","mtime":"1742341335","size":"1213186","md5":"0964299a68a79e8d58634b0159eddf24","crc32":"c87686d9","sha1":"38b055699592fc0d68ae467b002cfdbbbded3f8b"},{"name":"P000279_hocr_pageindex.json.gz","source":"derivative","hocr_pageindex_module_version":"1.1.0","hocr_pageindex_hocr_version":"1.1.56","format":"OCR Page Index","original":"P000279_hocr.html","mtime":"1742341352","size":"338","md5":"3a17e2eb33dcbb18fbc97067931aefe3","crc32":"d234df8d","sha1":"b8d9647f21f3d650511f6c3b7b14d4d6b5bb55f2"},{"name":"P000279_hocr_searchtext.txt.gz","source":"derivative","hocr_fts_text_module_version":"1.2.0","hocr_fts_text_hocr_version":"1.1.56","word_conf_0_10":"147","word_conf_11_20":"76","word_conf_21_30":"87","word_conf_31_40":"129","word_conf_41_50":"146","word_conf_51_60":"168","word_conf_61_70":"222","word_conf_71_80":"351","word_conf_81_90":"932","word_conf_91_100":"6057","format":"OCR Search Text","original":"P000279_hocr.html","mtime":"1742341363","size":"20953","md5":"a42e85aeddb946f38ca1ef226bec588e","crc32":"bae55e61","sha1":"40987399360108bdbe879fa94db6ed7e6c26df5b"},{"name":"P000279_images.zip","source":"original","mtime":"1742341068","size":"1014719","md5":"8309ec8dba10a159bb934b9a38143ef9","crc32":"77671d51","sha1":"d1efc22f9e6f9a6d25660c0e5b7172856e51bd4c","format":"Generic Raw Book Zip","filecount":"28"},{"name":"P000279_jp2.zip","source":"derivative","format":"Single Page Processed JP2 ZIP","original":"P000279_images.zip","mtime":"1742341241","size":"2337005","md5":"d0208ded9437a12ed23bb8b496c09ef6","crc32":"a985ae56","sha1":"63dccdfb97d40d15ae80b292f0aa0801165fd410","filecount":"28"},{"name":"P000279_meta.sqlite","source":"original","mtime":"1742341082","size":"28672","md5":"5a7411a41a566e4e94980acf5d1eff04","crc32":"aad4d5b5","sha1":"3b5412fdce63d8cdbfbf826fea8e860416a43c26","format":"Metadata"},{"name":"P000279_meta.xml","source":"original","mtime":"1742341463","size":"3005","md5":"9a5f4121ccb10d7aa6cddbb1a0c61131","crc32":"f24874e7","sha1":"e84c63a0888c4b6568f5896f3350069eb50ae02e","format":"Metadata"},{"name":"P000279_page_numbers.json","source":"derivative","hocr_pagenumber_module_version":"1.0.5","hocr_pagenumber_hocr_version":"1.1.54","hocr_pagenumber_confidence":"63","format":"Page Numbers JSON","original":"P000279_hocr.html","mtime":"1742341407","size":"4809","md5":"af72641d6b32a5f7f0ef90ce838e03d7","crc32":"63c98760","sha1":"f294043e138efe292bdff1eba9abe772197aab3f"},{"name":"P000279_scandata.xml","source":"derivative","format":"Scandata","original":"P000279_djvu.xml","mtime":"1742341407","size":"10040","md5":"673746ca199ca22418310fdfe85e1526","crc32":"d1f7c882","sha1":"e4cd120e81198cdfc9484e26cd9a1b83555a4111"},{"name":"__ia_thumb.jpg","source":"original","mtime":"1742341479","size":"21748","md5":"fc9c835dc51a8c88139efa848543a5c8","crc32":"950a6ca3","sha1":"b9e7228c38de7cd111ba6a0e23f6cfa91fef1745","format":"Item Tile"}],"files_count":17,"item_last_updated":1742341480,"item_size":7120831,"metadata":{"identifier":"P000279","adaptive_ocr":"true","collection":["peel_print","peel","university_of_alberta_libraries","toronto"],"creator":"Lafl\u00e8che, Louis-Fran\u00e7ois Richer, 1818-1898. (author)","date":"1853","description":"Lafl\u00e8che, Louis-Fran\u00e7ois Richer: 1818-1898. Catholic missionary in Rupert's Land, 1844-1856; Bishop of Three Rivers, 1870-1898 (Wallace, <i>Dictionary of Canadian biography</i>). // Dated: \"Saint Fran\u00e7ois de la Prairie du Cheval-Blanc, le 4 septembre 1851.\" In <i>Rapport sur les missions du dioc\u00e8se de Qu\u00e9bec </i>, mars 1853, no.10. An entertaining account of an excursion which Father Lafl\u00e8che made in the summer of 1851 with the M\u00e9tis on their annual buffalo hunt.","format":"pp.44-70 .","identifier-bib":["local:peel1: 118","local:peel2: 141","local:peel3: 279","local:peel-procite-id: 279"],"language":"French","mediatype":"texts","publisher":"[Presses \u00e0 Vapeur d'Augustin C\u00f4t\u00e9] ([Quebec])","scanner":"Internet Archive Python library 5.0.5","subject":["The People--M\u00e9tis","Explorers, Surveyors and Travellers--Description and Travel--General","Animals--Anecdotes","Animaux--Anecdotes","Letters","Lettres (Genre litt\u00e9raire)","M\u00e9tis--Hunting","M\u00e9tis--Canada--Chasse","Outdoor life","Plein air","Prairie Provinces--Description and travel","1851"],"title":"Lettre de M. Richer Lafl\u00e8che, missionnaire, \u00e0 un de ses amis","uploader":"digitization.IAscript@ualberta.ca","collection_added":["peel","university_of_alberta_libraries","toronto"],"publicdate":"2025-03-18 23:37:46","addeddate":"2025-03-18 23:37:46","identifier-access":"http://archive.org/details/P000279","identifier-ark":"ark:/13960/s230t6m7hh3","imagecount":"28","ocr":"tesseract 5.3.0-6-g76ae","ocr_parameters":"-l fra","ocr_module_version":"0.0.21","ocr_detected_script":"Latin","ocr_detected_script_conf":"1.0000","ocr_detected_lang":"fr","ocr_detected_lang_conf":"1.0000","page_number_confidence":"63","page_number_module_version":"1.0.5","pdf_degraded":"invalid-jp2-headers","pdf_module_version":"0.0.25"},"page_numbers":{
+    "identifier": "P000279",
+    "format-version": "2",
+    "archive-hocr-tools-version": "1.1.54",
+    "confidence": 63,
+    "pages": [
+        {
+            "leafNum": 0,
+            "confidence": null,
+            "pageNumber": "",
+            "pageProb": null,
+            "wordConf": null
+        },
+        {
+            "leafNum": 1,
+            "confidence": null,
+            "pageNumber": "",
+            "pageProb": null,
+            "wordConf": null
+        },
+        {
+            "leafNum": 2,
+            "confidence": null,
+            "pageNumber": "",
+            "pageProb": null,
+            "wordConf": null
+        },
+        {
+            "leafNum": 3,
+            "confidence": 63,
+            "pageNumber": "46",
+            "pageProb": 53,
+            "wordConf": 96
+        },
+        {
+            "leafNum": 4,
+            "confidence": null,
+            "pageNumber": "47",
+            "pageProb": null,
+            "wordConf": null
+        },
+        {
+            "leafNum": 5,
+            "confidence": null,
+            "pageNumber": "48",
+            "pageProb": null,
+            "wordConf": null
+        },
+        {
+            "leafNum": 6,
+            "confidence": null,
+            "pageNumber": "49",
+            "pageProb": null,
+            "wordConf": null
+        },
+        {
+            "leafNum": 7,
+            "confidence": 61,
+            "pageNumber": "50",
+            "pageProb": 51,
+            "wordConf": 96
+        },
+        {
+            "leafNum": 8,
+            "confidence": null,
+            "pageNumber": "51",
+            "pageProb": null,
+            "wordConf": null
+        },
+        {
+            "leafNum": 9,
+            "confidence": 63,
+            "pageNumber": "52",
+            "pageProb": 53,
+            "wordConf": 95
+        },
+        {
+            "leafNum": 10,
+            "confidence": 63,
+            "pageNumber": "53",
+            "pageProb": 53,
+            "wordConf": 93
+        },
+        {
+            "leafNum": 11,
+            "confidence": 61,
+            "pageNumber": "54",
+            "pageProb": 51,
+            "wordConf": 77
+        },
+        {
+            "leafNum": 12,
+            "confidence": 62,
+            "pageNumber": "55",
+            "pageProb": 52,
+            "wordConf": 93
+        },
+        {
+            "leafNum": 13,
+            "confidence": null,
+            "pageNumber": "56",
+            "pageProb": null,
+            "wordConf": null
+        },
+        {
+            "leafNum": 14,
+            "confidence": 61,
+            "pageNumber": "57",
+            "pageProb": 51,
+            "wordConf": 93
+        },
+        {
+            "leafNum": 15,
+            "confidence": null,
+            "pageNumber": "58",
+            "pageProb": null,
+            "wordConf": null
+        },
+        {
+            "leafNum": 16,
+            "confidence": 65,
+            "pageNumber": "59",
+            "pageProb": 55,
+            "wordConf": 96
+        },
+        {
+            "leafNum": 17,
+            "confidence": 62,
+            "pageNumber": "60",
+            "pageProb": 52,
+            "wordConf": 96
+        },
+        {
+            "leafNum": 18,
+            "confidence": 60,
+            "pageNumber": "61",
+            "pageProb": 50,
+            "wordConf": 97
+        },
+        {
+            "leafNum": 19,
+            "confidence": 63,
+            "pageNumber": "62",
+            "pageProb": 53,
+            "wordConf": 93
+        },
+        {
+            "leafNum": 20,
+            "confidence": 61,
+            "pageNumber": "63",
+            "pageProb": 51,
+            "wordConf": 96
+        },
+        {
+            "leafNum": 21,
+            "confidence": 63,
+            "pageNumber": "64",
+            "pageProb": 53,
+            "wordConf": 90
+        },
+        {
+            "leafNum": 22,
+            "confidence": null,
+            "pageNumber": "65",
+            "pageProb": null,
+            "wordConf": null
+        },
+        {
+            "leafNum": 23,
+            "confidence": 66,
+            "pageNumber": "66",
+            "pageProb": 56,
+            "wordConf": 96
+        },
+        {
+            "leafNum": 24,
+            "confidence": 67,
+            "pageNumber": "67",
+            "pageProb": 57,
+            "wordConf": 83
+        },
+        {
+            "leafNum": 25,
+            "confidence": 70,
+            "pageNumber": "68",
+            "pageProb": 60,
+            "wordConf": 22
+        },
+        {
+            "leafNum": 26,
+            "confidence": 64,
+            "pageNumber": "69",
+            "pageProb": 54,
+            "wordConf": 96
+        },
+        {
+            "leafNum": 27,
+            "confidence": 63,
+            "pageNumber": "70",
+            "pageProb": 53,
+            "wordConf": 92
+        }
+    ]
+},"server":"ia801302.us.archive.org","uniq":43673070,"workable_servers":["ia801302.us.archive.org","ia601302.us.archive.org"]}
