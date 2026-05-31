@@ -18,9 +18,6 @@ export function bootstrap(seed = null) {
     reroll: (s) => { const g = createGame(s); window._metisGame = g; render(); },
   };
   mount();
-
-  const state = game.getState();
-  renderStatusBar(state);
   renderNarrative(['Welcome to the Métis Trail. Click Begin Journey to start.']);
 
   const startBtn = find('#intro-start');
@@ -35,15 +32,12 @@ export function bootstrap(seed = null) {
     game.travelOneDay();
     render();
   });
-
   find('#btn-camp').onclick = () => {
     game.makeCamp();
     render();
   };
-
   find('#btn-cart').onclick = () => showCart(game);
   find('#btn-crew').onclick = () => showCrew(game);
-
   find('#event-continue').onclick = () => {
     find('#event-overlay')?.classList.remove('active');
   };
@@ -89,6 +83,17 @@ function render() {
     return;
   }
   hideOverlays();
+  renderTravelLines(state, game);
+}
+
+function renderTravelLines(state, gameRef) {
+  const here = gameRef?.getCurrentNode?.();
+  const next = gameRef?.getNextNode?.();
+  const lines = [];
+  if (here) lines.push(`${here.name} (Day ${state.day})`);
+  if (next) lines.push(`Next: ${next.name}`);
+  if (!lines.length) lines.push('On the trail...');
+  renderNarrative(lines);
 }
 
 function hideOverlays() {
@@ -125,7 +130,6 @@ function showEvent(game) {
 }
 
 function showSettlement(game) {
-  const state = game.getState();
   const next = game.getCurrentNode();
   const nameEl = document.getElementById('settlement-name');
   const descEl = document.getElementById('settlement-desc');
@@ -176,9 +180,7 @@ function showEnd(game) {
   if (!titleEl || !narrativeEl || !statsEl) return;
 
   titleEl.textContent = state.won ? 'You Made It!' : 'Journey Over';
-  narrativeEl.textContent = state.won
-    ? `You reached Fort Edmonton on day ${state.day}. Your cart held, the crew survived, and the trade goods arrived.`
-    : `Your journey ends on day ${state.day} on the Carlton Trail.`;
+  narrativeEl.textContent = state.won ? `You reached Fort Edmonton on day ${state.day}. Your cart held, the crew survived, and the trade goods arrived.` : `Your journey ends on day ${state.day} on the Carlton Trail.`;
   statsEl.innerHTML = `
     <div class="stat-row"><span class="label">Days</span><span>${state.day}</span></div>
     <div class="stat-row"><span class="label">Score</span><span>${state.score}</span></div>
