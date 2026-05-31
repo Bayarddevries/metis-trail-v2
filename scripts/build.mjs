@@ -20,16 +20,15 @@ export async function build() {
     target: 'es2020',
   });
 
-  // Rewrite the deployed HTML so the module bundle filename always matches BUILDVER.
   const indexPath = path.join(outDir, 'index.html');
-  const initialHtml = (await fs.readFile(indexPath, 'utf8')) || html;
-  html = initialHtml.replace(
+  const appCode = await fs.readFile(path.join(outDir, `app.v${BUILDVER}.js`), 'utf8');
+  let html = (await fs.readFile(indexPath, 'utf8')) || '';
+
+  html = html.replace(
     /(<script\s+type="module"\s+src=")app\.v\d+\.js(")/g,
     `$1app.v${BUILDVER}.js$2`
   );
 
-  // Inject asset manifest, if any.
-  const appCode = await fs.readFile(path.join(outDir, `app.v${BUILDVER}.js`), 'utf8');
   const assetPaths = [...appCode.matchAll(/(?<=["'])([^"']+\.(png|jpg|svg|json))(?=["'])/g)].map((m) => m[1]);
   const unique = [...new Set(assetPaths)];
   const assets = [];
@@ -43,9 +42,8 @@ export async function build() {
   const manifest = JSON.stringify({ assets }, null, 2);
   html = html.replace('</body>', `${manifest ? '<script>window.__METIS_ASSETS__=' + manifest + ';</script>' : ''}\n</body>`);
 
-  await fs.writeFile(path.join(outDir, 'index.html'), html);
+  await fs.writeFile(indexPath, html);
 
-  // Self-boot stamp only (bundle filename already set in template context).
   const stamp = `\nif (!window.__METIS_BOOTED__) { window.__METIS_BOOTED__ = true; try { bootstrap(); } catch (e) { console.error("Metis boot error:", e); } }`;
   await fs.writeFile(path.join(outDir, `app.v${BUILDVER}.js`), appCode + stamp);
 
