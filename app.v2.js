@@ -1333,9 +1333,13 @@ function renderStatusBar(state) {
   } else {
     segEl.textContent = node.name;
   }
-  foodEl.innerHTML = `<span class="stat-label">Food </span><span class="stat-value${state.food <= 5 ? " food-low" : ""}">${state.food}</span>`;
-  wearEl.innerHTML = `<span class="stat-label">Wear </span><span class="stat-value${state.wear >= 4 ? " wear-high" : ""}">${state.wear}</span>`;
-  crewEl.innerHTML = `<span class="stat-label">Crew </span><span class="stat-value">${state.crew}</span>`;
+  const crewState = game.getCrew?.()?.state || "";
+  let crewCls = "stat-value";
+  if (crewState === "tired") crewCls += " crew-tired";
+  else if (crewState === "exhausted") crewCls += " crew-exhausted";
+  else if (crewState === "rested") crewCls += " crew-rested";
+  crewEl.innerHTML = `<span class="stat-label">Crew </span><span class="${crewCls}">${state.crew} (${crewState || "ok"})</span>`;
+  dayEl.innerHTML = `<span class="stat-label">Day </span><span class="stat-value">${state.day}</span>`;
 }
 function renderNarrative(lines) {
   const el = document.getElementById("narrative");
@@ -1351,25 +1355,25 @@ function clearSave() {
 
 // src/main.js
 function bootstrap(seed = null) {
-  const game = createGame(seed);
-  window._metisGame = game;
+  const game2 = createGame(seed);
+  window._metisGame = game2;
   window.__METIS_READY__ = true;
   window.__METIS_DEBUG__ = {
     get state() {
-      return game.getState();
+      return game2.getState();
     },
     get cart() {
-      return game.getCart();
+      return game2.getCart();
     },
     get crew() {
-      return game.getCrew();
+      return game2.getCrew();
     },
     get node() {
-      return game.getCurrentNode();
+      return game2.getCurrentNode();
     },
-    travel: () => game.travelOneDay(),
-    camp: () => game.makeCamp(),
-    choose: (i) => game.chooseEventChoice(i),
+    travel: () => game2.travelOneDay(),
+    camp: () => game2.makeCamp(),
+    choose: (i) => game2.chooseEventChoice(i),
     reroll: (s) => {
       const g = createGame(s);
       window._metisGame = g;
@@ -1385,23 +1389,23 @@ function bootstrap(seed = null) {
     render();
   });
   find("#btn-travel").addEventListener("click", () => {
-    const { pendingEvent, pendingSettlement, over } = game.getState();
+    const { pendingEvent, pendingSettlement, over } = game2.getState();
     if (pendingEvent || pendingSettlement || over) return;
     travelOneDay();
     render();
   });
   find("#btn-camp").onclick = () => {
     publishCampResult();
-    game.makeCamp();
+    game2.makeCamp();
     render();
   };
-  find("#btn-cart").onclick = () => showCart(game);
-  find("#btn-crew").onclick = () => showCrew(game);
+  find("#btn-cart").onclick = () => showCart(game2);
+  find("#btn-crew").onclick = () => showCrew(game2);
   find("#event-continue").onclick = () => {
     find("#event-overlay")?.classList.remove("active");
   };
   find("#settlement-continue").onclick = () => {
-    game.settlementAction("continue");
+    game2.settlementAction("continue");
     find("#settlement-overlay")?.classList.remove("active");
     render();
   };
@@ -1424,10 +1428,10 @@ function publishResult(text) {
   pendingResult = text;
 }
 function travelOneDay() {
-  const game = window._metisGame;
-  const prev = game.getState();
-  const result = game.travelOneDay();
-  const state = game.getState();
+  const game2 = window._metisGame;
+  const prev = game2.getState();
+  const result = game2.travelOneDay();
+  const state = game2.getState();
   if (state.pendingEvent) return null;
   const msgs = [];
   msgs.push("Day advances.");
@@ -1436,7 +1440,7 @@ function travelOneDay() {
   if (state.wear > prev.wear) msgs.push(`${state.wear - prev.wear} Wear added.`);
   if (state.morale < prev.morale) msgs.push(`Morale: ${prev.morale} -> ${state.morale}`);
   if (state.node > prev.node) {
-    msgs.push(`Arrived at: ${game.getCurrentNode().name}`);
+    msgs.push(`Arrived at: ${game2.getCurrentNode().name}`);
   } else if (state.node === prev.node && state.over) {
     msgs.push("Journey ends here.");
   } else if (state.node === prev.node) {
@@ -1447,8 +1451,8 @@ function travelOneDay() {
   return result;
 }
 function publishCampResult() {
-  const game = window._metisGame;
-  const prev = game.getState();
+  const game2 = window._metisGame;
+  const prev = game2.getState();
   const msgs = [];
   msgs.push("Camp.");
   msgs.push("-1 Food.");
@@ -1461,25 +1465,25 @@ function publishCampResult() {
   publishResult(msgs.join(" "));
 }
 function render() {
-  const game = window._metisGame;
-  if (!game) return;
-  const state = game.getState();
+  const game2 = window._metisGame;
+  if (!game2) return;
+  const state = game2.getState();
   renderStatusBar(state);
   updateMap(state);
   if (state.over) {
-    showEnd(game);
+    showEnd(game2);
     return;
   }
   if (state.pendingEvent) {
-    showEvent(game);
+    showEvent(game2);
     return;
   }
   if (state.pendingSettlement) {
-    showSettlement(game);
+    showSettlement(game2);
     return;
   }
   hideOverlays();
-  renderTravelLines(state, game, pendingResult);
+  renderTravelLines(state, game2, pendingResult);
   pendingResult = null;
 }
 function renderTravelLines(state, gameRef, result) {
@@ -1536,8 +1540,8 @@ function animateDicePill(result) {
     }
   }, 60);
 }
-function showEvent(game) {
-  const ev = game.getPendingEvent();
+function showEvent(game2) {
+  const ev = game2.getPendingEvent();
   if (!ev) return;
   const textEl = document.getElementById("event-text");
   const choicesEl = document.getElementById("event-choices");
@@ -1568,8 +1572,8 @@ function showEvent(game) {
     btn.className = "choice-btn";
     btn.textContent = ch.text;
     btn.onclick = () => {
-      const prev = game.getState();
-      const stepLog = game.chooseEventChoice(i);
+      const prev = game2.getState();
+      const stepLog = game2.chooseEventChoice(i);
       const entry = stepLog && stepLog[0] ? stepLog[0] : null;
       const res = entry && entry.result ? entry.result : entry;
       if (res && res.roll !== null && res.dc !== null) {
@@ -1578,14 +1582,14 @@ function showEvent(game) {
         renderDicePill(res);
         animateDicePill(res);
         setTimeout(() => {
-          const outcome2 = buildEventChoiceOutcome(stepLog, prev, game.getState());
+          const outcome2 = buildEventChoiceOutcome(stepLog, prev, game2.getState());
           if (outcome2) publishResult(outcome2);
           pendingDice = null;
           render();
         }, 650 + Math.random() * 180);
         return;
       }
-      const outcome = buildEventChoiceOutcome(stepLog, prev, game.getState());
+      const outcome = buildEventChoiceOutcome(stepLog, prev, game2.getState());
       if (outcome) publishResult(outcome);
       render();
     };
@@ -1614,10 +1618,10 @@ function buildEventChoiceOutcome(stepLog, before, after) {
   if (!msgs.length) return "The day passes without change.";
   return msgs.join(", ");
 }
-function showSettlement(game) {
-  const next = game.getCurrentNode();
-  const before = game.getState();
-  const beforeCart = game.getCart();
+function showSettlement(game2) {
+  const next = game2.getCurrentNode();
+  const before = game2.getState();
+  const beforeCart = game2.getCart();
   const nameEl = document.getElementById("settlement-name");
   const descEl = document.getElementById("settlement-desc");
   const actionsEl = document.getElementById("settlement-actions");
@@ -1625,7 +1629,7 @@ function showSettlement(game) {
   nameEl.textContent = next.name;
   descEl.textContent = next.desc;
   actionsEl.innerHTML = "";
-  const available = game.getAvailableActions();
+  const available = game2.getAvailableActions();
   (available.actions || []).forEach((action) => {
     const wrap = document.createElement("div");
     wrap.className = "settlement-action";
@@ -1645,9 +1649,9 @@ function showSettlement(game) {
     btn.appendChild(sub);
     btn.onclick = () => {
       hideOverlays();
-      game.settlementAction(action);
-      const after = game.getState();
-      const afterCart = game.getCart();
+      game2.settlementAction(action);
+      const after = game2.getState();
+      const afterCart = game2.getCart();
       const outcome = buildSettlementOutcome(action, before, after, beforeCart, afterCart);
       if (outcome) publishResult(outcome);
       render();
@@ -1677,22 +1681,22 @@ function buildSettlementOutcome(action, before, after, beforeCart, afterCart) {
   if (!msgs.length) return "Nothing changed.";
   return msgs.join(", ");
 }
-function showCart(game) {
-  const cart = game.getCart();
+function showCart(game2) {
+  const cart = game2.getCart();
   const listEl = document.getElementById("inv-list");
   if (!listEl) return;
   listEl.innerHTML = cart.map((i) => `<div>${i.icon || ""} ${i.name} \xD7${i.count} (${i.wt * i.count} kg)</div>`).join("");
   document.getElementById("cart-overlay")?.classList.add("active");
 }
-function showCrew(game) {
-  const c = game.getCrew();
+function showCrew(game2) {
+  const c = game2.getCrew();
   const el = document.getElementById("crew-status");
   if (!el) return;
   el.innerHTML = `<div>State: ${c.state}</div><div>Morale: ${c.morale}</div><div>Modifier: ${c.mod}</div>`;
   document.getElementById("crew-overlay")?.classList.add("active");
 }
-function showEnd(game) {
-  const state = game.getState();
+function showEnd(game2) {
+  const state = game2.getState();
   const titleEl = document.getElementById("end-title");
   const narrativeEl = document.getElementById("end-narrative");
   const statsEl = document.getElementById("end-stats");
