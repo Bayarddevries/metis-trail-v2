@@ -84,9 +84,13 @@ export function renderStatusBar(state) {
     segEl.textContent = node.name;
   }
 
-  foodEl.innerHTML = `<span class="stat-label">Food </span><span class="stat-value${state.food <= 5 ? ' food-low' : ''}">${state.food}</span>`;
-  wearEl.innerHTML = `<span class="stat-label">Wear </span><span class="stat-value${state.wear >= 4 ? ' wear-high' : ''}">${state.wear}</span>`;
-  crewEl.innerHTML = `<span class="stat-label">Crew </span><span class="stat-value">${state.crew}</span>`;
+  const crewState = game.getCrew?.()?.state || '';
+  let crewCls = 'stat-value';
+  if (crewState === 'tired') crewCls += ' crew-tired';
+  else if (crewState === 'exhausted') crewCls += ' crew-exhausted';
+  else if (crewState === 'rested') crewCls += ' crew-rested';
+  crewEl.innerHTML = `<span class="stat-label">Crew </span><span class="${crewCls}">${state.crew} (${crewState || 'ok'})</span>`;
+  dayEl.innerHTML = `<span class="stat-label">Day </span><span class="stat-value">${state.day}</span>`;
 }
 
 export function renderNarrative(lines) {
