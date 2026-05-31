@@ -805,6 +805,7 @@ function find(selector) {
 // src/ui/renderer.js
 var map = null;
 var tileLayer = null;
+var markerGroup = null;
 function initMap() {
   const el = document.getElementById("map");
   if (!el || typeof L === "undefined") return;
@@ -819,56 +820,35 @@ function initMap() {
     attribution: "&copy; OSM contributors",
     maxZoom: 18
   }).addTo(map);
-  const visited = NODES.slice(0, 2).map((n) => [n.lat, n.lon]);
-  L.polyline(visited, {
-    color: "#8B2500",
-    weight: 3,
-    opacity: 0.7
-  }).addTo(map);
-  L.circleMarker([NODES[0].lat, NODES[0].lon], {
-    radius: 6,
-    color: "#1A1410",
-    fillColor: "#C8B888",
-    fillOpacity: 1
-  }).addTo(map);
-  L.circleMarker([NODES[1].lat, NODES[1].lon], {
-    radius: 6,
-    color: "#1A1410",
-    fillColor: "#E8DCC8",
-    fillOpacity: 1
-  }).addTo(map);
+  markerGroup = L.featureGroup().addTo(map);
+  updateMap({ node: 0 });
 }
 function updateMap(state) {
   if (!map) return;
   const here = NODES[state.node];
   if (!here) return;
-  map.setView([here.lat, here.lon], Math.max(map.getZoom(), 6));
   const visited = NODES.slice(0, state.node + 1).map((n) => [n.lat, n.lon]);
   const next = NODES[state.node + 1];
-  tileLayer?.setUrl("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png");
-  map.eachLayer((layer) => {
-    if (!layer._path) return;
-    map.removeLayer(layer);
-  });
-  L.polyline(visited, {
-    color: "#8B2500",
-    weight: 4,
-    opacity: 0.8
-  }).addTo(map);
+  map.setView([here.lat, here.lon], Math.max(map.getZoom(), 6));
+  if (!markerGroup) markerGroup = L.featureGroup().addTo(map);
+  markerGroup.clearLayers();
+  if (visited.length > 1) {
+    L.polyline(visited, { color: "#8B2500", weight: 3, opacity: 0.7 }).addTo(markerGroup);
+  }
   if (next) {
     L.circleMarker([next.lat, next.lon], {
       radius: 6,
       color: "#1A1410",
       fillColor: "#E8DCC8",
       fillOpacity: 1
-    }).addTo(map);
+    }).addTo(markerGroup);
   }
   L.circleMarker([here.lat, here.lon], {
     radius: 8,
     color: "#1A1410",
     fillColor: "#8B2500",
     fillOpacity: 1
-  }).addTo(map);
+  }).addTo(markerGroup);
 }
 function renderStatusBar(state) {
   const node = NODES[state.node];
