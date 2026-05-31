@@ -980,8 +980,14 @@ function renderTravelLines(state, gameRef) {
   const here = gameRef?.getCurrentNode?.();
   const next = gameRef?.getNextNode?.();
   const lines = [];
-  if (here) lines.push(`${here.name} (Day ${state.day})`);
-  if (next) lines.push(`Next: ${next.name}`);
+  if (here) {
+    lines.push(`${here.name} \u2014 Day ${state.day}`);
+    if (here.desc) lines.push(here.desc);
+  }
+  if (next) {
+    lines.push(`Next: ${next.name}`);
+    if (next.desc) lines.push(next.desc);
+  }
   if (!lines.length) lines.push("On the trail...");
   renderNarrative(lines);
 }
