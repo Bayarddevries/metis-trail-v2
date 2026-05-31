@@ -168,6 +168,18 @@ function showEvent(game) {
   if (!textEl || !choicesEl) return;
 
   textEl.textContent = ev.text;
+
+  const amountEl = document.getElementById('event-amount');
+  if (amountEl) {
+    const amount = ev.amount || ev.rollAdjust || null;
+    amountEl.textContent = '';
+    amountEl.style.display = 'none';
+    if (amount) {
+      amountEl.textContent = amount;
+      amountEl.style.display = 'block';
+    }
+  }
+
   choicesEl.innerHTML = '';
   continueEl.style.display = 'none';
 
