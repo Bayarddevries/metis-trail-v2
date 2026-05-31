@@ -937,17 +937,18 @@ function bootstrap(seed = null) {
   const state = game.getState();
   renderStatusBar(state);
   renderNarrative(["Welcome to the M\xE9tis Trail. Click Begin Journey to start."]);
-  find("#intro-start").onclick = () => {
+  const startBtn = find("#intro-start");
+  if (startBtn) startBtn.addEventListener("click", () => {
     find("#intro-overlay")?.classList.remove("active");
     initMap();
     render();
-  };
-  find("#btn-travel").onclick = () => {
+  });
+  find("#btn-travel").addEventListener("click", () => {
     const { pendingEvent, pendingSettlement, over } = game.getState();
     if (pendingEvent || pendingSettlement || over) return;
     game.travelOneDay();
     render();
-  };
+  });
   find("#btn-camp").onclick = () => {
     game.makeCamp();
     render();
