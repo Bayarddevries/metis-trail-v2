@@ -934,8 +934,6 @@ function bootstrap(seed = null) {
     }
   };
   mount();
-  const state = game.getState();
-  renderStatusBar(state);
   renderNarrative(["Welcome to the M\xE9tis Trail. Click Begin Journey to start."]);
   const startBtn = find("#intro-start");
   if (startBtn) startBtn.addEventListener("click", () => {
@@ -996,6 +994,16 @@ function render() {
     return;
   }
   hideOverlays();
+  renderTravelLines(state, game);
+}
+function renderTravelLines(state, gameRef) {
+  const here = gameRef?.getCurrentNode?.();
+  const next = gameRef?.getNextNode?.();
+  const lines = [];
+  if (here) lines.push(`${here.name} (Day ${state.day})`);
+  if (next) lines.push(`Next: ${next.name}`);
+  if (!lines.length) lines.push("On the trail...");
+  renderNarrative(lines);
 }
 function hideOverlays() {
   ["event-overlay", "settlement-overlay", "cart-overlay", "crew-overlay"].forEach((id) => {
@@ -1026,7 +1034,6 @@ function showEvent(game) {
   document.getElementById("event-overlay")?.classList.add("active");
 }
 function showSettlement(game) {
-  const state = game.getState();
   const next = game.getCurrentNode();
   const nameEl = document.getElementById("settlement-name");
   const descEl = document.getElementById("settlement-desc");
