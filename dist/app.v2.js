@@ -536,7 +536,7 @@ function createGame(seed = null) {
     return Math.max(0, Math.round(score));
   }
   const stepLog = [];
-  function travelOneDay() {
+  function travelOneDay2() {
     if (S.over || S.pendingSettlement) return stepLog;
     const nextDist = NODES[S.node + 1]?.dist || 1;
     S.food -= CONSTANTS.DAILY_FOOD;
@@ -673,7 +673,7 @@ function createGame(seed = null) {
     return [];
   }
   return {
-    travelOneDay,
+    travelOneDay: travelOneDay2,
     makeCamp,
     chooseEventChoice,
     settlementAction,
@@ -924,10 +924,11 @@ function bootstrap(seed = null) {
   find("#btn-travel").addEventListener("click", () => {
     const { pendingEvent, pendingSettlement, over } = game.getState();
     if (pendingEvent || pendingSettlement || over) return;
-    game.travelOneDay();
+    travelOneDay();
     render();
   });
   find("#btn-camp").onclick = () => {
+    publishCampResult();
     game.makeCamp();
     render();
   };
@@ -955,6 +956,47 @@ function bootstrap(seed = null) {
   render();
 }
 window.__METIS_BOOT__ = bootstrap;
+var pendingResult = null;
+function publishResult(text) {
+  pendingResult = text;
+}
+function travelOneDay() {
+  const game = window._metisGame;
+  const prev = game.getState();
+  const result = game.travelOneDay();
+  const state = game.getState();
+  if (state.pendingEvent) return null;
+  const msgs = [];
+  msgs.push("Day advances.");
+  msgs.push(`-1 Food.`);
+  if (state.crew !== prev.crew) msgs.push(`Crew: ${prev.crew} -> ${state.crew}`);
+  if (state.wear > prev.wear) msgs.push(`${state.wear - prev.wear} Wear added.`);
+  if (state.morale < prev.morale) msgs.push(`Morale: ${prev.morale} -> ${state.morale}`);
+  if (state.node > prev.node) {
+    msgs.push(`Arrived at: ${game.getCurrentNode().name}`);
+  } else if (state.node === prev.node && state.over) {
+    msgs.push("Journey ends here.");
+  } else if (state.node === prev.node) {
+    msgs.push("Still on the trail.");
+  }
+  const msg = msgs.join(" ");
+  publishResult(msg);
+  return result;
+}
+function publishCampResult() {
+  const game = window._metisGame;
+  const prev = game.getState();
+  const msgs = [];
+  msgs.push("Camp.");
+  msgs.push("-1 Food.");
+  msgs.push("+1 Day.");
+  msgs.push("Crew rested.");
+  if (prev.morale < 100) {
+    const newMorale = Math.min(100, prev.morale + 15);
+    msgs.push(`Morale: ${prev.morale} -> ${newMorale}`);
+  }
+  publishResult(msgs.join(" "));
+}
 function render() {
   const game = window._metisGame;
   if (!game) return;
@@ -974,9 +1016,10 @@ function render() {
     return;
   }
   hideOverlays();
-  renderTravelLines(state, game);
+  renderTravelLines(state, game, pendingResult);
+  pendingResult = null;
 }
-function renderTravelLines(state, gameRef) {
+function renderTravelLines(state, gameRef, result) {
   const here = gameRef?.getCurrentNode?.();
   const next = gameRef?.getNextNode?.();
   const lines = [];
@@ -988,6 +1031,7 @@ function renderTravelLines(state, gameRef) {
     lines.push(`Next: ${next.name}`);
     if (next.desc) lines.push(next.desc);
   }
+  if (result) lines.push(result);
   if (!lines.length) lines.push("On the trail...");
   renderNarrative(lines);
 }
@@ -1012,15 +1056,30 @@ function showEvent(game) {
     btn.className = "choice-btn";
     btn.textContent = ch.text;
     btn.onclick = () => {
+      const before = game.getState();
       game.chooseEventChoice(i);
+      const after = game.getState();
+      const outcome = buildEventOutcome(before, after);
+      if (outcome) publishResult(outcome);
       render();
     };
     choicesEl.appendChild(btn);
   });
   document.getElementById("event-overlay")?.classList.add("active");
 }
+function buildEventOutcome(before, after) {
+  const msgs = [];
+  if (after.food !== before.food) msgs.push(`${after.food - before.food >= 0 ? "+" : ""}${after.food - before.food} Food`);
+  if (after.wear !== before.wear) msgs.push(`${after.wear - before.wear >= 0 ? "+" : ""}${after.wear - before.wear} Wear`);
+  if (after.crew !== before.crew) msgs.push(`Crew: ${before.crew} -> ${after.crew}`);
+  if (after.node !== before.node) msgs.push(`Arrived at: ${NODES[after.node]?.name || "unknown"}`);
+  if (!msgs.length) return "The day passes without change.";
+  return msgs.join(", ");
+}
 function showSettlement(game) {
   const next = game.getCurrentNode();
+  const before = game.getState();
+  const beforeCart = game.getCart();
   const nameEl = document.getElementById("settlement-name");
   const descEl = document.getElementById("settlement-desc");
   const actionsEl = document.getElementById("settlement-actions");
@@ -1036,11 +1095,36 @@ function showSettlement(game) {
     btn.onclick = () => {
       hideOverlays();
       game.settlementAction(action);
+      const after = game.getState();
+      const afterCart = game.getCart();
+      const outcome = buildSettlementOutcome(action, before, after, beforeCart, afterCart);
+      if (outcome) publishResult(outcome);
       render();
     };
     actionsEl.appendChild(btn);
   });
   document.getElementById("settlement-overlay")?.classList.add("active");
+}
+function buildSettlementOutcome(action, before, after, beforeCart, afterCart) {
+  const msgs = [];
+  if (after.food !== before.food) msgs.push(`${after.food - before.food >= 0 ? "+" : ""}${after.food - before.food} Food`);
+  if (after.wear !== before.wear) msgs.push(`Wear ${after.wear - before.wear >= 0 ? "+" : ""}${after.wear - before.wear}`);
+  if (after.morale !== before.morale) msgs.push(`Morale ${after.morale - before.morale >= 0 ? "+" : ""}${after.morale - before.morale}`);
+  if (after.crew !== before.crew) msgs.push(`Crew: ${before.crew} -> ${after.crew}`);
+  if (after.day !== before.day) msgs.push(`${after.day - before.day} Day(s)`);
+  if (action === "trade") {
+    const gained = afterCart.reduce((s, i) => s + Math.max(0, i.count - (beforeCart.find((j) => j.name === i.name)?.count || 0)), 0);
+    if (gained > 0) msgs.push(`Food gained.`);
+  }
+  if (action === "repair") msgs.push("Cart repaired.");
+  if (action === "grease") msgs.push("Axle greased.");
+  if (action === "heal") msgs.push("Healed.");
+  if (action === "forage") msgs.push("Foraging...");
+  if (action === "recruit") msgs.push("Reinforcements found.");
+  if (action === "rumours") msgs.push("You learn the latest trail news.");
+  if (action === "rest") msgs.push("Rest. Crew and supplies refreshed.");
+  if (!msgs.length) return "Nothing changed.";
+  return msgs.join(", ");
 }
 function showCart(game) {
   const cart = game.getCart();
