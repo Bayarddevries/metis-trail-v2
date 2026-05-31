@@ -5,9 +5,9 @@ import esbuild from 'esbuild';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const cwd = process.cwd();
-const BUILDVER = '3';
 
 export async function build() {
+  const BUILDVER = process.env.BUILDVER || '2';
   const outDir = path.join(cwd, 'dist');
   await fs.mkdir(outDir, { recursive: true });
 
@@ -20,11 +20,11 @@ export async function build() {
     target: 'es2020',
   });
 
-  // Load template and rewrite bundle reference, preserving leading spaces.
-  const templateRel = path.join(cwd, 'src/template.html');
-  let html = await fs.readFile(templateRel, 'utf8');
-  html = html.replace(
-    /(<script\s+src=")app\.v\d+\.js(")/g,
+  // Rewrite the deployed HTML so the module bundle filename always matches BUILDVER.
+  const indexPath = path.join(outDir, 'index.html');
+  const initialHtml = (await fs.readFile(indexPath, 'utf8')) || html;
+  html = initialHtml.replace(
+    /(<script\s+type="module"\s+src=")app\.v\d+\.js(")/g,
     `$1app.v${BUILDVER}.js$2`
   );
 
