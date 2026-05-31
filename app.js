@@ -947,6 +947,7 @@ function bootstrap(seed = null) {
   };
   render();
 }
+window.__METIS_BOOT__ = bootstrap;
 function render() {
   const game = window._metisGame;
   if (!game) return;
@@ -1054,3 +1055,5 @@ function actionLabel(a) {
 export {
   bootstrap
 };
+
+if (!window.__METIS_BOOTED__) { window.__METIS_BOOTED__ = true; try { bootstrap(); } catch (e) { console.error("Metis boot error:", e); } }
