@@ -1,6 +1,6 @@
 import { createGame } from './systems/engine.js';
 import { mount, find } from './ui/shell.js';
-import { renderStatusBar, renderNarrative } from './ui/renderer.js';
+import { renderStatusBar, renderNarrative, initMap, updateMap } from './ui/renderer.js';
 import { saveGame, loadGame, clearSave } from './ui/persistence.js';
 
 export function bootstrap(seed = null) {
@@ -25,6 +25,7 @@ export function bootstrap(seed = null) {
 
   find('#intro-start').onclick = () => {
     find('#intro-overlay')?.classList.remove('active');
+    initMap();
     render();
   };
 
@@ -73,6 +74,7 @@ function render() {
   if (!game) return;
   const state = game.getState();
   renderStatusBar(state);
+  updateMap(state);
 
   if (state.over) {
     showEnd(game);
