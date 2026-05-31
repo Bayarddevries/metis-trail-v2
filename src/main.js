@@ -1,8 +1,8 @@
-import { createGame } from '../systems/engine.js';
-import { mount, find } from './shell.js';
-import { renderStatusBar, renderNarrative } from './renderer.js';
-import { mountDebugUI } from './debug.js';
-import { saveGame, loadGame, clearSave } from './persistence.js';
+import { createGame } from './systems/engine.js';
+import { mount, find } from './ui/shell.js';
+import { renderStatusBar, renderNarrative } from './ui/renderer.js';
+import { mountDebugUI } from './ui/debug.js';
+import { saveGame, loadGame, clearSave } from './ui/persistence.js';
 
 export function bootstrap(seed = null) {
   const game = createGame(seed);

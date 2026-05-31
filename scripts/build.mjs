@@ -6,8 +6,10 @@ export async function build() {
 
   await fs.promises.mkdir(outDir, { recursive: true });
 
+  const cwd = process.cwd();
   await esbuild.build({
-    entryPoints: ['src/main.js'],
+    absWorkingDir: cwd,
+    entryPoints: [path.join(cwd, 'src/main.js')],
     bundle: true,
     format: 'esm',
     outfile: path.join(outDir, 'app.js'),
@@ -57,4 +59,11 @@ async function findAssets(code) {
     matches.add(m[1]);
   }
   return Array.from(matches);
+}
+
+try {
+  await build();
+} catch (err) {
+  console.error(err);
+  process.exit(1);
 }

@@ -1,5 +1,17 @@
 import { applyTheme } from './theme.js';
 
+export function mount() {
+  const { root } = createShell();
+  const gameRoot = document.getElementById('game-root');
+  if (!gameRoot) throw new Error('#game-root missing');
+  gameRoot.replaceWith(root);
+  return root;
+}
+
+export function find(selector) {
+  return document.querySelector(selector);
+}
+
 export function createShell() {
   const root = document.createElement('div');
   root.id = 'game-container';
@@ -15,35 +27,27 @@ export function createShell() {
     </div>
     <div id="map-panel">
       <div id="map"></div>
-      <div id="map-debug"></div>
     </div>
     <div id="bottom-panel">
       <div id="narrative"></div>
       <div id="controls">
-        <button id="btn-travel" class="ctrl-btn">Travel 1 Day</button>
-        <button id="btn-camp" class="ctrl-btn">Make Camp</button>
-        <button id="btn-cart" class="ctrl-btn">Cart</button>
-        <button id="btn-crew" class="ctrl-btn">Crew</button>
+        <button class="ctrl-btn" id="btn-travel">Travel</button>
+        <button class="ctrl-btn" id="btn-camp">Make Camp</button>
+        <button class="ctrl-btn" id="btn-cart">Cart</button>
+        <button class="ctrl-btn" id="btn-crew">Crew</button>
       </div>
     </div>
     <div id="intro-overlay" class="overlay active">
       <div class="overlay-card intro-card">
         <h1>Métis Trail</h1>
-        <div class="subtitle">A Carlton Trail Journey — 1878</div>
-        <div class="flavor-text">Fort Garry to Fort Edmonton. Build your cart, read the land, honour the trail.</div>
-        <button id="intro-start" class="start-btn">Begin Journey</button>
+        <p class="scene-text">Fort Garry, June 1878. Load your cart. Choose your crew. Head west.</p>
+        <button class="start-btn" id="intro-start">Begin Journey</button>
       </div>
     </div>
     <div id="event-overlay" class="overlay"></div>
     <div id="settlement-overlay" class="overlay"></div>
-    <div id="cart-overlay" class="overlay"></div>
-    <div id="crew-overlay" class="overlay"></div>
     <div id="end-overlay" class="overlay"></div>
   `;
   applyTheme(root);
-  return { root, overrides: {} };
-}
-
-export function find(selector) {
-  return document.querySelector(selector);
+  return { root };
 }
