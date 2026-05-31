@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Metis Trail V1 — Production Audit Report</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0f172a; --surface: #1e293b; --surface-2: #334155; --border: #475569;
+    --text: #e2e8f0; --muted: #94a3b8; --accent: #8B2500; --ok: #4A6741;
+    --code-bg: #0b1220; --warn-bg: #2a1a05; --ok-bg: #0a1f14; --crit-bg: #2a0a0a;
+  }
+  body { background: var(--bg); color: var(--text); font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; line-height: 1.55; }
+  a { color: #93c5fd; }
+  .wrap { display: grid; grid-template-columns: 260px 1fr; min-height: 100vh; }
+  nav { position: sticky; top: 0; height: 100vh; overflow: auto; background: var(--surface); border-right: 1px solid var(--border); padding: 18px 14px; }
+  nav h2 { font-size: 13px; text-transform: uppercase; letter-spacing: 1.1px; color: var(--muted); margin-bottom: 10px; }
+  nav a { display: block; color: var(--text); text-decoration: none; padding: 5px 8px; border-radius: 6px; font-size: 13px; }
+  nav a:hover { background: var(--surface-2); }
+  main { padding: 28px 32px 80px; max-width: 1100px; }
+  h1 { font-size: 26px; font-weight: 700; margin-bottom: 6px; }
+  .sub { color: var(--muted); margin-bottom: 22px; }
+  section { margin-bottom: 44px; scroll-margin-top: 18px; }
+  h2 { font-size: 19px; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+  h3 { font-size: 15px; margin: 14px 0 6px; color: #f1f5f9; }
+  p, li { font-size: 14px; color: #cbd5e1; }
+  ul, ol { margin: 6px 0 12px 22px; }
+  li { margin: 4px 0; }
+  .callout { border-left: 4px solid var(--accent); background: var(--crit-bg); padding: 12px 14px; border-radius: 0 10px 10px 0; margin: 12px 0; }
+  .callout.ok { border-left-color: var(--ok); background: var(--ok-bg); }
+  .callout.info { border-left-color: #38bdf8; background: #071e2e; }
+  pre { background: var(--code-bg); border: 1px solid var(--border); border-radius: 10px; padding: 14px; overflow: auto; font-size: 12.5px; line-height: 1.5; }
+  code { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 11px; border: 1px solid var(--border); color: var(--muted); }
+  .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 14px; }
+  .card h4 { font-size: 13px; color: #f8fafc; margin-bottom: 6px; }
+  @media (max-width: 860px) {
+    .wrap { grid-template-columns: 1fr; }
+    nav { height: auto; position: static; border-right: 0; border-bottom: 1px solid var(--border); }
+    main { padding: 22px 18px 70px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav>
+    <h2>Contents</h2>
+    <a href="#architecture">1 — Architecture & Code Critique</a>
+    <a href="#debug">2 — Debugging & Bug Reporting</a>
+    <a href="#scoring">3 — Scoring & High Scores</a>
+    <a href="#expansion">4 — Novelty → Full Game</a>
+    <a href="#history">5 — Historical Accuracy</a>
+    <a href="#plan">6 — Prioritized Action Plan</a>
+    <a href="#summary">Executive Summary</a>
+  </nav>
+  <main>
+    <h1>Métis Trail V1 — Production Audit &amp; V2 Upgrade Brief</h1>
+    <p class="sub">Rigorous technical review of the current build and a sourced roadmap to production-grade V2.</p>
+
+    <section id="summary">
+      <h2>Executive Summary</h2>
+      <div class="callout info">
+        The current v1 build is best understood as a <strong>vertical slice</strong>: solid thematic narrative, clear UI, and competent event writing. As an architecture, it is <strong>not production-ready</strong>. It ships as a single 1,600+ line HTML file with embedded state, data, and rendering logic. Scaling it will break fast. V2 already fixes the structural issues with modular ESM + esbuild; for highest impact, prioritize: (1) deterministic state/replay, (2) debugging tools, (3) scoring/LB, and (4) source-cited content pipeline.
+      </div>
+    </section>
+
+    <section id="architecture">
+      <h2>1 — Architectural &amp; Code Critique</h2>
+
+      <h3>1.1 What it is now</h3>
+      <p>The v1 build is a single-file web app: 1,652 lines combining HTML, CSS, and two large embedded JS blocks (data + engine). It is playable, but it conflates every concern into one monolith.</p>
+
+      <h3>1.2 Immediate red flags</h3>
+      <ul>
+        <li><strong>Monolithic file structure</strong> — Data, engine, UI, and storage share one file. Any change risks regression across the entire stack.</li>
+        <li><strong>No formal state layer</strong> — State is mutated ad-hoc inside closures. No snapshot/undo/replay; bugs are reproduced only by replaying input.</li>
+        <li><strong>Randomness is not seeded for gameplay</strong> — <code>Math.random()</code> drives outcomes. This means identical choices yield different results, complicating QA and player trust.</li>
+        <li><strong>Inline mutation patterns</strong> — Multiple functions mutate <code>S</code> directly. No immutability, no events, no logging of state transitions.</li>
+        <li><strong>Single event pool</strong> — Events are static arrays. No weighting by season, node, crew state, or time pressure.</li>
+        <li><strong>Persistence is absent</strong> — No save/load. The experience is single-session only.</li>
+        <li><strong>Scoring is minimal</strong> — Final score is a simple linear formula. No meaningful differentiation between playstyles.</li>
+        <li><strong>Offline/build maturity</strong> — V1 is not structured for offline bundling, dependency pinning, or reproducible local builds.</li>
+      </ul>
+
+      <h3>1.3 What V2 gets right</h3>
+      <ul>
+        <li>ESM modules with clear boundaries: <code>core</code>, <code>data</code>, <code>systems</code>, <code>ui</code></li>
+        <li>Deterministic PRNG for reproducible runs</li>
+        <li><code>localStorage</code> save/load scaffolding</li>
+        <li>Separation of calendar, items, events, nodes as data files writable by non-devs</li>
+        <li>Source citation objects attached to narrative content</li>
+      </ul>
+
+      <h3>1.4 V2 gaps that will still cause pain</h3>
+      <ul>
+        <li><strong>State is still mutable global</strong> — Guild-style state object invites accidental mutation; add immutable reducers or a state machine before expanding.</li>
+        <li><strong>Import graph not enforced</strong> — Data imports core cleanly, but ui imports systems with no contract/types (JSDoc is good, but not enforced).</li>
+        <li><strong>No telemetry/trace layer</strong> — Still no event stream; debug overlay exists but is not wired to a logger.</li>
+        <li><strong>CI/build discoverability</strong> — The Pages deploy issue shows lack of build artifact validation; you must verify <code>dist/</code> exists before deploy steps consume it.</li>
+      </ul>
+
+      <h3>1.5 Recommended architecture direction</h3>
+      <pre>src/
+  core/
+    state.js          # State machine + reducer pattern
+    constants.js      # Tunables
+    calendar.js
+    seed.js           # PRNG + seeded d20
+    schema.js         # Structural contracts (keep JSDoc, consider Zod/valibot later)
+  data/
+    nodes.js
+    items.js
+    events/
+      plains.js
+      river_valley.js
+      ...
+    sources/
+      index.js        # Citation registry
+  systems/
+    engine.js         # Pure step(state, input) -> newState + logEntry[]
+    crew.js
+    cart.js
+    travel.js
+    scoring.js
+    encounters.js
+    logger.js         # Append-only event log for debugging/replay
+  ui/
+    renderer.js       # Declarative view(state)
+    overlays.js
+    shell.js
+    theme.js
+    save.js           # Serialize + restore state snapshots
+  tests/
+    calendar.test.js
+    scoring.test.js
+  main.js
+  template.html</pre>
+
+      <h3>1.6 Anti-pattern to burn now</h3>
+      <pre>// v1 anti-pattern
+function travelOneDay() {
+  S.food--;           // implicit side effects on shared object
+  S.day++;            // multiple FUNCTIONS can do this differently
+  S.wear++;           // no record of WHO changed it
+}
+
+// v2 direction
+function step(state, action) {
+  const log = [];
+  let next = structuredClone(state);
+  next.food -= 1;
+  if (next.food &lt;= 0) { next.over = true; log.push({ kind: 'gameover', reason: 'food' }); }
+  return { state: next, log };
+}</pre>
+    </section>
+
+    <section id="debug">
+      <h2>2 — Robust Debugging &amp; Bug Reporting Architecture</h2>
+
+      <h3>2.1 Core principle</h3>
+      <p>Ship a first-class internal tool with a toggle. Developer UX is your multiplier. Bugs that cannot be reproduced in under 60 seconds never get fixed.</p>
+
+      <h3>2.2 Debug suite blueprint</h3>
+      <pre>/**
+ * @typedef {Object} DebugAction
+ * @property {'warp'|'give'|'set'|'log'|'snapshot'|'replay'} kind
+ * @property {*} payload
+ */
+
+class DebugConsole {
+  constructor(store) {
+    this.store = store;
+    this.entries = [];        // append-only state log
+    this.snapshots = [];      // sparse saved states
+    this.bindUI();
+  }
+  dispatch(action) {
+    const entry = { ts: Date.now(), action };
+    switch (action.kind) {
+      case 'warp': {
+        const { day, node } = action.payload;
+        this.store.state.day = day;
+        this.store.state.node = node ?? this.store.state.node;
+        entry.result = { day, node: this.store.state.node };
+        break;
+      }
+      case 'give': {
+        const item = this.store.cart.find(i => i.name === action.payload.name);
+        if (item) item.count += action.payload.amount;
+        entry.result = { item: item.name, count: item.count };
+        break;
+      }
+      case 'set': {
+        Object.assign(this.store.state, action.payload.fields);
+        entry.result = action.payload.fields;
+        break;
+      }
+      case 'snapshot': {
+        this.snapshots.push({
+          ts: entry.ts,
+          state: structuredClone(this.store.state),
+          cart: JSON.parse(JSON.stringify(this.store.cart))
+        });
+        entry.result = { count: this.snapshots.length };
+        break;
+      }
+      default: entry.ignored = true;
+    }
+    this.entries.push(entry);
+    this.render();
+  }
+  exportBugReport() {
+    return JSON.stringify({
+      meta: { ts: Date.now(), userAgent: navigator.userAgent },
+      state: this.store.state,
+      cart: this.store.cart,
+      log: this.entries.slice(-50),
+      lastSnapshot: this.snapshots.at(-1)
+    }, null, 2);
+  }
+}</pre>
+
+      <h3>2.3 Runtime error capture</h3>
+      <pre>window.addEventListener('error', (e) => {
+  const payload = {
+    msg: e.message,
+    file: e.filename,
+    line: e.lineno,
+    col: e.colno,
+    state: store ? serialize(store) : null,
+    stack: e.error?.stack
+  };
+  navigator.sendBeacon?.('/api/bug-report', JSON.stringify(payload));
+  // Fallback: queue to localStorage and send on next clean load
+  localStorage.setItem('metis_pending_bug', JSON.stringify(payload));
+});
+
+window.addEventListener('unhandledrejection', (e) => {
+  console.error('Unhandled rejection:', e.reason);
+  // same shape as above
+});</pre>
+
+      <h3>2.4 User-facing bug report flow</h3>
+      <ol>
+        <li>User presses hidden-dev-combo or taps Debug toggle</li>
+        <li>System generates runtime JSON payload: state + last 50 log entries + last snapshot</li>
+        <li>User copies from textarea or downloads <code>metis-bug-YYYYMMDD-HHMMSS.json</code></li>
+        <li>Dev recreates state with <code>DebugConsole.restore(payload)</code></li>
+      </ol>
+
+      <h3>2.5 Speed-run / warp tooling</h3>
+      <ul>
+        <li><code>WARP node:5 day:120 seed:42</code> — jump to any node/day with fixed seed</li>
+        <li><code>LOG tail:20</code> — show last 20 state transitions</li>
+        <li><code>SNAPSHOT</code> / <code>RESTORE 3</code> — save/load sparse state</li>
+        <li><code>GIVE Pemmican 10</code> / <code>SET wear:0 food:99</code> — inject resources</li>
+        <li><code>FORCE_EVENT broken_wheel</code> — inject a specific event by ID</li>
+      </ul>
+    </section>
+
+    <section id="scoring">
+      <h2>3 — Systems Design: Scoring &amp; High Scores</h2>
+
+      <h3>3.1 Design goals</h3>
+      <ul>
+        <li>Multiple win conditions feel distinct, not just “same result with different numbers”</li>
+        <li>Punish inefficient but reward patient, historically plausible behavior</li>
+        <li>Surface historical literacy via scoring (e.g., visiting culturally significant sites)</li>
+      </ul>
+
+      <h3>3.2 Scoring formula (production-ready pseudocode)</h3>
+      <pre>/**
+ * Base score decomposition:
+ *   Base = 1000 (arrival at Edmonton)
+ * Subtract:
+ *   - 6 per day elapsed      # time pressure
+ *   - 40 per wear point      # cart condition
+ *   - 5 per camp made        # rest tradeoff
+ *   - 50 if crew exhausted   # bad management
+ * Add:
+ *   + 120 per trade good
+ *   + 75 per cultural milestone
+ *   + 20 per food remaining
+ *   + 30 per rested crew member
+ * Multiply:
+ *   x (1 + restBonus/1000)   # sublinear bonus for rest-heavy runs</code>
+ * </pre>
+
+      <h3>3.3 Implementation</h3>
+      <pre>function calcScore(state, cart) {
+  if (!state.won) return 0;
+  const tradeGoods = cart.filter(i => i.type === 'trade' && i.count > 0).reduce((s, i) => s + i.count, 0);
+  const culturalVisited = [...new Set(state.nodesVisited.filter(n => ['metis','mission','nwmp'].includes(n.type)))].length;
+  const restBonus = Math.min(state.camps * 8, 120);
+
+  let score = 1000;
+  score -= state.day * 6;
+  score -= state.wear * 40;
+  score -= state.camps * 5;
+  if (state.crew === 'exhausted') score -= 50;
+  score += tradeGoods * 120;
+  score += culturalVisited * 75;
+  score += state.food * 20;
+  if (state.crew === 'rested') score += 30;
+  score = Math.floor(score * (1 + restBonus / 1000));
+  return Math.max(score, 0);
+}</pre>
+
+      <h3>3.4 Persistent leaderboard options</h3>
+      <div class="grid">
+        <div class="card">
+          <h4>A. Pure client-side (fastest)</h4>
+          <p>Store top-N in <code>localStorage</code>. Zero network deps. Pro: works offline, no infra. Con: per-browser, can be cleared.</p>
+        </div>
+        <div class="card">
+          <h4>B. Serverless JSON file</h4>
+          <p>POST to GitHub Gist or a Cloudflare Pages function writing a JSON file. Pro: real persistence. Con: auth + rate limits.</p>
+        </div>
+        <div class="card">
+          <h4>C. GitHub Issues as scores</h4>
+          <p>Create issue with label <code>score</code> via GitHub API. Pro: auth-free public, auditable. Con: workspace, noise.</p>
+        </div>
+        <div class="card">
+          <h4>D. Firebase/Supabase</h4>
+          <p>Lightweight row in a hosted table. Pro: proper global LB, auth. Con: backend knowledge, billing.</p>
+        </div>
+      </div>
+      <p><strong>Recommendation:</strong> Start with A, introduce B or C only if a global community emerges. For V2, make the leaderboard interface-agnostic: an adapter with one method <code>saveScore(entry)</code> and one <code>getTop(n)</code>. You can swap implementations without touching UI.</p>
+    </section>
+
+    <section id="expansion">
+      <h2>4 — Evolving from Novelty to a Full Game</h2>
+
+      <h3>4.1 Current loops (v1)</h3>
+      <ul>
+        <li><strong>Travel loop:</strong> click Travel/Make Camp → narrative text + random event overlay → choice → effect</li>
+        <li><strong>Settlement loop:</strong> reach node → action buttons → trade/rest/repair → continue</li>
+        <li><strong>Cart loop:</strong> wear increases from events/travel; repair costs shaganappi</li>
+      </ul>
+      <p>These loops are functional but shallow. Replayability is low because events do not meaningfully interact with each other.</p>
+
+      <h3>4.2 Depth patterns to add</h3>
+      <ul>
+        <li><strong>Seasons as difficulty ramps</strong>: map has a daily “stress” value that rises after August. Food depletion accelerates; rivers swell (more crossing events).</li>
+        <li><strong>Inventory weight as first-class mechanic</strong>: heavy cart = slower speed = longer exposure to random events. Deliberate curation is rewarded.</li>
+        <li><strong>Moral dilemmas with delayed consequence</strong>: e.g., an ailing traveller offers a map for half your food. Save them and gain a route shortcut later; ignore them and find no help at the next river crossing.</li>
+        <li><strong>Encounter chains</strong>: events that reference prior choices (Deserter → recognised by NWMP? Same river crossing remembered by ferry operator?).</li>
+        <li><strong>Economic simulation</strong>: Commodity prices shift by node and season. Pemmican cheap at Batoche, expensive at Edmonton.</li>
+        <li><strong>Permadeath + legacy:</strong> on loss, unlock a short “Trail Tales” note about what happened to the crew.</li>
+      </ul>
+
+      <h3>4.3 Pacing rhythm</h3>
+      <pre>Phase structure per run:
+  1. Setup (intro)           — 90 seconds
+  2. Early Prairie           — 5 minutes, events are resource-positive
+  3. River Valley mid-game   — 10 minutes, events become tradeoffs
+  4. Wooded/Upland late game — 10 minutes, risks escalate, fewer safe choices
+  5. Endgame sprint          — 5 minutes, Edmonton reachable, winter pressure</pre>
+
+      <h3>4.4 Replay design</h3>
+      <ul>
+        <li>Rotating event pools by seed so no two runs feel identical</li>
+        <li>Daily narrative log with “highlights reel” for social sharing</li>
+        <li>Scoring tiers that reward different archetypes: “Steady Brigade,” “Daredevil,” “Trader,” “Historian”</li>
+      </ul>
+    </section>
+
+    <section id="history">
+      <h2>5 — Deep Historical Accuracy &amp; Source Material Respect</h2>
+
+      <h3>5.1 What V1 gets right</h3>
+      <ul>
+        <li>Landscape framing — buffalo herds, prairie fire, river fording, mosquito plagues</li>
+        <li>Culturally specific details — shaganappi, bannock, saskatoon preserve, Sunday song references (“Old Hundred, Balerma, Dundee, Ward”)</li>
+        <li>NWMP tension and duty narrative</li>
+        <li>Red River cart squeal as a persistent mechanic</li>
+      </ul>
+
+      <h3>5.2 Where it flattens the history</h3>
+      <ul>
+        <li><strong>Crew is singular, not collective</strong> — “Your crew” sounds like one entity. Real freight brigades were family groups and Métis kinship networks.</li>
+        <li><strong>No Michif language or bilingual texture</strong> — Even a handful of Métis terms (e.g., “s_voyer_,” place names) would ground the world deeper.</li>
+        <li><strong>Events read like generic survival fiction</strong> — Several are modular D&amp;D-style encounters; they reference 1878 Western Canadian history only loosely.</li>
+        <li><strong>Missing economic context</strong> — Why pemmican? Because the HBC supply pipeline was collapsing and Métis brigades filled it. Why is the Factor paying for beaver? Because fashion demand shifted; no mention of this in-game.</li>
+        <li><strong>Settlements are atmospheric but not structural</strong> — Fort Garry, Batoche, and Edmonton are described beautifully, but their historical roles in 1878 are not reflected in gameplay differences.</li>
+      </ul>
+
+      <h3>5.3 Integrating history into mechanics</h3>
+      <ul>
+        <li><strong>Religion as resource:</strong> Sunday rest at St. Norbert/Batoche restores crew differently than at an HBC post (missions provide morale/health; forts provide repair/trade only).</li>
+        <li><strong>Family obligations:</strong> Some events require choices with kinship cost. Example: your sister begs you to take her child west for safety; that consumes a food/weight slot but unlocks crew loyalty at a future node.</li>
+        <li><strong>Trade good historicity:</strong> Replace “trade goods” with historically grounded outputs: pemmican, dry meat, bison robes, beaver pelts, wolf skins. Their Edmonton market value changes with supply.</li>
+        <li><strong>River crossing seasonality:</strong> June-July crossings are risky (melt). August-September safer. Mechanically, change fording DC by month.</li>
+        <li><strong>Treaty/papers:</strong> Introduces travel documentation as an inventory item. At NWMP posts, you must present papers. Losing them creates a cascading penalty.</li>
+        <li><strong>Citation tooltips:</strong> Every narrative passage should expose its source on hover or via a “Read source” link. V2 already has the source registry; wire it into the UI.</li>
+      </ul>
+
+      <h3>5.4 Specific historical recommendations</h3>
+      <ul>
+        <li>Introduce <strong>Cuthbert Grant / Gabriel Dumont</strong> figures as non-combat NPCs with region-specific requests (e.g., Gabriel Dumont at the South Saskatchewan offers a shortcut for carrying dispatches).</li>
+        <li>Reference the 1878 bison collapse era: fewer herds, more hunting pressure — make <code>game_sighted</code> events rarer as days increase.</li>
+        <li>Use HBC post factorledger logs as a known pricing curve (edmonton prices go up later season; batoche prices drop as locals glut supply).</li>
+        <li>St. Norbert, St. Boniface, St. François Xavier are actual parish nodes; use their historically documented functions (school, grist mill, ferry).</li>
+        <li>Place calendar Easter, St. John’s Day, and winter count references in travel flavor.</li>
+      </ul>
+    </section>
+
+    <section id="debug-section">
+      <h2>Appendices / Reference</h2>
+    </section>
+
+    <section id="plan">
+      <h2>6 — Prioritized Action Plan</h2>
+
+      <h3>Phase 1 — Foundation &amp; Technical Debt (Weeks 1–3)</h3>
+      <ul>
+        <li><strong>Finish V2 modular build and Pages deploy.</strong> Build artifact validation; rollback plan.</li>
+        <li><strong>State machine + reducer</strong> in <code>src/core/state.js</code>. Replace <code>S.mutate()</code> style with <code>step(state, input)</code>.</li>
+        <li><strong>Pure engine</strong> in <code>src/systems/engine.js</code>: no DOM access. All interactions via a clean API.</li>
+        <li><strong>Logger</strong>: append-only event stream tied to each turn.</li>
+        <li><strong>Save/load with schema validation</strong>.</li>
+        <li><strong>Tests</strong> for calendar, scorer, PRNG, event resolution.</li>
+      </ul>
+
+      <h3>Phase 2 — Core Systems &amp; Debugging (Weeks 4–7)</h3>
+      <ul>
+        <li><strong>Weight system</strong>: total weight affects speed/wear; show live weight bar.</li>
+        <li><strong>Component-based cart wear</strong>: wheel/axle/tongue subsystems squealing thresholds.</li>
+        <li><strong>Crew morale + hunger</strong> with per-member modeling.</li>
+        <li><strong>Debug suite implementation</strong> from Section 2 with warp/give/snapshot/replay.</li>
+        <li><strong>Scoring formula V2</strong> with tiered mastery labels.</li>
+        <li><strong>Bug report plumbing</strong> (localStorage queue + <code>exportBugReport()</code>).</li>
+        <li><strong>Offline-ready dist/</strong> with bundled assets; remove CDN dependency.</li>
+      </ul>
+
+      <h3>Phase 3 — Content &amp; Mechanics Expansion (Weeks 8–16)</h3>
+      <ul>
+        <li><strong>Seasonal event weighting</strong> and node-specific encounters.</li>
+        <li><strong>Economic simulation</strong>: dynamic pricing, supply g.</li>
+        <li><strong>Historical narrative layer</strong>: source-cited events, day journal.</li>
+        <li><strong>Leaderboard adapter</strong>: choose A/B/C based on user feedback.</li>
+        <li><strong>Accessibility pass</strong>: keyboard nav, reduced-motion mode, text-only fallbacks, ARIA labels.</li>
+        <li><strong>Polish</strong>: icons for inventory, map illustrations, audio cues (optional), journal export as PDF.</li>
+      </ul>
+
+      <h3>Definition of Done per phase</h3>
+      <ul>
+        <li>Phase 1: <code>npm test</code> green, <code>npm run build</code> always produces <code>dist/</code>, GitHub Pages deploy verified.</li>
+        <li>Phase 2: can speed-run any 10-minute test scenario using debug tools, scoring formula described above implemented, cart wear and crew hunger feel meaningfully different.</li>
+        <li>Phase 3: 3+ distinct viable strategies, 30+ source-cited events, first external playtest with documented feedback.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Final Verdict</h2>
+      <div class="callout ok">
+        <strong>V1 is a strong vertical slice.</strong> The writing, theme, and UI shell are genuinely good. Treat it as a prototype, not a product. V2 is the correct evacuation path. Execute in the order above: stabilize architecture, instrument the system, then enrich content. Do not add features to V1.
+      </div>
+    </section>
+
+  </main>
+</div>
+</body>
+</html>
