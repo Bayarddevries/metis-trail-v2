@@ -3,6 +3,7 @@ import { applyTheme } from './theme.js';
 
 let map = null;
 let tileLayer = null;
+let markerGroup = null;
 
 export function initMap() {
   const el = document.getElementById('map');
@@ -22,49 +23,26 @@ export function initMap() {
     maxZoom: 18,
   }).addTo(map);
 
-  const visited = NODES.slice(0, 2).map((n) => [n.lat, n.lon]);
-  L.polyline(visited, {
-    color: '#8B2500',
-    weight: 3,
-    opacity: 0.7,
-  }).addTo(map);
-
-  L.circleMarker([NODES[0].lat, NODES[0].lon], {
-    radius: 6,
-    color: '#1A1410',
-    fillColor: '#C8B888',
-    fillOpacity: 1,
-  }).addTo(map);
-
-  L.circleMarker([NODES[1].lat, NODES[1].lon], {
-    radius: 6,
-    color: '#1A1410',
-    fillColor: '#E8DCC8',
-    fillOpacity: 1,
-  }).addTo(map);
+  markerGroup = L.featureGroup().addTo(map);
+  updateMap({ node: 0 });
 }
 
 export function updateMap(state) {
   if (!map) return;
   const here = NODES[state.node];
   if (!here) return;
-  map.setView([here.lat, here.lon], Math.max(map.getZoom(), 6));
 
   const visited = NODES.slice(0, state.node + 1).map((n) => [n.lat, n.lon]);
   const next = NODES[state.node + 1];
 
-  tileLayer?.setUrl('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png');
+  map.setView([here.lat, here.lon], Math.max(map.getZoom(), 6));
 
-  map.eachLayer((layer) => {
-    if (!layer._path) return;
-    map.removeLayer(layer);
-  });
+  if (!markerGroup) markerGroup = L.featureGroup().addTo(map);
+  markerGroup.clearLayers();
 
-  L.polyline(visited, {
-    color: '#8B2500',
-    weight: 4,
-    opacity: 0.8,
-  }).addTo(map);
+  if (visited.length > 1) {
+    L.polyline(visited, { color: '#8B2500', weight: 3, opacity: 0.7 }).addTo(markerGroup);
+  }
 
   if (next) {
     L.circleMarker([next.lat, next.lon], {
@@ -72,7 +50,7 @@ export function updateMap(state) {
       color: '#1A1410',
       fillColor: '#E8DCC8',
       fillOpacity: 1,
-    }).addTo(map);
+    }).addTo(markerGroup);
   }
 
   L.circleMarker([here.lat, here.lon], {
@@ -80,7 +58,7 @@ export function updateMap(state) {
     color: '#1A1410',
     fillColor: '#8B2500',
     fillOpacity: 1,
-  }).addTo(map);
+  }).addTo(markerGroup);
 }
 
 export function renderStatusBar(state) {
