@@ -1383,6 +1383,11 @@ function showEvent(game) {
       amountEl.style.display = "block";
     }
   }
+  const stampEl = document.getElementById("event-stamp");
+  if (stampEl) {
+    stampEl.textContent = ev.classification || "";
+    stampEl.style.display = ev.classification ? "inline-block" : "none";
+  }
   choicesEl.innerHTML = "";
   continueEl.style.display = "none";
   (ev.choices || []).forEach((ch, i) => {
