@@ -30,7 +30,7 @@ export async function build() {
   const manifest = JSON.stringify({ assets }, null, 2);
   const bootstrapScript = `<script type="module">
     import { bootstrap } from './app.js';
-    window.addEventListener('DOMContentLoaded', () => bootstrap());
+    bootstrap();
   </script>`;
 
   let html = await fs.promises.readFile(path.join(cwd, 'src/template.html'), 'utf8');
