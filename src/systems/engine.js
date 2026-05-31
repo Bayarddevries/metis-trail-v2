@@ -5,6 +5,7 @@ import { makeRNG, d20 } from '../core/seed.js';
 import { NODES } from '../data/nodes.js';
 import { startingCart, totalWeight } from '../data/items.js';
 import { getSource } from '../data/sources/index.js';
+import { pickEventForTerrain } from '../data/events.js';
 
 export function createGame(seed = null) {
   const rng = makeRNG(seed);
@@ -42,6 +43,7 @@ export function createGame(seed = null) {
     eventsResolved: 0,
     tradesMade: 0,
     flags: {},
+    reputation: { hbc: 0, nwmp: 0, metis: 0, mission: 0, cree: 0 },
   };
 
   function checkGameOver() {
@@ -70,12 +72,17 @@ export function createGame(seed = null) {
 
   function resolveChoice(ev, ci) {
     const ch = ev.choices[ci];
-    const result = { roll: null, total: null, dc: null, success: null, text: '', effects: [] };
+    const result = { roll: null, total: null, dc: null, success: null, text: '', effects: [], flags: [], reps: [] };
 
-    if (ch.need) {
-      const needs = cart.some((i) => i.name === ch.need && i.count > 0);
-      if (!needs) {
-        result.text = `You don't have a ${ch.need}. You can't do that.`;
+    if (ch.requiresFlag && !S.flags[ch.requiresFlag]) {
+      result.text = `You need a different circumstance for that.`;
+      result.success = false;
+      return result;
+    }
+    if (ch.requiresRep) {
+      const cur = S.reputation[ch.requiresRep.key] || 0;
+      if (cur < ch.requiresRep.min) {
+        result.text = `Your reputation with the ${ch.requiresRep.key} is too low for that.`;
         result.success = false;
         return result;
       }
@@ -135,15 +142,27 @@ export function createGame(seed = null) {
       result.effects.push(`+${ch.extraProgress} progress`);
     }
 
+    if (ch.setsFlag) {
+      S.flags[ch.setsFlag] = true;
+      result.flags.push(ch.setsFlag);
+    }
+    if (ch.addsRep) {
+      S.reputation[ch.addsRep.key] = (S.reputation[ch.addsRep.key] || 0) + ch.addsRep.delta;
+      result.reps.push({ key: ch.addsRep.key, delta: ch.addsRep.delta, value: S.reputation[ch.addsRep.key] });
+    }
+
+    if (ch.branch && !S.pendingEvent) {
+      const branched = typeof ch.branch === 'function' ? ch.branch({ flags: S.flags, reputation: S.reputation, rng: rand }) : ch.branch;
+      if (branched) S.pendingEvent = branched;
+    }
+
     S.eventsResolved++;
     return result;
   }
 
   function pickEvent() {
     if (rand() > CONSTANTS.EVENT_CHANCE) return null;
-    const node = NODES[S.node];
-    const pool = EVENTS[node.terrain] || EVENTS.plains;
-    return pool[Math.floor(rand() * pool.length)];
+    return pickEventForTerrain(NODES[S.node]?.terrain || 'plains', rand);
   }
 
   function calcScore() {
