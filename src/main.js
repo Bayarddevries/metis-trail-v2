@@ -298,9 +298,25 @@ function showSettlement(game) {
 
   const available = game.getAvailableActions();
   (available.actions || []).forEach((action) => {
+    const wrap = document.createElement('div');
+    wrap.className = 'settlement-action';
+
+    const label = document.createElement('div');
+    label.className = 'settlement-action-label';
+    label.textContent = actionLabel(action);
+
+    const sub = document.createElement('div');
+    sub.className = 'settlement-action-sub';
+    sub.textContent = actionSubtitle(action);
+
     const btn = document.createElement('button');
     btn.className = 'ctrl-btn';
-    btn.textContent = actionLabel(action);
+    btn.style.display = 'flex';
+    btn.style.flexDirection = 'column';
+    btn.style.alignItems = 'flex-start';
+    btn.style.gap = '2px';
+    btn.appendChild(label);
+    btn.appendChild(sub);
     btn.onclick = () => {
       hideOverlays();
       game.settlementAction(action);
@@ -374,4 +390,18 @@ function showEnd(game) {
 function actionLabel(a) {
   const map = { rest: 'Rest', trade: 'Trade', repair: 'Repair', grease: 'Grease', forage: 'Forage', recruit: 'Recruit', rumours: 'Gossip', heal: 'Heal', continue: 'Continue West' };
   return map[a] || a;
+}
+function actionSubtitle(a) {
+  const map = {
+    rest: 'Crew rested, morale restored, supplies refresh.',
+    trade: 'Spend one trade good for +6-10 food.',
+    repair: 'Reduce wheel wear, or apply shaganappi if carried.',
+    grease: 'Consume shaganappi to silence axle squeal.',
+    forage: 'D20 + crew modifier; 12+ gains 1-4 food.',
+    recruit: 'Rests tired crew if not exhausted.',
+    rumours: 'Advance one day, learn trail news.',
+    heal: 'Crew rested, morale restored.',
+    continue: 'Resume the journey.',
+  };
+  return map[a] || '';
 }
