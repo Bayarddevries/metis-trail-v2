@@ -20,9 +20,10 @@ export async function build() {
     target: 'es2020',
   });
 
+  const templatePath = path.join(cwd, 'src', 'template.html');
   const indexPath = path.join(outDir, 'index.html');
   const appCode = await fs.readFile(path.join(outDir, `app.v${BUILDVER}.js`), 'utf8');
-  let html = (await fs.readFile(indexPath, 'utf8')) || '';
+  let html = (await fs.readFile(templatePath, 'utf8')) || '';
 
   html = html.replace(
     /(<script\s+type="module"\s+src=")app\.v\d+\.js(")/g,
