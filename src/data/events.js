@@ -124,6 +124,42 @@ export const EVENT_POOLS = {
         { text: 'Bypass through the bush', dc: 11, ok: 'The bush breaks open onto the old trail.', bad: 'A branch catches the canvas cover.', wear: 1 },
         { text: 'Backtrack to the ford', dc: null, always: 'A long, slow re-route. But safe.', time: 2 }
       ]
+    },
+    {
+      id: 'plains_axle_snap',
+      text: 'A sickening crack — the right axle shears against a hidden stone half-buried in yesterday\'s washout.',
+      source: { quote: 'Many a worn-out axle and broken wheel attest the power of its stumps and coulees.', author: 'John C. Schultz', work: 'The Old Crow Wing Trail, MHS Transactions, 1894' },
+      choices: [
+        { text: 'Set a splice with rope and wedges', dc: 11, ok: 'A jury-rig holds. Progress is slow, but the cart is rolling again.', bad: 'The splice splits by noon.', wear: 1, time: 1, morale: -4 },
+        { text: 'Cache the load and press on light', dc: null, always: 'You bury the crated freight and mark the spot. The cart is light, but you return poorer.', time: -1, food: -4 }
+      ]
+    },
+    {
+      id: 'plains_bear_camp',
+      text: 'Dawn finds a cinnamon bear rooting through your bread sack at the edge of camp.',
+      source: { quote: 'The bears along the Carlton were a constant threat to unprotected provisions.', author: 'Brehaut, citing Fort Qu\'Appelle accounts', work: 'MHS Transactions, 1971-72' },
+      choices: [
+        { text: 'Beat the pan and drive it off', dc: 11, ok: 'The bear lumbers away with a swat at its nose.', bad: 'It turns. A strap snaps and half the flour is gone.', food: -3, morale: -6, wear: 1 },
+        { text: 'Climb for height and wait', dc: null, always: 'The bear eventually loses interest. You lose the morning, not the flour.', time: 1 }
+      ]
+    },
+    {
+      id: 'plains_hail',
+      text: 'The sky turns green and the air goes still. Then the hail comes — stones the size of walnuts.',
+      source: { quote: 'Sudden storms of hail and sleet were not uncommon on the open prairie in late spring.', author: 'Lacombe missionary journals, 1878' },
+      choices: [
+        { text: 'Cover the canvas and ride it out', dc: 10, ok: 'The wagon top holds. The oxen are skittish but unhurt.', bad: 'Canvas tears and two rounds of cheese are spoiled.', food: -2, morale: -4 },
+        { text: 'Scramble to the nearest coulee', dc: 9, ok: 'Natural shelter saves the load.', bad: 'A slipped wheel in the rush.', wear: 1 }
+      ]
+    },
+    {
+      id: 'plains_theft',
+      text: 'Camp is crowded. You wake to find a small bundle of trade goods missing from the cart pole.',
+      source: { quote: 'Thefts at rendezvous camps were usually petty and punished by the trail\'s own informal courts.', author: 'MMF Historical Research' },
+      choices: [
+        { text: 'Tell the camp overseer and help search', dc: 9, ok: 'The goods are returned. The thief is ordered to pay in labour.', addsRep: { key: 'metis', delta: 1 } },
+        { text: 'Write it off and tighten watch', dc: null, always: 'Pragmatic. The trail teaches scarcity.', alwaysWear: 0, morale: -2 }
+      ]
     }
   ],
   river_valley: [
