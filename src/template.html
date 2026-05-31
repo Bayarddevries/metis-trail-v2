@@ -402,13 +402,14 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 10px;
+    gap: 12px;
     padding: 12px;
     background: var(--clr-bg-dark);
-    border: 1px solid var(--clr-accent);
-    border-radius: 8px;
+    border: 2px solid var(--clr-ink);
+    border-radius: 10px;
     margin-bottom: 14px;
     font-family: var(--font-heading);
+    opacity: 0.9;
   }
   .die {
     width: 40px;
@@ -424,12 +425,11 @@
     color: var(--clr-ink);
     box-shadow: 0 2px 0 rgba(0,0,0,0.25);
   }
-  .die.spin {
-    animation: dice-spin 0.35s linear infinite;
-  }
-  .die.success { background: #2e7d32; color: #fff; border-color: #1b5e20; }
-  .die.fail { background: #b71c1c; color: #fff; border-color: #7f0000; }
-  .roll-label { font-size: 12px; color: var(--clr-ink); }
+  .roll-label { font-size: 12px; color: var(--clr-ink); letter-spacing: 0.05em; }
+  .roll-result { font-size: 13px; color: var(--clr-ink); font-weight: 700; text-transform: uppercase; }
+  .roll-result.pass { color: #2e7d32; }
+  .roll-result.fail { color: #8b2500; }
+  .die.small { width: 42px; height: 42px; font-size: 20px; border-width: 2px; }
   @keyframes dice-spin {
     from { transform: translateY(-6px) rotate(-8deg); opacity: 0.9; }
     to { transform: translateY(6px) rotate(8deg); opacity: 0.4; }

@@ -159,6 +159,43 @@ function hideOverlays() {
   });
 }
 
+let pendingDice = null;
+
+function rollDiceOnce() {
+  return Math.floor(Math.random() * 20) + 1;
+}
+
+function renderDicePill(result) {
+  const rc = document.getElementById('event-roll-display');
+  if (!rc) return;
+  rc.style.display = 'flex';
+  rc.innerHTML = `
+    <div class="roll-label">Roll</div>
+    <div id="die" class="die small font-spectral">-</div>
+    <div class="roll-label">DC ${result.dc}</div>
+    <div class="roll-result ${result.success ? 'pass' : 'fail'}">${result.success ? 'Pass' : 'Fail'}</div>
+  `;
+}
+
+function animateDicePill(result) {
+  const el = document.getElementById('die');
+  if (!el) return;
+  el.className = 'die small font-spectral spin';
+
+  let ticks = 0;
+  const maxTicks = 8 + Math.floor(Math.random() * 5);
+  const id = setInterval(() => {
+    el.textContent = String(Math.floor(Math.random() * 20) + 1);
+    ticks += 1;
+    if (ticks >= maxTicks) {
+      clearInterval(id);
+      const settled = rollDiceOnce();
+      el.textContent = String(settled);
+      el.className = 'die small font-spectral ' + (result.success ? 'pass' : 'fail');
+    }
+  }, 60);
+}
+
 function showEvent(game) {
   const ev = game.getPendingEvent();
   if (!ev) return;
@@ -189,6 +226,9 @@ function showEvent(game) {
   choicesEl.innerHTML = '';
   continueEl.style.display = 'none';
 
+  const rc = document.getElementById('event-roll-display');
+  if (rc) rc.style.display = 'none';
+
   (ev.choices || []).forEach((ch, i) => {
     const btn = document.createElement('button');
     btn.className = 'choice-btn';
@@ -196,6 +236,21 @@ function showEvent(game) {
     btn.onclick = () => {
       const prev = game.getState();
       const stepLog = game.chooseEventChoice(i);
+      const entry = stepLog && stepLog[0] ? stepLog[0] : null;
+      const res = entry && entry.result ? entry.result : entry;
+      if (res && res.roll !== null && res.dc !== null) {
+        btn.disabled = true;
+        pendingDice = res;
+        renderDicePill(res);
+        animateDicePill(res);
+        setTimeout(() => {
+          const outcome = buildEventChoiceOutcome(stepLog, prev, game.getState());
+          if (outcome) publishResult(outcome);
+          pendingDice = null;
+          render();
+        }, 650 + Math.random() * 180);
+        return;
+      }
       const outcome = buildEventChoiceOutcome(stepLog, prev, game.getState());
       if (outcome) publishResult(outcome);
       render();
