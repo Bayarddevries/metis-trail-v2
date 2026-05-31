@@ -5,6 +5,18 @@ import { saveGame, loadGame, clearSave } from './ui/persistence.js';
 
 export function bootstrap(seed = null) {
   const game = createGame(seed);
+  window._metisGame = game;
+  window.__METIS_READY__ = true;
+  window.__METIS_DEBUG__ = {
+    get state() { return game.getState(); },
+    get cart() { return game.getCart(); },
+    get crew() { return game.getCrew(); },
+    get node() { return game.getCurrentNode(); },
+    travel: () => game.travelOneDay(),
+    camp: () => game.makeCamp(),
+    choose: (i) => game.chooseEventChoice(i),
+    reroll: (s) => { const g = createGame(s); window._metisGame = g; render(); },
+  };
   mount();
 
   const state = game.getState();
