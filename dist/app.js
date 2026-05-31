@@ -867,62 +867,10 @@ function renderStatusBar(state) {
   wearEl.innerHTML = `<span class="stat-label">Wear </span><span class="stat-value${state.wear >= 4 ? " wear-high" : ""}">${state.wear}</span>`;
   crewEl.innerHTML = `<span class="stat-label">Crew </span><span class="stat-value">${state.crew}</span>`;
 }
-
-// src/systems/events.js
-var EventBus = class {
-  constructor() {
-    this.handlers = /* @__PURE__ */ new Map();
-  }
-  on(name, handler) {
-    if (!this.handlers.has(name)) this.handlers.set(name, []);
-    this.handlers.get(name).push(handler);
-  }
-  emit(name, detail) {
-    const list = this.handlers.get(name) || [];
-    for (const fn of list) {
-      try {
-        fn(detail);
-      } catch (e) {
-        console.error("EventBus handler error", e);
-      }
-    }
-  }
-};
-var bus = new EventBus();
-
-// src/ui/debug.js
-function mountDebugUI(game) {
-  const url = new URL(location.href);
-  if (!url.searchParams.has("debug")) return;
-  const panel = document.createElement("div");
-  panel.style.position = "fixed";
-  panel.style.bottom = "0";
-  panel.style.right = "0";
-  panel.style.width = "360px";
-  panel.style.maxHeight = "50vh";
-  panel.style.background = "#1e1e1e";
-  panel.style.color = "#e8dcc8";
-  panel.style.fontFamily = "ui-monospace, monospace";
-  panel.style.fontSize = "12px";
-  panel.style.overflow = "auto";
-  panel.style.borderTop = "2px solid #8B2500";
-  panel.style.padding = "8px";
-  panel.style.zIndex = "9999";
-  const stateEl = document.createElement("pre");
-  stateEl.id = "debug-state";
-  const btn = document.createElement("button");
-  btn.textContent = "\u2715";
-  btn.onclick = () => panel.remove();
-  panel.append(btn, stateEl);
-  document.body.appendChild(panel);
-  setInterval(() => {
-    try {
-      const s = game.getState();
-      stateEl.textContent = JSON.stringify(s, null, 2);
-    } catch (e) {
-      stateEl.textContent = "no state";
-    }
-  }, 500);
+function renderNarrative(lines) {
+  const el = document.getElementById("narrative");
+  el.innerHTML = lines.map((t) => `<div class="scene-text">${t}</div>`).join("");
+  el.scrollTop = el.scrollHeight;
 }
 
 // src/ui/persistence.js
@@ -934,123 +882,150 @@ function clearSave() {
 // src/main.js
 function bootstrap(seed = null) {
   const game = createGame(seed);
-  const root = mount();
-  document.body.style.fontFamily = "var(--font-body)";
-  renderer = stateRenderer(game);
+  mount();
+  const state = game.getState();
+  renderStatusBar(state);
+  renderNarrative(["Welcome to the M\xE9tis Trail. Click Begin Journey to start."]);
   find("#intro-start").onclick = () => {
-    find("#intro-overlay").classList.remove("active");
-    renderer();
+    find("#intro-overlay")?.classList.remove("active");
+    render();
   };
   find("#btn-travel").onclick = () => {
-    if (game.getState().pendingEvent || game.getState().pendingSettlement) return;
+    const { pendingEvent, pendingSettlement, over } = game.getState();
+    if (pendingEvent || pendingSettlement || over) return;
     game.travelOneDay();
-    renderer();
+    render();
   };
   find("#btn-camp").onclick = () => {
     game.makeCamp();
-    renderer();
+    render();
   };
-  find("#btn-cart").onclick = () => showCart(game, root);
+  find("#btn-cart").onclick = () => showCart(game);
   find("#btn-crew").onclick = () => showCrew(game);
+  find("#event-continue").onclick = () => {
+    find("#event-overlay")?.classList.remove("active");
+  };
+  find("#settlement-continue").onclick = () => {
+    game.settlementAction("continue");
+    find("#settlement-overlay")?.classList.remove("active");
+    render();
+  };
+  find("#settlement-close").onclick = () => {
+    find("#settlement-overlay")?.classList.remove("active");
+  };
+  find("#cart-close-btn").onclick = () => find("#cart-overlay")?.classList.remove("active");
+  find("#cart-close-btn-2").onclick = () => find("#cart-overlay")?.classList.remove("active");
+  find("#crew-close-btn").onclick = () => find("#crew-overlay")?.classList.remove("active");
+  find("#crew-close-btn-2").onclick = () => find("#crew-overlay")?.classList.remove("active");
   find("#end-restart").onclick = () => {
     clearSave();
     window.location.reload();
   };
-  mountDebugUI(game);
+  render();
 }
-var renderer = null;
-function stateRenderer(game) {
-  return () => {
-    const state = game.getState();
-    renderStatusBar(state);
-    if (state.pendingEvent) presentEvent(game);
-    else if (state.pendingSettlement) presentSettlement(game);
-    else if (state.over) showEnd(game);
-  };
+function render() {
+  const game = window._metisGame;
+  if (!game) return;
+  const state = game.getState();
+  renderStatusBar(state);
+  if (state.over) {
+    showEnd(game);
+    return;
+  }
+  if (state.pendingEvent) {
+    showEvent(game);
+    return;
+  }
+  if (state.pendingSettlement) {
+    showSettlement(game);
+    return;
+  }
+  hideOverlays();
 }
-function presentEvent(game) {
+function hideOverlays() {
+  ["event-overlay", "settlement-overlay", "cart-overlay", "crew-overlay"].forEach((id) => {
+    const el = document.getElementById(id);
+    if (el) el.classList.remove("active");
+  });
+}
+function showEvent(game) {
   const ev = game.getPendingEvent();
   if (!ev) return;
-  const el = document.getElementById("event-overlay");
-  el.innerHTML = `
-    <div class="overlay-card">
-      <div id="event-text"><p>${ev.text}</p></div>
-      <div id="event-choices"></div>
-    </div>`;
-  el.classList.add("active");
-  const choices = document.getElementById("event-choices");
-  ev.choices.forEach((ch, i) => {
+  const textEl = document.getElementById("event-text");
+  const choicesEl = document.getElementById("event-choices");
+  const continueEl = document.getElementById("event-continue");
+  if (!textEl || !choicesEl) return;
+  textEl.textContent = ev.text;
+  choicesEl.innerHTML = "";
+  continueEl.style.display = "none";
+  (ev.choices || []).forEach((ch, i) => {
     const btn = document.createElement("button");
     btn.className = "choice-btn";
     btn.textContent = ch.text;
     btn.onclick = () => {
       game.chooseEventChoice(i);
-      renderer();
+      render();
     };
-    choices.appendChild(btn);
+    choicesEl.appendChild(btn);
   });
+  document.getElementById("event-overlay")?.classList.add("active");
 }
-function presentSettlement(game) {
+function showSettlement(game) {
   const state = game.getState();
   const next = game.getCurrentNode();
-  const el = document.getElementById("settlement-overlay");
-  el.innerHTML = `
-    <div class="overlay-card">
-      <h2>${next.name}</h2>
-      <div class="settlement-desc">${next.desc}</div>
-      <div id="settlement-actions"></div>
-      <button class="ctrl-btn" id="settlement-continue">Continue West</button>
-    </div>`;
-  el.classList.add("active");
-  document.getElementById("settlement-continue").onclick = () => {
-    game.settlementAction("continue");
-    renderer();
-  };
+  const nameEl = document.getElementById("settlement-name");
+  const descEl = document.getElementById("settlement-desc");
+  const actionsEl = document.getElementById("settlement-actions");
+  if (!nameEl || !descEl || !actionsEl) return;
+  nameEl.textContent = next.name;
+  descEl.textContent = next.desc;
+  actionsEl.innerHTML = "";
+  const available = game.getAvailableActions();
+  (available.actions || []).forEach((action) => {
+    const btn = document.createElement("button");
+    btn.className = "ctrl-btn";
+    btn.textContent = actionLabel(action);
+    btn.onclick = () => {
+      hideOverlays();
+      game.settlementAction(action);
+      render();
+    };
+    actionsEl.appendChild(btn);
+  });
+  document.getElementById("settlement-overlay")?.classList.add("active");
 }
 function showCart(game) {
   const cart = game.getCart();
-  const el = document.getElementById("cart-overlay");
-  el.innerHTML = `
-    <div class="overlay-card">
-      <h2>Cart</h2>
-      <div id="inv-list">${cart.map((i) => `<div>${i.icon || ""} ${i.name} \xD7${i.count} (${i.wt * i.count} kg)</div>`).join("")}</div>
-      <button class="ctrl-btn" id="cart-close-btn">Close</button>
-    </div>`;
-  el.classList.add("active");
-  document.getElementById("cart-close-btn").onclick = () => el.classList.remove("active");
+  const listEl = document.getElementById("inv-list");
+  if (!listEl) return;
+  listEl.innerHTML = cart.map((i) => `<div>${i.icon || ""} ${i.name} \xD7${i.count} (${i.wt * i.count} kg)</div>`).join("");
+  document.getElementById("cart-overlay")?.classList.add("active");
 }
 function showCrew(game) {
   const c = game.getCrew();
-  const el = document.getElementById("crew-overlay");
-  el.innerHTML = `
-    <div class="overlay-card">
-      <h2>Crew</h2>
-      <div>State: ${c.state}</div>
-      <div>Morale: ${c.morale}</div>
-      <div>Modifier: ${c.mod}</div>
-      <button class="ctrl-btn" id="crew-close-btn">Close</button>
-    </div>`;
-  el.classList.add("active");
-  document.getElementById("crew-close-btn").onclick = () => el.classList.remove("active");
+  const el = document.getElementById("crew-status");
+  if (!el) return;
+  el.innerHTML = `<div>State: ${c.state}</div><div>Morale: ${c.morale}</div><div>Modifier: ${c.mod}</div>`;
+  document.getElementById("crew-overlay")?.classList.add("active");
 }
 function showEnd(game) {
   const state = game.getState();
-  const el = document.getElementById("end-overlay");
-  el.innerHTML = `
-    <div class="overlay-card end-card">
-      <h1>${state.won ? "You Made It!" : "Journey Over"}</h1>
-      <div class="end-stats">
-        <div class="stat-row"><span class="label">Days</span><span>${state.day}</span></div>
-        <div class="stat-row"><span class="label">Score</span><span>${state.score}</span></div>
-        <div class="score-row">Score</div>
-      </div>
-      <button id="end-restart" class="restart-btn">Play Again</button>
-    </div>`;
-  el.classList.add("active");
-  document.getElementById("end-restart").onclick = () => {
-    clearSave();
-    window.location.reload();
-  };
+  const titleEl = document.getElementById("end-title");
+  const narrativeEl = document.getElementById("end-narrative");
+  const statsEl = document.getElementById("end-stats");
+  if (!titleEl || !narrativeEl || !statsEl) return;
+  titleEl.textContent = state.won ? "You Made It!" : "Journey Over";
+  narrativeEl.textContent = state.won ? `You reached Fort Edmonton on day ${state.day}. Your cart held, the crew survived, and the trade goods arrived.` : `Your journey ends on day ${state.day} on the Carlton Trail.`;
+  statsEl.innerHTML = `
+    <div class="stat-row"><span class="label">Days</span><span>${state.day}</span></div>
+    <div class="stat-row"><span class="label">Score</span><span>${state.score}</span></div>
+    <div class="score-row">Score</div>
+  `;
+  document.getElementById("end-overlay")?.classList.add("active");
+}
+function actionLabel(a) {
+  const map = { rest: "Rest", trade: "Trade", repair: "Repair", grease: "Grease", forage: "Forage", recruit: "Recruit", rumours: "Gossip", heal: "Heal", continue: "Continue West" };
+  return map[a] || a;
 }
 export {
   bootstrap

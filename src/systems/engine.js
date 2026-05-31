@@ -417,3 +417,28 @@ const EVENTS = {
   uplands: [],
   river: [],
 };
+
+const FALLBACK_EVENTS = {
+  plains: [
+    { id: 'plains_rough', text: "The prairie trail is rutted and slow. Your ox leans into the traces, but the ground saps momentum.", choices: [{ text: 'Press on carefully', dc: null, ok: '', bad: '', always: 'The cart creaks forward. Nothing breaks, but the day is long.', alwaysWear: 0 }, { text: 'Push the pace', dc: 10, ok: 'You find firmer ground ahead. Progress is better than expected.', bad: 'A hidden rut jolts the cart. The axle complains.', wear: 1 }] },
+    { id: 'plains_wind', text: "A hot wind pushes at your back. The prairie grass ripples like water.", choices: [{ text: 'Let the wind carry you', dc: null, ok: '', bad: '', always: 'You make excellent time.' }, { text: 'Hunker against expected rain', dc: null, ok: '', bad: '', always: 'You wrap the load and keep moving. No rain comes.' }] },
+  ],
+  river_valley: [
+    { id: 'river_high', text: "The river is running high and fast. The bank trail is muddy and narrow.", choices: [{ text: 'Ford carefully', dc: 12, ok: 'The ox keeps footing and you stay dry enough.', bad: 'The cart tilts in the current. Repairs are needed after crossing.', wear: 1 }, { text: 'Wait for afternoon', dc: null, ok: '', bad: '', always: 'You camp and cross later when the water drops.', time: 1 }] },
+  ],
+  wooded: [
+    { id: 'wooded_brush', text: "A windfall blocks the trail through the trees.", choices: [{ text: 'Unload and drag the cart clear', dc: null, ok: '', bad: '', always: 'You clear it. Half an hour lost.', time: 1 }, { text: 'Blaze a bypass', dc: 9, ok: 'A narrow detour avoids the mess.', bad: 'You scratch the paint and lose twenty minutes.', time: 1, wear: 0 }] },
+  ],
+  uplands: [
+    { id: 'upland_gust', text: "The wind on the ridge cuts through your clothes. The cart groans.", choices: [{ text: 'Descend to shelter', dc: null, ok: '', bad: '', always: 'You lose elevation but keep the crew safe.', time: 1 }, { text: 'Push through the wind', dc: 11, ok: 'The gust passes. The crew holds together.', bad: 'A sudden gust slams the cart body.', wear: 1 }] },
+  ],
+  river: [
+    { id: 'river_crossing', text: "You reach the river crossing and check the depth.", choices: [{ text: 'Ford it', dc: 12, ok: 'The water is high but passable.', bad: 'A wheel drops into a hole mid-crossing.', wear: 1 }, { text: 'Wait for safer water', dc: null, ok: '', bad: '', always: 'You wait a day and cross when levels drop.', time: 1 }] },
+  ],
+};
+
+function getEventsForTerrain(t) {
+  const primary = EVENTS[t];
+  if (primary && primary.length) return primary;
+  return FALLBACK_EVENTS[t] || FALLBACK_EVENTS.plains;
+}

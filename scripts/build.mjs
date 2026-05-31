@@ -28,21 +28,17 @@ export async function build() {
   }
 
   const manifest = JSON.stringify({ assets }, null, 2);
+  const bootstrapScript = `<script type="module">
+    import { bootstrap } from './app.js';
+    window.addEventListener('DOMContentLoaded', () => bootstrap());
+  </script>`;
 
-  const html = `<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Métis Trail V2</title>
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-<script type="module" src="./app.js"></script>
-</head>
-<body>
-<div id="game-root"></div>
-${manifest && `<script>window.__METIS_ASSETS__=${manifest};</script>`}
-</body>
-</html>`;
+  let html = await fs.promises.readFile(path.join(cwd, 'src/template.html'), 'utf8');
+  html = html.replace(
+    '<script type="module" src="./app.js"></script>',
+    bootstrapScript
+  );
+  html = html.replace('</body>', `${manifest ? `<script>window.__METIS_ASSETS__=${manifest};</script>` : ''}\n</body>`);
 
   await fs.promises.writeFile(path.join(outDir, 'index.html'), html);
   if (manifest) {
