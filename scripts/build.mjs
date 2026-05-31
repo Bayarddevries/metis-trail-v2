@@ -12,11 +12,11 @@ export async function build() {
     entryPoints: [path.join(cwd, 'src/main.js')],
     bundle: true,
     format: 'esm',
-    outfile: path.join(outDir, 'app.js'),
+    outfile: path.join(outDir, 'app.v2.js'),
     target: ['es2020'],
   });
 
-  const appCode = await fs.promises.readFile(path.join(outDir, 'app.js'), 'utf8');
+  const appCode = await fs.promises.readFile(path.join(outDir, 'app.v2.js'), 'utf8');
   const assetPaths = await findAssets(appCode);
 
   const assets = [];
@@ -33,7 +33,7 @@ export async function build() {
   html = html.replace('</body>', `${manifest ? `<script>window.__METIS_ASSETS__=${manifest};</script>` : ''}\n</body>`);
 
   await fs.promises.writeFile(path.join(outDir, 'index.html'), html);
-  await fs.promises.writeFile(path.join(outDir, 'app.js'), appCode + '\nif (!window.__METIS_BOOTED__) { window.__METIS_BOOTED__ = true; try { bootstrap(); } catch (e) { console.error("Metis boot error:", e); } }');
+  await fs.promises.writeFile(path.join(outDir, 'app.v2.js'), appCode + '\nif (!window.__METIS_BOOTED__) { window.__METIS_BOOTED__ = true; try { bootstrap(); } catch (e) { console.error("Metis boot error:", e); } }');
 
   await fs.promises.writeFile(path.join(outDir, 'index.html'), html);
   if (manifest) {
