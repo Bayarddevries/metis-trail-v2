@@ -190,19 +190,20 @@ function showEvent(game) {
 
 function buildEventChoiceOutcome(stepLog, before, after) {
   const msgs = [];
-  const entry = Array.isArray(stepLog) ? stepLog[0] : null;
-  if (entry?.roll !== null && entry?.dc !== null) {
-    msgs.push(`Rolled ${entry.roll} vs DC ${entry.dc} ${entry.success ? 'Success' : 'Failure'}`);
+  const entry = stepLog && stepLog[0] ? stepLog[0] : null;
+  const res = entry && entry.result ? entry.result : entry;
+  if (res && res.roll !== null && res.dc !== null) {
+    msgs.push(`Rolled ${res.roll} vs DC ${res.dc}: ${res.success ? 'Success' : 'Failure'}`);
   }
-  if (entry?.text) msgs.push(entry.text);
+  if (res && res.text) msgs.push(res.text);
   if (after.food !== before.food) msgs.push(`${after.food - before.food >= 0 ? '+' : ''}${after.food - before.food} Food`);
   if (after.wear !== before.wear) msgs.push(`Wear ${after.wear - before.wear >= 0 ? '+' : ''}${after.wear - before.wear}`);
   if (after.morale !== before.morale) msgs.push(`Morale ${after.morale - before.morale >= 0 ? '+' : ''}${after.morale - before.morale}`);
   if (after.crew !== before.crew) msgs.push(`Crew: ${before.crew} -> ${after.crew}`);
   if (after.node !== before.node) msgs.push(`Arrived at: ${NODES[after.node]?.name || 'unknown'}`);
-  if (entry?.flags?.length) msgs.push(`Flag: ${entry.flags[0]}`);
-  if (entry?.reps?.length) {
-    const r = entry.reps[0];
+  if (res && res.flags && res.flags.length) msgs.push(`Flag: ${res.flags[0]}`);
+  if (res && res.reps && res.reps.length) {
+    const r = res.reps[0];
     msgs.push(`Reputation ${r.key}: ${r.delta >= 0 ? '+' : ''}${r.delta} (now ${r.value})`);
   }
   if (!msgs.length) return 'The day passes without change.';

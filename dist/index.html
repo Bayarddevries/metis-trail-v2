@@ -273,6 +273,43 @@
     margin: 0 3px;
   }
 
+  .event-roll-display {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 12px;
+    background: var(--clr-bg-dark);
+    border: 1px solid var(--clr-accent);
+    border-radius: 8px;
+    margin-bottom: 14px;
+    font-family: var(--font-heading);
+  }
+  .die {
+    width: 40px;
+    height: 40px;
+    border-radius: 6px;
+    background: var(--clr-bg);
+    border: 2px solid var(--clr-ink);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--clr-ink);
+    box-shadow: 0 2px 0 rgba(0,0,0,0.25);
+  }
+  .die.spin {
+    animation: dice-spin 0.35s linear infinite;
+  }
+  .die.success { background: #2e7d32; color: #fff; border-color: #1b5e20; }
+  .die.fail { background: #b71c1c; color: #fff; border-color: #7f0000; }
+  .roll-label { font-size: 12px; color: var(--clr-ink); }
+  @keyframes dice-spin {
+    from { transform: translateY(-6px) rotate(-8deg); opacity: 0.9; }
+    to { transform: translateY(6px) rotate(8deg); opacity: 0.4; }
+  }
+
   .end-card { text-align: center; max-width: 520px; }
   .end-card h1 {
     font-family: var(--font-heading);
@@ -354,6 +391,7 @@
       <div class="overlay" id="event-overlay">
         <div class="overlay-card">
           <div id="event-text" class="event-text"></div>
+          <div id="event-roll-display" class="event-roll-display" style="display:none"></div>
           <div id="event-choices" class="event-choices"></div>
           <button class="choice-btn" id="event-continue" style="display:none">Continue</button>
         </div>
