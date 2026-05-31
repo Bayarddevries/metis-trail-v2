@@ -1,16 +1,10 @@
 import { applyTheme } from './theme.js';
 
 export function mount() {
-  const existing = document.getElementById('game-container');
-  if (existing && existing.children.length > 0) {
-    applyTheme(existing);
-    return existing;
-  }
-  const { root } = createShell();
   const gameRoot = document.getElementById('game-root');
   if (!gameRoot) throw new Error('#game-root missing');
-  gameRoot.replaceWith(root);
-  return root;
+  applyTheme(gameRoot);
+  return gameRoot;
 }
 
 export function find(selector) {
