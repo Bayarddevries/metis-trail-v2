@@ -12,9 +12,25 @@ All notable changes are documented here. Format loosely follows Keep a Changelog
 - UI scaffold: `shell.js`, `renderer.js`, `theme.js`, `debug.js`
 - esbuild bundler in `scripts/build.mjs`
 - GitHub Actions Pages deploy workflow
+- Event classification labels and gritty paper texture in `.overlay-card`
+- Ledger-style amount line for bonuses/penalties in event overlay (`#event-amount`)
+- Dice roll UI with tumbling Spectral font die and pass/fail pill
+- `dice-demo.html` with three roll treatments (Ledger Stamp / Slot Machine / Tumbling Die)
+- `plan/dice-and-events.md` implementation plan
+- Source artwork and wireframe-style style options (`style-options.html`)
+- Debugging utilities: `rollHistory`, terrain guard, hook logging
 
 ### Fixed
 - package-lock regenerated (dev dependency mismatch)
+- Leaflet CSS/JS load order and self-booting bundle wiring
+- Idempotent map mount and `initMap` / `updateMap` call chain
+- `renderStatusBar` refresh after travel choices
+- Event card `background` vs `background-image` conflict restoring cream fill under texture
+- Travel choice handler now reliably boots renderer, map, and overlay rewrite on first move
+
+### Changed
+- Palette switched to forest/brass/cream Document scheme
+- Event card texture opacity increased for dirt effect
 
 ### Docs
 - README.md
@@ -22,8 +38,10 @@ All notable changes are documented here. Format loosely follows Keep a Changelog
 - CHANGELOG.md
 - ISSUES.md
 - AGENTS.md
-- RULES.md
 - docs/pitfalls.md
+- style-options.html
+- dice-demo.html
+- plan/dice-and-events.md
 
 ## Notes
 - v1 site baseline: https://bayarddevries.github.io/metis-trail/
