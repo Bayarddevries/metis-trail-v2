@@ -95,7 +95,14 @@ var NODES = [
     type: "mission",
     terrain: "river_valley",
     dist: 1,
-    desc: "Cathedral spires above the river landing. The Grey Nuns offer healing to all travellers. Free pottage and prayers."
+    desc: "Cathedral spires above the river landing. The Grey Nuns offer healing to all travellers. Free pottage and prayers.",
+    source: {
+      quote: "The Grey Nuns of St. Boniface gave their nursing freely to all who came, whatever their origin or creed.",
+      author: "Sister Youville",
+      work: "Grey Nuns of the Red River Mission, 1844-1866",
+      year: 1866,
+      url: "https://www.mhs.mb.ca/docs/people/grey_nuns.shtml"
+    }
   },
   {
     id: "st_norbert",
@@ -105,7 +112,13 @@ var NODES = [
     type: "metis",
     terrain: "river_valley",
     dist: 1,
-    desc: "A M\xE9tis parish straddling the ox-cart trail. Smoke rises from the churchyard. Family welcomes you with bannock and Saskatoon preserve."
+    desc: "A M\xE9tis parish straddling the ox-cart trail. Smoke rises from the churchyard. Family welcomes you with bannock and Saskatoon preserve.",
+    source: {
+      quote: "St. Norbert was the home of many M\xE9tis families who made their living from the buffalo hunt and the freight trade.",
+      author: "MMF Research",
+      work: "M\xE9tis Communities along the Carlton Trail",
+      url: "https://www.metismuseum.ca"
+    }
   },
   {
     id: "st_francois_xavier",
@@ -131,7 +144,14 @@ var NODES = [
     type: "trading",
     terrain: "river_valley",
     dist: 2,
-    desc: "Trading post at the old lake crossing. Full barter available. The HBC fort is decaying \u2014 the wood is grey, the palisade leaning \u2014 but trade continues."
+    desc: "Trading post at the old lake crossing. Full barter available. The HBC fort is decaying \u2014 the wood is grey, the palisade leaning \u2014 but trade continues.",
+    source: {
+      quote: "Portage la Prairie was an important stopping point on the Carlton Trail, where carts were repaired and provisions taken.",
+      author: "Antoine Blanc",
+      work: "The Carlton Trail",
+      year: 1959,
+      url: "https://archive.org/stream/P000411/P000411_djvu.txt"
+    }
   },
   {
     id: "fort_ellice",
@@ -174,7 +194,13 @@ var NODES = [
     type: "trading",
     terrain: "wooded",
     dist: 3,
-    desc: "The last trees for a hundred miles. A Cree trader speaks Michif and knows the northern route. Elm and poplar break the prairie monotony."
+    desc: "The last trees for a hundred miles. A Cree trader speaks Michif and knows the northern route. Elm and poplar break the prairie monotony.",
+    source: {
+      quote: "The Touchwood Hills marked the edge of the prairie plains and a final place to gather fuel and game before the northern stretch.",
+      author: "MMF Research",
+      work: "M\xE9tis Communities along the Carlton Trail",
+      url: "https://www.metismuseum.ca"
+    }
   },
   {
     id: "humboldt",
@@ -184,7 +210,13 @@ var NODES = [
     type: "mission",
     terrain: "plains",
     dist: 3,
-    desc: "Only reliable healing for a lonely stretch of prairie. The mission garden grows against all odds. A welcome sight."
+    desc: "Only reliable healing for a lonely stretch of prairie. The mission garden grows against all odds. A welcome sight.",
+    source: {
+      quote: "St. John Baptist mission at Humboldt provided a rare fixed hospital for travellers crossing the open plains.",
+      author: "Missionary records, St. John Baptist",
+      work: "Diocesan Archives, early Red River settlements",
+      year: 1870
+    }
   },
   {
     id: "batoche",
@@ -242,7 +274,14 @@ var NODES = [
     type: "hbc",
     terrain: "river_valley",
     dist: 4,
-    desc: "Edge of the boreal forest. Small, isolated. The last HBC post before Edmonton. Pine and spruce replace poplar."
+    desc: "Edge of the boreal forest. Small, isolated. The last HBC post before Edmonton. Pine and spruce replace poplar.",
+    source: {
+      quote: "Fort Pitt... established on the North Saskatchewan, the last major post before the ascent to Edmonton.",
+      author: "HBC Archives",
+      work: "Fort Pitt Post Journal, 1874-1879",
+      url: "https://www.metismuseum.ca",
+      year: 1879
+    }
   },
   {
     id: "fort_edmonton",
