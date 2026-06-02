@@ -1379,42 +1379,63 @@ function bootstrap(seed = null) {
     }
   };
   mount();
+  const rootEl = find("#game-root");
+  if (!rootEl) {
+    console.error("Metis bootstrap aborted: #game-root is missing.");
+    return;
+  }
   renderNarrative(["Welcome to the M\xE9tis Trail. Click Begin Journey to start."]);
   const startBtn = find("#intro-start");
-  if (startBtn) startBtn.addEventListener("click", () => {
-    find("#intro-overlay")?.classList.remove("active");
-    initMap();
-    render();
-  });
-  find("#btn-travel").addEventListener("click", () => {
+  if (startBtn) {
+    startBtn.addEventListener("click", () => {
+      find("#intro-overlay")?.classList.remove("active");
+      initMap();
+      render();
+    });
+  } else {
+    console.warn("Metis bootstrap: #intro-start not found; Begin Journey button is offline.");
+  }
+  const travelBtn = find("#btn-travel");
+  if (travelBtn) travelBtn.addEventListener("click", () => {
     const { pendingEvent, pendingSettlement, over } = game.getState();
     if (pendingEvent || pendingSettlement || over) return;
     travelOneDay();
     render();
   });
-  find("#btn-camp").onclick = () => {
+  const campBtn = find("#btn-camp");
+  if (campBtn) campBtn.onclick = () => {
     publishCampResult();
     game.makeCamp();
     render();
   };
-  find("#btn-cart").onclick = () => showCart(game);
-  find("#btn-crew").onclick = () => showCrew(game);
-  find("#event-continue").onclick = () => {
+  const cartBtn = find("#btn-cart");
+  if (cartBtn) cartBtn.onclick = () => showCart(game);
+  const crewBtn = find("#btn-crew");
+  if (crewBtn) crewBtn.onclick = () => showCrew(game);
+  const eventContinue = find("#event-continue");
+  if (eventContinue) eventContinue.onclick = () => {
     find("#event-overlay")?.classList.remove("active");
   };
-  find("#settlement-continue").onclick = () => {
+  const settlementContinue = find("#settlement-continue");
+  if (settlementContinue) settlementContinue.onclick = () => {
     game.settlementAction("continue");
     find("#settlement-overlay")?.classList.remove("active");
     render();
   };
-  find("#settlement-close").onclick = () => {
+  const settlementClose = find("#settlement-close");
+  if (settlementClose) settlementClose.onclick = () => {
     find("#settlement-overlay")?.classList.remove("active");
   };
-  find("#cart-close-btn").onclick = () => find("#cart-overlay")?.classList.remove("active");
-  find("#cart-close-btn-2").onclick = () => find("#cart-overlay")?.classList.remove("active");
-  find("#crew-close-btn").onclick = () => find("#crew-overlay")?.classList.remove("active");
-  find("#crew-close-btn-2").onclick = () => find("#crew-overlay")?.classList.remove("active");
-  find("#end-restart").onclick = () => {
+  const cartClose = find("#cart-close-btn");
+  const cartClose2 = find("#cart-close-btn-2");
+  if (cartClose) cartClose.onclick = () => find("#cart-overlay")?.classList.remove("active");
+  if (cartClose2) cartClose2.onclick = () => find("#cart-overlay")?.classList.remove("active");
+  const crewClose = find("#crew-close-btn");
+  const crewClose2 = find("#crew-close-btn-2");
+  if (crewClose) crewClose.onclick = () => find("#crew-overlay")?.classList.remove("active");
+  if (crewClose2) crewClose2.onclick = () => find("#crew-overlay")?.classList.remove("active");
+  const restartBtn = find("#end-restart");
+  if (restartBtn) restartBtn.onclick = () => {
     clearSave();
     window.location.reload();
   };
