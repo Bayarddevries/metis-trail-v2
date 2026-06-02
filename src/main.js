@@ -32,7 +32,10 @@ export function bootstrap(seed = null) {
   if (startBtn) {
     startBtn.addEventListener('click', () => {
       const overlay = find('#intro-overlay');
-      if (overlay) overlay.remove();
+      if (overlay) {
+        overlay.classList.remove('active');
+        overlay.setAttribute('hidden', '');
+      }
       render();
       initMap();
     });
@@ -41,12 +44,15 @@ export function bootstrap(seed = null) {
   }
 
   const travelBtn = find('#btn-travel');
-  if (travelBtn) travelBtn.addEventListener('click', () => {
-    const { pendingEvent, pendingSettlement, over } = game.getState();
-    if (pendingEvent || pendingSettlement || over) return;
-    travelOneDay();
-    render();
-  });
+  if (travelBtn) {
+    travelBtn.addEventListener('click', () => {
+      const { pendingEvent, pendingSettlement, over } = game.getState();
+      if (pendingEvent || pendingSettlement || over) return;
+      travelOneDay();
+      render();
+    });
+    travelBtn.setAttribute('data-metis-travel-bound', '1');
+  }
 
   const campBtn = find('#btn-camp');
   if (campBtn) campBtn.onclick = () => {
@@ -170,7 +176,7 @@ function render() {
 }
 
 function hideOverlays() {
-  ['event-overlay', 'settlement-overlay', 'cart-overlay', 'crew-overlay'].forEach((id) => {
+  ['intro-overlay', 'event-overlay', 'settlement-overlay', 'cart-overlay', 'crew-overlay'].forEach((id) => {
     const el = document.getElementById(id);
     if (el) el.classList.remove('active');
   });
