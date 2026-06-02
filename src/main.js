@@ -31,7 +31,8 @@ export function bootstrap(seed = null) {
   const startBtn = find('#intro-start');
   if (startBtn) {
     startBtn.addEventListener('click', () => {
-      find('#intro-overlay')?.classList.remove('active');
+      const overlay = find('#intro-overlay');
+      if (overlay) overlay.remove();
       initMap();
       render();
     });
