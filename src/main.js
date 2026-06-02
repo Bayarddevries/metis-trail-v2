@@ -33,8 +33,8 @@ export function bootstrap(seed = null) {
     startBtn.addEventListener('click', () => {
       const overlay = find('#intro-overlay');
       if (overlay) overlay.remove();
-      initMap();
       render();
+      initMap();
     });
   } else {
     console.warn('Metis bootstrap: #intro-start not found; Begin Journey button is offline.');
