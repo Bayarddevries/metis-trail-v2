@@ -1,6 +1,6 @@
 import { createGame } from './systems/engine.js';
 import { mount, find } from './ui/shell.js';
-import { renderStatusBar, renderNarrative, initMap, updateMap } from './ui/renderer.js';
+import { renderStatusBar, renderNarrative, initMap, updateMap, renderTravelLines2 } from './ui/renderer.js';
 import { saveGame, loadGame, clearSave } from './ui/persistence.js';
 import { NODES } from './data/nodes.js';
 
@@ -167,23 +167,6 @@ function render() {
   hideOverlays();
   renderTravelLines2(state, game, pendingResult);
   pendingResult = null;
-}
-
-function renderTravelLines2(state, gameRef, result) {
-  const here = gameRef?.getCurrentNode?.();
-  const next = gameRef?.getNextNode?.();
-  const lines = [];
-  if (here) {
-    lines.push(`${here.name} — Day ${state.day}`);
-    if (here.desc) lines.push(here.desc);
-  }
-  if (next) {
-    lines.push(`Next: ${next.name}`);
-    if (next.desc) lines.push(next.desc);
-  }
-  if (result) lines.push(result);
-  if (!lines.length) lines.push('On the trail...');
-  renderNarrative(lines);
 }
 
 function hideOverlays() {

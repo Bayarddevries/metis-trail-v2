@@ -61,6 +61,23 @@ export function updateMap(state) {
   }).addTo(markerGroup);
 }
 
+export function renderTravelLines2(state, gameRef, result) {
+  const here = gameRef?.getCurrentNode?.();
+  const next = gameRef?.getNextNode?.();
+  const lines = [];
+  if (here) {
+    lines.push(`${here.name} — Day ${state.day}`);
+    if (here.desc) lines.push(here.desc);
+  }
+  if (next) {
+    lines.push(`Next: ${next.name}`);
+    if (next.desc) lines.push(next.desc);
+  }
+  if (result) lines.push(result);
+  if (!lines.length) lines.push('On the trail...');
+  renderNarrative(lines);
+}
+
 export function renderStatusBar(state) {
   const node = NODES[state.node];
   const next = NODES[state.node + 1];
