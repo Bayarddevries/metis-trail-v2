@@ -88,7 +88,7 @@ export function renderStatusBar(state) {
   foodEl.innerHTML = `<span class="stat-label">Food </span><span class="stat-value${state.food <= 4 ? ' food-low' : ''}">${state.food}</span>`;
   wearEl.innerHTML = `<span class="stat-label">Wear </span><span class="stat-value${state.wear >= 4 ? ' wear-high' : ''}">${state.wear}</span>`;
 
-  renderTravelLines(state, window._metisGame, pendingResult);
+  renderTravelLines2(state, window._metisGame, pendingResult);
 }
 
 export function renderNarrative(lines) {

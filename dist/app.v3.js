@@ -1,3 +1,6 @@
+var __defProp = Object.defineProperty;
+var __name = (target, value) => __defProp(target, "name", { value, configurable: true });
+
 // src/core/constants.js
 var CONSTANTS = Object.freeze({
   YEAR: 1878,
@@ -17,27 +20,33 @@ var CONSTANTS = Object.freeze({
 function crewMod(state) {
   return CONSTANTS.CREW_MOD[state.crew] ?? 0;
 }
+__name(crewMod, "crewMod");
 function wearMod(wear) {
   return CONSTANTS.WEAR_MOD[wear] ?? -5;
 }
+__name(wearMod, "wearMod");
 function totalMod(state) {
   return crewMod(state) + wearMod(state.wear);
 }
+__name(totalMod, "totalMod");
 
 // src/core/calendar.js
 var DAYS_IN_MONTH = [0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
 function isLeap(year) {
   return year % 4 === 0 && year % 100 !== 0 || year % 400 === 0;
 }
+__name(isLeap, "isLeap");
 function daysInMonth(month, year) {
   if (month === 2 && isLeap(year)) return 29;
   return DAYS_IN_MONTH[month];
 }
+__name(daysInMonth, "daysInMonth");
 function seasonFor(month) {
   if ([6, 7, 8].includes(month)) return "summer";
   if ([9, 10].includes(month)) return "autumn";
   return "early winter";
 }
+__name(seasonFor, "seasonFor");
 function advanceDate(month, day, year = 1878) {
   let m = month;
   let d = day + 1;
@@ -51,22 +60,25 @@ function advanceDate(month, day, year = 1878) {
   }
   return { month: m, day: d };
 }
+__name(advanceDate, "advanceDate");
 
 // src/core/seed.js
 function makeRNG(seed) {
   if (seed == null) return null;
   let s = seed | 0;
-  return function prng() {
+  return /* @__PURE__ */ __name(function prng() {
     s |= 0;
     s = s + 1831565813 | 0;
     let t = Math.imul(s ^ s >>> 15, 1 | s);
     t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
     return ((t ^ t >>> 14) >>> 0) / 4294967296;
-  };
+  }, "prng");
 }
+__name(makeRNG, "makeRNG");
 function d20(rand) {
   return Math.floor(rand() * 20) + 1;
 }
+__name(d20, "d20");
 
 // src/data/nodes.js
 var NODES = [
@@ -95,7 +107,14 @@ var NODES = [
     type: "mission",
     terrain: "river_valley",
     dist: 1,
-    desc: "Cathedral spires above the river landing. The Grey Nuns offer healing to all travellers. Free pottage and prayers."
+    desc: "Cathedral spires above the river landing. The Grey Nuns offer healing to all travellers. Free pottage and prayers.",
+    source: {
+      quote: "The Grey Nuns of St. Boniface gave their nursing freely to all who came, whatever their origin or creed.",
+      author: "Sister Youville",
+      work: "Grey Nuns of the Red River Mission, 1844-1866",
+      year: 1866,
+      url: "https://www.mhs.mb.ca/docs/people/grey_nuns.shtml"
+    }
   },
   {
     id: "st_norbert",
@@ -105,7 +124,13 @@ var NODES = [
     type: "metis",
     terrain: "river_valley",
     dist: 1,
-    desc: "A M\xE9tis parish straddling the ox-cart trail. Smoke rises from the churchyard. Family welcomes you with bannock and Saskatoon preserve."
+    desc: "A M\xE9tis parish straddling the ox-cart trail. Smoke rises from the churchyard. Family welcomes you with bannock and Saskatoon preserve.",
+    source: {
+      quote: "St. Norbert was the home of many M\xE9tis families who made their living from the buffalo hunt and the freight trade.",
+      author: "MMF Research",
+      work: "M\xE9tis Communities along the Carlton Trail",
+      url: "https://www.metismuseum.ca"
+    }
   },
   {
     id: "st_francois_xavier",
@@ -131,7 +156,14 @@ var NODES = [
     type: "trading",
     terrain: "river_valley",
     dist: 2,
-    desc: "Trading post at the old lake crossing. Full barter available. The HBC fort is decaying \u2014 the wood is grey, the palisade leaning \u2014 but trade continues."
+    desc: "Trading post at the old lake crossing. Full barter available. The HBC fort is decaying \u2014 the wood is grey, the palisade leaning \u2014 but trade continues.",
+    source: {
+      quote: "Portage la Prairie was an important stopping point on the Carlton Trail, where carts were repaired and provisions taken.",
+      author: "Antoine Blanc",
+      work: "The Carlton Trail",
+      year: 1959,
+      url: "https://archive.org/stream/P000411/P000411_djvu.txt"
+    }
   },
   {
     id: "fort_ellice",
@@ -174,7 +206,13 @@ var NODES = [
     type: "trading",
     terrain: "wooded",
     dist: 3,
-    desc: "The last trees for a hundred miles. A Cree trader speaks Michif and knows the northern route. Elm and poplar break the prairie monotony."
+    desc: "The last trees for a hundred miles. A Cree trader speaks Michif and knows the northern route. Elm and poplar break the prairie monotony.",
+    source: {
+      quote: "The Touchwood Hills marked the edge of the prairie plains and a final place to gather fuel and game before the northern stretch.",
+      author: "MMF Research",
+      work: "M\xE9tis Communities along the Carlton Trail",
+      url: "https://www.metismuseum.ca"
+    }
   },
   {
     id: "humboldt",
@@ -184,7 +222,13 @@ var NODES = [
     type: "mission",
     terrain: "plains",
     dist: 3,
-    desc: "Only reliable healing for a lonely stretch of prairie. The mission garden grows against all odds. A welcome sight."
+    desc: "Only reliable healing for a lonely stretch of prairie. The mission garden grows against all odds. A welcome sight.",
+    source: {
+      quote: "St. John Baptist mission at Humboldt provided a rare fixed hospital for travellers crossing the open plains.",
+      author: "Missionary records, St. John Baptist",
+      work: "Diocesan Archives, early Red River settlements",
+      year: 1870
+    }
   },
   {
     id: "batoche",
@@ -242,7 +286,14 @@ var NODES = [
     type: "hbc",
     terrain: "river_valley",
     dist: 4,
-    desc: "Edge of the boreal forest. Small, isolated. The last HBC post before Edmonton. Pine and spruce replace poplar."
+    desc: "Edge of the boreal forest. Small, isolated. The last HBC post before Edmonton. Pine and spruce replace poplar.",
+    source: {
+      quote: "Fort Pitt... established on the North Saskatchewan, the last major post before the ascent to Edmonton.",
+      author: "HBC Archives",
+      work: "Fort Pitt Post Journal, 1874-1879",
+      url: "https://www.metismuseum.ca",
+      year: 1879
+    }
   },
   {
     id: "fort_edmonton",
@@ -385,9 +436,11 @@ var ITEMS = [
 function startingCart() {
   return JSON.parse(JSON.stringify(ITEMS));
 }
+__name(startingCart, "startingCart");
 function totalWeight(cart) {
   return cart.reduce((s, i) => s + i.wt * i.count, 0);
 }
+__name(totalWeight, "totalWeight");
 
 // src/data/events.js
 var EVENT_POOLS = {
@@ -395,6 +448,7 @@ var EVENT_POOLS = {
     {
       id: "plains_trader",
       text: "A Metis freighter catches up to your cart. He eyes your load and offers a short-term deal.",
+      classification: "Freight & Trade",
       source: { quote: "The freighting trade along the Carlton Trail was dominated by Metis independent carters.", author: "MMF Research", work: "Research Vault" },
       choices: [
         { text: "Hire him as a scout", dc: 11, ok: "He rides ahead and spots a safer campsite.", bad: "He takes the easy path and you lose a day.", wear: 0, time: -1, addsRep: { key: "metis", delta: 1 }, branch: {
@@ -513,9 +567,63 @@ var EVENT_POOLS = {
         { text: "Bypass through the bush", dc: 11, ok: "The bush breaks open onto the old trail.", bad: "A branch catches the canvas cover.", wear: 1 },
         { text: "Backtrack to the ford", dc: null, always: "A long, slow re-route. But safe.", time: 2 }
       ]
+    },
+    {
+      id: "plains_axle_snap",
+      text: "A sickening crack \u2014 the right axle shears against a hidden stone half-buried in yesterday's washout.",
+      source: { quote: "Many a worn-out axle and broken wheel attest the power of its stumps and coulees.", author: "John C. Schultz", work: "The Old Crow Wing Trail, MHS Transactions, 1894" },
+      choices: [
+        { text: "Set a splice with rope and wedges", dc: 11, ok: "A jury-rig holds. Progress is slow, but the cart is rolling again.", bad: "The splice splits by noon.", wear: 1, time: 1, morale: -4 },
+        { text: "Cache the load and press on light", dc: null, always: "You bury the crated freight and mark the spot. The cart is light, but you return poorer.", time: -1, food: -4 }
+      ]
+    },
+    {
+      id: "plains_bear_camp",
+      text: "Dawn finds a cinnamon bear rooting through your bread sack at the edge of camp.",
+      source: { quote: "The bears along the Carlton were a constant threat to unprotected provisions.", author: "Brehaut, citing Fort Qu'Appelle accounts", work: "MHS Transactions, 1971-72" },
+      choices: [
+        { text: "Beat the pan and drive it off", dc: 11, ok: "The bear lumbers away with a swat at its nose.", bad: "It turns. A strap snaps and half the flour is gone.", food: -3, morale: -6, wear: 1 },
+        { text: "Climb for height and wait", dc: null, always: "The bear eventually loses interest. You lose the morning, not the flour.", time: 1 }
+      ]
+    },
+    {
+      id: "plains_hail",
+      text: "The sky turns green and the air goes still. Then the hail comes \u2014 stones the size of walnuts.",
+      source: { quote: "Sudden storms of hail and sleet were not uncommon on the open prairie in late spring.", author: "Lacombe missionary journals, 1878" },
+      choices: [
+        { text: "Cover the canvas and ride it out", dc: 10, ok: "The wagon top holds. The oxen are skittish but unhurt.", bad: "Canvas tears and two rounds of cheese are spoiled.", food: -2, morale: -4 },
+        { text: "Scramble to the nearest coulee", dc: 9, ok: "Natural shelter saves the load.", bad: "A slipped wheel in the rush.", wear: 1 }
+      ]
+    },
+    {
+      id: "plains_theft",
+      text: "Camp is crowded. You wake to find a small bundle of trade goods missing from the cart pole.",
+      source: { quote: "Thefts at rendezvous camps were usually petty and punished by the trail's own informal courts.", author: "MMF Historical Research" },
+      choices: [
+        { text: "Tell the camp overseer and help search", dc: 9, ok: "The goods are returned. The thief is ordered to pay in labour.", addsRep: { key: "metis", delta: 1 } },
+        { text: "Write it off and tighten watch", dc: null, always: "Pragmatic. The trail teaches scarcity.", alwaysWear: 0, morale: -2 }
+      ]
     }
   ],
   river_valley: [
+    {
+      id: "river_valley_sudden_rain",
+      text: "The heavy cloud bursts without warning. The trail turns to a slurry and the cart sinks to the naves.",
+      source: { quote: "Sudden storms of rain turned the valley trail into a bog that could trap a loaded cart for hours.", author: "Lacombe missionary journals, 1878" },
+      choices: [
+        { text: "Unhitch and pole the cart through", dc: 12, ok: "The oxen respond; you keep moving, soaked.", bad: "A wheel hub sinks axle-deep.", wear: 1, morale: -4 },
+        { text: "Wait it out on dry ground", dc: null, always: "Two hours of rain. The mud thickens.", time: 1 }
+      ]
+    },
+    {
+      id: "river_valley_broken_axle",
+      text: "A hidden washout has eaten into the bank. The cart slews and the axle groans.",
+      source: { quote: "Many a worn-out axle and broken wheel attest the power of its stumps and coulees.", author: "John C. Schultz", work: "The Old Crow Wing Trail, MHS Transactions, 1894" },
+      choices: [
+        { text: "Set a temporary truss with canvas and rope", dc: 11, ok: "A crude repair holds for the remaining miles.", bad: "The truss fails in the next gully.", wear: 1, time: 1 },
+        { text: "Spike the wheel and coast downhill", dc: null, always: "You save time but the wheel wobbles loose.", alwaysWear: 1, morale: -4 }
+      ]
+    },
     {
       id: "river_high",
       text: "The river is running high and fast. The bank trail is muddy and narrow.",
@@ -531,14 +639,14 @@ var EVENT_POOLS = {
       text: "An NWMP patrol stops you just above the ferry landing.",
       choices: [
         { text: "Show your papers", dc: 9, ok: "The permits read clearly. They let you pass.", bad: "A signature mismatch. You are delayed.", time: 1, addsRep: { key: "nwmp", delta: 1 } },
-        { text: "Talk your way past", dc: 12, ok: "They accept your story.", bad: "They insist on a spot inspection. Wear is likely.", wear: 1, addsRep: { key: "nwmp", delta: -1 }, branch: () => ({
+        { text: "Talk your way past", dc: 12, ok: "They accept your story.", bad: "They insist on a spot inspection. Wear is likely.", wear: 1, addsRep: { key: "nwmp", delta: -1 }, branch: /* @__PURE__ */ __name(() => ({
           id: "nwmp_detain",
           text: "The inspection turns up a loose rivet in your axle. The sergeant orders you to make camp until morning.",
           choices: [
             { text: "Comply and camp for the night", dc: null, always: "The sergeant inspects in the morning and lets you go.", time: 1, addsRep: { key: "nwmp", delta: 1 } },
             { text: "Argue your case", dc: 10, ok: "The sergeant relents, but writes your name in the ledger.", bad: "You are held another full day.", time: 2, wear: 1 }
           ]
-        }) }
+        }), "branch") }
       ]
     },
     {
@@ -628,6 +736,33 @@ var EVENT_POOLS = {
         { text: "Drive through to firmer ground", dc: 11, ok: "You outpace the worst of the cloud.", bad: "The animals bolt; a strap snaps.", wear: 1, crew: "tired" },
         { text: "Let the oxen cool in the water", dc: null, always: "The delay costs time but saves nerves.", time: 1 }
       ]
+    },
+    {
+      id: "wooded_black_bear",
+      text: "A black bear crosses the trail thirty yards ahead, then stops and turns, taking the measure of the party.",
+      source: { quote: "Bears were common along the wooded corridors of the Carlton Trail and could be dangerous when surprised at close range.", author: "Brehaut, citing Fort Qu'Appelle accounts", work: "MHS Transactions, 1971-72" },
+      choices: [
+        { text: "Stand your ground and make noise", dc: 12, ok: "The bear veers away.", bad: "It charges and the oxen bolt.", wear: 1, morale: -6, crew: "tired" },
+        { text: "Back away quietly with the cart", dc: null, always: "The bear waits until you are clear, then moves on.", time: 1 }
+      ]
+    },
+    {
+      id: "wooded_rattlesnake",
+      text: "A rattlesnake hums in the grass beside the trail, still as a root until you are almost on it.",
+      source: { quote: "Rattlesnakes were common on the southern stretches of the trail and caused many a nervous night.", author: "Schultz, citing settler accounts", work: "The Old Crow Wing Trail, MHS Transactions, 1894" },
+      choices: [
+        { text: "Hook it clear with a pole and move on", dc: 10, ok: "The snake disappears into the brush.", bad: "It strikes at the lead ox.", wear: 1, morale: -2 },
+        { text: "Backtrack to a wider crossing", dc: null, always: "A slow detour, but nerves settle.", time: 1 }
+      ]
+    },
+    {
+      id: "wooded_axle_rut",
+      text: "A hidden washout drops the front wheel axle-deep. The cart tilts dangerously toward the ditch.",
+      source: { quote: "Many a worn-out axle and broken wheel attest the power of its stumps and coulees.", author: "John C. Schultz", work: "The Old Crow Wing Trail, MHS Transactions, 1894" },
+      choices: [
+        { text: "Spade and block the wheel", dc: 11, ok: "You free the cart without damage.", bad: "The soil gives way twice.", time: 1, morale: -3 },
+        { text: "Lighten and rock it free", dc: 9, ok: "A quick heave gets you out clean.", bad: "A crate lands in the muck.", food: -2, wear: 1 }
+      ]
     }
   ],
   uplands: [
@@ -646,6 +781,15 @@ var EVENT_POOLS = {
       choices: [
         { text: "Hug the ridge line to avoid low ground", dc: 11, ok: "Clear ground saves the cart.", bad: "A hidden stump catches the wheel hub.", wear: 1 },
         { text: "Take the direct trail", dc: null, always: "The going is rough but quick.", alwaysWear: 0 }
+      ]
+    },
+    {
+      id: "upland_thunderstorm",
+      text: "The ridge offers no shelter. Lightning finds the highest point and the rain comes down in sheets.",
+      source: { quote: "Sudden storms of hail and sleet were not uncommon on the uplands in late spring.", author: "Lacombe missionary journals, 1878" },
+      choices: [
+        { text: "Hobble the oxen and weather it under the cart", dc: 11, ok: "The canvas holds. You are soaked but intact.", bad: "A lightning-struck tree falls nearby.", morale: -6, time: -1 },
+        { text: "Run for the coulee bottom", dc: 9, ok: "Lower ground is safer.", bad: "A slipped wheel in the mud.", wear: 1 }
       ]
     }
   ],
@@ -692,17 +836,28 @@ var EVENT_POOLS = {
         { text: "Exchange dried fish and route talk", dc: 8, ok: "They share intelligence on the next water crossings.", bad: "The conversation is brief and businesslike.", morale: 6 },
         { text: "Hire a guide for the hard water ahead", dc: 10, ok: "A steady hand joins your crew for three days.", bad: "The boatman is competent but expensive.", food: -3, extraProgress: 2, addsRep: { key: "metis", delta: 1 } }
       ]
+    },
+    {
+      id: "river_broken_wheel",
+      text: "The wheel bites into a submerged root and the rim splits with a crack.",
+      source: { quote: "Many a worn-out axle and broken wheel attest the power of riverbank obstacles.", author: "John C. Schultz", work: "The Old Crow Wing Trail, MHS Transactions, 1894" },
+      choices: [
+        { text: "Fell a nearby birch and fashion a new felly", dc: 12, ok: "A rough repair, but the wheel is round again.", bad: "The timber is green and splits by afternoon.", wear: 1, time: 1, morale: -3 },
+        { text: "Rig an axle skid and limp to the post", dc: null, always: "You arrive, but the cart is lopsided and the load is light.", alwaysWear: 1, food: -2 }
+      ]
     }
   ]
 };
 function getEventsForTerrain(terrain) {
   return EVENT_POOLS[terrain] || EVENT_POOLS.plains;
 }
+__name(getEventsForTerrain, "getEventsForTerrain");
 function pickEventForTerrain(terrain, rng) {
   const pool = getEventsForTerrain(terrain);
   if (!pool.length) return null;
   return pool[Math.floor(rng() * pool.length)];
 }
+__name(pickEventForTerrain, "pickEventForTerrain");
 
 // src/systems/engine.js
 function createGame(seed = null) {
@@ -710,9 +865,11 @@ function createGame(seed = null) {
   function rand() {
     return rng ? rng() : Math.random();
   }
+  __name(rand, "rand");
   function d() {
     return d20(rand);
   }
+  __name(d, "d");
   const cart = startingCart();
   const S = {
     seed,
@@ -755,6 +912,7 @@ function createGame(seed = null) {
       S.over = true;
     }
   }
+  __name(checkGameOver, "checkGameOver");
   function advance() {
     const next = advanceDate(S.date.month, S.date.day, 0);
     S.date = next;
@@ -762,6 +920,7 @@ function createGame(seed = null) {
     S.day++;
     S.season = seasonFor(S.month);
   }
+  __name(advance, "advance");
   function resolveChoice(ev, ci) {
     const ch = ev.choices[ci];
     const result = { roll: null, total: null, dc: null, success: null, text: "", effects: [], flags: [], reps: [] };
@@ -845,10 +1004,12 @@ function createGame(seed = null) {
     S.eventsResolved++;
     return result;
   }
+  __name(resolveChoice, "resolveChoice");
   function pickEvent() {
     if (rand() > CONSTANTS.EVENT_CHANCE) return null;
     return pickEventForTerrain(NODES[S.node]?.terrain || "plains", rand);
   }
+  __name(pickEvent, "pickEvent");
   function calcScore() {
     if (!S.won) return 0;
     const tradeUnits = cart.filter((i) => i.type === "trade" && i.count > 0).reduce((s, i) => s + i.count, 0);
@@ -866,6 +1027,7 @@ function createGame(seed = null) {
     score -= noRestPenalty;
     return Math.max(0, Math.round(score));
   }
+  __name(calcScore, "calcScore");
   const stepLog = [];
   function travelOneDay2() {
     if (S.over || S.pendingSettlement) return stepLog;
@@ -914,6 +1076,7 @@ function createGame(seed = null) {
     }
     return stepLog;
   }
+  __name(travelOneDay2, "travelOneDay");
   function chooseEventChoice(choiceIndex) {
     if (!S.pendingEvent) return [];
     const ev = S.pendingEvent;
@@ -936,6 +1099,7 @@ function createGame(seed = null) {
     checkGameOver();
     return [{ action: "eventResolved", event: ev.id, choiceIndex, result }];
   }
+  __name(chooseEventChoice, "chooseEventChoice");
   function makeCamp() {
     if (S.pendingSettlement || S.over) return;
     S.food--;
@@ -947,6 +1111,7 @@ function createGame(seed = null) {
     advance();
     checkGameOver();
   }
+  __name(makeCamp, "makeCamp");
   function settlementAction(action) {
     if (!S.pendingSettlement) return [];
     S.pendingSettlement = null;
@@ -1003,6 +1168,7 @@ function createGame(seed = null) {
     checkGameOver();
     return [];
   }
+  __name(settlementAction, "settlementAction");
   return {
     travelOneDay: travelOneDay2,
     makeCamp,
@@ -1088,6 +1254,7 @@ function createGame(seed = null) {
     }
   };
 }
+__name(createGame, "createGame");
 function availableSettlementActions(type) {
   const base = ["rest"];
   if (type === "hbc") return [...base, "trade", "repair", "grease", "forage", "recruit"];
@@ -1097,6 +1264,7 @@ function availableSettlementActions(type) {
   if (type === "nwmp") return [...base, "trade", "grease", "rumours"];
   return base;
 }
+__name(availableSettlementActions, "availableSettlementActions");
 
 // src/ui/theme.js
 function applyTheme(root) {
@@ -1114,6 +1282,7 @@ function applyTheme(root) {
   root.style.setProperty("--font-heading", "'Rye', 'Georgia', serif");
   root.style.setProperty("--font-body", "'Alegreya', 'Georgia', serif");
 }
+__name(applyTheme, "applyTheme");
 
 // src/ui/shell.js
 function mount() {
@@ -1122,9 +1291,11 @@ function mount() {
   applyTheme(gameRoot);
   return gameRoot;
 }
+__name(mount, "mount");
 function find(selector) {
   return document.querySelector(selector);
 }
+__name(find, "find");
 
 // src/ui/renderer.js
 var map = null;
@@ -1147,6 +1318,7 @@ function initMap() {
   markerGroup = L.featureGroup().addTo(map);
   updateMap({ node: 0 });
 }
+__name(initMap, "initMap");
 function updateMap(state) {
   if (!map) return;
   const here = NODES[state.node];
@@ -1174,41 +1346,47 @@ function updateMap(state) {
     fillOpacity: 1
   }).addTo(markerGroup);
 }
+__name(updateMap, "updateMap");
 function renderStatusBar(state) {
   const node = NODES[state.node];
   const next = NODES[state.node + 1];
-  const dayEl = document.getElementById("s-day");
-  const monthEl = document.getElementById("s-month");
-  const seasonEl = document.getElementById("s-season");
   const segEl = document.getElementById("s-segment");
   const foodEl = document.getElementById("s-food");
   const wearEl = document.getElementById("s-wear");
   const crewEl = document.getElementById("s-crew");
-  dayEl.innerHTML = `<span class="stat-label">Day </span><span class="stat-value">${state.day}</span>`;
-  monthEl.textContent = `${state.month}/${state.date?.day ?? state.day}`;
-  seasonEl.textContent = state.season.replace("_", " ");
-  if (state.pendingSettlement) {
-    segEl.textContent = `${node.name} \u2014 you have arrived`;
-  } else if (next) {
-    segEl.textContent = `${node.name} \u2192 ${next.name}`;
-  } else {
-    segEl.textContent = node.name;
+  if (segEl) {
+    if (state.pendingSettlement) {
+      segEl.textContent = `At: ${node?.name || "camp"}`;
+    } else if (next) {
+      segEl.textContent = `Next: ${next.name} (${next.dist} day segment)`;
+    } else {
+      segEl.textContent = node?.name || "Arrived";
+    }
   }
-  foodEl.innerHTML = `<span class="stat-label">Food </span><span class="stat-value${state.food <= 5 ? " food-low" : ""}">${state.food}</span>`;
+  const crewState = window._metisGame?.getCrew?.()?.state || "";
+  let crewCls = "stat-value";
+  if (crewState === "tired") crewCls += " crew-tired";
+  else if (crewState === "exhausted") crewCls += " crew-exhausted";
+  else if (crewState === "rested") crewCls += " crew-rested";
+  crewEl.innerHTML = `<span class="stat-label">Crew </span><span class="${crewCls}">${state.crew}</span>`;
+  foodEl.innerHTML = `<span class="stat-label">Food </span><span class="stat-value${state.food <= 4 ? " food-low" : ""}">${state.food}</span>`;
   wearEl.innerHTML = `<span class="stat-label">Wear </span><span class="stat-value${state.wear >= 4 ? " wear-high" : ""}">${state.wear}</span>`;
-  crewEl.innerHTML = `<span class="stat-label">Crew </span><span class="stat-value">${state.crew}</span>`;
+  renderTravelLines2(state, window._metisGame, pendingResult);
 }
+__name(renderStatusBar, "renderStatusBar");
 function renderNarrative(lines) {
   const el = document.getElementById("narrative");
   el.innerHTML = lines.map((t) => `<div class="scene-text">${t}</div>`).join("");
   el.scrollTop = el.scrollHeight;
 }
+__name(renderNarrative, "renderNarrative");
 
 // src/ui/persistence.js
 var STORAGE_KEY = "metis-trail-v2.save";
 function clearSave() {
   localStorage.removeItem(STORAGE_KEY);
 }
+__name(clearSave, "clearSave");
 
 // src/main.js
 function bootstrap(seed = null) {
@@ -1228,62 +1406,85 @@ function bootstrap(seed = null) {
     get node() {
       return game.getCurrentNode();
     },
-    travel: () => game.travelOneDay(),
-    camp: () => game.makeCamp(),
-    choose: (i) => game.chooseEventChoice(i),
-    reroll: (s) => {
+    travel: /* @__PURE__ */ __name(() => game.travelOneDay(), "travel"),
+    camp: /* @__PURE__ */ __name(() => game.makeCamp(), "camp"),
+    choose: /* @__PURE__ */ __name((i) => game.chooseEventChoice(i), "choose"),
+    reroll: /* @__PURE__ */ __name((s) => {
       const g = createGame(s);
       window._metisGame = g;
       render();
-    }
+    }, "reroll")
   };
   mount();
+  const rootEl = find("#game-root");
+  if (!rootEl) {
+    console.error("Metis bootstrap aborted: #game-root is missing.");
+    return;
+  }
   renderNarrative(["Welcome to the M\xE9tis Trail. Click Begin Journey to start."]);
   const startBtn = find("#intro-start");
-  if (startBtn) startBtn.addEventListener("click", () => {
-    find("#intro-overlay")?.classList.remove("active");
-    initMap();
-    render();
-  });
-  find("#btn-travel").addEventListener("click", () => {
+  if (startBtn) {
+    startBtn.addEventListener("click", () => {
+      find("#intro-overlay")?.classList.remove("active");
+      initMap();
+      render();
+    });
+  } else {
+    console.warn("Metis bootstrap: #intro-start not found; Begin Journey button is offline.");
+  }
+  const travelBtn = find("#btn-travel");
+  if (travelBtn) travelBtn.addEventListener("click", () => {
     const { pendingEvent, pendingSettlement, over } = game.getState();
     if (pendingEvent || pendingSettlement || over) return;
     travelOneDay();
     render();
   });
-  find("#btn-camp").onclick = () => {
+  const campBtn = find("#btn-camp");
+  if (campBtn) campBtn.onclick = () => {
     publishCampResult();
     game.makeCamp();
     render();
   };
-  find("#btn-cart").onclick = () => showCart(game);
-  find("#btn-crew").onclick = () => showCrew(game);
-  find("#event-continue").onclick = () => {
+  const cartBtn = find("#btn-cart");
+  if (cartBtn) cartBtn.onclick = () => showCart(game);
+  const crewBtn = find("#btn-crew");
+  if (crewBtn) crewBtn.onclick = () => showCrew(game);
+  const eventContinue = find("#event-continue");
+  if (eventContinue) eventContinue.onclick = () => {
     find("#event-overlay")?.classList.remove("active");
   };
-  find("#settlement-continue").onclick = () => {
+  const settlementContinue = find("#settlement-continue");
+  if (settlementContinue) settlementContinue.onclick = () => {
     game.settlementAction("continue");
     find("#settlement-overlay")?.classList.remove("active");
     render();
   };
-  find("#settlement-close").onclick = () => {
+  const settlementClose = find("#settlement-close");
+  if (settlementClose) settlementClose.onclick = () => {
     find("#settlement-overlay")?.classList.remove("active");
   };
-  find("#cart-close-btn").onclick = () => find("#cart-overlay")?.classList.remove("active");
-  find("#cart-close-btn-2").onclick = () => find("#cart-overlay")?.classList.remove("active");
-  find("#crew-close-btn").onclick = () => find("#crew-overlay")?.classList.remove("active");
-  find("#crew-close-btn-2").onclick = () => find("#crew-overlay")?.classList.remove("active");
-  find("#end-restart").onclick = () => {
+  const cartClose = find("#cart-close-btn");
+  const cartClose2 = find("#cart-close-btn-2");
+  if (cartClose) cartClose.onclick = () => find("#cart-overlay")?.classList.remove("active");
+  if (cartClose2) cartClose2.onclick = () => find("#cart-overlay")?.classList.remove("active");
+  const crewClose = find("#crew-close-btn");
+  const crewClose2 = find("#crew-close-btn-2");
+  if (crewClose) crewClose.onclick = () => find("#crew-overlay")?.classList.remove("active");
+  if (crewClose2) crewClose2.onclick = () => find("#crew-overlay")?.classList.remove("active");
+  const restartBtn = find("#end-restart");
+  if (restartBtn) restartBtn.onclick = () => {
     clearSave();
     window.location.reload();
   };
   render();
 }
+__name(bootstrap, "bootstrap");
 window.__METIS_BOOT__ = bootstrap;
-var pendingResult = null;
+var pendingResult2 = null;
 function publishResult(text) {
-  pendingResult = text;
+  pendingResult2 = text;
 }
+__name(publishResult, "publishResult");
 function travelOneDay() {
   const game = window._metisGame;
   const prev = game.getState();
@@ -1307,6 +1508,7 @@ function travelOneDay() {
   publishResult(msg);
   return result;
 }
+__name(travelOneDay, "travelOneDay");
 function publishCampResult() {
   const game = window._metisGame;
   const prev = game.getState();
@@ -1321,6 +1523,7 @@ function publishCampResult() {
   }
   publishResult(msgs.join(" "));
 }
+__name(publishCampResult, "publishCampResult");
 function render() {
   const game = window._metisGame;
   if (!game) return;
@@ -1340,10 +1543,11 @@ function render() {
     return;
   }
   hideOverlays();
-  renderTravelLines(state, game, pendingResult);
-  pendingResult = null;
+  renderTravelLines22(state, game, pendingResult2);
+  pendingResult2 = null;
 }
-function renderTravelLines(state, gameRef, result) {
+__name(render, "render");
+function renderTravelLines22(state, gameRef, result) {
   const here = gameRef?.getCurrentNode?.();
   const next = gameRef?.getNextNode?.();
   const lines = [];
@@ -1359,12 +1563,49 @@ function renderTravelLines(state, gameRef, result) {
   if (!lines.length) lines.push("On the trail...");
   renderNarrative(lines);
 }
+__name(renderTravelLines22, "renderTravelLines2");
 function hideOverlays() {
   ["event-overlay", "settlement-overlay", "cart-overlay", "crew-overlay"].forEach((id) => {
     const el = document.getElementById(id);
     if (el) el.classList.remove("active");
   });
 }
+__name(hideOverlays, "hideOverlays");
+var pendingDice = null;
+function rollDiceOnce() {
+  return Math.floor(Math.random() * 20) + 1;
+}
+__name(rollDiceOnce, "rollDiceOnce");
+function renderDicePill(result) {
+  const rc = document.getElementById("event-roll-display");
+  if (!rc) return;
+  rc.style.display = "flex";
+  rc.innerHTML = `
+    <div class="roll-label">Roll</div>
+    <div id="die" class="die small font-spectral">-</div>
+    <div class="roll-label">DC ${result.dc}</div>
+    <div class="roll-result ${result.success ? "pass" : "fail"}">${result.success ? "Pass" : "Fail"}</div>
+  `;
+}
+__name(renderDicePill, "renderDicePill");
+function animateDicePill(result) {
+  const el = document.getElementById("die");
+  if (!el) return;
+  el.className = "die small font-spectral spin";
+  let ticks = 0;
+  const maxTicks = 8 + Math.floor(Math.random() * 5);
+  const id = setInterval(() => {
+    el.textContent = String(Math.floor(Math.random() * 20) + 1);
+    ticks += 1;
+    if (ticks >= maxTicks) {
+      clearInterval(id);
+      const settled = rollDiceOnce();
+      el.textContent = String(settled);
+      el.className = "die small font-spectral " + (result.success ? "pass" : "fail");
+    }
+  }, 60);
+}
+__name(animateDicePill, "animateDicePill");
 function showEvent(game) {
   const ev = game.getPendingEvent();
   if (!ev) return;
@@ -1373,8 +1614,25 @@ function showEvent(game) {
   const continueEl = document.getElementById("event-continue");
   if (!textEl || !choicesEl) return;
   textEl.textContent = ev.text;
+  const amountEl = document.getElementById("event-amount");
+  if (amountEl) {
+    const amount = ev.amount || ev.rollAdjust || null;
+    amountEl.textContent = "";
+    amountEl.style.display = "none";
+    if (amount) {
+      amountEl.textContent = amount;
+      amountEl.style.display = "block";
+    }
+  }
+  const stampEl = document.getElementById("event-stamp");
+  if (stampEl) {
+    stampEl.textContent = ev.classification || "";
+    stampEl.style.display = ev.classification ? "inline-block" : "none";
+  }
   choicesEl.innerHTML = "";
   continueEl.style.display = "none";
+  const rc = document.getElementById("event-roll-display");
+  if (rc) rc.style.display = "none";
   (ev.choices || []).forEach((ch, i) => {
     const btn = document.createElement("button");
     btn.className = "choice-btn";
@@ -1382,6 +1640,21 @@ function showEvent(game) {
     btn.onclick = () => {
       const prev = game.getState();
       const stepLog = game.chooseEventChoice(i);
+      const entry = stepLog && stepLog[0] ? stepLog[0] : null;
+      const res = entry && entry.result ? entry.result : entry;
+      if (res && res.roll !== null && res.dc !== null) {
+        btn.disabled = true;
+        pendingDice = res;
+        renderDicePill(res);
+        animateDicePill(res);
+        setTimeout(() => {
+          const outcome2 = buildEventChoiceOutcome(stepLog, prev, game.getState());
+          if (outcome2) publishResult(outcome2);
+          pendingDice = null;
+          render();
+        }, 650 + Math.random() * 180);
+        return;
+      }
       const outcome = buildEventChoiceOutcome(stepLog, prev, game.getState());
       if (outcome) publishResult(outcome);
       render();
@@ -1390,6 +1663,7 @@ function showEvent(game) {
   });
   document.getElementById("event-overlay")?.classList.add("active");
 }
+__name(showEvent, "showEvent");
 function buildEventChoiceOutcome(stepLog, before, after) {
   const msgs = [];
   const entry = stepLog && stepLog[0] ? stepLog[0] : null;
@@ -1411,6 +1685,7 @@ function buildEventChoiceOutcome(stepLog, before, after) {
   if (!msgs.length) return "The day passes without change.";
   return msgs.join(", ");
 }
+__name(buildEventChoiceOutcome, "buildEventChoiceOutcome");
 function showSettlement(game) {
   const next = game.getCurrentNode();
   const before = game.getState();
@@ -1424,9 +1699,22 @@ function showSettlement(game) {
   actionsEl.innerHTML = "";
   const available = game.getAvailableActions();
   (available.actions || []).forEach((action) => {
+    const wrap = document.createElement("div");
+    wrap.className = "settlement-action";
+    const label = document.createElement("div");
+    label.className = "settlement-action-label";
+    label.textContent = actionLabel(action);
+    const sub = document.createElement("div");
+    sub.className = "settlement-action-sub";
+    sub.textContent = actionSubtitle(action);
     const btn = document.createElement("button");
     btn.className = "ctrl-btn";
-    btn.textContent = actionLabel(action);
+    btn.style.display = "flex";
+    btn.style.flexDirection = "column";
+    btn.style.alignItems = "flex-start";
+    btn.style.gap = "2px";
+    btn.appendChild(label);
+    btn.appendChild(sub);
     btn.onclick = () => {
       hideOverlays();
       game.settlementAction(action);
@@ -1440,6 +1728,7 @@ function showSettlement(game) {
   });
   document.getElementById("settlement-overlay")?.classList.add("active");
 }
+__name(showSettlement, "showSettlement");
 function buildSettlementOutcome(action, before, after, beforeCart, afterCart) {
   const msgs = [];
   if (after.food !== before.food) msgs.push(`${after.food - before.food >= 0 ? "+" : ""}${after.food - before.food} Food`);
@@ -1461,6 +1750,7 @@ function buildSettlementOutcome(action, before, after, beforeCart, afterCart) {
   if (!msgs.length) return "Nothing changed.";
   return msgs.join(", ");
 }
+__name(buildSettlementOutcome, "buildSettlementOutcome");
 function showCart(game) {
   const cart = game.getCart();
   const listEl = document.getElementById("inv-list");
@@ -1468,6 +1758,7 @@ function showCart(game) {
   listEl.innerHTML = cart.map((i) => `<div>${i.icon || ""} ${i.name} \xD7${i.count} (${i.wt * i.count} kg)</div>`).join("");
   document.getElementById("cart-overlay")?.classList.add("active");
 }
+__name(showCart, "showCart");
 function showCrew(game) {
   const c = game.getCrew();
   const el = document.getElementById("crew-status");
@@ -1475,6 +1766,7 @@ function showCrew(game) {
   el.innerHTML = `<div>State: ${c.state}</div><div>Morale: ${c.morale}</div><div>Modifier: ${c.mod}</div>`;
   document.getElementById("crew-overlay")?.classList.add("active");
 }
+__name(showCrew, "showCrew");
 function showEnd(game) {
   const state = game.getState();
   const titleEl = document.getElementById("end-title");
@@ -1490,10 +1782,27 @@ function showEnd(game) {
   `;
   document.getElementById("end-overlay")?.classList.add("active");
 }
+__name(showEnd, "showEnd");
 function actionLabel(a) {
   const map2 = { rest: "Rest", trade: "Trade", repair: "Repair", grease: "Grease", forage: "Forage", recruit: "Recruit", rumours: "Gossip", heal: "Heal", continue: "Continue West" };
   return map2[a] || a;
 }
+__name(actionLabel, "actionLabel");
+function actionSubtitle(a) {
+  const map2 = {
+    rest: "Crew rested, morale restored, supplies refresh.",
+    trade: "Spend one trade good for +6-10 food.",
+    repair: "Reduce wheel wear, or apply shaganappi if carried.",
+    grease: "Consume shaganappi to silence axle squeal.",
+    forage: "D20 + crew modifier; 12+ gains 1-4 food.",
+    recruit: "Rests tired crew if not exhausted.",
+    rumours: "Advance one day, learn trail news.",
+    heal: "Crew rested, morale restored.",
+    continue: "Resume the journey."
+  };
+  return map2[a] || "";
+}
+__name(actionSubtitle, "actionSubtitle");
 export {
   bootstrap
 };

@@ -164,11 +164,11 @@ function render() {
     return;
   }
   hideOverlays();
-  renderTravelLines(state, game, pendingResult);
+  renderTravelLines2(state, game, pendingResult);
   pendingResult = null;
 }
 
-function renderTravelLines(state, gameRef, result) {
+function renderTravelLines2(state, gameRef, result) {
   const here = gameRef?.getCurrentNode?.();
   const next = gameRef?.getNextNode?.();
   const lines = [];
