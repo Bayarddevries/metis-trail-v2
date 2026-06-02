@@ -1,3 +1,6 @@
+var __defProp = Object.defineProperty;
+var __name = (target, value) => __defProp(target, "name", { value, configurable: true });
+
 // src/core/constants.js
 var CONSTANTS = Object.freeze({
   YEAR: 1878,
@@ -17,27 +20,33 @@ var CONSTANTS = Object.freeze({
 function crewMod(state) {
   return CONSTANTS.CREW_MOD[state.crew] ?? 0;
 }
+__name(crewMod, "crewMod");
 function wearMod(wear) {
   return CONSTANTS.WEAR_MOD[wear] ?? -5;
 }
+__name(wearMod, "wearMod");
 function totalMod(state) {
   return crewMod(state) + wearMod(state.wear);
 }
+__name(totalMod, "totalMod");
 
 // src/core/calendar.js
 var DAYS_IN_MONTH = [0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
 function isLeap(year) {
   return year % 4 === 0 && year % 100 !== 0 || year % 400 === 0;
 }
+__name(isLeap, "isLeap");
 function daysInMonth(month, year) {
   if (month === 2 && isLeap(year)) return 29;
   return DAYS_IN_MONTH[month];
 }
+__name(daysInMonth, "daysInMonth");
 function seasonFor(month) {
   if ([6, 7, 8].includes(month)) return "summer";
   if ([9, 10].includes(month)) return "autumn";
   return "early winter";
 }
+__name(seasonFor, "seasonFor");
 function advanceDate(month, day, year = 1878) {
   let m = month;
   let d = day + 1;
@@ -51,22 +60,25 @@ function advanceDate(month, day, year = 1878) {
   }
   return { month: m, day: d };
 }
+__name(advanceDate, "advanceDate");
 
 // src/core/seed.js
 function makeRNG(seed) {
   if (seed == null) return null;
   let s = seed | 0;
-  return function prng() {
+  return /* @__PURE__ */ __name(function prng() {
     s |= 0;
     s = s + 1831565813 | 0;
     let t = Math.imul(s ^ s >>> 15, 1 | s);
     t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
     return ((t ^ t >>> 14) >>> 0) / 4294967296;
-  };
+  }, "prng");
 }
+__name(makeRNG, "makeRNG");
 function d20(rand) {
   return Math.floor(rand() * 20) + 1;
 }
+__name(d20, "d20");
 
 // src/data/nodes.js
 var NODES = [
@@ -424,9 +436,11 @@ var ITEMS = [
 function startingCart() {
   return JSON.parse(JSON.stringify(ITEMS));
 }
+__name(startingCart, "startingCart");
 function totalWeight(cart) {
   return cart.reduce((s, i) => s + i.wt * i.count, 0);
 }
+__name(totalWeight, "totalWeight");
 
 // src/data/events.js
 var EVENT_POOLS = {
@@ -625,14 +639,14 @@ var EVENT_POOLS = {
       text: "An NWMP patrol stops you just above the ferry landing.",
       choices: [
         { text: "Show your papers", dc: 9, ok: "The permits read clearly. They let you pass.", bad: "A signature mismatch. You are delayed.", time: 1, addsRep: { key: "nwmp", delta: 1 } },
-        { text: "Talk your way past", dc: 12, ok: "They accept your story.", bad: "They insist on a spot inspection. Wear is likely.", wear: 1, addsRep: { key: "nwmp", delta: -1 }, branch: () => ({
+        { text: "Talk your way past", dc: 12, ok: "They accept your story.", bad: "They insist on a spot inspection. Wear is likely.", wear: 1, addsRep: { key: "nwmp", delta: -1 }, branch: /* @__PURE__ */ __name(() => ({
           id: "nwmp_detain",
           text: "The inspection turns up a loose rivet in your axle. The sergeant orders you to make camp until morning.",
           choices: [
             { text: "Comply and camp for the night", dc: null, always: "The sergeant inspects in the morning and lets you go.", time: 1, addsRep: { key: "nwmp", delta: 1 } },
             { text: "Argue your case", dc: 10, ok: "The sergeant relents, but writes your name in the ledger.", bad: "You are held another full day.", time: 2, wear: 1 }
           ]
-        }) }
+        }), "branch") }
       ]
     },
     {
@@ -837,11 +851,13 @@ var EVENT_POOLS = {
 function getEventsForTerrain(terrain) {
   return EVENT_POOLS[terrain] || EVENT_POOLS.plains;
 }
+__name(getEventsForTerrain, "getEventsForTerrain");
 function pickEventForTerrain(terrain, rng) {
   const pool = getEventsForTerrain(terrain);
   if (!pool.length) return null;
   return pool[Math.floor(rng() * pool.length)];
 }
+__name(pickEventForTerrain, "pickEventForTerrain");
 
 // src/systems/engine.js
 function createGame(seed = null) {
@@ -849,9 +865,11 @@ function createGame(seed = null) {
   function rand() {
     return rng ? rng() : Math.random();
   }
+  __name(rand, "rand");
   function d() {
     return d20(rand);
   }
+  __name(d, "d");
   const cart = startingCart();
   const S = {
     seed,
@@ -894,6 +912,7 @@ function createGame(seed = null) {
       S.over = true;
     }
   }
+  __name(checkGameOver, "checkGameOver");
   function advance() {
     const next = advanceDate(S.date.month, S.date.day, 0);
     S.date = next;
@@ -901,6 +920,7 @@ function createGame(seed = null) {
     S.day++;
     S.season = seasonFor(S.month);
   }
+  __name(advance, "advance");
   function resolveChoice(ev, ci) {
     const ch = ev.choices[ci];
     const result = { roll: null, total: null, dc: null, success: null, text: "", effects: [], flags: [], reps: [] };
@@ -984,10 +1004,12 @@ function createGame(seed = null) {
     S.eventsResolved++;
     return result;
   }
+  __name(resolveChoice, "resolveChoice");
   function pickEvent() {
     if (rand() > CONSTANTS.EVENT_CHANCE) return null;
     return pickEventForTerrain(NODES[S.node]?.terrain || "plains", rand);
   }
+  __name(pickEvent, "pickEvent");
   function calcScore() {
     if (!S.won) return 0;
     const tradeUnits = cart.filter((i) => i.type === "trade" && i.count > 0).reduce((s, i) => s + i.count, 0);
@@ -1005,6 +1027,7 @@ function createGame(seed = null) {
     score -= noRestPenalty;
     return Math.max(0, Math.round(score));
   }
+  __name(calcScore, "calcScore");
   const stepLog = [];
   function travelOneDay2() {
     if (S.over || S.pendingSettlement) return stepLog;
@@ -1053,6 +1076,7 @@ function createGame(seed = null) {
     }
     return stepLog;
   }
+  __name(travelOneDay2, "travelOneDay");
   function chooseEventChoice(choiceIndex) {
     if (!S.pendingEvent) return [];
     const ev = S.pendingEvent;
@@ -1075,6 +1099,7 @@ function createGame(seed = null) {
     checkGameOver();
     return [{ action: "eventResolved", event: ev.id, choiceIndex, result }];
   }
+  __name(chooseEventChoice, "chooseEventChoice");
   function makeCamp() {
     if (S.pendingSettlement || S.over) return;
     S.food--;
@@ -1086,6 +1111,7 @@ function createGame(seed = null) {
     advance();
     checkGameOver();
   }
+  __name(makeCamp, "makeCamp");
   function settlementAction(action) {
     if (!S.pendingSettlement) return [];
     S.pendingSettlement = null;
@@ -1142,6 +1168,7 @@ function createGame(seed = null) {
     checkGameOver();
     return [];
   }
+  __name(settlementAction, "settlementAction");
   return {
     travelOneDay: travelOneDay2,
     makeCamp,
@@ -1227,6 +1254,7 @@ function createGame(seed = null) {
     }
   };
 }
+__name(createGame, "createGame");
 function availableSettlementActions(type) {
   const base = ["rest"];
   if (type === "hbc") return [...base, "trade", "repair", "grease", "forage", "recruit"];
@@ -1236,6 +1264,7 @@ function availableSettlementActions(type) {
   if (type === "nwmp") return [...base, "trade", "grease", "rumours"];
   return base;
 }
+__name(availableSettlementActions, "availableSettlementActions");
 
 // src/ui/theme.js
 function applyTheme(root) {
@@ -1253,6 +1282,7 @@ function applyTheme(root) {
   root.style.setProperty("--font-heading", "'Rye', 'Georgia', serif");
   root.style.setProperty("--font-body", "'Alegreya', 'Georgia', serif");
 }
+__name(applyTheme, "applyTheme");
 
 // src/ui/shell.js
 function mount() {
@@ -1261,9 +1291,11 @@ function mount() {
   applyTheme(gameRoot);
   return gameRoot;
 }
+__name(mount, "mount");
 function find(selector) {
   return document.querySelector(selector);
 }
+__name(find, "find");
 
 // src/ui/renderer.js
 var map = null;
@@ -1286,6 +1318,7 @@ function initMap() {
   markerGroup = L.featureGroup().addTo(map);
   updateMap({ node: 0 });
 }
+__name(initMap, "initMap");
 function updateMap(state) {
   if (!map) return;
   const here = NODES[state.node];
@@ -1313,6 +1346,7 @@ function updateMap(state) {
     fillOpacity: 1
   }).addTo(markerGroup);
 }
+__name(updateMap, "updateMap");
 function renderStatusBar(state) {
   const node = NODES[state.node];
   const next = NODES[state.node + 1];
@@ -1337,19 +1371,22 @@ function renderStatusBar(state) {
   crewEl.innerHTML = `<span class="stat-label">Crew </span><span class="${crewCls}">${state.crew}</span>`;
   foodEl.innerHTML = `<span class="stat-label">Food </span><span class="stat-value${state.food <= 4 ? " food-low" : ""}">${state.food}</span>`;
   wearEl.innerHTML = `<span class="stat-label">Wear </span><span class="stat-value${state.wear >= 4 ? " wear-high" : ""}">${state.wear}</span>`;
-  renderTravelLines(state, window._metisGame, pendingResult);
+  renderTravelLines2(state, window._metisGame, pendingResult);
 }
+__name(renderStatusBar, "renderStatusBar");
 function renderNarrative(lines) {
   const el = document.getElementById("narrative");
   el.innerHTML = lines.map((t) => `<div class="scene-text">${t}</div>`).join("");
   el.scrollTop = el.scrollHeight;
 }
+__name(renderNarrative, "renderNarrative");
 
 // src/ui/persistence.js
 var STORAGE_KEY = "metis-trail-v2.save";
 function clearSave() {
   localStorage.removeItem(STORAGE_KEY);
 }
+__name(clearSave, "clearSave");
 
 // src/main.js
 function bootstrap(seed = null) {
@@ -1369,14 +1406,14 @@ function bootstrap(seed = null) {
     get node() {
       return game.getCurrentNode();
     },
-    travel: () => game.travelOneDay(),
-    camp: () => game.makeCamp(),
-    choose: (i) => game.chooseEventChoice(i),
-    reroll: (s) => {
+    travel: /* @__PURE__ */ __name(() => game.travelOneDay(), "travel"),
+    camp: /* @__PURE__ */ __name(() => game.makeCamp(), "camp"),
+    choose: /* @__PURE__ */ __name((i) => game.chooseEventChoice(i), "choose"),
+    reroll: /* @__PURE__ */ __name((s) => {
       const g = createGame(s);
       window._metisGame = g;
       render();
-    }
+    }, "reroll")
   };
   mount();
   const rootEl = find("#game-root");
@@ -1388,7 +1425,8 @@ function bootstrap(seed = null) {
   const startBtn = find("#intro-start");
   if (startBtn) {
     startBtn.addEventListener("click", () => {
-      find("#intro-overlay")?.classList.remove("active");
+      const overlay = find("#intro-overlay");
+      if (overlay) overlay.remove();
       initMap();
       render();
     });
@@ -1441,11 +1479,13 @@ function bootstrap(seed = null) {
   };
   render();
 }
+__name(bootstrap, "bootstrap");
 window.__METIS_BOOT__ = bootstrap;
 var pendingResult2 = null;
 function publishResult(text) {
   pendingResult2 = text;
 }
+__name(publishResult, "publishResult");
 function travelOneDay() {
   const game = window._metisGame;
   const prev = game.getState();
@@ -1469,6 +1509,7 @@ function travelOneDay() {
   publishResult(msg);
   return result;
 }
+__name(travelOneDay, "travelOneDay");
 function publishCampResult() {
   const game = window._metisGame;
   const prev = game.getState();
@@ -1483,6 +1524,7 @@ function publishCampResult() {
   }
   publishResult(msgs.join(" "));
 }
+__name(publishCampResult, "publishCampResult");
 function render() {
   const game = window._metisGame;
   if (!game) return;
@@ -1502,10 +1544,11 @@ function render() {
     return;
   }
   hideOverlays();
-  renderTravelLines2(state, game, pendingResult2);
+  renderTravelLines22(state, game, pendingResult2);
   pendingResult2 = null;
 }
-function renderTravelLines2(state, gameRef, result) {
+__name(render, "render");
+function renderTravelLines22(state, gameRef, result) {
   const here = gameRef?.getCurrentNode?.();
   const next = gameRef?.getNextNode?.();
   const lines = [];
@@ -1521,16 +1564,19 @@ function renderTravelLines2(state, gameRef, result) {
   if (!lines.length) lines.push("On the trail...");
   renderNarrative(lines);
 }
+__name(renderTravelLines22, "renderTravelLines2");
 function hideOverlays() {
   ["event-overlay", "settlement-overlay", "cart-overlay", "crew-overlay"].forEach((id) => {
     const el = document.getElementById(id);
     if (el) el.classList.remove("active");
   });
 }
+__name(hideOverlays, "hideOverlays");
 var pendingDice = null;
 function rollDiceOnce() {
   return Math.floor(Math.random() * 20) + 1;
 }
+__name(rollDiceOnce, "rollDiceOnce");
 function renderDicePill(result) {
   const rc = document.getElementById("event-roll-display");
   if (!rc) return;
@@ -1542,6 +1588,7 @@ function renderDicePill(result) {
     <div class="roll-result ${result.success ? "pass" : "fail"}">${result.success ? "Pass" : "Fail"}</div>
   `;
 }
+__name(renderDicePill, "renderDicePill");
 function animateDicePill(result) {
   const el = document.getElementById("die");
   if (!el) return;
@@ -1559,6 +1606,7 @@ function animateDicePill(result) {
     }
   }, 60);
 }
+__name(animateDicePill, "animateDicePill");
 function showEvent(game) {
   const ev = game.getPendingEvent();
   if (!ev) return;
@@ -1616,6 +1664,7 @@ function showEvent(game) {
   });
   document.getElementById("event-overlay")?.classList.add("active");
 }
+__name(showEvent, "showEvent");
 function buildEventChoiceOutcome(stepLog, before, after) {
   const msgs = [];
   const entry = stepLog && stepLog[0] ? stepLog[0] : null;
@@ -1637,6 +1686,7 @@ function buildEventChoiceOutcome(stepLog, before, after) {
   if (!msgs.length) return "The day passes without change.";
   return msgs.join(", ");
 }
+__name(buildEventChoiceOutcome, "buildEventChoiceOutcome");
 function showSettlement(game) {
   const next = game.getCurrentNode();
   const before = game.getState();
@@ -1679,6 +1729,7 @@ function showSettlement(game) {
   });
   document.getElementById("settlement-overlay")?.classList.add("active");
 }
+__name(showSettlement, "showSettlement");
 function buildSettlementOutcome(action, before, after, beforeCart, afterCart) {
   const msgs = [];
   if (after.food !== before.food) msgs.push(`${after.food - before.food >= 0 ? "+" : ""}${after.food - before.food} Food`);
@@ -1700,6 +1751,7 @@ function buildSettlementOutcome(action, before, after, beforeCart, afterCart) {
   if (!msgs.length) return "Nothing changed.";
   return msgs.join(", ");
 }
+__name(buildSettlementOutcome, "buildSettlementOutcome");
 function showCart(game) {
   const cart = game.getCart();
   const listEl = document.getElementById("inv-list");
@@ -1707,6 +1759,7 @@ function showCart(game) {
   listEl.innerHTML = cart.map((i) => `<div>${i.icon || ""} ${i.name} \xD7${i.count} (${i.wt * i.count} kg)</div>`).join("");
   document.getElementById("cart-overlay")?.classList.add("active");
 }
+__name(showCart, "showCart");
 function showCrew(game) {
   const c = game.getCrew();
   const el = document.getElementById("crew-status");
@@ -1714,6 +1767,7 @@ function showCrew(game) {
   el.innerHTML = `<div>State: ${c.state}</div><div>Morale: ${c.morale}</div><div>Modifier: ${c.mod}</div>`;
   document.getElementById("crew-overlay")?.classList.add("active");
 }
+__name(showCrew, "showCrew");
 function showEnd(game) {
   const state = game.getState();
   const titleEl = document.getElementById("end-title");
@@ -1729,10 +1783,12 @@ function showEnd(game) {
   `;
   document.getElementById("end-overlay")?.classList.add("active");
 }
+__name(showEnd, "showEnd");
 function actionLabel(a) {
   const map2 = { rest: "Rest", trade: "Trade", repair: "Repair", grease: "Grease", forage: "Forage", recruit: "Recruit", rumours: "Gossip", heal: "Heal", continue: "Continue West" };
   return map2[a] || a;
 }
+__name(actionLabel, "actionLabel");
 function actionSubtitle(a) {
   const map2 = {
     rest: "Crew rested, morale restored, supplies refresh.",
@@ -1747,6 +1803,7 @@ function actionSubtitle(a) {
   };
   return map2[a] || "";
 }
+__name(actionSubtitle, "actionSubtitle");
 export {
   bootstrap
 };
