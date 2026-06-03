@@ -9,11 +9,10 @@ const cwd = process.cwd();
 console.log('[build] cwd=', cwd);
 
 export async function build() {
-  const BUILDVER = process.env.BUILDVER || '3';
+  const appRel = 'app.js';
   const outDir = path.join(cwd, 'dist');
   await fs.mkdir(outDir, { recursive: true });
 
-  const appRel = `app.v${BUILDVER}.js`;
   const appPath = path.join(outDir, appRel);
 
   const result = await esbuild.build({
