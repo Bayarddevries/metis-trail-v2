@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Metis Trail V2 — Strategic Recommendations</title>
+<style>
+:root {
+  --cream: #FAF3E7;
+  --forest: #2D4A3E;
+  --brass: #B8860B;
+  --wood: #8B6914;
+  --dark: #1A1A1A;
+  --red: #8B2500;
+  --border: #D4C5A9;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: 'Georgia', serif;
+  background: var(--cream);
+  color: var(--dark);
+  line-height: 1.7;
+}
+header {
+  background: var(--forest);
+  color: var(--cream);
+  padding: 2.5rem 2rem 2rem;
+  border-bottom: 4px solid var(--brass);
+}
+header h1 { font-size: 1.8rem; font-weight: normal; }
+header .subtitle { font-size: 0.95rem; opacity: 0.85; margin-top: 0.5rem; font-style: italic; }
+main { max-width: 860px; margin: 0 auto; padding: 2rem; }
+h2 {
+  font-size: 1.4rem;
+  color: var(--forest);
+  margin: 2.5rem 0 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid var(--brass);
+  font-weight: normal;
+}
+h3 { font-size: 1.1rem; color: var(--wood); margin: 1.75rem 0 0.75rem; font-weight: normal; }
+h4 { font-size: 1rem; color: var(--red); margin: 1.25rem 0 0.5rem; font-weight: normal; font-style: italic; }
+p { margin-bottom: 0.75rem; }
+ul, ol { margin: 0.5rem 0 1rem 1.5rem; }
+li { margin-bottom: 0.3rem; }
+.block {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--forest);
+  padding: 1.25rem 1.5rem;
+  margin: 1.5rem 0;
+  border-radius: 0 4px 4px 0;
+}
+.block.warn { border-left-color: var(--wood); }
+.block.important { border-left-color: var(--red); }
+.block h4 { margin-top: 0; }
+.code {
+  background: #F5EDE0;
+  padding: 1rem 1.25rem;
+  margin: 1rem 0;
+  border-radius: 4px;
+  font-family: 'ui-monospace', monospace;
+  font-size: 0.82rem;
+  line-height: 1.6;
+  overflow-x: auto;
+  white-space: pre-wrap;
+}
+table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: 0.88rem; }
+th { background: var(--forest); color: #fff; padding: 6px 10px; text-align: left; font-weight: normal; }
+td { padding: 6px 10px; border-bottom: 1px solid var(--border); }
+tr:nth-child(even) td { background: #F5EDE0; }
+.p-high { color: var(--red); font-weight: bold; }
+.p-med { color: var(--wood); }
+.p-low { color: var(--forest); }
+hr { border: none; border-top: 1px solid var(--border); margin: 2.5rem 0; }
+footer {
+  background: var(--forest);
+  color: var(--cream);
+  padding: 1.5rem 2rem;
+  font-size: 0.8rem;
+  opacity: 0.8;
+  margin-top: 3rem;
+}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Metis Trail V2 — Strategic Recommendations</h1>
+  <p class="subtitle">Content systems, game design mechanics, project process, and growth strategy beyond the visual UX audit</p>
+</header>
+
+<main>
+
+<h2>Overview</h2>
+<p>This document covers what the UX critique and source compendium did not: the game design mechanics, the narrative systems, the build/deploy pipeline, the testing strategy, and the product decisions that will determine whether this project becomes a compelling experience or a well-structured prototype that nobody finishes. Every recommendation is grounded in what I found in the codebase, the node data, the source archive, and the three verified historical texts.</p>
+
+<hr>
+
+<h2>I. Narrative &amp; Content Systems</h2>
+
+<div class="block important">
+<h4>1. The game needs a narrative engine layer between state changes and displayed text</h4>
+<p>Currently, <code>renderTravelLines()</code> in main.js pushes raw data strings. The event overlays display event.text (placeholder). There is no system that transforms <em>what happened</em> into <em>what the player reads</em>. Every good narrative game has this layer: a text generation system that takes game state and produces prose.</p>
+<p>Build a simple text fragment assembler:</p>
+<div class="code">// Instead of:
+`${here.name} (Day ${state.day})`
+
+// Build:
+const fragments = [];
+fragments.push(pick(opening, { terrain, season, morale }));
+if (state.squeal > 30) fragments.push(pick(squeal_high, { squeal: state.squeal }));
+if (state.food <= 10) fragments.push(pick(food_low, { terrain }));
+if (state.wear >= 3) fragments.push(pick(wear_high, { node: here.name }));
+fragments.push(pick(season_detail, { season, terrain }));
+return fragments.join(' ');</div>
+<p>Each terrain+season combination gets a pool of 15-20 text fragments. The seed-based RNG picks which ones appear. This alone transforms the game from a spreadsheet into a travel journal. The source compendium we built provides the raw material for every fragment pool.</p>
+</div>
+
+<div class="block">
+<h4>2. Node descriptions are static — they should change based on game state</h4>
+<p>Every node in <code>nodes.js</code> has a single <code>desc</code> string. But a player arriving at Fort Ellice on Day 5 with full supplies should have a different experience than a player arriving on Day 30 with a broken cart and no food. The node description should be a function, not a string.</p>
+<div class="code">// Instead of:
+desc: "Midpoint resupply where the Assiniboine meets the Qu'Appelle..."
+
+// Build:
+desc: (state) => {
+  const base = "Midpoint resupply where the Assiniboine meets the Qu'Appelle.";
+  if (state.wear >= 3) return base + " The HBC factor eyes your battered cart with concern.";
+  if (state.food <= 5) return base + " You eye the pemmican stores with desperate hunger.";
+  return base + " Smoke rises from the fort's chimney. A welcome sight.";
+}</div>
+</div>
+
+<div class="block">
+<h4>3. The "rumours" settlement action is underdeveloped — it should be a primary information channel</h4>
+<p>Currently "rumours" is just a settlement action that advances time by 1 day. But historically, the trail gossip network was how Métis communities shared intelligence about buffalo movements, river conditions, police activity, and trade prices. Rumours should give the player actionable intelligence that affects decisions:</p>
+<ul>
+  <li>"The buffalo have shifted west toward the Touchwood Hills" — hints at where food can be foraged</li>
+  <li>"The Assiniboine is running high — three carts lost at the Portage crossing" — warns of upcoming river event difficulty</li>
+  <li>"The Company is rationing pemmican at Carlton" — signals upcoming scarcity</li>
+  <li>"Riel's men are watching the trail south of Batoche" — NWMP/authority tension foreshadowing</li>
+</ul>
+<p>Each rumour should be a structured data object with a mechanical effect (e.g., next river crossing DC +3, next forage roll +2, etc.) and a source citation from the research wiki.</p>
+</div>
+
+<div class="block">
+<h4>4. Events need consequence chains — not just one-shot outcomes</h4>
+<p>Every event in the engine resolves immediately: roll, apply effects, done. But real trail events have consequences that ripple forward. A broken axle doesn't just add +1 wear — it means you're slower tomorrow, which means you consume more food, which means you might run out before the next settlement.</p>
+<p>Implement a simple <strong>flags</strong> system (already in engine state as <code>flags: {}</code>):</p>
+<div class="code">// Event: "You ford the river but the cart bed soaks through."
+// Immediate: food -2 (wet rations)
+// Flag: { wet_rations: true }
+// Next 3 travel days: if wet_rations, food spoils at 2x rate
+// Resolution: at next settlement or camp, "Dry out the rations" action clears flag</div>
+<p>This transforms events from isolated incidents into stories with arcs. The flags object is already in the engine — it just needs to be used.</p>
+</div>
+
+<div class="block">
+<h4>5. The game needs a "journal" — a persistent log of what happened</h4>
+<p>Players should be able to review their journey. Not just the current state, but the story of how they got there. A scrollable journal overlay (accessible via a book icon) that records:</p>
+<ul>
+  <li>Each day's narrative fragment</li>
+  <li>Event outcomes with dice results</li>
+  <li>Settlement actions taken</li>
+  <li>Source citations for historical events</li>
+</ul>
+<p>This serves three purposes: (a) players can re-read the story they're creating, (b) it provides context when they're trying to understand why their food is low, (c) it becomes a shareable artifact — "here's my journey" with seed value.</p>
+</div>
+
+<hr>
+
+<h2>II. Game Design Mechanics</h2>
+
+<div class="block important">
+<h4>6. The economy is too simple — trade goods have no differentiation</h4>
+<p>Currently, "Bison Hide" and "Beaver Pelts" are both just "trade" type items with a count. But historically, these had very different economics:</p>
+<ul>
+  <li><strong>Bison robes:</strong> 1.25 MB each, bulky, high volume. The staple of the independent freighter. Price stable but weight-heavy.</li>
+  <li><strong>Beaver pelts:</strong> 3 MB each, compact, high value. The HBC's core commodity. Price fluctuated with European fashion.</li>
+  <li><strong>Pemmican:</strong> 14¢/lb in 1878. Not a trade good — it's food. But it was also the currency of the trail. You paid for ferry crossings, guide services, and repairs in pemmican.</li>
+</ul>
+<p>The trade system should have <strong>price variation by node</strong>. At Fort Garry, robes are cheap (buy low). At Edmonton, robes are expensive (sell high). At St. Paul, American goods are cheap. This creates the actual economic decision that defined Métis freighting: what to buy, where to sell, how to maximize the cart's 450kg capacity.</p>
+</div>
+
+<div class="block">
+<h4>7. The crew system is too abstract — "rested/tired/exhausted" is not a person</h4>
+<p>The crew is currently a single state value. But the historical sources describe specific people with names, skills, and personalities. The Portage La Loche Brigade had named guides (Laurent Cadotte, Alexis L'Esperance, Jean Baptiste Bruce) with different wages and roles.</p>
+<p>Implement named crew members:</p>
+<ul>
+  <li><strong>Guide:</strong> +2 to navigation/forage rolls. Can be hired at settlements (costs 1 trade good or 5 food). Leaves after 3 nodes unless paid again.</li>
+  <li><strong>Hunter:</strong> +2 to food foraging. Can hunt on plains terrain (requires ammunition).</li>
+  <li><strong>Mechanic:</strong> +2 to repair rolls. Can do field repairs without tool kit.</li>
+</ul>
+<p>Each crew member has a name drawn from historical sources, a portrait placeholder (initials in a circle), and a one-line bio. This makes the crew feel real and gives the "recruit" settlement action meaning.</p>
+</div>
+
+<div class="block">
+<h4>8. The squeal mechanic needs a counterplay loop</h4>
+<p>Currently squeal just accumulates and makes noise. But the historical sources are clear about the counterplay: shaganappi grease. The mechanic should be:</p>
+<ol>
+  <li>Squeal increases randomly during travel (terrain-dependent probability)</li>
+  <li>High squeal attracts attention (encounter probability increases)</li>
+  <li>Greasing the axle at camp or settlement resets squeal to 0 (costs 1 shaganappi)</li>
+  <li>Without grease, squeal accelerates (dust + dry wood = worse each day)</li>
+  <li>At squeal = 100, the axle is so loud it can be heard for miles — guaranteed encounter</li>
+</ol>
+<p>This creates a resource tension: shaganappi is also used for repairs. Do you use it for grease (preventive) or save it for repairs (reactive)?</p>
+</div>
+
+<div class="block">
+<h4>9. Food consumption is flat — it should vary by conditions</h4>
+<p>Currently: 1 food per day, always. But historically, food consumption varied:</p>
+<ul>
+  <li><strong>Normal travel:</strong> 1 ration/day</li>
+  <li><strong>Hard travel (mud, hills, forced march):</strong> 1.5 rations/day (round up)</li>
+  <li><strong>Resting at camp:</strong> 0.5 rations/day (you're not burning as much, and you can forage)</li>
+  <li><strong>Crew exhausted:</strong> they eat more (stress/desperation) = 1.5 rations/day</li>
+</ul>
+<p>This makes the "Make Camp" decision meaningful beyond just morale recovery. It's also a food conservation strategy.</p>
+</div>
+
+<div class="block">
+<h4>10. The season system needs mechanical teeth</h4>
+<p>Three seasons (summer, autumn, early winter) but only early winter has a mechanical effect (game over if not at final node). Summer and autumn should differ:</p>
+<ul>
+  <li><strong>Summer (Jun-Aug):</strong> Normal travel. Rivers may be high from snowmelt. Forage is good. Prairie fire risk.</li>
+  <li><strong>Autumn (Sep-Oct):</strong> Rivers lower (easier crossings). Forage declining. Days shorter (travel distance per day reduced by 10%). First frost events.</li>
+  <li><strong>Early Winter (Nov):</strong> Game over if not at Edmonton. This is the real pressure — the calendar is the enemy.</li>
+</ul>
+<p>The season transition should be a notable event. "The first frost silvered the grass this morning. Summer is over. You feel the urgency of the trail."</p>
+</div>
+
+<div class="block">
+<h4>11. The scoring system doesn't reward the right things</h4>
+<p>Current scoring: base 1000 + trade_units*120 + food_bonus*12 + crew_bonus - days*8 - wear^2*40. This heavily penalizes wear (quadratic) and days (linear), but doesn't reward:</p>
+<ul>
+  <li><strong>Historical events resolved:</strong> +50 per event (engagement with the story)</li>
+  <li><strong>Source citations read:</strong> +10 per source clicked (engagement with the research)</li>
+  <li><strong>Settlements visited:</strong> +25 per unique node (exploration)</li>
+  <li><strong>Crew morale at arrival:</strong> morale * 5 (taking care of people)</li>
+  <li><strong>Journal completeness:</strong> +10 per day logged (playing the full game)</li>
+</ul>
+<p>Scoring should reward engagement with the historical content, not just speed and efficiency.</p>
+</div>
+
+<hr>
+
+<h2>III. Build, Deploy &amp; Testing</h2>
+
+<div class="block important">
+<h4>12. The build pipeline has a known CI failure that needs fixing</h4>
+<p>ISSUES.md documents: "CI log <code>tar: dist: Cannot open: No such file or directory</code>." The build script writes to <code>dist/</code> but the GitHub Actions workflow apparently can't find it. This needs debugging before any deploy.</p>
+<p>Check: does the GitHub Actions workflow run <code>npm run build</code> from the repo root? Does <code>esbuild</code> output to the right path? The build script uses <code>process.cwd()</code> which should be the repo root in CI, but worth verifying.</p>
+</div>
+
+<div class="block">
+<h4>13. No test coverage for the engine</h4>
+<p>The TODO.md mentions "Add minimal unit tests for calendar and PRNG" but <code>tests/</code> directory is empty. The engine has non-trivial logic (date advancement, PRNG, event resolution, scoring) that should be tested before adding content on top.</p>
+<p>Priority tests:</p>
+<ul>
+  <li>Calendar: date advancement across month boundaries, leap year handling, season transitions</li>
+  <li>PRNG: seed reproducibility (same seed = same sequence), distribution sanity</li>
+  <li>Engine: food depletion → game over, wear max → game over, reaching final node → win</li>
+  <li>Scoring: verify formula produces expected values for known inputs</li>
+</ul>
+<p>Vitest is already in package.json. Write 10 tests. Takes 2 hours. Prevents regressions forever.</p>
+</div>
+
+<div class="block">
+<h4>14. The deploy target needs a decision</h4>
+<p>GitHub Pages is configured but not verified. The game should be playable at a URL. Options:</p>
+<ul>
+  <li><strong>GitHub Pages (recommended):</strong> Free, automatic from <code>dist/</code>. Fix the CI, verify the URL, done.</li>
+  <li><strong>Self-hosted:</strong> Any static host works. The single HTML file + JS bundle is trivially deployable.</li>
+  <li><strong>Offline-first distribution:</strong> The game could be distributed as a single <code>.html</code> file (inline the JS bundle). Users download it, open in browser, play forever. No server needed. This is the most resilient option.</li>
+</ul>
+<p>The offline-first distribution is philosophically aligned with the project. A Métis trail game that works without internet is a statement.</p>
+</div>
+
+<hr>
+
+<h2>IV. Content Pipeline &amp; Research Integration</h2>
+
+<div class="block">
+<h4>15. The source wiki and the game need a tighter integration</h4>
+<p>The research wiki has 30+ entity pages, 20+ articles, and structured data. The game has 14 nodes and ~10 event slots. There's a massive content gap. Build a pipeline:</p>
+<ol>
+  <li>Write a script that reads wiki markdown files and outputs game event JSON</li>
+  <li>Each wiki article becomes 2-4 game events</li>
+  <li>Each entity page becomes node description text + settlement flavor</li>
+  <li>Source citations are auto-generated from wiki provenance</li>
+</ol>
+<p>This means the research wiki becomes the content management system for the game. You write research → run the script → game has new content. No copy-pasting.</p>
+</div>
+
+<div class="block">
+<h4>16. The game needs an "archive" view — a research mode</h4>
+<p>Players who finish the game (or who are curious before playing) should be able to browse the source material. An "Archive" button on the intro screen that shows:</p>
+<ul>
+  <li>All sources used in the game, with full citations</li>
+  <li>Direct links to archive.org for each primary source</li>
+  <li>Historical context paragraphs for each node</li>
+  <li>A timeline of the 1878 Carlton Trail journey</li>
+</ul>
+<p>This positions the game as educational, not just entertaining. It also drives traffic to the research wiki and archive.org sources — which is good for the project's visibility and credibility.</p>
+</div>
+
+<div class="block">
+<h4>17. Missing content: the return journey</h4>
+<p>The game is one-directional: Fort Garry to Fort Edmonton. But historically, the Carlton Trail was a round trip. The return journey (eastbound, spring 1878) had different challenges: spring floods, breakup ice, the opposite economic calculus (manufactured goods west, furs east).</p>
+<p>This could be a "New Game+" mode. Same map, reversed direction, different events, different seasonal pressures. Doubles the content without doubling the node work.</p>
+</div>
+
+<hr>
+
+<h2>V. Product &amp; Growth Strategy</h2>
+
+<div class="block">
+<h4>18. The game needs a shareable moment</h4>
+<p>Every good indie game has a moment players want to share. For Metis Trail, it should be the journey summary — a beautifully formatted "My Journey" card that shows:</p>
+<ul>
+  <li>The route taken with key events marked</li>
+  <li>Final score with breakdown</li>
+  <li>One standout moment ("You forded the Red Lake River in a horse-shoe pattern")</li>
+  <li>The seed value for challenge runs</li>
+  <li>A source citation for the most dramatic event that occurred</li>
+</ul>
+<p>This card should be exportable as an image (html2canvas, 50 lines of code) or at minimum copyable as formatted text. Players share it → new players discover the game.</p>
+</div>
+
+<div class="block">
+<h4>19. Seed-based challenge runs create replayability</h4>
+<p>The engine already supports seed-based play. Lean into this. After completing the game, show the seed and say: "Challenge a friend: can you beat seed 2847?" Leaderboard by seed. Weekly challenge seeds. This is how you get replayability without adding content.</p>
+</div>
+
+<div class="block">
+<h4>20. The game should have a "historical mode" and a "story mode"</h4>
+<p><strong>Historical mode:</strong> Strict. Historical prices, historical events only, no anachronisms. For the history nerds. Source citations always visible.</p>
+<p><strong>Story mode:</strong> Relaxed. More events, more dramatic, more forgiving. For the casual player. Source citations available but not foregrounded.</p>
+<p>Same engine, different content pools and difficulty curves. Doubles the audience.</p>
+</div>
+
+<hr>
+
+<h2>VI. Technical Debt &amp; Code Quality</h2>
+
+<div class="block warn">
+<h4>21. The schema.js typedefs are imported but never used for validation</h4>
+<p><code>nodes.js</code> imports <code>{ Node }</code> from schema.js but the schema file has no exports (it's all JSDoc typedefs). The import is dead code. More importantly, there's no runtime validation that events, nodes, or items conform to the schema. A malformed event object will silently produce broken UI.</p>
+<p>Fix: either make the schema import meaningful (export validation functions) or remove the dead import. Add a <code>validateEvent()</code> function that checks required fields at load time. Run it in dev mode.</p>
+</div>
+
+<div class="block warn">
+<h4>22. The debug UI and persistence modules are duplicated</h4>
+<p><code>debug.js</code> and <code>persistence.js</code> both define <code>saveGame</code>, <code>loadGame</code>, and <code>clearSave</code>. The main.js imports from persistence.js, but debug.js has its own copies. This will cause bugs if they diverge. Consolidate into one module.</p>
+</div>
+
+<div class="block warn">
+<h4>23. The engine creates a global <code>window._metisGame</code> — this is a debugging crutch that will cause problems</h4>
+<p>The game instance is exposed on <code>window._metisGame</code> and <code>window.__METIS_DEBUG__</code>. This is fine for development but should be stripped in production. The build script should have a <code>--production</code> flag that removes all <code>window.__METIS*</code> exports and the debug UI mount.</p>
+</div>
+
+<div class="block">
+<h4>24. The PRNG is good but the seed input is never exposed to the player</h4>
+<p>The engine accepts a seed parameter but the UI has no way to input one. Add a "Journey Seed" field to the intro screen (collapsed by default, visible under "Advanced"). Players who want to share seeds or replay specific journeys can do so.</p>
+</div>
+
+<hr>
+
+<h2>VII. Accessibility &amp; Inclusivity</h2>
+
+<div class="block">
+<h4>25. The game uses "half-breed" in source quotes — needs contextual framing</h4>
+<p>Several historical sources use the term "half-breed" (Fonseca, the barricade verses). This was the common term of the era but is offensive in modern usage. The game should:</p>
+<ul>
+  <li>Never use the term in game-authored text</li>
+  <li>When quoting historical sources that contain it, add a contextual note: "This term appears in the original 1869 source. The Métis Nation uses 'Métis' as its self-designation."</li>
+  <li>Default to "Métis" in all game text</li>
+</ul>
+<p>This is both an accessibility issue and a historical accuracy issue — the Métis called themselves Métis, not "half-breed."</p>
+</div>
+
+<div class="block">
+<h4>26. Color contrast needs verification</h4>
+<p>The current palette: #E8DCC8 on #1A1410 (status bar text on dark bg) — this is good contrast. But #8B2500 (accent red) on #E8DCC8 (cream) may fail WCAG AA for small text. Verify with a contrast checker. The brass #A67C29 on cream is likely borderline. If the game is educational and public-facing, WCAG AA compliance matters.</p>
+</div>
+
+<div class="block">
+<h4>27. The game needs a text-only mode for screen readers</h4>
+<p>The map is purely visual. The narrative panel is text but not semantically structured (just divs with class "screen-text"). Add proper semantic HTML: <code>&lt;article&gt;</code> for narrative, <code>&lt;ol&gt;</code> for event choices, <code>&lt;dl&gt;</code> for status bar stats. The game should be playable with a screen reader even without the visual map.</p>
+</div>
+
+<hr>
+
+<h2>VIII. Prioritized Roadmap — All Recommendations</h2>
+
+<table>
+<tr><th>Priority</th><th>Item</th><th>Category</th><th>Effort</th></tr>
+<tr><td class="p-high">P0</td><td>Fix Leaflet offline / replace with trail strip</td><td>UX</td><td>2-4h</td></tr>
+<tr><td class="p-high">P0</td><td>Narrative engine layer (fragment assembler)</td><td>Content</td><td>3-4h</td></tr>
+<tr><td class="p-high">P0</td><td>Status bar redesign + trail progress bar</td><td>UX</td><td>2-3h</td></tr>
+<tr><td class="p-high">P0</td><td>Button hierarchy (primary/secondary/tertiary)</td><td>UX</td><td>1h</td></tr>
+<tr><td class="p-high">P0</td><td>Dice result shown in event overlay</td><td>UX</td><td>1h</td></tr>
+<tr><td class="p-high">P0</td><td>Fix CI build failure (dist/ not found)</td><td>Build</td><td>1-2h</td></tr>
+<tr><td class="p-high">P0</td><td>Write 10 unit tests (calendar, PRNG, engine)</td><td>Testing</td><td>2h</td></tr>
+<tr><td class="p-med">P1</td><td>Node descriptions as functions of state</td><td>Content</td><td>2h</td></tr>
+<tr><td class="p-med">P1</td><td>Consequence chains (flags system)</td><td>Mechanics</td><td>2-3h</td></tr>
+<tr><td class="p-med">P1</td><td>Named crew members with skills</td><td>Mechanics</td><td>3h</td></tr>
+<tr><td class="p-med">P1</td><td>Trade economy with price variation by node</td><td>Mechanics</td><td>3-4h</td></tr>
+<tr><td class="p-med">P1</td><td>Seasonal mechanical differences</td><td>Mechanics</td><td>1-2h</td></tr>
+<tr><td class="p-med">P1</td><td>Squeal counterplay loop (grease resource tension)</td><td>Mechanics</td><td>1h</td></tr>
+<tr><td class="p-med">P1</td><td>Food consumption varies by conditions</td><td>Mechanics</td><td>1h</td></tr>
+<tr><td class="p-med">P1</td><td>Mobile-first re-layout</td><td>UX</td><td>3-4h</td></tr>
+<tr><td class="p-med">P1</td><td>Settlement visual identity per node type</td><td>UX</td><td>2h</td></tr>
+<tr><td class="p-med">P1</td><td>Event overlay redesign (source, dice, pacing)</td><td>UX</td><td>2-3h</td></tr>
+<tr><td class="p-med">P1</td><td>ARIA + keyboard navigation</td><td>A11y</td><td>2h</td></tr>
+<tr><td class="p-med">P1</td><td>Journal overlay (journey log)</td><td>Content</td><td>2-3h</td></tr>
+<tr><td class="p-med">P1</td><td>Rumours system with mechanical effects</td><td>Content</td><td>2h</td></tr>
+<tr><td class="p-low">P2</td><td>Cart/crew overlay redesign</td><td>UX</td><td>3h</td></tr>
+<tr><td class="p-low">P2</td><td>End screen narrative + journey summary</td><td>UX</td><td>2h</td></tr>
+<tr><td class="p-low">P2</td><td>Seasonal atmosphere CSS</td><td>UX</td><td>1-2h</td></tr>
+<tr><td class="p-low">P2</td><td>Cart squeal visual/audio feedback</td><td>UX</td><td>1h</td></tr>
+<tr><td class="p-low">P2</td><td>Ambient animation/particles</td><td>UX</td><td>1-2h</td></tr>
+<tr><td class="p-low">P2</td><td>Scoring system revision</td><td>Mechanics</td><td>1h</td></tr>
+<tr><td class="p-low">P2</td><td>Wiki-to-game content pipeline</td><td>Content</td><td>4-6h</td></tr>
+<tr><td class="p-low">P2</td><td>Archive/research mode</td><td>Content</td><td>3-4h</td></tr>
+<tr><td class="p-low">P2</td><td>Shareable journey card (image export)</td><td>Growth</td><td>2-3h</td></tr>
+<tr><td class="p-low">P2</td><td>Seed input field on intro screen</td><td>UX</td><td>0.5h</td></tr>
+<tr><td class="p-low">P2</td><td>Historical mode vs story mode</td><td>Content</td><td>4-6h</td></tr>
+<tr><td class="p-low">P2</td><td>Return journey (New Game+)</td><td>Content</td><td>6-8h</td></tr>
+<tr><td class="p-low">P2</td><td>Consolidate debug/persistence modules</td><td>Code</td><td>0.5h</td></tr>
+<tr><td class="p-low">P2</td><td>Production build flag (strip debug globals)</td><td>Build</td><td>0.5h</td></tr>
+<tr><td class="p-low">P2</td><td>Color contrast verification (WCAG AA)</td><td>A11y</td><td>0.5h</td></tr>
+<tr><td class="p-low">P2</td><td>Semantic HTML for screen readers</td><td>A11y</td><td>1h</td></tr>
+<tr><td class="p-low">P2</td><td>Historical term contextual framing</td><td>A11y</td><td>1h</td></tr>
+<tr><td class="p-low">P2</td><td>Self-hosted fonts for offline</td><td>Build</td><td>1h</td></tr>
+</table>
+
+<hr>
+
+<footer>
+  <p><strong>Metis Trail V2 — Strategic Recommendations</strong></p>
+  <p>27 additional recommendations across 8 categories: narrative systems, game design mechanics, build/deploy/testing, content pipeline, product strategy, technical debt, accessibility, and growth. Combined with the UX critique (17 items) and source compendium (37 events), this gives a complete picture of what the project needs to go from functional prototype to compelling experience.</p>
+  <p>May 31, 2026</p>
+</footer>
+
+</main>
+</body>
+</html>
