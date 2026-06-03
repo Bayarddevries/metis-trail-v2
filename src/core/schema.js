@@ -58,3 +58,11 @@
  */
 
 /** @typedef {'trade'|'repair'|'rest'|'heal'|'grease'|'forage'|'recruit'|'rumours'|'continue'} SettlementAction */
+
+export class Node {
+  constructor(data = {}) {
+    Object.assign(this, data);
+  }
+}
+
+export default Node;

@@ -1,5 +1,3 @@
-import { Node } from '../core/schema.js';
-
 export const NODES = [
   {
     id: 'fort_garry',
