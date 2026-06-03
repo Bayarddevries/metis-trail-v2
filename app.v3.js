@@ -1347,6 +1347,23 @@ function updateMap(state) {
   }).addTo(markerGroup);
 }
 __name(updateMap, "updateMap");
+function renderTravelLinesView(state, gameRef, result) {
+  const here = gameRef?.getCurrentNode?.();
+  const next = gameRef?.getNextNode?.();
+  const lines = [];
+  if (here) {
+    lines.push(`${here.name} \u2014 Day ${state.day}`);
+    if (here.desc) lines.push(here.desc);
+  }
+  if (next) {
+    lines.push(`Next: ${next.name}`);
+    if (next.desc) lines.push(next.desc);
+  }
+  if (result) lines.push(result);
+  if (!lines.length) lines.push("On the trail...");
+  renderNarrative(lines);
+}
+__name(renderTravelLinesView, "renderTravelLinesView");
 function renderStatusBar(state) {
   const node = NODES[state.node];
   const next = NODES[state.node + 1];
@@ -1371,7 +1388,7 @@ function renderStatusBar(state) {
   crewEl.innerHTML = `<span class="stat-label">Crew </span><span class="${crewCls}">${state.crew}</span>`;
   foodEl.innerHTML = `<span class="stat-label">Food </span><span class="stat-value${state.food <= 4 ? " food-low" : ""}">${state.food}</span>`;
   wearEl.innerHTML = `<span class="stat-label">Wear </span><span class="stat-value${state.wear >= 4 ? " wear-high" : ""}">${state.wear}</span>`;
-  renderTravelLines2(state, window._metisGame, pendingResult);
+  renderTravelLinesView(state, window._metisGame, pendingResult);
 }
 __name(renderStatusBar, "renderStatusBar");
 function renderNarrative(lines) {
@@ -1426,20 +1443,26 @@ function bootstrap(seed = null) {
   if (startBtn) {
     startBtn.addEventListener("click", () => {
       const overlay = find("#intro-overlay");
-      if (overlay) overlay.remove();
-      initMap();
+      if (overlay) {
+        overlay.classList.remove("active");
+        overlay.setAttribute("hidden", "");
+      }
       render();
+      initMap();
     });
   } else {
     console.warn("Metis bootstrap: #intro-start not found; Begin Journey button is offline.");
   }
   const travelBtn = find("#btn-travel");
-  if (travelBtn) travelBtn.addEventListener("click", () => {
-    const { pendingEvent, pendingSettlement, over } = game.getState();
-    if (pendingEvent || pendingSettlement || over) return;
-    travelOneDay();
-    render();
-  });
+  if (travelBtn) {
+    travelBtn.addEventListener("click", () => {
+      const { pendingEvent, pendingSettlement, over } = game.getState();
+      if (pendingEvent || pendingSettlement || over) return;
+      travelOneDay();
+      render();
+    });
+    travelBtn.setAttribute("data-metis-travel-bound", "1");
+  }
   const campBtn = find("#btn-camp");
   if (campBtn) campBtn.onclick = () => {
     publishCampResult();
@@ -1544,29 +1567,12 @@ function render() {
     return;
   }
   hideOverlays();
-  renderTravelLines22(state, game, pendingResult2);
+  renderTravelLinesView(state, game, pendingResult2);
   pendingResult2 = null;
 }
 __name(render, "render");
-function renderTravelLines22(state, gameRef, result) {
-  const here = gameRef?.getCurrentNode?.();
-  const next = gameRef?.getNextNode?.();
-  const lines = [];
-  if (here) {
-    lines.push(`${here.name} \u2014 Day ${state.day}`);
-    if (here.desc) lines.push(here.desc);
-  }
-  if (next) {
-    lines.push(`Next: ${next.name}`);
-    if (next.desc) lines.push(next.desc);
-  }
-  if (result) lines.push(result);
-  if (!lines.length) lines.push("On the trail...");
-  renderNarrative(lines);
-}
-__name(renderTravelLines22, "renderTravelLines2");
 function hideOverlays() {
-  ["event-overlay", "settlement-overlay", "cart-overlay", "crew-overlay"].forEach((id) => {
+  ["intro-overlay", "event-overlay", "settlement-overlay", "cart-overlay", "crew-overlay"].forEach((id) => {
     const el = document.getElementById(id);
     if (el) el.classList.remove("active");
   });
