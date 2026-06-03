@@ -61,7 +61,7 @@ export function updateMap(state) {
   }).addTo(markerGroup);
 }
 
-export function renderTravelLines2(state, gameRef, result) {
+export function renderTravelLinesView(state, gameRef, result) {
   const here = gameRef?.getCurrentNode?.();
   const next = gameRef?.getNextNode?.();
   const lines = [];
@@ -105,7 +105,7 @@ export function renderStatusBar(state) {
   foodEl.innerHTML = `<span class="stat-label">Food </span><span class="stat-value${state.food <= 4 ? ' food-low' : ''}">${state.food}</span>`;
   wearEl.innerHTML = `<span class="stat-label">Wear </span><span class="stat-value${state.wear >= 4 ? ' wear-high' : ''}">${state.wear}</span>`;
 
-  renderTravelLines2(state, window._metisGame, pendingResult);
+  renderTravelLinesView(state, window._metisGame, pendingResult);
 }
 
 export function renderNarrative(lines) {

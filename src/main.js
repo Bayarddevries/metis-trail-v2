@@ -1,6 +1,6 @@
 import { createGame } from './systems/engine.js';
 import { mount, find } from './ui/shell.js';
-import { renderStatusBar, renderNarrative, initMap, updateMap, renderTravelLines2 } from './ui/renderer.js';
+import { renderStatusBar, renderNarrative, initMap, updateMap, renderTravelLinesView } from './ui/renderer.js';
 import { saveGame, loadGame, clearSave } from './ui/persistence.js';
 import { NODES } from './data/nodes.js';
 
@@ -171,7 +171,7 @@ function render() {
     return;
   }
   hideOverlays();
-  renderTravelLines2(state, game, pendingResult);
+  renderTravelLinesView(state, game, pendingResult);
   pendingResult = null;
 }
 
