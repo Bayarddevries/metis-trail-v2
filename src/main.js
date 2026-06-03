@@ -107,7 +107,7 @@ window.__METIS_BOOT__ = bootstrap;
 let pendingResult = null;
 
 function publishResult(text) {
-  pendingResult = text;
+window.__METIS_PENDING_RESULT__ = text;
 }
 
 function travelOneDay() {
@@ -171,8 +171,8 @@ function render() {
     return;
   }
   hideOverlays();
-  renderTravelLinesView(state, game, pendingResult);
-  pendingResult = null;
+  renderTravelLinesView(state, game, window.__METIS_PENDING_RESULT__);
+  window.__METIS_PENDING_RESULT__ = null;
 }
 
 function hideOverlays() {
