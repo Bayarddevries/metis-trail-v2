@@ -27,6 +27,8 @@ All notable changes are documented here. Format loosely follows Keep a Changelog
 - `renderStatusBar` refresh after travel choices
 - Event card `background` vs `background-image` conflict restoring cream fill under texture
 - Travel choice handler now reliably boots renderer, map, and overlay rewrite on first move
+- Day/month/season status bar updates now write to DOM during travel
+- Cross-module map init trigger fix with `window._metisMapInited`
 
 ### Changed
 - Palette switched to forest/brass/cream Document scheme
@@ -42,6 +44,21 @@ All notable changes are documented here. Format loosely follows Keep a Changelog
 - style-options.html
 - dice-demo.html
 - plan/dice-and-events.md
+
+## [v0.5-playable] - 2026-06-04
+
+### Added
+- First fully playable public release via GitHub Pages.
+- Day/month/season UI now actually advances in the status bar during travel.
+- Cross-module map initialization fix so route tiles render.
+- Verified live travel loop: Travel 1 Day → settlement modal → Continue West → next segment.
+
+### Changed
+- Live at https://bayarddevries.github.io/metis-trail-v2/
+- Git tag `v0.5-playable` pinned to commit `4977e31`.
+
+### Docs
+- Marked release baseline for continuing development.
 
 ## Notes
 - v1 site baseline: https://bayarddevries.github.io/metis-trail/

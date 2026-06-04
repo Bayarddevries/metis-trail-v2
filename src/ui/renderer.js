@@ -1,5 +1,6 @@
 import { NODES } from '../data/nodes.js';
 import { applyTheme } from './theme.js';
+import cartMarkerUrl from '../../art/cart_marker_48px.png';
 
 const MONTH_NAMES = ['', 'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
@@ -10,6 +11,13 @@ function monthName(month) {
 let map = null;
 let tileLayer = null;
 let markerGroup = null;
+
+const cartIcon = L.icon({
+  iconUrl: cartMarkerUrl,
+  iconSize: [48, 48],
+  iconAnchor: [24, 24],
+  popupAnchor: [0, -24],
+});
 
 export function initMap() {
   const el = document.getElementById('map');
@@ -60,12 +68,7 @@ export function updateMap(state) {
     }).addTo(markerGroup);
   }
 
-  L.circleMarker([here.lat, here.lon], {
-    radius: 8,
-    color: '#1A1410',
-    fillColor: '#8B2500',
-    fillOpacity: 1,
-  }).addTo(markerGroup);
+  L.marker([here.lat, here.lon], { icon: cartIcon }).addTo(markerGroup);
 }
 
 export function renderTravelLinesView(state, gameRef, result) {

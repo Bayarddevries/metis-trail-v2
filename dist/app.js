@@ -1297,6 +1297,9 @@ function find(selector) {
 }
 __name(find, "find");
 
+// art/cart_marker_48px.png
+var cart_marker_48px_default = "./cart_marker_48px-FURXAOAP.png";
+
 // src/ui/renderer.js
 var MONTH_NAMES = ["", "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 function monthName(month) {
@@ -1306,6 +1309,12 @@ __name(monthName, "monthName");
 var map = null;
 var tileLayer = null;
 var markerGroup = null;
+var cartIcon = L.icon({
+  iconUrl: cart_marker_48px_default,
+  iconSize: [48, 48],
+  iconAnchor: [24, 24],
+  popupAnchor: [0, -24]
+});
 function initMap() {
   const el = document.getElementById("map");
   if (!el || typeof L === "undefined") return;
@@ -1345,12 +1354,7 @@ function updateMap(state) {
       fillOpacity: 1
     }).addTo(markerGroup);
   }
-  L.circleMarker([here.lat, here.lon], {
-    radius: 8,
-    color: "#1A1410",
-    fillColor: "#8B2500",
-    fillOpacity: 1
-  }).addTo(markerGroup);
+  L.marker([here.lat, here.lon], { icon: cartIcon }).addTo(markerGroup);
 }
 __name(updateMap, "updateMap");
 function renderTravelLinesView(state, gameRef, result) {
