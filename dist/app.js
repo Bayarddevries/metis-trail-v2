@@ -1298,6 +1298,11 @@ function find(selector) {
 __name(find, "find");
 
 // src/ui/renderer.js
+var MONTH_NAMES = ["", "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+function monthName(month) {
+  return MONTH_NAMES[month] || String(month);
+}
+__name(monthName, "monthName");
 var map = null;
 var tileLayer = null;
 var markerGroup = null;
@@ -1305,6 +1310,7 @@ function initMap() {
   const el = document.getElementById("map");
   if (!el || typeof L === "undefined") return;
   if (map) return;
+  if (!window.__METIS_READY__) return;
   applyTheme(el);
   map = L.map("map", {
     center: [NODES[0].lat, NODES[0].lon],
@@ -1367,10 +1373,16 @@ __name(renderTravelLinesView, "renderTravelLinesView");
 function renderStatusBar(state) {
   const node = NODES[state.node];
   const next = NODES[state.node + 1];
+  const dayEl = document.getElementById("s-day");
+  const monthEl = document.getElementById("s-month");
+  const seasonEl = document.getElementById("s-season");
   const segEl = document.getElementById("s-segment");
   const foodEl = document.getElementById("s-food");
   const wearEl = document.getElementById("s-wear");
   const crewEl = document.getElementById("s-crew");
+  if (dayEl) dayEl.textContent = String(state.day);
+  if (monthEl) monthEl.textContent = monthName(state.month);
+  if (seasonEl) seasonEl.textContent = state.season;
   if (segEl) {
     if (state.pendingSettlement) {
       segEl.textContent = `At: ${node?.name || "camp"}`;
@@ -1388,7 +1400,8 @@ function renderStatusBar(state) {
   crewEl.innerHTML = `<span class="stat-label">Crew </span><span class="${crewCls}">${state.crew}</span>`;
   foodEl.innerHTML = `<span class="stat-label">Food </span><span class="stat-value${state.food <= 4 ? " food-low" : ""}">${state.food}</span>`;
   wearEl.innerHTML = `<span class="stat-label">Wear </span><span class="stat-value${state.wear >= 4 ? " wear-high" : ""}">${state.wear}</span>`;
-  renderTravelLinesView(state, window._metisGame, pendingResult);
+  if (!window.__METIS_PENDING_RESULT__) window.__METIS_PENDING_RESULT__ = null;
+  renderTravelLinesView(state, window._metisGame, window.__METIS_PENDING_RESULT__);
 }
 __name(renderStatusBar, "renderStatusBar");
 function renderNarrative(lines) {
@@ -1504,9 +1517,8 @@ function bootstrap(seed = null) {
 }
 __name(bootstrap, "bootstrap");
 window.__METIS_BOOT__ = bootstrap;
-var pendingResult2 = null;
 function publishResult(text) {
-  pendingResult2 = text;
+  window.__METIS_PENDING_RESULT__ = text;
 }
 __name(publishResult, "publishResult");
 function travelOneDay() {
@@ -1551,6 +1563,10 @@ __name(publishCampResult, "publishCampResult");
 function render() {
   const game = window._metisGame;
   if (!game) return;
+  if (!window._metisMapInited && window.__METIS_READY__ && document.getElementById("intro-overlay")?.classList.contains("active")) {
+    initMap();
+    window._metisMapInited = true;
+  }
   const state = game.getState();
   renderStatusBar(state);
   updateMap(state);
@@ -1567,8 +1583,8 @@ function render() {
     return;
   }
   hideOverlays();
-  renderTravelLinesView(state, game, pendingResult2);
-  pendingResult2 = null;
+  renderTravelLinesView(state, game, window.__METIS_PENDING_RESULT__);
+  window.__METIS_PENDING_RESULT__ = null;
 }
 __name(render, "render");
 function hideOverlays() {
