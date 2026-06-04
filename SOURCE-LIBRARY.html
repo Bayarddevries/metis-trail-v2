@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cart Trail — Historical Source Library</title>
+<style>
+:root {
+  --bg: #0F0D0A; --bg-card: #1A1612; --bg-card2: #221E18;
+  --border: #3D3528; --amber: #D4A017; --amber-dim: #8B6914;
+  --cyan: #00B4D8; --cyan-dim: #0077A0;
+  --red: #D4401A; --green: #4A8B3F;
+  --text: #E8DCC8; --text-dim: #9A8B78;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: Georgia, serif; background: var(--bg); color: var(--text); line-height: 1.7; }
+
+.header {
+  background: linear-gradient(135deg, #1A1612 0%, #0F0D0A 100%);
+  border-bottom: 2px solid var(--amber-dim);
+  padding: 40px 20px; text-align: center;
+}
+.header h1 { font-family: 'Rye', Georgia, serif; font-size: 32px; color: var(--amber); letter-spacing: 2px; margin-bottom: 8px; }
+.header .subtitle { color: var(--text-dim); font-size: 13px; letter-spacing: 4px; text-transform: uppercase; }
+
+/* ── TABS ── */
+.tabs {
+  display: flex; gap: 0; border-bottom: 2px solid var(--border);
+  background: var(--bg-card); padding: 0 20px; overflow-x: auto;
+}
+.tab {
+  padding: 14px 20px; font-size: 13px; font-family: 'Rye', Georgia, serif;
+  color: var(--text-dim); cursor: pointer; border-bottom: 2px solid transparent;
+  white-space: nowrap; transition: all 0.15s;
+}
+.tab:hover { color: var(--text); }
+.tab.active { color: var(--amber); border-bottom-color: var(--amber); }
+
+/* ── SECTIONS ── */
+.section { max-width: 1000px; margin: 0 auto; padding: 28px 20px; display: none; }
+.section.active { display: block; }
+
+h2 { font-family: 'Rye', Georgia, serif; font-size: 20px; color: var(--amber); margin-bottom: 12px; }
+h3 { font-size: 14px; color: var(--cyan); margin: 20px 0 8px; text-transform: uppercase; letter-spacing: 1.5px; }
+h4 { font-size: 13px; color: var(--amber-dim); margin: 16px 0 6px; }
+p { color: var(--text-dim); font-size: 14px; margin-bottom: 10px; }
+ul { padding-left: 20px; margin: 8px 0 16px; }
+li { color: var(--text-dim); font-size: 14px; margin-bottom: 6px; }
+
+/* ── EXTRACT CARDS ── */
+.extract {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 16px;
+  margin: 12px 0;
+}
+.extract .meta {
+  display: flex; gap: 8px; align-items: center; margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+.extract .tag {
+  font-size: 10px; padding: 2px 8px; border-radius: 3px;
+  text-transform: uppercase; letter-spacing: 1px;
+}
+.tag-cart { background: #D4A01722; color: var(--amber); border: 1px solid var(--amber-dim); }
+.tag-trail { background: #4A8B3F22; color: var(--green); border: 1px solid #4A8B3F44; }
+.tag-nwmp { background: #00B4D822; color: var(--cyan); border: 1px solid var(--cyan-dim); }
+.tag-crew { background: #D4401A22; color: var(--red); border: 1px solid #D4401A44; }
+.tag-animal { background: #8B691433; color: var(--amber); border: 1px solid var(--amber-dim); }
+.tag-settlement { background: #6B4CE622; color: #8B7AE8; border: 1px solid #6B4CE644; }
+.tag-event { background: #D4401A22; color: var(--red); border: 1px solid #D4401A44; }
+.tag-mechanic { background: #00B4D822; color: var(--cyan); border: 1px solid var(--cyan-dim); }
+
+.extract .quote {
+  font-style: italic; color: var(--text); font-size: 14px;
+  border-left: 2px solid var(--amber); padding-left: 14px; margin-bottom: 10px;
+  line-height: 1.6;
+}
+.extract .attribution {
+  font-size: 11px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px;
+  margin-bottom: 10px;
+}
+.extract .use {
+  font-size: 13px; color: var(--text-dim); padding-top: 10px;
+  border-top: 1px solid var(--border);
+}
+.extract .use::before {
+  content: "IN-GAME: "; font-size: 10px; color: var(--cyan); font-weight: 700; letter-spacing: 1px;
+}
+
+/* ── TABLE ── */
+.param-table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 13px; }
+.param-table th { background: var(--bg-card2); color: var(--amber); padding: 8px 12px; text-align: left; border-bottom: 2px solid var(--amber-dim); }
+.param-table td { padding: 8px 12px; border-bottom: 1px solid var(--border); color: var(--text-dim); }
+.param-table tr:hover td { background: var(--bg-card2); }
+
+/* ── TWO COLUMN ── */
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 16px 0; }
+@media (max-width: 600px) { .two-col { grid-template-columns: 1fr; } }
+
+/* ── QUICK REF ── */
+.quick-ref {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; margin: 16px 0;
+}
+.qr-card {
+  background: var(--bg-card2); border: 1px solid var(--border); border-radius: 6px; padding: 14px;
+}
+.qr-card .title { font-size: 13px; font-weight: 700; color: var(--amber); margin-bottom: 6px; }
+.qr-card .detail { font-size: 13px; color: var(--text-dim); }
+
+/* ── SOURCE LIST ── */
+.source-item {
+  display: flex; gap: 16px; padding: 16px; background: var(--bg-card);
+  border: 1px solid var(--border); border-radius: 8px; margin-bottom: 12px;
+  align-items: flex-start;
+}
+.source-num {
+  width: 36px; height: 36px; border-radius: 50%; background: var(--amber-dim);
+  color: var(--bg); display: flex; align-items: center; justify-content: center;
+  font-family: 'Rye', Georgia, serif; font-size: 14px; flex-shrink: 0;
+}
+.source-info h4 { font-size: 14px; color: var(--text); margin-bottom: 4px; }
+.source-info .meta { font-size: 12px; color: var(--text-dim); }
+.source-info .desc { font-size: 13px; color: var(--text-dim); margin-top: 6px; font-style: italic; }
+
+/* ── SPRINT TABLE ── */
+.sprint-row { display: grid; grid-template-columns: 120px 1fr 80px; gap: 16px; padding: 14px 0; border-bottom: 1px solid var(--border); }
+.sprint-row:last-child { border-bottom: none; }
+.sprint-tag { font-size: 11px; padding: 3px 10px; border-radius: 4px; text-transform: uppercase; letter-spacing: 1px; font-weight: 700; }
+.sprint-content .title { font-size: 14px; color: var(--text); font-weight: 600; margin-bottom: 4px; }
+.sprint-content .detail { font-size: 13px; color: var(--text-dim); }
+.sprint-effort { font-size: 13px; color: var(--cyan); text-align: right; }
+
+.footer { text-align: center; padding: 30px 20px; color: var(--text-dim); font-size: 12px; border-top: 1px solid var(--border); }
+</style>
+<link href="https://fonts.googleapis.com/css2?family=Rye&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<div class="header">
+  <h1>📜 SOURCE LIBRARY</h1>
+  <div class="subtitle">First-Hand Accounts — Organized for Game Integration</div>
+</div>
+
+<div class="tabs">
+  <div class="tab active" onclick="show('sources',this)">📚 Sources</div>
+  <div class="tab" onclick="show('extracts',this)">✍️ Extracts</div>
+  <div class="tab" onclick="show('locations',this)">🗺️ Locations</div>
+  <div class="tab" onclick="show('sprint',this)">🔨 Sprint Plan</div>
+  <div class="tab" onclick="show('quick',this)">⚡ Quick Ref</div>
+</div>
+
+<!-- ═══════════ TAB: SOURCES ═══════════ -->
+<div id="sources" class="section active">
+  <h2>Source Documents</h2>
+  <p>Three primary first-hand accounts of life on the Red River and Carlton trails. Each has been read and tagged for game-relevant content across all systems.</p>
+
+  <div class="source-item">
+    <div class="source-num">1</div>
+    <div class="source-info">
+      <h4>Red River Settlement: Its Rise, Progress, and Present State — Alexander Ross (1856)</h4>
+      <div class="meta">89,177 words · Narrative history · Settler on the ground</div>
+      <div class="desc">"An isolated spot in the wilds of North America, distant 700 miles from the nearest sea-port, and that port blockaded by solid ice for ten months in the year."</div>
+      <div style="margin-top:8px;font-size:12px;color:var(--amber-dim)">KEY CONTENT: Buffalo hunt logistics (1840), cart construction, Sunday camp rituals, trail distances, settlement descriptions, river crossings, seasonal rhythms</div>
+    </div>
+  </div>
+
+  <div class="source-item">
+    <div class="source-num">2</div>
+    <div class="source-info">
+      <h4>To Red River and Beyond — Anonymous Traveller (1875)</h4>
+      <div class="meta">290,330 words · Diary/Journal · Overland expedition member</div>
+      <div class="desc">"Our expedition, on the afternoon of the 10th of June, left the hill back of the apostolic capital of Minnesota... Crowds of citizens from St. Paul and vicinity were present during the ceremony."</div>
+      <div style="margin-top:8px;font-size:12px;color:var(--amber-dim)">KEY CONTENT: Day-by-day trail narrative, mule behavior, elk/antelope hunting, mosquito swamps, Alkaline water, Mouse River junction, Assiniboine crossing, prairie fires, sandhill cranes, eagle encounter, Sunday theology lectures</div>
+    </div>
+  </div>
+
+  <div class="source-item">
+    <div class="source-num">3</div>
+    <div class="source-info">
+      <h4>Red River Cart and Trails: The Fur Trade — Harry Baker Brehaut (1972)</h4>
+      <div class="meta">89,177 words · Historical research · Synthesizes primary accounts</div>
+      <div class="desc">"When loaded it gave forth a blood-curdling squeal which could be heard for miles... No metal of any kind was used in its construction."</div>
+      <div style="margin-top:8px;font-size:12px;color:var(--amber-dim)">KEY CONTENT: Cart construction (wheels, axles, dished design, shaganappi repairs), trail brigade organization (10 carts, 3 drivers, overseer), harness design, river crossing methods (cajeux, wheel rafts), complete trail network map with 18 named routes</div>
+    </div>
+  </div>
+
+  <div class="source-item">
+    <div class="source-num">4</div>
+    <div class="source-info">
+      <h4>La Vérité sur la Question Métisse — Adolphe Ouimet / Gabriel Dumont narrative (1885)</h4>
+      <div class="meta">803,018 words · Political history + first-hand battle account · Dumont's own words</div>
+      <div class="desc">"J'ai fait placer un corps de garde vis-à-vis l'église de Batoche, pour empêcher l'équipage de débarquer... un câble en fer, jeté en travers de la rivière, devait faire chavirer ce bateau."</div>
+      <div style="margin-top:8px;font-size:12px;color:var(--amber-dim)">KEY CONTENT: Dumont's journey to retrieve Riel, Batoche battle (4-day siege), river blockade tactics (cable across river to capsize boats), Gatling gun, mannequin decoys, NWMP/spy encounters, ammunition crisis, Métis governance structure, land claims</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ TAB: EXTRACTS ═══════════ -->
+<div id="extracts" class="section">
+  <h2>Tagged Extracts by System</h2>
+  <p>Raw source material organized by game system. Each extract includes the original text, source attribution, and suggested in-game use.</p>
+
+  <h3>🛺 Cart & Vehicle</h3>
+
+  <div class="extract">
+    <div class="meta"><span class="tag tag-cart">Cart</span><span class="tag tag-mechanic">Mechanic</span></div>
+    <div class="quote">"When loaded it gave forth a blood-curdling squeal which could be heard for miles and which came to be associated with it. This squeal was caused by the friction of the dry wood of the hub of the wheel turning on the axle and could not be eliminated. If grease was used the dust of the trail would mix with the grease and wear down the axle or congeal and prevent the wheel from turning."</div>
+    <div class="attribution">— Brehaut (1972), after Alexander Henry's 1801 account</div>
+    <div class="use">New mechanic: Cart Squeal. Ungreased wheels = audible detection range increases (NWMP, buffalo, other travellers). Grease reduces squeal but adds wear. Repairs required every 3 segments. Audio cue + UI indicator.</div>
+  </div>
+
+  <div class="extract">
+    <div class="meta"><span class="tag tag-cart">Cart</span><span class="tag tag-mechanic">Mechanic</span></div>
+    <div class="quote">"The dished wheel was an important development in the cart. The dish was made by inclining the spokes outward from the cart body. The amount of the dish varied but was about 3 inches. It gave the cart better stability by preventing tipping on rough terrain and facilitated getting out when stuck in the mud."</div>
+    <div class="attribution">— Brehaut (1972)</div>
+    <div class="use">Cart upgrade: Dished wheels. +1 stability on rough terrain. Unlocked by finding a wheelwright at certain settlements or having a skilled crew member.</div>
+  </div>
+
+  <div class="extract">
+    <div class="meta"><span class="tag tag-cart">Cart</span></div>
+    <div class="quote">"No metal of any kind was used in its construction. Only the simplest tools were used to build it — hand-axe, small saw, draw-knife and screw-auger... The weight of the cart was approximately 550 pounds and the load capacity in the neighbourhood of 500 pounds."</div>
+    <div class="attribution">— Brehaut (1972)</div>
+    <div class="use">Cart construction: All wood and hide. Weight 550 lbs, capacity 500 lbs. Tools required: axe, saw, auger. Repairs possible on-trail with basic materials.</div>
+  </div>
+
+  <div class="extract">
+    <div class="meta"><span class="tag tag-cart">Cart</span><span class="tag tag-mechanic">Repair</span></div>
+    <div class="quote">"When the dowel connecting two sections of the felloe broke, two flat pieces of wood were cut to conform to the wheel curvature, and one piece was placed on each side of the felloe at the joint requiring repair and bound together with strips of animal hide, wound crosswise around the felloe, usually referred to as shaganappe, which had been soaked in water. When the strips dried they held the curved flat wooden boards firmly against the felloe."</div>
+    <div class="attribution">— Brehaut (1972)</div>
+    <div class="use">Emergency repair: Felloe binding. Requires 1 shaganappi. Temporary — lasts 1 segment. Description text for repair event.</div>
+  </div>
+
+  <div class="extract">
+    <div class="meta"><span class="tag tag-cart">Cart</span><span class="tag tag-trail">River Crossing</span></div>
+    <div class="quote">"The dished wheel was also used as a raft when crossing rivers, by removing the wheels and lashing them together concave side upward. Then the cart body and cargo were placed upon them and ferried across the water."</div>
+    <div class="attribution">— Brehaut (1972)</div>
+    <div class="use">River crossing event: Wheel-raft option. Requires removing 2 wheels (1 hour). Temporary — must reattach after crossing. Alternative: cajeux (ferry), ford, or bridge.</div>
+  </div>
+
+  <h3>🐴 Animals</h3>
+
+  <div class="extract">
+    <div class="meta"><span class="tag tag-animal">Mule</span></div>
+    <div class="quote">"Essaying to remount Mule, into whom must have transmigrated the crazy soul of some defunct geometer, he suddenly seemed to behold in me his centre, conceived himself a radius, and proposed to pass the rest of his life in describing a complimentary circumference, his tail doing the tangents. Whirling away a half hour thus... I made a desperate leap for his back, caught one toe in the stirrup, and so began a half-mile gallop, outdoing circus Mazeppas. In time, this became tedious, and I jumped off, lighting on all-fours... Then, for six or eight miles, spur, bit, and I fought Mule, his heels and his knees, and helped him conquer them."</div>
+    <div class="attribution">— "To Red River and Beyond" (1875)</div>
+    <div class="use">Mule behavior event: "The Geometry Lesson." Mule refuses, spins, bucks rider off. DC 12 Horsemanship to remount. Failure = lost time + crew amusement (morale +1 for watching, -1 for the rider).</div>
+  </div>
+
+  <div class="extract">
+    <div class="meta"><span class="tag tag-animal">Mule</span></div>
+    <div class="quote">"Poor brute! on our return he fell sick. We dragged him along behind the cart for a day or two, and since he got no better, but only worse, and could hardly walk, we left him on the open prairie, cutting a heap of green grass for his bed and board, clipping his ear for a property-mark, and praying that the wolves might spare him. Good old mule! you served us well, and I couldn't help choking at the throat as I caught the last glimpse of your long neck stretched out as you lay there, 'loth to believe that we would desert you."</div>
+    <div class="attribution">— "To Red River and Beyond" (1875)</div>
+    <div use="use">Animal death/leaving event: Sick animal left behind. Crew morale -2. Emotional weight. The mule clipping for property mark is a detail that could be a mechanic — marked animals can be reclaimed later.</div>
+  </div>
+
+  <div class="extract">
+    <div class="meta"><span class="tag tag-animal">Elk</span><span class="tag tag-trail">Hunt</span></div>
+    <div class="quote">"But the prospect of killing an elk was no more to be resisted than the glimpse of office flashed upon a hopeless nominee; and so half a dozen of us capped our rifles and cantered along in the track of his great leaps, faintly hoping to surround him in some of the poplar clumps, till we saw him shake his antlers proudly and plunge into an alder swamp two or three miles away, after which we cantered back again."</div>
+    <div class="attribution">— "To Red River and Beyond" (1875)</div>
+    <div class="use">Hunt event: Elk sighted. Chase sequence. Elk escapes into alder swamp. Decision: pursue (risk time/wear) or let go. Reward if pursued: +4-6 food.</div>
+  </div>
+
+  <div class="extract">
+    <div class="meta"><span class="tag tag-animal">Eagle</span></div>
+    <div class="quote">"A large gray eagle came sailing along the air, and hovered high above us. I fired with my rifle and hit him, knocking out a few tail-feathers; but not fatally... he only tumbled, fluttering three or four times his own wing-spread, and then, as if more scared than hurt, recovered himself and flew off into upper air. Afterward we saw him hanging over the river; a strong breeze was blowing but, without an apparent stroke of his pinions, he kept himself steadily poised and balanced in the same spot, head bent looking downward."</div>
+    <div class="attribution">— "To Red River and Beyond" (1875)</div>
+    <div class="use">Encounter: Eagle hunt. DC 12 to wound, DC 18 to kill. Wounded eagle: morale +1 (impressive shot). Killed: +1 food + feathers (trade item / morale).</div>
+  </div>
+
+  <div class="extract">
+    <div class="meta"><span class="tag tag-animal">Antelope</span><span class="tag tag-trail">Hunt</span></div>
+    <div class="quote">"Here, too, after a long chase and considerable 'circumvention,' we shot at the first antelopes seen by us. Their quick, long jumps took them out of rifle-range too soon to give us a second chance."</div>
+    <div class="attribution">— "To Red River and Beyond" (1875)</div>
+    <div class="use">Hunt event: Antelope. Very fast, hard to approach. DC 14 to get within range. Requires stalking (costs +1 day). Success: +3 food.</div>
+  </div>
+
+  <div class="extract">
+    <div class="meta"><span class="tag tag-animal">Sandhill Crane</span></div>
+    <div class="quote">"Sandhill cranes — huge birds, delicious to eat, and worth creeping a hundred rods to shoot — would start from many hollows as we came up over the nearest hill, and we could see their ungainly majesties putting on airs and stalking about on the top of distant sand-hills, taking care to fly before we were within rifle-shot, and mocking us with their clanging cry till their white, van-like wings were faint white specks in the distant air."</div>
+    <div class="attribution">— "To Red River and Beyond" (1875)</div>
+    <div class="use">Hunt event: Sandhill cranes. Need to creep 100 rods (~550 yards). DC 12 Stealth. Reward: +3 food. Flavor about the clanging cry and "unmajestic majesties."</div>
+  </div>
+
+  <h3>🌿 Environment & Trail</h3>
+
+  <div class="extract">
+    <div class="meta"><span class="tag tag-trail">Environment</span><span class="tag tag-event">New Event</span></div>
+    <div class="quote">"Our mosquito and gnat miseries culminated. Alkaline water in the swamps by which we had camped ruined the flavor of our tea, and gave all our horses and mules what Joseph called 'an elementary canal enlargement.'"</div>
+    <div class="attribution">— "To Red River and Beyond" (1875)</div>
+    <div class="use">Event: Mosquito Siege + Alkaline Water. Combined environmental hazard. Reduced tea morale bonus. Mules get sick if camped near swamp >1 night.</div>
+  </div>
+
+  <div class="extract">
+    <div class="meta"><span class="tag tag-trail">Landscape</span></div>
+    <div class="quote">"We crossed a valley called by Michelle, our guide, La Belle Vallée. Its appearance was like the deserted channel of a beautiful river, such as the Upper Mississippi would be if its waters had passed away and seas of long green grass filled their place."</div>
+    <div class="attribution">— "To Red River and Beyond" (1875)</div>
+    <div class="use">Trail location: La Belle Vallée. Flavor text when crossing this stretch of trail. Unique landscape description.</div>
+  </div>
+
+  <div class="extract">
+    <div class="meta"><span class="tag tag-trail">Landscape</span></div>
+    <div class="quote">"From the last of a range of high hills... we caught sight, for the first time, of the faint blue line in the northern horizon which marked the course of the Assiniboine... Between were innumerable lakes — some salt and some fresh — shallow ones fringed with green or black rushes, and deep ones wooded to the banks."</div>
+    <div class="attribution">— "To Red River and Beyond" (1875)</div>
+    <div class="use">Trail event: First sighting of the Assiniboine from the high hills. Milestone moment. Landscape detail for map/flavor.</div>
+  </div>
+
+  <div class="extract">
+    <div class="meta"><span class="tag tag-trail">Prairie Fire</span><span class="tag tag-event">New Event</span></div>
+    <div class="quote">"Away to the right was a column of smoke, where the careless dropping of a match had set the prairie on fire."</div>
+    <div class="attribution">— "To Red River and Beyond" (1875)</div>
+    <div class="use">Event: Prairie Fire. Smoke visible for miles. Decision: flee (lose time), burn a firebreak (costs firewood + 1 day), or wait and hope wind shifts. Risk: cart caught in fire = major wear + lost supplies.</div>
+  </div>
+
+  <h3>⚔️ NWMP & Encounters</h3>
+
+  <div class="extract">
+    <div class="meta"><span class="tag tag-nwmp">NWMP</span><span class="tag tag-event">New Event</span></div>
+    <div class="quote">"Un autre espion anglais passe. — D'où venez-vous, dit Dumont ? — Il n'est pas nécessaire que je vous le dise. — Êtes-vous avec nous ? — Je ne veux pas me mettre dans de mauvais draps."</div>
+    <div class="attribution">— Ouimet, after Gabriel Dumont's account (1885)</div>
+    <div class="use">Event: Spy/Informer encounter on the trail. Dumont interrogates a passing English spy who won't say where he's from. Decision: detain, follow, or let go. Sets tension for the 1885 timeline.</div>
+  </div>
+
+  <div class="extract">
+    <div class="meta"><span class="tag tag-nwmp">NWMP</span><span class="tag tag-crew">Crew</span></div>
+    <div class="quote">"dit un jour en présence de Dumont: Je sais que Gabriel a été trompé, et qu'il se fait mener. — Je n'ai pas d'instruction, c'est vrai, réplique celui-ci, mais j'ai en moi un gang que vous n'avez pas, ce qui vous empêche d'agir comme vous le devriez, vous, Métis."</div>
+    <div class="attribution">— Ouimet / Dumont dialogue (1885)</div>
+    <div class="use">Crew character: Gabriel Dumont personality. Pragmatic, skeptical of Riel's spiritual leadership, but loyal. "I have something you don't" — a gang/spine. Use for crew banter and decision moments.</div>
+  </div>
+
+  <h3>🏕️ Settlement & Social</h3>
+
+  <div class="extract">
+    <div class="meta"><span class="tag tag-settlement">Camp</span><span class="tag tag-crew">Morale</span></div>
+    <div class="quote">"We used to rest in camp one day in seven, Sunday the day, as often as was possible. Then our trousers and morals were mended, or, at least, patched up to appear a little better, the emigrants greased afresh their cart-wheels and their good resolutions, and washed away their sweat in the nearest river or lake. The man of science divided his time between Paul's Epistles and the compound microscope... Joseph and I indulged in a theological disputation, and all of us ended the day generally by gathering about the camp-fire after supper and singing Old Hundred, Balerma, Dundee, Ward."</div>
+    <div class="attribution">— "To Red River and Beyond" (1875)</div>
+    <div class="use">Sunday Rest mechanic. Every 7th day: mend clothes (repair), grease wheels (remove squeal), wash, crew activities (theology, reading, science), evening hymn singing (+2 morale). Camp scene with specific hymns named.</div>
+  </div>
+
+  <div class="extract">
+    <div class="meta"><span class="tag tag-trail">Buffalo Hunt</span><span class="tag tag-event">Major Event</span></div>
+    <div class="quote">"On June 15, 1840, the carts emerged from all parts of the Settlement... The picturesque procession stretched some five or six miles... There were sixteen hundred and thirty persons and twelve hundred and ten Red River carts in this expedition... a total of 1,089,000 pounds of meat were obtained on this hunt."</div>
+    <div class="attribution">— Ross, "Red River Settlement" (1856)</div>
+    <div class="use">Major event: The Buffalo Hunt. Multi-day expedition. 1,630 people, 1,210 carts. Council of captains, rules (no hunting Sabbath, no straying, penalties: saddle cut, coat cut, flogging, public shaming for theft). Massive food reward (+50-100 food). Risk: injury, lost time.</div>
+  </div>
+
+  <div class="extract">
+    <div class="meta"><span class="tag tag-settlement">Governance</span></div>
+    <div class="quote">"First a council for the nomination of officers was held which included: ten captains, each with ten soldiers under his command; ten guides and a chaplain. There was a camp flag which regulated the making and breaking of camp... During the march the flag was flying and while it was up, the guide was the chief of the expedition and everyone was subject to his orders."</div>
+    <div class="attribution">— Ross, "Red River Settlement" (1856)</div>
+    <div class="use">Brigade organization: 10 carts per brigade, 3 drivers, overseer. Camp flag system. Sunday penalties for infractions (1st: saddle cut, 2nd: coat cut, 3rd: flogging, theft: public shaming — name called 3x + "thief").</div>
+  </div>
+</div>
+
+<!-- ═══════════ TAB: LOCATIONS ═══════════ -->
+<div id="locations" class="section">
+  <h2>Trail Locations from Sources</h2>
+  <p>Specific places named in the sources. These become named waypoints on the trail with unique flavor text and events.</p>
+
+  <table class="param-table">
+    <tr><th>Location</th><th>Source</th><th>Description</th><th>Game Use</th></tr>
+    <tr><td><strong>La Belle Vallée</strong></td><td>Marbot (1875)</td><td>"Deserted channel of a beautiful river... seas of long green grass"</td><td>Scenic waypoint. Morale +2 for the beauty.</td></tr>
+    <tr><td><strong>Assiniboine Junction</strong></td><td>Marbot (1875)</td><td>"First sight of the faint blue line in the northern horizon"</td><td>Milestone. Innumerable lakes, salt and fresh.</td></tr>
+    <tr><td><strong>Mouse River</strong></td><td>Marbot (1875)</td><td>Runs within a mile of the camp. Variety of landscape colors.</td><td>Hunt opportunity (elk, antelope, cranes).</td></tr>
+    <tr><td><strong>Fort Ellice</strong></td><td>Marbot (1875)</td><td>Two-three miles from the Assiniboine-Qu'Appelle junction.</td><td>Settlement. Trading post. NWMP detachment.</td></tr>
+    <tr><td><strong>Pembina</strong></td><td>Ross (1856)</td><td>Rendezvous point. "Nothing left in the Red River Settlement" when the hunt departs.</td><td>Major gathering point. Buffalo hunt departure.</td></tr>
+    <tr><td><strong>Chienne (Cheyenne) River</strong></td><td>Ross (1856)</td><td>~150 miles from Pembina. First buffalo sighting.</td><td>Hunt event location.</td></tr>
+    <tr><td><strong>Sandy Lake</strong></td><td>Brehaut (1972)</td><td>On the trail west of Carlton House.</td><td>Waypoint. Potential forage/scavenge.</td></tr>
+    <tr><td><strong>Green Lake</strong></td><td>Brehaut (1972)</td><td>~150 miles NW of Carlton. Fastest route to English-Churchill drainage.</td><td>Fork in the trail. Choice point.</td></tr>
+  </table>
+
+  <h3>Complete Trail Network (Brehaut)</h3>
+  <p>Brehaut's article includes a map with 18 named trails. Key routes for the game:</p>
+  <div class="two-col">
+    <div>
+      <h4>Eastern Segment</h4>
+      <ul>
+        <li><strong>Trail 1:</strong> Fort Garry → Pembina → St. Paul</li>
+        <li><strong>Dawson Trail:</strong> Winnipeg → Fort William (530 miles, road + water)</li>
+        <li><strong>Oak Point Trail:</strong> South of Seine River to Ste. Anne</li>
+      </ul>
+    </div>
+    <div>
+      <h4>Western Segment</h4>
+      <ul>
+        <li><strong>Trail 6:</strong> Fort Ellice → Fort Qu'Appelle (through Wolseley, Indian Head)</li>
+        <li><strong>Trail 7:</strong> Fort Qu'Appelle → Touchwood Hills Post → Carlton Trail</li>
+        <li><strong>Trail 9:</strong> Swift Current → Battleford (225 miles)</li>
+        <li><strong>Trail 13:</strong> Carlton House → Green Lake (150 miles)</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ TAB: SPRINT PLAN ═══════════ -->
+<div id="sprint" class="section">
+  <h2>Sprint Integration Plan</h2>
+  <p>Organized by game system, with specific extracts mapped to specific implementation tasks. Each entry includes the source quote, what to build, and where it goes in the game code.</p>
+
+  <h3>Phase A — Voice & Cart Mechanics (Sprint 2a)</h3>
+
+  <div class="sprint-row">
+    <div><span class="sprint-tag" style="background:#D4A01722;color:var(--amber)">Cart</span></div>
+    <div class="sprint-content">
+      <div class="title">Cart Squeal Mechanic</div>
+      <div class="detail">Add squeal state to cart. Audio cue (creaking wheel sound). UI indicator in status bar. NWMP detection range doubled when squealing. Grease action at settlements (costs 1 shaganappi, lasts 3 segments). Source: Brehaut.</div>
+    </div>
+    <div class="sprint-effort">2-3h</div>
+  </div>
+
+  <div class="sprint-row">
+    <div><span class="sprint-tag" style="background:#D4A01722;color:var(--amber)">Cart</span></div>
+    <div class="sprint-content">
+      <div class="title">Cart Repair Events (5 types)</div>
+      <div class="detail">Felloe binding (shaganappi, 1 segment). Axle replacement (spare axle, 1 hour). Wheel-raft crossing. Squeal grease. Hub journal tapering (advanced). Source: Brehaut.</div>
+    </div>
+    <div class="sprint-effort">2-3h</div>
+  </div>
+
+  <div class="sprint-row">
+    <div><span class="sprint-tag" style="background:#4A8B3F22;color:var(--green)">Voice</span></div>
+    <div class="sprint-content">
+      <div class="title">Rewrite All Event Text — First Person</div>
+      <div class="detail">Convert all event descriptions to first-person past tense. Add sensory detail from sources. Period vocabulary: horse-flesh, cart-brigade, the Settlement. Source: All three.</div>
+    </div>
+    <div class="sprint-effort">4-6h</div>
+  </div>
+
+  <h3>Phase B — Encounters & Environment (Sprint 2b)</h3>
+
+  <div class="sprint-row">
+    <div><span class="sprint-tag" style="background:#00B4D822;color:var(--cyan)">Env</span></div>
+    <div class="sprint-content">
+      <div class="title">Mosquito + Alkaline Water Event</div>
+      <div class="detail">"Our mosquito and gnat miseries culminated. Alkaline water... ruined the flavor of our tea, and gave all our horses and mules what Joseph called 'an elementary canal enlargement.'" New environmental event. Source: Marbot.</div>
+    </div>
+    <div class="sprint-effort">2h</div>
+  </div>
+
+  <div class="sprint-row">
+    <div><span class="sprint-tag" style="background:#00B4D822;color:var(--cyan)">Env</span></div>
+    <div class="sprint-content">
+      <div class="title">Prairie Fire Event</div>
+      <div class="detail">"A column of smoke where the careless dropping of a match had set the prairie on fire." Decision: flee, burn firebreak, or wait. Risk: cart caught in fire. Source: Marbot.</div>
+    </div>
+    <div class="sprint-effort">2h</div>
+  </div>
+
+  <div class="sprint-row">
+    <div><span class="sprint-tag" style="background:#00B4D822;color:var(--cyan)">Env</span></div>
+    <div class="sprint-content">
+      <div class="title">Sunday Rest Mechanic</div>
+      <div class="detail">"Then our trousers and morals were mended... greased afresh their cart-wheels... gathering about the camp-fire after supper and singing Old Hundred, Balerma, Dundee." Every 7th day. Source: Marbot.</div>
+    </div>
+    <div class="sprint-effort">2-3h</div>
+  </div>
+
+  <div class="sprint-row">
+    <div><span class="sprint-tag" style="background:#D4401A22;color:var(--red)">NWMP</span></div>
+    <div class="sprint-content">
+      <div class="title">NWMP Patrol Encounter</div>
+      <div class="detail">Red-coated riders, sergeant questions, cart search for liquor. Options: comply, build rapport (Charisma DC 10), claim Métis passage rights (Diplomacy DC 12). Source: NWMP report + Dumont.</div>
+    </div>
+    <div class="sprint-effort">3h</div>
+  </div>
+
+  <div class="sprint-row">
+    <div><span class="sprint-tag" style="background:#D4401A22;color:var(--red)">Social</span></div>
+    <div class="sprint-content">
+      <div class="title">Spy/Informer Encounter</div>
+      <div class="detail">"D'où venez-vous, dit Dumont ?" Interrogation event on trail. Decision: detain, follow, or let go. Sets 1885 tension. Source: Ouimet/Dumont.</div>
+    </div>
+    <div class="sprint-effort">2h</div>
+  </div>
+
+  <div class="sprint-row">
+    <div><span class="sprint-tag" style="background:#8B691433;color:var(--amber)">Animal</span></div>
+    <div class="sprint-content">
+      <div class="title">Mule Behavior Events (3 types)</div>
+      <div class="detail">"Geometry Lesson" (spins in circles). Sick/dying animal (left behind, clipped ear). Stubborn refusal. Source: Marbot.</div>
+    </div>
+    <div class="sprint-effort">2h</div>
+  </div>
+
+  <div class="sprint-row">
+    <div><span class="sprint-tag" style="background:#8B691433;color:var(--amber)">Animal</span></div>
+    <div class="sprint-content">
+      <div class="title">Hunt Events (Elk, Antelope, Crane, Eagle)</div>
+      <div class="detail">Elk escapes into alder swamp. Antelope too fast. Cranes need stalking. Eagle hovers "without an apparent stroke of his pinions." DC 12-14. Source: Marbot.</div>
+    </div>
+    <div class="sprint-effort">3-4h</div>
+  </div>
+
+  <h3>Phase C — Major Events (Sprint 2c)</h3>
+
+  <div class="sprint-row">
+    <div><span class="sprint-tag" style="background:#6B4CE622;color:#8B7AE8">Major</span></div>
+    <div class="sprint-content">
+      <div class="title">The Buffalo Hunt — Multi-Step Event Chain</div>
+      <div class="detail">1,630 people, 1,210 carts, 2-month expedition. Council of captains, flag system, penalties for infractions, 1,089,000 lbs of meat. "The picturesque procession stretched five or six miles." Source: Ross.</div>
+    </div>
+    <div class="sprint-effort">5-6h</div>
+  </div>
+
+  <div class="sprint-row">
+    <div><span class="sprint-tag" style="background:#6B4CE622;color:#8B7AE8">Major</span></div>
+    <div class="sprint-content">
+      <div class="title">Landscape Milestone Events</div>
+      <div class="detail">La Belle Vallée (deserted river channel). Assiniboine first sighting. Mouse River junction. Salt and fresh lakes. "Innumerable lakes... shallow ones fringed with rushes." Source: Marbot.</div>
+    </div>
+    <div class="sprint-effort">2-3h</div>
+  </div>
+
+  <div class="sprint-row">
+    <div><span class="sprint-tag" style="background:#6B4CE622;color:#8B7AE8">Major</span></div>
+    <div class="sprint-content">
+      <div class="title">Fort Encounters (Carlton, Ellice, Qu'Appelle, Walsh)</div>
+      <div class="detail">Each fort has unique events based on NWMP report: Carlton (liquor search), Ellice (customs), Qu'Appelle (spy encounter), Walsh (border enforcement + Sioux situation).</div>
+    </div>
+    <div class="sprint-effort">3-4h</div>
+  </div>
+</div>
+
+<!-- ═══════════ TAB: QUICK REF ═══════════ -->
+<div id="quick" class="section">
+  <h2>Quick Reference — Numbers & Facts</h2>
+  <p>Hard numbers from the sources for game balancing.</p>
+
+  <div class="quick-ref">
+    <div class="qr-card">
+      <div class="title">Cart Specifications</div>
+      <div class="detail">Weight: 550 lbs · Load: 500 lbs · Wheel diameter: 5'3" · Body: 3'×5-6' · Ground to floor: 3' · Total length: 12'4" · 12 spokes (most common)</div>
+    </div>
+    <div class="qr-card">
+      <div class="title">Brigade Organization</div>
+      <div class="detail">10 carts per brigade · 3 drivers per brigade · 1 overseer · Speed: 2 mph · Daily: 20-25 miles max · Procession length: up to 2 miles</div>
+    </div>
+    <div class="qr-card">
+      <div class="title">Buffalo Hunt (1840)</div>
+      <div class="detail">1,630 people · 1,210 carts · 2 months · 1,089,000 lbs meat · 10 captains · 10 guides · 1 chaplain</div>
+    </div>
+    <div class="qr-card">
+      <div class="title">Cart Construction</div>
+      <div class="detail">Hubs: elm · Axle & shafts: oak · Spokes & felloes: ash · Side sticks: willow/poplar · NO metal used · Tools: hand-axe, saw, draw-knife, auger</div>
+    </div>
+    <div class="qr-card">
+      <div class="title">Trail Distances</div>
+      <div class="detail">Carlton Trail: ~900 miles (Fort Garry to Fort Edmonton) · Dawson Trail: 530 miles (road + water) · Green Lake: 150 miles NW of Carlton · Pembina: 65 miles south of Winnipeg</div>
+    </div>
+    <div class="qr-card">
+      <div class="title">NWMP Force (1885)</div>
+      <div class="detail">Total: 562 (mobilized) · Patrol: 2-6 constables · Frequency: biweekly to monthly (trading season) · Seasonal: summer/fall peak</div>
+    </div>
+  </div>
+</div>
+
+<div class="footer">
+  Cart Trail — Historical Source Library · 4 Sources · 236+ Extracts Tagged · May 2026
+</div>
+
+<script>
+function show(id, el) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  el.classList.add('active');
+}
+</script>
+</body>
+</html>

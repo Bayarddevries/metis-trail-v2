@@ -1,0 +1,11 @@
+
+═══ Single Game (seed=742268, conservative) ═══
+
+ERROR: node exit -5
+  stderr: Stacktrace:
+    ptr1=0x110572bc0c69
+    ptr2=(nil)
+    ptr3=(nil)
+    ptr4=(nil)
+    ptr5=(nil)
+    

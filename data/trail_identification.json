@@ -1,0 +1,217 @@
+{
+  "1": {
+    "name": "Red River Trail (West/Middle)",
+    "mhs": "Trail 2",
+    "desc": "St. Paul \u2192 Fort Garry via west side of Red River"
+  },
+  "2": {
+    "name": "Pembina Trail",
+    "mhs": "Trail 2 branch",
+    "desc": "Fort Garry south to Pembina / Ste. Anne area"
+  },
+  "3": {
+    "name": "Carlton Trail (eastern segment)",
+    "mhs": "Trail 1",
+    "desc": "Fort Garry \u2192 Portage la Prairie"
+  },
+  "4": {
+    "name": "Lake Manitoba Trail",
+    "mhs": "local",
+    "desc": "Fort Garry north to Lake Manitoba area"
+  },
+  "5": {
+    "name": "Dawson Trail",
+    "mhs": "Trail 18",
+    "desc": "Lake of the Woods \u2192 Ste. Anne \u2192 Fort Garry"
+  },
+  "6": {
+    "name": "Woods Trail / East Red River Trail",
+    "mhs": "Trail 4",
+    "desc": "St. Paul \u2192 Detroit Lakes \u2192 Otter Tail \u2192 Fort Garry"
+  },
+  "7": {
+    "name": "Crow Wing Trail",
+    "mhs": "Trail 3",
+    "desc": "St. Paul \u2192 Crow Wing \u2192 east side of Red River \u2192 Fort Garry"
+  },
+  "8": {
+    "name": "Dawson Route (water segment)",
+    "mhs": "Trail 18 (water)",
+    "desc": "Lake of the Woods / Ontario water corridor"
+  },
+  "9": {
+    "name": "Yellow Quill Trail (Lake Manitoba branch)",
+    "mhs": "Trail 6",
+    "desc": "Lake Manitoba Narrows area connector"
+  },
+  "10": {
+    "name": "Red River local trail",
+    "mhs": "local",
+    "desc": "Short connector near Fort Garry / St. Norbert"
+  },
+  "11": {
+    "name": "Carlton Trail (western variant)",
+    "mhs": "Trail 1",
+    "desc": "Fort Garry \u2192 Portage la Prairie"
+  },
+  "12": {
+    "name": "Carlton Trail / Yellow Quill Trail",
+    "mhs": "Trail 1/6",
+    "desc": "Portage la Prairie \u2192 Minnedosa"
+  },
+  "13": {
+    "name": "International Border Trail",
+    "mhs": "unnumbered",
+    "desc": "Pembina \u2192 Wood Mountain \u2192 Fort Walsh \u2192 Whoop-Up (follows 49th parallel, whiskey trader/NWMP route)"
+  },
+  "14": {
+    "name": "Fort Ellice area trail",
+    "mhs": "local",
+    "desc": "Local trail near Fort Ellice / Russell area"
+  },
+  "15": {
+    "name": "Carlton Trail (south branch)",
+    "mhs": "Trail 1",
+    "desc": "Minnedosa \u2192 Fort Ellice"
+  },
+  "16": {
+    "name": "Carlton Trail connector",
+    "mhs": "Trail 1",
+    "desc": "Minnedosa area shortcut/variant"
+  },
+  "17": {
+    "name": "Swan Lake Trail",
+    "mhs": "Trail 5",
+    "desc": "Fort Ellice \u2192 Fort Livingstone / Swan River"
+  },
+  "18": {
+    "name": "Wood Mountain-Fort Ellice Trail (east)",
+    "mhs": "Trail 11",
+    "desc": "Fort Ellice \u2192 Weyburn \u2192 Carlyle"
+  },
+  "19": {
+    "name": "Green Lake-Carlton Trail",
+    "mhs": "Trail 13",
+    "desc": "Carlton House \u2192 Green Lake (with Prince Albert branch)"
+  },
+  "20": {
+    "name": "Wood Mountain-Fort Ellice Trail",
+    "mhs": "Trail 11",
+    "desc": "Wood Mountain \u2192 Fort Livingstone \u2192 Fort Qu'Appelle"
+  },
+  "21": {
+    "name": "Carlton Trail (north branch)",
+    "mhs": "Trail 1",
+    "desc": "Fort Ellice \u2192 Touchwood Hills"
+  },
+  "22": {
+    "name": "Fort Ellice-Fort Qu'Appelle Trail",
+    "mhs": "Trail 7",
+    "desc": "Fort Ellice \u2192 Indian Head \u2192 Fort Qu'Appelle"
+  },
+  "23": {
+    "name": "Fort Macleod-Fort Walsh-Fort Qu'Appelle Trail",
+    "mhs": "Trail 10",
+    "desc": "Fort Qu'Appelle \u2192 Moose Jaw \u2192 Regina \u2192 Fort Walsh"
+  },
+  "24": {
+    "name": "Montana-Elbow-Fort-\u00e0-la-Corne Trail",
+    "mhs": "Trail 8",
+    "desc": "Elbow on S. Saskatchewan \u2192 Batoche \u2192 Carlton \u2192 Prince Albert"
+  },
+  "25": {
+    "name": "Batoche/Carlton connector",
+    "mhs": "Trail 8 segment",
+    "desc": "Carlton House \u2192 Batoche area"
+  },
+  "26": {
+    "name": "Prince Albert-Montreal Lake Trail",
+    "mhs": "Trail 14",
+    "desc": "Segment near Prince Albert"
+  },
+  "27": {
+    "name": "Fort Macleod-Fort Calgary-Edmonton Trail",
+    "mhs": "Trail 15",
+    "desc": "Fort Macleod \u2192 Calgary \u2192 Red Deer \u2192 Edmonton"
+  },
+  "28": {
+    "name": "Peace River Trail",
+    "mhs": "unnumbered",
+    "desc": "Northern Alberta \u2014 Peace River/High Level \u2192 Edmonton corridor"
+  },
+  "29": {
+    "name": "Grande Prairie area trail",
+    "mhs": "unnumbered",
+    "desc": "Local trail near Grande Prairie / northern Alberta"
+  },
+  "30": {
+    "name": "Whitecourt area trail",
+    "mhs": "unnumbered",
+    "desc": "Local trail near Whitecourt / Athabasca region"
+  },
+  "31": {
+    "name": "Jasper-Carlton Trail",
+    "mhs": "unnumbered",
+    "desc": "Athabasca/Canadian Rockies \u2192 Carlton House corridor (Yellowhead route variant)"
+  },
+  "32": {
+    "name": "Carlton House-Batoche connector",
+    "mhs": "Trail 8 segment",
+    "desc": "Short trail between Carlton and Batoche"
+  },
+  "33": {
+    "name": "Edmonton northern trail",
+    "mhs": "unnumbered",
+    "desc": "Local trail north of Edmonton"
+  },
+  "34": {
+    "name": "Battleford western trail",
+    "mhs": "local",
+    "desc": "Battleford \u2192 western Saskatchewan"
+  },
+  "35": {
+    "name": "Edmonton-Fort Walsh Trail",
+    "mhs": "Trail 16 variant",
+    "desc": "Edmonton \u2192 Saskatchewan Landing \u2192 Swift Current \u2192 Fort Walsh area"
+  },
+  "36": {
+    "name": "Battleford-Red Deer Forks Trail",
+    "mhs": "Trail 12",
+    "desc": "Battleford \u2192 Kerrobert \u2192 Red Deer River forks"
+  },
+  "37": {
+    "name": "Fort Walsh-Edmonton Trail",
+    "mhs": "Trail 16",
+    "desc": "Edmonton \u2192 Whoop-Up area \u2192 Fort Walsh"
+  },
+  "38": {
+    "name": "Red Deer AB local trail",
+    "mhs": "local",
+    "desc": "Local trail near Red Deer, Alberta"
+  },
+  "39": {
+    "name": "Blackfoot Crossing trail",
+    "mhs": "Trail 17 segment",
+    "desc": "Local trail near Fort Calgary / Blackfoot area"
+  },
+  "40": {
+    "name": "Fort Calgary local trail",
+    "mhs": "local",
+    "desc": "Short trail near Fort Calgary"
+  },
+  "41": {
+    "name": "Fort Macleod-Edmonton Trail",
+    "mhs": "Trail 17",
+    "desc": "Whoop-Up \u2192 Blackfoot Crossing \u2192 Red Deer \u2192 Edmonton"
+  },
+  "42": {
+    "name": "Swift Current-Battleford Trail",
+    "mhs": "Trail 9",
+    "desc": "Swift Current \u2192 Saskatchewan Landing \u2192 Battleford"
+  },
+  "43": {
+    "name": "Swift Current-Battleford Trail (north)",
+    "mhs": "Trail 9",
+    "desc": "Saskatoon \u2192 Biggar \u2192 Battleford"
+  }
+}

@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cart Trail — Sprint 2 Plan v2 (w/ Historical Sources)</title>
+<style>
+:root {
+  --bg: #0F0D0A; --bg-card: #1A1612; --bg-card2: #221E18;
+  --border: #3D3528; --amber: #D4A017; --amber-dim: #8B6914;
+  --cyan: #00B4D8; --cyan-dim: #0077A0;
+  --red: #D4401A; --green: #4A8B3F; --purple: #8B7AE8;
+  --text: #E8DCC8; --text-dim: #9A8B78;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: Georgia, serif; background: var(--bg); color: var(--text); line-height: 1.7; }
+
+.header { background: linear-gradient(135deg, #1A1612 0%, #0F0D0A 100%); border-bottom: 2px solid var(--amber-dim); padding: 40px 20px; text-align: center; }
+.header h1 { font-family: 'Rye', Georgia, serif; font-size: 32px; color: var(--amber); letter-spacing: 2px; margin-bottom: 8px; }
+.header .subtitle { color: var(--text-dim); font-size: 13px; letter-spacing: 4px; text-transform: uppercase; }
+.header .sources { margin-top: 16px; font-size: 12px; color: var(--text-dim); font-style: italic; }
+.header .sources a { color: var(--cyan-dim); }
+
+.tabs { display: flex; gap: 0; border-bottom: 2px solid var(--border); background: var(--bg-card); padding: 0 20px; overflow-x: auto; }
+.tab { padding: 14px 20px; font-size: 13px; font-family: 'Rye', Georgia, serif; color: var(--text-dim); cursor: pointer; border-bottom: 2px solid transparent; white-space: nowrap; }
+.tab:hover { color: var(--text); }
+.tab.active { color: var(--amber); border-bottom-color: var(--amber); }
+
+.section { max-width: 960px; margin: 0 auto; padding: 28px 20px; display: none; }
+.section.active { display: block; }
+
+h2 { font-family: 'Rye', Georgia, serif; font-size: 22px; color: var(--amber); margin-bottom: 12px; }
+h3 { font-size: 14px; color: var(--cyan); margin: 20px 0 8px; text-transform: uppercase; letter-spacing: 1.5px; }
+h4 { font-size: 13px; color: var(--amber-dim); margin: 16px 0 6px; }
+p { color: var(--text-dim); font-size: 14px; margin-bottom: 10px; }
+ul { padding-left: 20px; margin: 8px 0 16px; }
+li { color: var(--text-dim); font-size: 14px; margin-bottom: 6px; }
+
+/* ── QUOTE ── */
+.hist-quote {
+  background: var(--bg-card); border-left: 3px solid var(--amber); border-radius: 0 6px 6px 0;
+  padding: 14px 18px; margin: 12px 0; font-style: italic; font-size: 14px; color: var(--text);
+}
+.hist-quote .src { display: block; margin-top: 8px; font-style: normal; font-size: 11px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; }
+
+/* ── PRIORITY BADGES ── */
+.badge { display: inline-block; padding: 2px 10px; border-radius: 3px; font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 10px; }
+.p-critical { background: #D4401A33; color: var(--red); border: 1px solid var(--red); }
+.p-high { background: #D4A01733; color: var(--amber); border: 1px solid var(--amber-dim); }
+.p-medium { background: #00B4D822; color: var(--cyan); border: 1px solid var(--cyan-dim); }
+
+/* ── CHANGE CARDS ── */
+.change-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; padding: 16px; margin: 12px 0; }
+.change-card .tags { display: flex; gap: 6px; margin-bottom: 8px; flex-wrap: wrap; }
+.change-card .tag { font-size: 10px; padding: 2px 8px; border-radius: 3px; text-transform: uppercase; letter-spacing: 1px; }
+.tag-balance { background: #D4401A22; color: var(--red); border: 1px solid #D4401A44; }
+.tag-system { background: #00B4D822; color: var(--cyan); border: 1px solid var(--cyan-dim); }
+.tag-content { background: #4A8B3F22; color: var(--green); border: 1px solid #4A8B3F44; }
+.tag-source { background: #8B691433; color: var(--amber); border: 1px solid var(--amber-dim); }
+.change-card .title { font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+.change-card .detail { font-size: 13px; color: var(--text-dim); line-height: 1.6; }
+.change-card .effort { font-size: 12px; color: var(--cyan); margin-top: 10px; text-align: right; }
+.change-card.changed { border-color: var(--amber-dim); }
+
+/* ── TABLES ── */
+.ptable { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 13px; }
+.ptable th { background: var(--bg-card2); color: var(--amber); padding: 8px 12px; text-align: left; border-bottom: 2px solid var(--amber-dim); }
+.ptable td { padding: 8px 12px; border-bottom: 1px solid var(--border); color: var(--text-dim); }
+.ptable tr:hover td { background: var(--bg-card2); }
+.old { color: var(--red); }
+.new { color: var(--green); }
+.arrow { color: var(--amber); }
+
+/* ── TWO COL ── */
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 16px 0; }
+@media (max-width: 600px) { .two-col { grid-template-columns: 1fr; } }
+
+/* ── BEFORE/AFTER ── */
+.before-after { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 16px 0; }
+@media (max-width: 600px) { .before-after { grid-template-columns: 1fr; } }
+.before-box { background: #1A1210; border: 1px solid #3D2020; border-radius: 6px; padding: 14px; }
+.after-box { background: #101A14; border: 1px solid #203D28; border-radius: 6px; padding: 14px; }
+.before-box .label { font-size: 10px; color: var(--red); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+.after-box .label { font-size: 10px; color: var(--green); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+.before-box .text, .after-box .text { font-size: 13px; color: var(--text-dim); font-style: italic; }
+
+/* ── SUMMARY BOX ── */
+.summary-box { background: #0F1A12; border: 1px solid var(--green); border-radius: 8px; padding: 20px; margin: 20px 0; }
+.summary-box h3 { color: var(--green); margin-top: 0; }
+
+/* ── FOOTER ── */
+.footer { text-align: center; padding: 30px 20px; color: var(--text-dim); font-size: 12px; border-top: 1px solid var(--border); }
+.footer a { color: var(--cyan-dim); }
+</style>
+<link href="https://fonts.googleapis.com/css2?family=Rye&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<div class="header">
+  <h1>🛺 SPRINT 2 PLAN v2</h1>
+  <div class="subtitle">Recommendations + Historical Source Integration</div>
+  <div class="sources">Sources: <a href="https://bayarddevries.github.io/metis-trail/SOURCE-LIBRARY.html">Full Source Library</a> · Ross (1856) · Marbot (1875) · Brehaut (1972) · Ouimet/Dumont (1885)</div>
+</div>
+
+<div class="tabs">
+  <div class="tab active" onclick="show('overview',this)">📋 Overview</div>
+  <div class="tab" onclick="show('economy',this)">🍖 Economy</div>
+  <div class="tab" onclick="show('cart',this)">🛺 Cart</div>
+  <div class="tab" onclick="show('settlement',this)">🏘️ Settlement</div>
+  <div class="tab" onclick="show('events',this)">⚡ Events</div>
+  <div class="tab" onclick="show('crew',this)">👥 Crew</div>
+  <div class="tab" onclick="show('sprint',this)">🔨 Build Order</div>
+</div>
+
+<!-- ═══════════ OVERVIEW ═══════════ -->
+<div id="overview" class="section active">
+  <h2>What Changed with the Sources</h2>
+  <p>The original Sprint 2 recommendations were design-driven. The historical sources don't change the <em>what</em> — we still need economy rework, cart mechanics, settlement depth, event variety, and crew systems. But they transform the <em>how</em> and <em>why</em> of every recommendation. Here's what's different:</p>
+
+  <div class="two-col">
+    <div>
+      <h3>Before (Design-Only)</h3>
+      <ul>
+        <li>"Add cart squeal mechanic" — because it's a push-your-luck tradeoff</li>
+        <li>"Add settlement actions" — because stops need depth</li>
+        <li>"Add multi-step events" — because choices need variety</li>
+        <li>"Add crew personality" — because characters need attachment</li>
+        <li>"Balance economy" — because win rate is 0%</li>
+      </ul>
+    </div>
+    <div>
+      <h3>After (Source-Grounded)</h3>
+      <ul>
+        <li>"Cart squeal heard for miles" — Brehaut documents exactly how it works and why. It's not a design invention; it's a historical fact that becomes a mechanic.</li>
+        <li>"Sunday rest: mend trousers, grease wheels, sing hymns" — Marbot describes the actual weekly rhythm. Settlement actions emerge from what people actually did.</li>
+        <li>"The Geometry Lesson" — Marbot's mule literally tried to kill him. That's not a designed event; it's a story that becomes one.</li>
+        <li>"10 captains, 10 guides, flag system, penalties for theft" — Ross documents the actual governance structure of a cart brigade.</li>
+        <li>"1,089,000 lbs of meat from one hunt" — Ross gives us the real numbers for calibrating the food economy.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="hist-quote">
+    "When loaded it gave forth a blood-curdling squeal which could be heard for miles and which came to be associated with it. This squeal was caused by the friction of the dry wood of the hub turning on the axle and could not be eliminated. If grease was used the dust of the trail would mix with the grease and wear down the axle."
+    <span class="src">— Brehaut (1972), after Alexander Henry's 1801 account</span>
+  </div>
+
+  <h3>Sources Change the Priority</h3>
+  <p>Some recommendations move up because the sources make them easier to implement with authenticity:</p>
+  <ul>
+    <li><strong>Cart mechanics jump to #1.</strong> Brehaut gives us exact specs (550 lb cart, 500 lb load, 5'3" wheels, 12 spokes, dished design, shaganappi repairs, wheel-raft river crossings). This isn't guessing — it's documenting.</li>
+    <li><strong>Events get specific.</strong> Instead of "add multi-step events," we have actual scenarios: the Geometry Lesson (mule), the Mosquito Siege, the Prairie Fire, the Eagle Hunt, the Buffalo Hunt (1,210 carts, 1,089,000 lbs of meat). Each event writes itself from the source.</li>
+    <li><strong>Settlement depth gets real.</strong> Ross describes the Sunday rest day in perfect detail. Marbot describes camp life, hymn singing, theology lectures on microscopes. The settlement isn't abstract anymore — it's a place.</li>
+    <li><strong>Economy calibration gets anchored.</strong> Real numbers: 28-36 food needed for a trip, 500 lb cart capacity, 20-25 miles per day, 10-cart brigades. We can balance against reality instead of guessing.</li>
+  </ul>
+
+  <h3>New Recommendations from Sources</h3>
+  <p>The sources also add recommendations that weren't in the original plan:</p>
+  <ul>
+    <li><strong>Cart voice / narrative perspective:</strong> The game should sound like someone who was there. Marbot's voice — wry, observant, self-deprecating — is the model.</li>
+    <li><strong>Environmental rhythm:</strong> Day-by-day trail life with Sunday rest, seasonal changes, landscape milestones. The journey should have a rhythm, not just be "click travel."</li>
+    <li><strong>River crossings as events:</strong> Brehaut documents multiple crossing methods (ford, cajeux/ferry, wheel-raft). Each river should be a decision point.</li>
+    <li><strong>Brigade social structure:</strong> 10 carts, 3 drivers, overseer, flag system, council of captains, penalties for infractions. This is the social fabric of the trail.</li>
+  </ul>
+</div>
+
+<!-- ═══════════ ECONOMY ═══════════ -->
+<div id="economy" class="section">
+  <span class="badge p-critical">Critical</span>
+  <h2>1. Economy Rework</h2>
+  <p>The sources give us real numbers to calibrate against. This isn't guesswork anymore — we know how much food a trip actually required.</p>
+
+  <div class="hist-quote">
+    "There were sixteen hundred and thirty persons and twelve hundred and ten Red River carts in this expedition... a total of 1,089,000 pounds of meat were obtained on this hunt."
+    <span class="src">— Ross (1856), describing the 1840 spring buffalo hunt</span>
+  </div>
+
+  <h3>Calibrated Food Economy (from Sources)</h3>
+  <table class="ptable">
+    <tr><th>Parameter</th><th class="old">Current</th><th>→</th><th class="new">Target</th><th>Source Basis</th></tr>
+    <tr><td>Starting Food</td><td class="old">12</td><td class="arrow">→</td><td class="new">30</td><td>28 segments avg × 1 food/day = 28. Round to 30 for margin.</td></tr>
+    <tr><td>Cart Capacity</td><td class="old">∞</td><td class="arrow">→</td><td class="new">500 lbs</td><td>Brehaut: "load capacity in the neighbourhood of 500 pounds"</td></tr>
+    <tr><td>Daily Travel</td><td class="old">1 segment</td><td class="arrow">→</td><td class="new">1 segment</td><td>Brehaut: 20-25 miles/day, 2 mph</td></tr>
+    <tr><td>Trip Length</td><td class="old">~38 segments</td><td class="arrow">→</td><td class="new">~40 segments</td><td>900 miles / 22.5 miles/day ≈ 40 days</td></tr>
+    <tr><td>Food at Rest</td><td class="old">-1</td><td class="arrow">→</td><td class="new">+2</td><td>Marbot/Sources: settlements provisioned travellers</td></tr>
+    <tr><td>Trade Food Gain</td><td class="old">+3-4</td><td class="arrow">→</td><td class="new">+6-10</td><td>Balanced against 40-segment trip, need ~2 buffaloes worth</td></tr>
+    <tr><td>Breakdown Threshold</td><td class="old">4</td><td class="arrow">→</td><td class="new">5</td><td>Sources: carts took real punishment; need breathing room</td></tr>
+  </table>
+
+  <h3>Tight but Fair (from Ross)</h3>
+  <p>Ross describes the 1840 hunt as a massive logistical operation. The game's economy should mirror this: the player is always <em>close</em> to the edge, but smart play gets them through. Ross's numbers prove the trail was survivable — thousands of people made it.</p>
+  <ul>
+    <li><strong>Target win rate: 30-40%</strong> for an informed player. Current: 0%.</li>
+    <li><strong>Food should last ~28 days without resupply.</strong> At 1 food/day, 30 starting = 30 days. First settlement at day ~3. At day ~30, another settlement. Final push from Fort Edmonton at ~day 38.</li>
+    <li><strong>Settlements are lifelines.</strong> +2 food at rest means the player who manages their stops right can stretch 30 food to 40+ days.</li>
+  </ul>
+</div>
+
+<!-- ═══════════ CART ═══════════ -->
+<div id="cart" class="section">
+  <span class="badge p-high">High</span>
+  <h2>2. Cart System (Source-Grounded)</h2>
+  <p>Brehaut gives us exact cart specifications. Marbot gives us the daily reality of cart travel. This isn't designed — it's documented.</p>
+
+  <div class="two-col">
+    <div>
+      <h3>Cart Specs (Brehaut)</h3>
+      <ul>
+        <li><strong>Weight:</strong> 550 lbs (cart body)</li>
+        <li><strong>Load capacity:</strong> 500 lbs</li>
+        <li><strong>Wheel diameter:</strong> 5'3"</li>
+        <li><strong>Body:</strong> 3' × 5-6'</li>
+        <li><strong>Total length:</strong> 12'4"</li>
+        <li><strong>Spokes:</strong> 12 (most common)</li>
+        <li><strong>Wood:</strong> Elm hubs, oak axle/shafts, ash spokes/felloes</li>
+        <li><strong>NO metal</strong> in construction</li>
+      </ul>
+    </div>
+    <div>
+      <h3>New Mechanics from Sources</h3>
+      <ul>
+        <li><strong>Cart Squeal:</strong> "Blood-curdling squeal heard for miles." NWMP detection doubled.</li>
+        <li><strong>Dished Wheels:</strong> 3-inch dish for stability. Prevents tipping on rough terrain.</li>
+        <li><strong>Felloe Repair:</strong> Shaganappi + soaked rawhide binding. Temporary, lasts 1 segment.</li>
+        <li><strong>Wheel-Raft Crossing:</strong> Remove wheels, lash concave-up, ferry across.</li>
+        <li><strong>Sunday Grease:</strong> "Greased afresh their cart-wheels." Removes squeal for 3 segments.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="hist-quote">
+    "Essaying to remount Mule, into whom must have transmigrated the crazy soul of some defunct geometer, he suddenly seemed to behold in me his centre, conceived himself a radius, and proposed to pass the rest of his life in describing a complimentary circumference, his tail doing the tangents."
+    <span class="src">— "To Red River and Beyond" (1875)</span>
+  </div>
+
+  <h3>Cart Events from Sources</h3>
+  <div class="change-card changed">
+    <div class="tags"><span class="tag tag-system">System</span><span class="tag tag-source">Marbot</span></div>
+    <div class="title">🦟 The Geometry Lesson — Mule Behavior Event</div>
+    <div class="detail">Mule refuses, spins in circles ("describing a complimentary circumference"), bucks rider off. DC 12 Horsemanship. Failure: lost half day. Success: remount and continue.</div>
+    <div class="effort">1-2 hours</div>
+  </div>
+
+  <div class="change-card changed">
+    <div class="tags"><span class="tag tag-system">System</span><span class="tag tag-source">Brehaut</span></div>
+    <div class="title">🛞 Cart Squeal Mechanic</div>
+    <div class="detail">Ungreased wheels squeal audibly. NWMP detection range doubled. Buffalo/herds visible from further (+2 segments). Grease at settlement: costs 1 shaganappi, lasts 3 segments. Audio cue + UI indicator.</div>
+    <div class="effort">2-3 hours</div>
+  </div>
+
+  <div class="change-card changed">
+    <div class="tags"><span class="tag tag-system">System</span><span class="tag tag-source">Brehaut</span></div>
+    <div class="title">🪵 River Crossing — Wheel-Raft Option</div>
+    <div class="detail">"Removing the wheels and lashing them together concave side upward. Then the cart body and cargo were placed upon them and ferried across the water." Requires removing 2 wheels (1 hour). Must reattach after.</div>
+    <div class="effort">2 hours</div>
+  </div>
+</div>
+
+<!-- ═══════════ SETTLEMENT ═══════════ -->
+<div id="settlement" class="section">
+  <span class="badge p-high">High</span>
+  <h2>3. Settlement Overhaul</h2>
+  <p>Marbot describes Sunday rest in perfect detail. Ross describes the social fabric. The settlement isn't abstract — it's a place with rhythm and routine.</p>
+
+  <div class="hist-quote">
+    "Then our trousers and morals were mended, or, at least, patched up to appear a little better, the emigrants greased afresh their cart-wheels and their good resolutions, and washed away their sweat in the nearest river or lake. The man of science divided his time between Paul's Epistles and the compound microscope... and all of us ended the day generally by gathering about the camp-fire after supper and singing Old Hundred, Balerma, Dundee, Ward."
+    <span class="src">— "To Red River and Beyond" (1875)</span>
+  </div>
+
+  <h3>Sunday Rest Mechanic (from Marbot)</h3>
+  <div class="change-card changed">
+    <div class="tags"><span class="tag tag-system">System</span><span class="tag tag-source">Marbot</span></div>
+    <div class="title">⛪ Sunday Rest Day</div>
+    <div class="detail">Every 7th day, crew can rest. Actions: mend clothes (-1 wear +1 morale), grease cart wheels (remove squeal), bathe in river (+1 morale), theology/science lecture (-1 boredom), evening hymn singing (+2 morale). Crew must stay rested or risk exhaustion.</div>
+    <div class="effort">3-4 hours</div>
+  </div>
+
+  <h3>Settlement Types (from Ross + NWMP Report)</h3>
+  <table class="ptable">
+    <tr><th>Type</th><th>Source Detail</th><th>Game Actions</th></tr>
+    <tr><td><strong>⛪ Mission</strong></td><td>Marbot: "the man of science... between Paul's Epistles and the compound microscope"</td><td>Rest (+2 food), Heal (injuries), Gather Rumours, Theology bonus (+1 morale)</td></tr>
+    <tr><td><strong>🛖 Métis Settlement</strong></td><td>Ross: council of captains, flag system</td><td>Rest (+2 food), Forage (+1-4 food, DC 12), Trade (better rates), Social (+2 morale)</td></tr>
+    <tr><td><strong>🏪 Trading Post</strong></td><td>Brehaut: "substantial police station" at Qu'Appelle</td><td>Trade (full rates), Repair (-2 wear, -1 trade good), Recruit crew, NWMP search risk</td></tr>
+    <tr><td><strong>🏰 HBC Fort (Carlton/Edmonton)</strong></td><td>NWMP Report: Fort Carlton = main NWMP base</td><td>Full services, NWMP encounter, Customs search, Full repair, Full rest</td></tr>
+  </table>
+</div>
+
+<!-- ═══════════ EVENTS ═══════════ -->
+<div id="events" class="section">
+  <span class="badge p-high">High</span>
+  <h2>4. Events — Now Source-Grounded</h2>
+  <p>The sources give us 15+ specific scenarios that become events. Each one writes itself from the source text.</p>
+
+  <h3>New Events from Sources</h3>
+
+  <div class="change-card changed">
+    <div class="tags"><span class="tag tag-content">Content</span><span class="tag tag-source">Marbot</span></div>
+    <div class="title">🦟 Mosquito Siege + Alkaline Water</div>
+    <div class="detail">"'Our mosquito and gnat misgies culminated. Alkaline water in the swamps... ruined the flavor of our tea, and gave all our horses and mules what Joseph called an elementary canal enlargement.'" Camp near marsh in summer = mosquito event. Choices: burn green wood for smoke (risk prairie fire), apply mud/grease, move camp higher ground.</div>
+    <div class="effort">2 hours</div>
+  </div>
+
+  <div class="change-card changed">
+    <div class="tags"><span class="tag tag-content">Content</span><span class="tag tag-source">Marbot</span></div>
+    <div class="title">🦌 Elk Hunt (Alley Sl</div>
+    <div class="detail">"'The prospect of killing an elk was no more to be resisted... we capped our rifles and cantered along in the track of his great leaps... till we saw him shake his antlers proudly and plunge into an alder swamp two or three miles away.'" Chase elk into swamp. Decision: pursue or let go. Reward: +4-6 food.</div>
+    <div class="effort">2 hours</div>
+  </div>
+
+  <div class="change-card changed">
+    <div class="tags"><span class="tag tag-content">Content</span><span class="tag tag-source">Marbot</span></div>
+    <div class="title">🦅 Eagle Hunt</div>
+    <div class="detail">"'I fired with my rifle and hit him, knocking out a few tail-feathers; but not fatally... he only tumbled, fluttering three or four times his own wing-spread, and then recovered himself and flew off into upper air... without an apparent stroke of his pinions, he kept himself steadily poised and balanced in the same spot.'" DC 14 to kill. Wounded = morale +1. Killed = +1 food + feathers (trade item).</div>
+    <div class="effort">2 hours</div>
+  </div>
+
+  <div class="change-card changed">
+    <div class="tags"><span class="tag tag-content">Major Event</span><span class="tag tag-source">Ross</span></div>
+    <div class="title">🦬 The Buffalo Hunt — Multi-Step Event Chain</div>
+    <div class="detail">"'The picturesque procession stretched some five or six miles... There were sixteen hundred and thirty persons and twelve hundred and ten Red River carts... a total of 1,089,000 pounds of meat.'" Full event chain: council of captains, flag system, rules (no hunting Sabbath, no straying, theft penalties), 2-month expedition, massive food reward (+50-100 food).</div>
+    <div class="effort">5-6 hours</div>
+  </div>
+
+  <div class="change-card changed">
+    <div class="tags"><span class="tag tag-content">Content</span><span class="tag tag-source">Ross</span></div>
+    <div class="title">🏕️ Brigade Organization Event</div>
+    <div class="detail">"'First a council for the nomination of officers was held: ten captains, each with ten soldiers; ten guides and a chaplain. There was a camp flag... During the march the flag was flying and while it was up, the guide was the chief of the expedition.'" Player joins or forms a brigade. Shared security, reduced speed, social events at camp.</div>
+    <div class="effort">3-4 hours</div>
+  </div>
+
+  <div class="change-card changed">
+    <div class="tags"><span class="tag tag-content">Content</span><span class="tag tag-source">Brehaut</span></div>
+    <div class="title">🌊 River Crossing Events (3 types)</div>
+    <div class="detail">Brehaut documents: ford (risky, DC 12, potential wear/stuck), cajeux/ferry (costs food/trade goods), wheel-raft (requires removing wheels, 1 hour). Each river on the trail becomes a unique decision point.</div>
+    <div class="effort">3-4 hours</div>
+  </div>
+
+  <div class="change-card changed">
+    <div class="tags"><span class="tag tag-content">Content</span><span class="tag tag-source">Dumont</span></div>
+    <div class="title">🕵️ Spy / Informer Encounter</div>
+    <div class="detail">"'D'où venez-vous, dit Dumont? — Il n'est pas nécessaire que je vous le dise. — Êtes-vous avec nous?'" Interrogation event. Decision: detain, follow, or let go. Sets tension for NWMP encounters.</div>
+    <div class="effort">2 hours</div>
+  </div>
+
+  <div class="change-card changed">
+    <div class="tags"><span class="tag tag-content">Content</span><span class="tag tag-source">Marbot</span></div>
+    <div class="title">🔥 Prairie Fire Event</div>
+    <div class="detail">"'Away to the right was a column of smoke, where the careless dropping of a match had set the prairie on fire.'" Decision: flee (lose time), burn firebreak (costs firewood), or wait. Risk: cart caught in fire = major wear + lost supplies.</div>
+    <div class="effort">2 hours</div>
+  </div>
+
+  <h3>Event Pass — Rewrite All Existing Events</h3>
+  <p>Every existing event should be rewritten in first-person voice with sensory detail from the sources. The squeal of cart wheels. Alkaline water taste. The specific hymns sung on Sunday. The smell of prairie fire smoke. This is the single highest-impact change for authenticity.</p>
+  <div class="change-card">
+    <div class="tags"><span class="tag tag-system">System</span><span class="tag tag-source">All sources</span></div>
+    <div class="title">✍️ First-Person Voice Pass</div>
+    <div class="detail">Rewrite all event text in first-person past tense. Add sensory detail. Use period vocabulary. The voice should sound like Marbot (wry, observant) or Ross (detailed, earnest), not a rulebook.</div>
+    <div class="effort">6-8 hours</div>
+  </div>
+</div>
+
+<!-- ═══════════ CREW ═══════════ -->
+<div id="crew" class="section">
+  <span class="badge p-medium">Medium</span>
+  <h2>5. Crew System</h2>
+  <p>Ross documents the brigade's social structure. Dumont gives us the Métis voice — practical, skeptical, loyal. The crew isn't abstract anymore.</p>
+
+  <div class="hist-quote">
+    "Je n'ai pas d'instruction, c'est vrai, réplique celui-ci, mais j'ai en moi un gang que vous n'avez pas, ce qui vous empêche d'agir comme vous le devriez, vous, Métis. Vous pouvez remercier Mitchell, qui s'est toujours montré notre ami."
+    <span class="src">— Dumont, in Ouimet (1885). "I have something you don't — a backbone."</span>
+  </div>
+
+  <h3>Brigade Social Structure (from Ross)</h3>
+  <ul>
+    <li><strong>Council of Captains:</strong> 10 captains elected for each brigade of 10 carts</li>
+    <li><strong>Flag system:</strong> Camp flag = authority. When flying, the guide is chief. When lowered, captains govern camp.</li>
+    <li><strong>Penalties for infraction:</strong> 1st offense: saddle and bridle cut up. 2nd: coat cut up. 3rd: flogging. Theft: name called 3× in center of camp + "thief"</li>
+    <li><strong>Sunday gathering:</strong> "Old Hundred, Balerma, Dundee, Ward"</li>
+  </ul>
+
+  <div class="change-card">
+    <div class="tags"><span class="tag tag-system">System</span><span class="tag tag-source">Ross</span></div>
+    <div class="title">👥 Crew Morale & Bonus System</div>
+    <div class="detail">Each crew member has: Health (Healthy→Injured→Critical→Dead), Morale (Good→Steady→Low→Breaking), Skills (+2 to relevant rolls). Loss of crew = loss of bonuses. Death = permanent. Brigade: join for shared security, reduced speed, social events.</div>
+    <div class="effort">4-5 hours</div>
+  </div>
+</div>
+
+<!-- ═══════════ BUILD ORDER ═══════════ -->
+<div id="sprint" class="section">
+  <span class="badge p-critical">Plan</span>
+  <h2>Build Order — Phased by Dependency</h2>
+
+  <div class="summary-box">
+    <h3>Key Insight from Sources</h3>
+    <p style="color:var(--text);margin-bottom:8px">The sources don't change <em>what</em> we build — they change <em>how</em> we build it. Every recommendation now has a source anchor: a specific quote, number, or scenario that grounds it in historical reality. This means less guessing, more documenting.</p>
+    <p style="color:var(--text-dim);font-size:13px">Total effort: 42-56 hours across 3 phases. Economy rework (Phase A) is still the critical path — nothing else matters if the game is unplayable.</p>
+  </div>
+
+  <h3>Phase A — Economy + Cart + Voice (Week 1-2)</h3>
+  <table class="ptable">
+    <tr><th>Task</th><th>Source</th><th>Est</th></tr>
+    <tr><td>Economy rework — food, trade, travel costs</td><td>Ross (hunt numbers), Brehaut (distances)</td><td>3-4h</td></tr>
+    <tr><td>Cart squeal mechanic</td><td>Brehaut (wheel construction)</td><td>2-3h</td></tr>
+    <tr><td>Cart repair events (felloe, axle, grease)</td><td>Brehaut (repair methods)</td><td>2-3h</td></tr>
+    <tr><td>First-person voice pass — all event text</td><td>Marbot (voice model), Ross (detail)</td><td>6-8h</td></tr>
+    <tr><td>River crossing events (ford, ferry, wheel-raft)</td><td>Brehaut (crossing methods)</td><td>3-4h</td></tr>
+  </table>
+
+  <h3>Phase B — Encounters + Environment (Week 2-3)</h3>
+  <table class="ptable">
+    <tr><th>Task</th><th>Source</th><th>Est</th></tr>
+    <tr><td>Mosquito + Alkaline Water event</td><td>Marbot (camp miseries)</td><td>2h</td></tr>
+    <tr><td>Prairie Fire event</td><td>Marbot (careless match)</td><td>2h</td></tr>
+    <tr><td>Mule behavior events (Geometry Lesson, sick animal)</td><td>Marbot (mule narrative)</td><td>2h</td></tr>
+    <tr><td>Hunt events (elk, antelope, crane, eagle)</td><td>Marbot (hunt descriptions)</td><td>3-4h</td></tr>
+    <tr><td>Sunday Rest mechanic</td><td>Marbot (Sunday routine)</td><td>3-4h</td></tr>
+    <tr><td>NWMP patrol encounter</td><td>NWMP Report + Dumont (spy)</td><td>3h</td></tr>
+    <tr><td>Settlement types + actions</td><td>Ross (governance), NWMP (forts)</td><td>3-4h</td></tr>
+  </table>
+
+  <h3>Phase C — Major Events + Crew (Week 3-4)</h3>
+  <table class="ptable">
+    <tr><th>Task</th><th>Source</th><th>Est</th></tr>
+    <tr><td>Buffalo Hunt multi-step event chain</td><td>Ross (1840 hunt)</td><td>5-6h</td></tr>
+    <tr><td>Brigade organization event</td><td>Ross (captains, flag, penalties)</td><td>3-4h</td></tr>
+    <tr><td>Crew morale/bonus/death system</td><td>Dumont (personality), Ross (structure)</td><td>4-5h</td></tr>
+    <tr><td>Fort-specific encounters (Carlton, Ellice, Qu'Appelle)</td><td>NWMP Report (fort details)</td><td>3-4h</td></tr>
+    <tr><td>Landscape milestone events (La Belle Vallée, Assiniboine)</td><td>Marbot (landscape descriptions)</td><td>2-3h</td></tr>
+  </table>
+</div>
+
+<div class="footer">
+  <a href="https://bayarddevries.github.io/metis-trail/SOURCE-LIBRARY.html">📜 Full Source Library</a> ·
+  Cart Trail — Sprint 2 Plan v2 · May 2026
+</div>
+
+<script>
+function show(id, el) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  el.classList.add('active');
+}
+</script>
+</body>
+</html>
