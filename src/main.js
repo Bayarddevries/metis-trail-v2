@@ -28,6 +28,9 @@ export function bootstrap(seed = null) {
   }
   renderNarrative(['Welcome to the Métis Trail. Click Begin Journey to start.']);
 
+  // Always init the map so it's ready behind the intro overlay
+  initMap();
+
   const startBtn = find('#intro-start');
   if (startBtn) {
     startBtn.addEventListener('click', () => {
@@ -37,7 +40,6 @@ export function bootstrap(seed = null) {
         overlay.setAttribute('hidden', '');
       }
       render();
-      initMap();
     });
   } else {
     console.warn('Metis bootstrap: #intro-start not found; Begin Journey button is offline.');
