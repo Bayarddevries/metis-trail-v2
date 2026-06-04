@@ -6,6 +6,10 @@ Legend: `pending` | `in_progress` | `blocked` | `done`
 - [x] Fix build pipeline so `npm run build` reliably produces `dist/index.html` and `dist/app.js`
 - [x] Get GitHub Pages deploy green and verified
 - [x] Verify local offline build by opening `dist/index.html` in a browser
+- [x] Bundle Leaflet locally instead of CDN (Tailscale/offline fix)
+- [x] Fix map initialization during bootstrap (map ready when intro dismissed)
+- [x] Dice roll click-to-dismiss with dramatic settle animation
+- [x] Cart marker icon on map (replaced plain circleMarker)
 - [ ] Standardize conventional commit messages across all contributors
 - [ ] Add minimal doc comments to each exported function in `src/systems/engine.js`
 

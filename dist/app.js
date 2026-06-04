@@ -1297,14 +1297,29 @@ function find(selector) {
 }
 __name(find, "find");
 
+// art/cart_marker_48px.png
+var cart_marker_48px_default = "./cart_marker_48px-FURXAOAP.png";
+
 // src/ui/renderer.js
+var MONTH_NAMES = ["", "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+function monthName(month) {
+  return MONTH_NAMES[month] || String(month);
+}
+__name(monthName, "monthName");
 var map = null;
 var tileLayer = null;
 var markerGroup = null;
+var cartIcon = L.icon({
+  iconUrl: cart_marker_48px_default,
+  iconSize: [48, 48],
+  iconAnchor: [24, 24],
+  popupAnchor: [0, -24]
+});
 function initMap() {
   const el = document.getElementById("map");
   if (!el || typeof L === "undefined") return;
   if (map) return;
+  if (!window.__METIS_READY__) return;
   applyTheme(el);
   map = L.map("map", {
     center: [NODES[0].lat, NODES[0].lon],
@@ -1339,12 +1354,7 @@ function updateMap(state) {
       fillOpacity: 1
     }).addTo(markerGroup);
   }
-  L.circleMarker([here.lat, here.lon], {
-    radius: 8,
-    color: "#1A1410",
-    fillColor: "#8B2500",
-    fillOpacity: 1
-  }).addTo(markerGroup);
+  L.marker([here.lat, here.lon], { icon: cartIcon }).addTo(markerGroup);
 }
 __name(updateMap, "updateMap");
 function renderTravelLinesView(state, gameRef, result) {
@@ -1367,10 +1377,16 @@ __name(renderTravelLinesView, "renderTravelLinesView");
 function renderStatusBar(state) {
   const node = NODES[state.node];
   const next = NODES[state.node + 1];
+  const dayEl = document.getElementById("s-day");
+  const monthEl = document.getElementById("s-month");
+  const seasonEl = document.getElementById("s-season");
   const segEl = document.getElementById("s-segment");
   const foodEl = document.getElementById("s-food");
   const wearEl = document.getElementById("s-wear");
   const crewEl = document.getElementById("s-crew");
+  if (dayEl) dayEl.textContent = String(state.day);
+  if (monthEl) monthEl.textContent = monthName(state.month);
+  if (seasonEl) seasonEl.textContent = state.season;
   if (segEl) {
     if (state.pendingSettlement) {
       segEl.textContent = `At: ${node?.name || "camp"}`;
@@ -1551,6 +1567,10 @@ __name(publishCampResult, "publishCampResult");
 function render() {
   const game = window._metisGame;
   if (!game) return;
+  if (!window._metisMapInited && window.__METIS_READY__ && document.getElementById("intro-overlay")?.classList.contains("active")) {
+    initMap();
+    window._metisMapInited = true;
+  }
   const state = game.getState();
   renderStatusBar(state);
   updateMap(state);

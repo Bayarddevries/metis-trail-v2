@@ -24,6 +24,12 @@ export async function build() {
     target: 'es2020',
     minify: false,
     keepNames: true,
+    loader: {
+      '.png': 'file',
+      '.jpg': 'file',
+      '.svg': 'file',
+    },
+    publicPath: '',
   });
   console.log('[build] esbuild done', {
     outputFiles: result.outputFiles?.map(o => o.path),

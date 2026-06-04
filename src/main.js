@@ -156,6 +156,12 @@ function publishCampResult() {
 function render() {
   const game = window._metisGame;
   if (!game) return;
+
+  if (!window._metisMapInited && window.__METIS_READY__ && document.getElementById('intro-overlay')?.classList.contains('active')) {
+    initMap();
+    window._metisMapInited = true;
+  }
+
   const state = game.getState();
   renderStatusBar(state);
   updateMap(state);

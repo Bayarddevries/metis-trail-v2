@@ -19,6 +19,11 @@ This file captures patterns that already caused failures in this project. Future
 - `src/ui/shell.js` must export `mount` and `find`.
 - If `main.js` reports `No matching export`, the issue is in the exporting module, not in import syntax.
 
+## Image assets
+- esbuild needs explicit `loader` config for image files (`.png`, `.jpg`, `.svg`). Without it, `import` statements on image paths fail at build time.
+- Use `L.icon` + `L.marker` for Leaflet custom markers, not `L.circleMarker`. Set `iconSize` to match the source image aspect ratio to avoid visual distortion.
+- Always verify marker icon renders at correct proportions in the browser after build.
+
 ## Permissions and approvals
 - Do not run `rm -rf` or other destructive commands without explicit approval.
 - Do not push to `main` until changes are verified locally.

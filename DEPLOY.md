@@ -17,7 +17,9 @@ npm run build
 open dist/index.html
 ```
 
-## Rules
+## Current release
+- `v0.5.1-marker-fix` (commit `a15b619`) — cart marker icon + aspect ratio fix
+- Previous: `v0.5-playable` (commit `4977e31`)
 - Do not edit files under `dist/` manually.
 - Do not commit built artifacts.
 - `src/template.html` must reference `app.v${BUILDVER}.js`.
