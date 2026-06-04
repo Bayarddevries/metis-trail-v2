@@ -182,8 +182,6 @@ function hideOverlays() {
   });
 }
 
-let pendingDice = null;
-
 function rollDiceOnce() {
   return Math.floor(Math.random() * 20) + 1;
 }
@@ -212,11 +210,34 @@ function animateDicePill(result) {
     ticks += 1;
     if (ticks >= maxTicks) {
       clearInterval(id);
-      const settled = rollDiceOnce();
-      el.textContent = String(settled);
-      el.className = 'die small font-spectral ' + (result.success ? 'pass' : 'fail');
+      el.textContent = String(result.roll);
+      // Dramatic final pose: remove spin, add settle animation + pass/fail color
+      el.className = 'die small font-spectral settled ' + (result.success ? 'pass' : 'fail');
+      // After settle animation, reveal outcome + Continue button
+      setTimeout(() => {
+        revealDiceOutcome(result);
+      }, 500);
     }
   }, 60);
+}
+
+function revealDiceOutcome(result) {
+  // Show outcome text inside the overlay
+  const outcomeEl = document.getElementById('event-dice-outcome');
+  if (outcomeEl) {
+    const rollHtml = `<span class="outcome-roll">Rolled ${result.roll} vs DC ${result.dc}</span>`;
+    const resultHtml = result.success
+      ? '<span class="outcome-pass">Success</span>'
+      : '<span class="outcome-fail">Failure</span>';
+    outcomeEl.innerHTML = `${rollHtml} — ${resultHtml}`;
+    outcomeEl.classList.add('visible');
+  }
+  // Show Continue button with glow
+  const continueEl = document.getElementById('event-continue');
+  if (continueEl) {
+    continueEl.style.display = 'inline-block';
+    continueEl.classList.add('ready');
+  }
 }
 
 function showEvent(game) {
@@ -248,9 +269,35 @@ function showEvent(game) {
 
   choicesEl.innerHTML = '';
   continueEl.style.display = 'none';
+  continueEl.classList.remove('ready');
 
+  // Hide dice display and outcome from previous roll
   const rc = document.getElementById('event-roll-display');
   if (rc) rc.style.display = 'none';
+  const outcomeEl = document.getElementById('event-dice-outcome');
+  if (outcomeEl) {
+    outcomeEl.textContent = '';
+    outcomeEl.classList.remove('visible');
+  }
+
+  // Track whether this event has a pending dice roll
+  let diceResult = null;
+
+  // Continue button handler — shared by dice and non-dice paths
+  continueEl.onclick = () => {
+    continueEl.classList.remove('ready');
+    // If there was a dice result, publish it now
+    if (diceResult) {
+      const outcome = buildEventChoiceOutcome(diceResult.stepLog, diceResult.before, game.getState());
+      if (outcome) publishResult(outcome);
+      diceResult = null;
+    }
+    // Close overlay and re-render
+    continueEl.style.display = 'none';
+    const overlay = document.getElementById('event-overlay');
+    if (overlay) overlay.classList.remove('active');
+    render();
+  };
 
   (ev.choices || []).forEach((ch, i) => {
     const btn = document.createElement('button');
@@ -262,24 +309,34 @@ function showEvent(game) {
       const entry = stepLog && stepLog[0] ? stepLog[0] : null;
       const res = entry && entry.result ? entry.result : entry;
       if (res && res.roll !== null && res.dc !== null) {
+        // Dice roll path: animate, then wait for user to click Continue
         btn.disabled = true;
-        pendingDice = res;
+        diceResult = { stepLog, before: prev, result: res };
         renderDicePill(res);
         animateDicePill(res);
-        setTimeout(() => {
-          const outcome = buildEventChoiceOutcome(stepLog, prev, game.getState());
-          if (outcome) publishResult(outcome);
-          pendingDice = null;
-          render();
-        }, 650 + Math.random() * 180);
         return;
       }
+      // Non-dice path: show outcome immediately, wait for user to click Continue
       const outcome = buildEventChoiceOutcome(stepLog, prev, game.getState());
-      if (outcome) publishResult(outcome);
-      render();
+      if (outcome) {
+        // Show brief outcome in the overlay above the Continue button
+        const oc = document.getElementById('event-dice-outcome');
+        if (oc) {
+          oc.textContent = outcome;
+          oc.classList.add('visible');
+        }
+      }
+      continueEl.style.display = 'inline-block';
+      continueEl.classList.add('ready');
     };
     choicesEl.appendChild(btn);
   });
+
+  // For events with no choices, show Continue immediately
+  if (!ev.choices || ev.choices.length === 0) {
+    continueEl.style.display = 'inline-block';
+    continueEl.classList.add('ready');
+  }
 
   document.getElementById('event-overlay')?.classList.add('active');
 }

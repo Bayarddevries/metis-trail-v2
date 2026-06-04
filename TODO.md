@@ -3,9 +3,9 @@
 Legend: `pending` | `in_progress` | `blocked` | `done`
 
 ## Phase 1 — Foundation & Technical Debt
-- [ ] Fix build pipeline so `npm run build` reliably produces `dist/index.html` and `dist/app.js`
-- [ ] Get GitHub Pages deploy green and verified
-- [ ] Verify local offline build by opening `dist/index.html` in a browser
+- [x] Fix build pipeline so `npm run build` reliably produces `dist/index.html` and `dist/app.js`
+- [x] Get GitHub Pages deploy green and verified
+- [x] Verify local offline build by opening `dist/index.html` in a browser
 - [ ] Standardize conventional commit messages across all contributors
 - [ ] Add minimal doc comments to each exported function in `src/systems/engine.js`
 

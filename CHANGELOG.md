@@ -43,5 +43,11 @@ All notable changes are documented here. Format loosely follows Keep a Changelog
 - dice-demo.html
 - plan/dice-and-events.md
 
-## Notes
+### Fixed
+- Dice roll overlay now waits for user to click Continue instead of auto-advancing
+- Non-dice event choices also show Continue button for consistent UX
+- Dice animation has dramatic settle pose with pass/fail color glow (green/red)
+- Roll outcome (e.g. "Rolled 14 vs DC 12 — Success") shown inside overlay before Continue
+- Outcome text still publishes to narrative log below after Continue is clicked
+- Continue button has subtle brass glow pulse to draw attention
 - v1 site baseline: https://bayarddevries.github.io/metis-trail/
