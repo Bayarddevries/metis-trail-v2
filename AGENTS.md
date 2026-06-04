@@ -25,3 +25,9 @@ This file is the contract for any agent or contributor working on `metis-trail-v
 - Update `TODO.md` status.
 - Append a dated note to `CHANGELOG.md`.
 - If you made any architectural decision or discovered a pitfall, update `AGENTS.md` if it affects future runs.
+
+## Known Pitfalls
+- **Map initialization timing**: `initMap()` must be called during `bootstrap()`, not deferred to user interaction. If the intro overlay is dismissed (e.g., saved game), the map must already be ready. Always init the map in bootstrap; the intro overlay sits on top.
+- **CDN dependencies**: Do not rely on CDN-hosted assets (unpkg.com, etc.) — the Tailscale network may not reach them. Bundle all dependencies locally.
+- **Build command**: Use `bun scripts/build.mjs` (not `npm run build` — npm is broken in this environment).
+- **Browser verification**: Always verify map rendering in browser after build. Check `L` is defined, tile pane exists, and markers are present.
