@@ -50,4 +50,5 @@ All notable changes are documented here. Format loosely follows Keep a Changelog
 - Roll outcome (e.g. "Rolled 14 vs DC 12 — Success") shown inside overlay before Continue
 - Outcome text still publishes to narrative log below after Continue is clicked
 - Continue button has subtle brass glow pulse to draw attention
+- Die face now shows actual result.roll instead of generating a new random number
 - v1 site baseline: https://bayarddevries.github.io/metis-trail/

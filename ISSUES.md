@@ -4,18 +4,21 @@ Use this file to log bugs, blockers, and known gaps during work sessions. Each i
 
 ## Active
 
-### 1. GitHub Pages deploy fails — missing `dist/`
-- Opened: 2026-05-31
-- Status: blocked
-- Evidence: CI log `tar: dist: Cannot open: No such file or directory`
-- Next action: verify `npm run build` actually writes `dist/` and update `scripts/build.mjs`
-
-### 2. Local build fails on import path resolution
-- Opened: 2026-05-31
-- Status: blocked
-- Evidence: `ERROR: Could not resolve "../systems/engine.js"` and `No matching export in "src/ui/shell.js" for import "mount"`
-- Next action: fix `src/main.js` imports and export the missing symbols from `src/ui/shell.js`
+### None currently
 
 ## Resolved
 
-### None yet
+### 3. Dice rolls should be click to dismiss
+- Opened: 2026-06-04
+- Resolved: 2026-06-04
+- Summary: Dice animation now ends with dramatic settle pose (scale bounce + pass/fail color glow). Outcome text shown inside overlay. Continue button appears — user clicks to dismiss. Non-dice events also get Continue button for consistency.
+
+### 2. Docs/ and dist/ need cleanup
+- Opened: 2026-06-03
+- Resolved: 2026-06-04
+- Summary: Cleaned stale build artifacts from dist/, added .gitignore entries.
+
+### 1. Import cart-trail engine modules from test/
+- Opened: 2026-06-03
+- Resolved: 2026-06-04
+- Summary: Engine modules consolidated into src/systems/.
