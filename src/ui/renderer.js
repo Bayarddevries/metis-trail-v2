@@ -1,6 +1,12 @@
 import { NODES } from '../data/nodes.js';
 import { applyTheme } from './theme.js';
 
+const MONTH_NAMES = ['', 'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+
+function monthName(month) {
+  return MONTH_NAMES[month] || String(month);
+}
+
 let map = null;
 let tileLayer = null;
 let markerGroup = null;
@@ -9,6 +15,7 @@ export function initMap() {
   const el = document.getElementById('map');
   if (!el || typeof L === 'undefined') return;
   if (map) return;
+  if (!window.__METIS_READY__) return;
 
   applyTheme(el);
 
@@ -81,10 +88,17 @@ export function renderTravelLinesView(state, gameRef, result) {
 export function renderStatusBar(state) {
   const node = NODES[state.node];
   const next = NODES[state.node + 1];
+  const dayEl = document.getElementById('s-day');
+  const monthEl = document.getElementById('s-month');
+  const seasonEl = document.getElementById('s-season');
   const segEl = document.getElementById('s-segment');
   const foodEl = document.getElementById('s-food');
   const wearEl = document.getElementById('s-wear');
   const crewEl = document.getElementById('s-crew');
+
+  if (dayEl) dayEl.textContent = String(state.day);
+  if (monthEl) monthEl.textContent = monthName(state.month);
+  if (seasonEl) seasonEl.textContent = state.season;
 
   if (segEl) {
     if (state.pendingSettlement) {
