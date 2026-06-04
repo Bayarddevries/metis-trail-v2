@@ -1388,7 +1388,8 @@ function renderStatusBar(state) {
   crewEl.innerHTML = `<span class="stat-label">Crew </span><span class="${crewCls}">${state.crew}</span>`;
   foodEl.innerHTML = `<span class="stat-label">Food </span><span class="stat-value${state.food <= 4 ? " food-low" : ""}">${state.food}</span>`;
   wearEl.innerHTML = `<span class="stat-label">Wear </span><span class="stat-value${state.wear >= 4 ? " wear-high" : ""}">${state.wear}</span>`;
-  renderTravelLinesView(state, window._metisGame, pendingResult);
+  if (!window.__METIS_PENDING_RESULT__) window.__METIS_PENDING_RESULT__ = null;
+  renderTravelLinesView(state, window._metisGame, window.__METIS_PENDING_RESULT__);
 }
 __name(renderStatusBar, "renderStatusBar");
 function renderNarrative(lines) {
@@ -1504,9 +1505,8 @@ function bootstrap(seed = null) {
 }
 __name(bootstrap, "bootstrap");
 window.__METIS_BOOT__ = bootstrap;
-var pendingResult2 = null;
 function publishResult(text) {
-  pendingResult2 = text;
+  window.__METIS_PENDING_RESULT__ = text;
 }
 __name(publishResult, "publishResult");
 function travelOneDay() {
@@ -1567,8 +1567,8 @@ function render() {
     return;
   }
   hideOverlays();
-  renderTravelLinesView(state, game, pendingResult2);
-  pendingResult2 = null;
+  renderTravelLinesView(state, game, window.__METIS_PENDING_RESULT__);
+  window.__METIS_PENDING_RESULT__ = null;
 }
 __name(render, "render");
 function hideOverlays() {
@@ -1578,11 +1578,6 @@ function hideOverlays() {
   });
 }
 __name(hideOverlays, "hideOverlays");
-var pendingDice = null;
-function rollDiceOnce() {
-  return Math.floor(Math.random() * 20) + 1;
-}
-__name(rollDiceOnce, "rollDiceOnce");
 function renderDicePill(result) {
   const rc = document.getElementById("event-roll-display");
   if (!rc) return;
@@ -1606,13 +1601,30 @@ function animateDicePill(result) {
     ticks += 1;
     if (ticks >= maxTicks) {
       clearInterval(id);
-      const settled = rollDiceOnce();
-      el.textContent = String(settled);
-      el.className = "die small font-spectral " + (result.success ? "pass" : "fail");
+      el.textContent = String(result.roll);
+      el.className = "die small font-spectral settled " + (result.success ? "pass" : "fail");
+      setTimeout(() => {
+        revealDiceOutcome(result);
+      }, 500);
     }
   }, 60);
 }
 __name(animateDicePill, "animateDicePill");
+function revealDiceOutcome(result) {
+  const outcomeEl = document.getElementById("event-dice-outcome");
+  if (outcomeEl) {
+    const rollHtml = `<span class="outcome-roll">Rolled ${result.roll} vs DC ${result.dc}</span>`;
+    const resultHtml = result.success ? '<span class="outcome-pass">Success</span>' : '<span class="outcome-fail">Failure</span>';
+    outcomeEl.innerHTML = `${rollHtml} \u2014 ${resultHtml}`;
+    outcomeEl.classList.add("visible");
+  }
+  const continueEl = document.getElementById("event-continue");
+  if (continueEl) {
+    continueEl.style.display = "inline-block";
+    continueEl.classList.add("ready");
+  }
+}
+__name(revealDiceOutcome, "revealDiceOutcome");
 function showEvent(game) {
   const ev = game.getPendingEvent();
   if (!ev) return;
@@ -1638,8 +1650,27 @@ function showEvent(game) {
   }
   choicesEl.innerHTML = "";
   continueEl.style.display = "none";
+  continueEl.classList.remove("ready");
   const rc = document.getElementById("event-roll-display");
   if (rc) rc.style.display = "none";
+  const outcomeEl = document.getElementById("event-dice-outcome");
+  if (outcomeEl) {
+    outcomeEl.textContent = "";
+    outcomeEl.classList.remove("visible");
+  }
+  let diceResult = null;
+  continueEl.onclick = () => {
+    continueEl.classList.remove("ready");
+    if (diceResult) {
+      const outcome = buildEventChoiceOutcome(diceResult.stepLog, diceResult.before, game.getState());
+      if (outcome) publishResult(outcome);
+      diceResult = null;
+    }
+    continueEl.style.display = "none";
+    const overlay = document.getElementById("event-overlay");
+    if (overlay) overlay.classList.remove("active");
+    render();
+  };
   (ev.choices || []).forEach((ch, i) => {
     const btn = document.createElement("button");
     btn.className = "choice-btn";
@@ -1651,23 +1682,28 @@ function showEvent(game) {
       const res = entry && entry.result ? entry.result : entry;
       if (res && res.roll !== null && res.dc !== null) {
         btn.disabled = true;
-        pendingDice = res;
+        diceResult = { stepLog, before: prev, result: res };
         renderDicePill(res);
         animateDicePill(res);
-        setTimeout(() => {
-          const outcome2 = buildEventChoiceOutcome(stepLog, prev, game.getState());
-          if (outcome2) publishResult(outcome2);
-          pendingDice = null;
-          render();
-        }, 650 + Math.random() * 180);
         return;
       }
       const outcome = buildEventChoiceOutcome(stepLog, prev, game.getState());
-      if (outcome) publishResult(outcome);
-      render();
+      if (outcome) {
+        const oc = document.getElementById("event-dice-outcome");
+        if (oc) {
+          oc.textContent = outcome;
+          oc.classList.add("visible");
+        }
+      }
+      continueEl.style.display = "inline-block";
+      continueEl.classList.add("ready");
     };
     choicesEl.appendChild(btn);
   });
+  if (!ev.choices || ev.choices.length === 0) {
+    continueEl.style.display = "inline-block";
+    continueEl.classList.add("ready");
+  }
   document.getElementById("event-overlay")?.classList.add("active");
 }
 __name(showEvent, "showEvent");
