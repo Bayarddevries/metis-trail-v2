@@ -1297,8 +1297,8 @@ function find(selector) {
 }
 __name(find, "find");
 
-// art/cart_marker_48px.png
-var cart_marker_48px_default = "./cart_marker_48px-FURXAOAP.png";
+// art/cart_marker.png
+var cart_marker_default = "./cart_marker-CQL7K2BU.png";
 
 // src/ui/renderer.js
 var MONTH_NAMES = ["", "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
@@ -1310,9 +1310,9 @@ var map = null;
 var tileLayer = null;
 var markerGroup = null;
 var cartIcon = L.icon({
-  iconUrl: cart_marker_48px_default,
-  iconSize: [48, 48],
-  iconAnchor: [24, 24],
+  iconUrl: cart_marker_default,
+  iconSize: [100, 48],
+  iconAnchor: [50, 24],
   popupAnchor: [0, -24]
 });
 function initMap() {
