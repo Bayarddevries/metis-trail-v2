@@ -1,6 +1,6 @@
 import { NODES } from '../data/nodes.js';
 import { applyTheme } from './theme.js';
-import cartMarkerUrl from '../../art/cart_marker_48px.png';
+import cartMarkerUrl from '../../art/cart_marker.png';
 
 const MONTH_NAMES = ['', 'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
@@ -14,8 +14,8 @@ let markerGroup = null;
 
 const cartIcon = L.icon({
   iconUrl: cartMarkerUrl,
-  iconSize: [48, 48],
-  iconAnchor: [24, 24],
+  iconSize: [100, 48],
+  iconAnchor: [50, 24],
   popupAnchor: [0, -24],
 });
 
