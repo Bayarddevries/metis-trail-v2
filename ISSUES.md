@@ -4,18 +4,16 @@ Use this file to log bugs, blockers, and known gaps during work sessions. Each i
 
 ## Active
 
-### 1. GitHub Pages deploy fails — missing `dist/`
-- Opened: 2026-05-31
-- Status: blocked
-- Evidence: CI log `tar: dist: Cannot open: No such file or directory`
-- Next action: verify `npm run build` actually writes `dist/` and update `scripts/build.mjs`
-
-### 2. Local build fails on import path resolution
-- Opened: 2026-05-31
-- Status: blocked
-- Evidence: `ERROR: Could not resolve "../systems/engine.js"` and `No matching export in "src/ui/shell.js" for import "mount"`
-- Next action: fix `src/main.js` imports and export the missing symbols from `src/ui/shell.js`
+None.
 
 ## Resolved
 
-### None yet
+### 1. GitHub Pages deploy fails — missing `dist/`
+- Opened: 2026-05-31
+- Resolved: 2026-06-04
+- Fix: Build pipeline fixed; `npm run build` writes `dist/` correctly. CI deploy verified.
+
+### 2. Local build fails on import path resolution
+- Opened: 2026-05-31
+- Resolved: 2026-06-04
+- Fix: Import paths corrected in `src/main.js`; `mount` and `find` exports added to `src/ui/shell.js`.

@@ -53,12 +53,21 @@ All notable changes are documented here. Format loosely follows Keep a Changelog
 - Cross-module map initialization fix so route tiles render.
 - Verified live travel loop: Travel 1 Day → settlement modal → Continue West → next segment.
 
+### Added
+- Cart marker icon (`art/cart_marker.png`, 1000x477 native) rendered at 100x48 on map via Leaflet `L.icon`
+- esbuild image file loaders (`.png`, `.jpg`, `.svg`) — assets referenced in JS are copied to `dist/`
+
+### Fixed
+- User marker replaced from plain brown `circleMarker` to cart icon (`renderer.js`)
+- Cart marker aspect ratio corrected (was 48x48 square, now 100x48 matching ~2.1:1 source ratio)
+- Build output includes image assets alongside `app.js`
+
 ### Changed
 - Live at https://bayarddevries.github.io/metis-trail-v2/
-- Git tag `v0.5-playable` pinned to commit `4977e31`.
+- Git tag `v0.5.1-marker-fix` pinned to commit `a15b619`.
 
 ### Docs
 - Marked release baseline for continuing development.
 
-## Notes
+## [v0.5-playable] - 2026-06-04
 - v1 site baseline: https://bayarddevries.github.io/metis-trail/
