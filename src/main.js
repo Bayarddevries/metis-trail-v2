@@ -247,10 +247,16 @@ function revealDiceOutcome(diceResult) {
       ? `<p class="outcome-flavor ${flavorClass}">${flavorText}</p>`
       : '';
 
-    // Mechanical summary (stat changes)
-    const mechText = buildEventChoiceOutcome(diceResult.stepLog, diceResult.before, window._metisGame.getState());
-    const mechHtml = mechText
-      ? `<div class="outcome-mechanical">${mechText}</div>`
+    // Compact mechanical summary (stat changes only)
+    const mechMsgs = [];
+    const after = window._metisGame.getState();
+    const before = diceResult.before;
+    if (after.food !== before.food) mechMsgs.push(`${after.food - before.food >= 0 ? '+' : ''}${after.food - before.food} Food`);
+    if (after.wear !== before.wear) mechMsgs.push(`Wear ${after.wear - before.wear >= 0 ? '+' : ''}${after.wear - before.wear}`);
+    if (after.morale !== before.morale) mechMsgs.push(`Morale ${after.morale - before.morale >= 0 ? '+' : ''}${after.morale - before.morale}`);
+    if (after.crew !== before.crew) mechMsgs.push(`Crew: ${before.crew} → ${after.crew}`);
+    const mechHtml = mechMsgs.length
+      ? `<div class="outcome-mechanical">${mechMsgs.join(' · ')}</div>`
       : '';
 
     outcomeEl.innerHTML = `${rollHtml} — ${resultHtml}${flavorHtml}${mechHtml}`;
@@ -345,15 +351,21 @@ function showEvent(game) {
       }
       // Non-dice path: show flavor text + outcome, wait for user to click Continue
       const flavorText = res && res.text ? res.text.replace(/^(Success|Failure)\.\s*/, '') : '';
-      const outcomeSummary = buildEventChoiceOutcome(stepLog, prev, game.getState());
       const oc = document.getElementById('event-dice-outcome');
       if (oc) {
         let html = '';
         if (flavorText) {
           html += `<p class="outcome-flavor neutral">${flavorText}</p>`;
         }
-        if (outcomeSummary) {
-          html += `<div class="outcome-mechanical">${outcomeSummary}</div>`;
+        // Compact mechanical summary
+        const afterState = game.getState();
+        const mechMsgs = [];
+        if (afterState.food !== prev.food) mechMsgs.push(`${afterState.food - prev.food >= 0 ? '+' : ''}${afterState.food - prev.food} Food`);
+        if (afterState.wear !== prev.wear) mechMsgs.push(`Wear ${afterState.wear - prev.wear >= 0 ? '+' : ''}${afterState.wear - prev.wear}`);
+        if (afterState.morale !== prev.morale) mechMsgs.push(`Morale ${afterState.morale - prev.morale >= 0 ? '+' : ''}${afterState.morale - prev.morale}`);
+        if (afterState.crew !== prev.crew) mechMsgs.push(`Crew: ${prev.crew} → ${afterState.crew}`);
+        if (mechMsgs.length) {
+          html += `<div class="outcome-mechanical">${mechMsgs.join(' · ')}</div>`;
         }
         oc.innerHTML = html;
         oc.classList.add('visible');
