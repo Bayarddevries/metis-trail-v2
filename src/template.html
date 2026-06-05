@@ -149,6 +149,7 @@
     z-index: 2000;
     justify-content: center;
     align-items: center;
+    overflow-y: auto;
   }
   .overlay.active { display: flex; }
 
@@ -283,7 +284,15 @@
     display: flex;
     flex-direction: column;
     max-height: 85vh;
+  }
+  .intro-card .intro-content {
     overflow-y: auto;
+    flex: 1;
+    padding: 22px 22px 0;
+  }
+  .intro-card .intro-actions {
+    flex-shrink: 0;
+    padding: 12px 22px 22px;
   }
   .intro-card h1 {
     font-family: var(--font-heading);
@@ -326,10 +335,7 @@
     font-size: 16px;
     font-weight: 600;
     cursor: pointer;
-    position: sticky;
-    bottom: 0;
-    margin-top: auto;
-    flex-shrink: 0;
+    width: 100%;
   }
   .intro-card .start-btn:hover { background: var(--clr-btn-hover); }
 
@@ -634,7 +640,10 @@
     }
     .ctrl-btn { flex: 1; padding: 12px 4px; font-size: 13px; font-weight: 600; min-height: 44px; border-radius: 8px; }
     .overlay { z-index: 3000; }
-    .overlay-card { width: 94%; max-height: 85vh; padding: 20px; margin: auto; border-width: 3px; border-radius: 12px; overflow-y: auto; }
+    .overlay-card { width: 94%; max-height: 85vh; margin: auto; border-width: 3px; border-radius: 12px; }
+    .intro-card { overflow-y: hidden; padding: 0; }
+    .intro-card .intro-content { overflow-y: auto; padding: 20px 20px 0; }
+    .intro-card .intro-actions { padding: 12px 20px 20px; }
   }
 </style>
 </head>
@@ -717,26 +726,30 @@
 
   <div class="overlay active" id="intro-overlay">
     <div class="overlay-card intro-card">
-      <h1>Métis Trail</h1>
-      <div class="subtitle">A Métis Journey — Fort Garry to Fort Edmonton, 1878</div>
-      <div class="flavor-text">
-        It is June 15th, 1878. You stand at Fort Garry with a loaded Red River cart, a strong ox, and a long road ahead.
-        <br><br>
-        Five hundred and sixty-seven miles of prairie, river crossings, and rough trail stretch between you and Fort Edmonton. You have until November — before the snow flies and the Carlton Trail disappears under winter.
-        <br><br>
-        Your cart is loaded with pemmican, tools, and trade goods. The bison hides and beaver pelts in your cart are worth good money at Edmonton — if you can get them there in one piece.
-        <br><br>
-        The trail is unforgiving. Rivers run high. The cart wears down. Your crew tires. Every day on the trail costs food, and food doesn't grow on the prairie.
+      <div class="intro-content">
+        <h1>Métis Trail</h1>
+        <div class="subtitle">A Métis Journey — Fort Garry to Fort Edmonton, 1878</div>
+        <div class="flavor-text">
+          It is June 15th, 1878. You stand at Fort Garry with a loaded Red River cart, a strong ox, and a long road ahead.
+          <br><br>
+          Five hundred and sixty-seven miles of prairie, river crossings, and rough trail stretch between you and Fort Edmonton. You have until November — before the snow flies and the Carlton Trail disappears under winter.
+          <br><br>
+          Your cart is loaded with pemmican, tools, and trade goods. The bison hides and beaver pelts in your cart are worth good money at Edmonton — if you can get them there in one piece.
+          <br><br>
+          The trail is unforgiving. Rivers run high. The cart wears down. Your crew tires. Every day on the trail costs food, and food doesn't grow on the prairie.
+        </div>
+        <div class="tutorial-text">
+          <strong>How to play:</strong> Each turn is one day. Click <strong>Travel 1 Day</strong> to advance along the trail. You'll consume 1 food per day. Events will test your crew's skill — choose wisely.
+          <br><br>
+          When you reach a settlement, you can <strong>Trade</strong> goods for supplies, <strong>Repair</strong> your cart, or <strong>Rest</strong> to recover. Use <strong>Make Camp</strong> on the trail to rest and do field repairs.
+          <br><br>
+          <strong>Win:</strong> Reach Fort Edmonton with at least 1 trade good and your cart still rolling. <br>
+          <strong>Lose:</strong> Run out of food, let your cart break down completely, or let winter catch you on the trail.
+        </div>
       </div>
-      <div class="tutorial-text">
-        <strong>How to play:</strong> Each turn is one day. Click <strong>Travel 1 Day</strong> to advance along the trail. You'll consume 1 food per day. Events will test your crew's skill — choose wisely.
-        <br><br>
-        When you reach a settlement, you can <strong>Trade</strong> goods for supplies, <strong>Repair</strong> your cart, or <strong>Rest</strong> to recover. Use <strong>Make Camp</strong> on the trail to rest and do field repairs.
-        <br><br>
-        <strong>Win:</strong> Reach Fort Edmonton with at least 1 trade good and your cart still rolling. <br>
-        <strong>Lose:</strong> Run out of food, let your cart break down completely, or let winter catch you on the trail.
+      <div class="intro-actions">
+        <button class="start-btn" id="intro-start">Begin Journey</button>
       </div>
-      <button class="start-btn" id="intro-start">Begin Journey</button>
     </div>
   </div>
 
