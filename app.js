@@ -1486,7 +1486,7 @@ function bootstrap(seed = null) {
     reroll: /* @__PURE__ */ __name((s) => {
       const g = createGame(s);
       window._metisGame = g;
-      render();
+      window.__METIS_RENDER__();
     }, "reroll")
   };
   mount();
@@ -1497,18 +1497,20 @@ function bootstrap(seed = null) {
   }
   renderNarrative(["Welcome to the M\xE9tis Trail. Click Begin Journey to start."]);
   initMap();
-  const startBtn = find("#intro-start");
-  if (startBtn) {
-    startBtn.addEventListener("click", () => {
-      const overlay = find("#intro-overlay");
-      if (overlay) {
-        overlay.classList.remove("active");
-        overlay.setAttribute("hidden", "");
+  const gameRoot = find("#game-root");
+  if (gameRoot) {
+    gameRoot.addEventListener("click", (e) => {
+      if (e.target.closest("#intro-start")) {
+        const overlay = find("#intro-overlay");
+        if (overlay) {
+          overlay.classList.remove("active");
+          overlay.setAttribute("hidden", "");
+        }
+        window.__METIS_RENDER__();
       }
-      render();
     });
   } else {
-    console.warn("Metis bootstrap: #intro-start not found; Begin Journey button is offline.");
+    console.warn("Metis bootstrap: #game-root not found; Begin Journey button is offline.");
   }
   const travelBtn = find("#btn-travel");
   if (travelBtn) {
@@ -1516,7 +1518,7 @@ function bootstrap(seed = null) {
       const { pendingEvent, pendingSettlement, over } = game.getState();
       if (pendingEvent || pendingSettlement || over) return;
       travelOneDay();
-      render();
+      window.__METIS_RENDER__();
     });
     travelBtn.setAttribute("data-metis-travel-bound", "1");
   }
@@ -1524,7 +1526,7 @@ function bootstrap(seed = null) {
   if (campBtn) campBtn.onclick = () => {
     publishCampResult();
     game.makeCamp();
-    render();
+    window.__METIS_RENDER__();
   };
   const cartBtn = find("#btn-cart");
   if (cartBtn) cartBtn.onclick = () => showCart(game);
@@ -1538,7 +1540,7 @@ function bootstrap(seed = null) {
   if (settlementContinue) settlementContinue.onclick = () => {
     game.settlementAction("continue");
     find("#settlement-overlay")?.classList.remove("active");
-    render();
+    window.__METIS_RENDER__();
   };
   const settlementClose = find("#settlement-close");
   if (settlementClose) settlementClose.onclick = () => {
@@ -1741,7 +1743,7 @@ function showEvent(game) {
     continueEl.style.display = "none";
     const overlay = document.getElementById("event-overlay");
     if (overlay) overlay.classList.remove("active");
-    render();
+    window.__METIS_RENDER__();
   };
   (ev.choices || []).forEach((ch, i) => {
     const btn = document.createElement("button");
@@ -1850,7 +1852,7 @@ function showSettlement(game) {
       const afterCart = game.getCart();
       const outcome = buildSettlementOutcome(action, before, after, beforeCart, afterCart);
       if (outcome) publishResult(outcome);
-      render();
+      window.__METIS_RENDER__();
     };
     actionsEl.appendChild(btn);
   });
@@ -1931,6 +1933,7 @@ function actionSubtitle(a) {
   return map2[a] || "";
 }
 __name(actionSubtitle, "actionSubtitle");
+window.__METIS_RENDER__ = render;
 export {
   bootstrap
 };
