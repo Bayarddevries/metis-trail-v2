@@ -31,18 +31,21 @@ export function bootstrap(seed = null) {
   // Always init the map so it's ready behind the intro overlay
   initMap();
 
-  const startBtn = find('#intro-start');
-  if (startBtn) {
-    startBtn.addEventListener('click', () => {
-      const overlay = find('#intro-overlay');
-      if (overlay) {
-        overlay.classList.remove('active');
-        overlay.setAttribute('hidden', '');
+  // Event delegation on #game-root survives DOM rebuilds from render()
+  const gameRoot = find('#game-root');
+  if (gameRoot) {
+    gameRoot.addEventListener('click', (e) => {
+      if (e.target.closest('#intro-start')) {
+        const overlay = find('#intro-overlay');
+        if (overlay) {
+          overlay.classList.remove('active');
+          overlay.setAttribute('hidden', '');
+        }
+        window.__METIS_RENDER__();
       }
-      window.__METIS_RENDER__();
     });
   } else {
-    console.warn('Metis bootstrap: #intro-start not found; Begin Journey button is offline.');
+    console.warn('Metis bootstrap: #game-root not found; Begin Journey button is offline.');
   }
 
   const travelBtn = find('#btn-travel');
