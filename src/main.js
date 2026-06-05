@@ -16,7 +16,7 @@ export function bootstrap(seed = null) {
     travel: () => game.travelOneDay(),
     camp: () => game.makeCamp(),
     choose: (i) => game.chooseEventChoice(i),
-    reroll: (s) => { const g = createGame(s); window._metisGame = g; render(); },
+    reroll: (s) => { const g = createGame(s); window._metisGame = g; window.__METIS_RENDER__(); },
   };
 
   mount();
@@ -39,7 +39,7 @@ export function bootstrap(seed = null) {
         overlay.classList.remove('active');
         overlay.setAttribute('hidden', '');
       }
-      render();
+      window.__METIS_RENDER__();
     });
   } else {
     console.warn('Metis bootstrap: #intro-start not found; Begin Journey button is offline.');
@@ -51,7 +51,7 @@ export function bootstrap(seed = null) {
       const { pendingEvent, pendingSettlement, over } = game.getState();
       if (pendingEvent || pendingSettlement || over) return;
       travelOneDay();
-      render();
+      window.__METIS_RENDER__();
     });
     travelBtn.setAttribute('data-metis-travel-bound', '1');
   }
@@ -60,7 +60,7 @@ export function bootstrap(seed = null) {
   if (campBtn) campBtn.onclick = () => {
     publishCampResult();
     game.makeCamp();
-    render();
+    window.__METIS_RENDER__();
   };
 
   const cartBtn = find('#btn-cart');
@@ -78,7 +78,7 @@ export function bootstrap(seed = null) {
   if (settlementContinue) settlementContinue.onclick = () => {
     game.settlementAction('continue');
     find('#settlement-overlay')?.classList.remove('active');
-    render();
+    window.__METIS_RENDER__();
   };
 
   const settlementClose = find('#settlement-close');
@@ -327,7 +327,7 @@ function showEvent(game) {
     continueEl.style.display = 'none';
     const overlay = document.getElementById('event-overlay');
     if (overlay) overlay.classList.remove('active');
-    render();
+    window.__METIS_RENDER__();
   };
 
   (ev.choices || []).forEach((ch, i) => {
@@ -449,7 +449,7 @@ function showSettlement(game) {
       const afterCart = game.getCart();
       const outcome = buildSettlementOutcome(action, before, after, beforeCart, afterCart);
       if (outcome) publishResult(outcome);
-      render();
+      window.__METIS_RENDER__();
     };
     actionsEl.appendChild(btn);
   });
@@ -530,3 +530,6 @@ function actionSubtitle(a) {
   };
   return map[a] || '';
 }
+
+// Expose render globally for event listener callbacks
+window.__METIS_RENDER__ = render;
