@@ -80,7 +80,7 @@ export function updateMap(state) {
   let viewLon = cartLon;
 
   if (next && next.dist > 0) {
-    const progress = Math.min(state.segmentDay / next.dist, 1);
+    const progress = Math.min((state.segmentDay || 0) / next.dist, 1);
     cartLat = here.lat + (next.lat - here.lat) * progress;
     cartLon = here.lon + (next.lon - here.lon) * progress;
     viewLat = cartLat;
