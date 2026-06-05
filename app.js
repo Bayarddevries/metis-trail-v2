@@ -321,6 +321,9 @@ var ITEMS = [
     wt: 15,
     count: 30,
     type: "food",
+    category: "provisions",
+    mbValue: 0.4,
+    perishable: true,
     desc: "Dried meat and fat. The staple of the prairie. Never truly spoils.",
     icon: "\u{1F969}",
     source: {
@@ -336,6 +339,9 @@ var ITEMS = [
     wt: 40,
     count: 1,
     type: "repair",
+    category: "parts",
+    mbValue: 1.2,
+    perishable: false,
     desc: "Hard maple. Heavy but essential for a Red River cart.",
     icon: "\u{1FAB5}"
   },
@@ -344,6 +350,10 @@ var ITEMS = [
     wt: 5,
     count: 3,
     type: "repair",
+    category: "repair",
+    mbValue: 0.6,
+    perishable: false,
+    factionPref: "hbc",
     desc: "Rawhide strips. Binding, lashing, and cart repair.",
     icon: "\u{1FA92}",
     source: {
@@ -359,6 +369,9 @@ var ITEMS = [
     wt: 10,
     count: 1,
     type: "tool",
+    category: "parts",
+    mbValue: 1.8,
+    perishable: false,
     desc: "Axe, auger, drawknife. Required for major repairs.",
     icon: "\u{1F6E0}\uFE0F"
   },
@@ -367,6 +380,10 @@ var ITEMS = [
     wt: 8,
     count: 2,
     type: "trade",
+    category: "furs",
+    mbValue: 1.25,
+    perishable: false,
+    factionPref: "metis",
     desc: "Folded. Trade value: ~1.25 MB each at Edmonton.",
     icon: "\u{1F9AC}"
   },
@@ -375,6 +392,9 @@ var ITEMS = [
     wt: 6,
     count: 1,
     type: "shelter",
+    category: "shelter",
+    mbValue: 1,
+    perishable: false,
     desc: "Waterproof. Shelter and cart-raft conversion.",
     icon: "\u26FA"
   },
@@ -383,6 +403,9 @@ var ITEMS = [
     wt: 10,
     count: 2,
     type: "fuel",
+    category: "fuel",
+    mbValue: 0.2,
+    perishable: false,
     desc: "Dried poplar. Required for cold nights.",
     icon: "\u{1FAB5}"
   },
@@ -391,6 +414,9 @@ var ITEMS = [
     wt: 3,
     count: 1,
     type: "tool",
+    category: "parts",
+    mbValue: 0.5,
+    perishable: false,
     desc: "Hemp. Crossings, repairs, binding.",
     icon: "\u{1FAA2}"
   },
@@ -399,6 +425,9 @@ var ITEMS = [
     wt: 2,
     count: 0,
     type: "ammo",
+    category: "hunting",
+    mbValue: 0.9,
+    perishable: false,
     desc: "Shot and ball. For hunting and defence.",
     icon: "\u{1F3AF}"
   },
@@ -407,6 +436,9 @@ var ITEMS = [
     wt: 2,
     count: 1,
     type: "medical",
+    category: "medical",
+    mbValue: 1.8,
+    perishable: true,
     desc: "Herbal remedies and bandages.",
     icon: "\u{1FAD9}"
   },
@@ -415,6 +447,9 @@ var ITEMS = [
     wt: 3,
     count: 1,
     type: "shelter",
+    category: "shelter",
+    mbValue: 2.2,
+    perishable: false,
     desc: "Wool. Winter survival.",
     icon: "\u{1F6CF}\uFE0F"
   },
@@ -423,6 +458,10 @@ var ITEMS = [
     wt: 5,
     count: 1,
     type: "trade",
+    category: "furs",
+    mbValue: 3,
+    perishable: false,
+    factionPref: "nwmp",
     desc: "Prime bundle. Trade value: ~3 MB.",
     icon: "\u{1F9AB}",
     source: {
@@ -895,7 +934,11 @@ function createGame(seed = null) {
     eventsResolved: 0,
     tradesMade: 0,
     flags: {},
-    reputation: { hbc: 0, nwmp: 0, metis: 0, mission: 0, cree: 0 }
+    reputation: { hbc: 0, nwmp: 0, metis: 0, mission: 0, cree: 0 },
+    capacity: 100,
+    usedWeight: 0,
+    credit: { hbc: 0, metis: 0, nwmp: 0, mission: 0 },
+    perishable: {}
   };
   function checkGameOver() {
     if (S.over) return;
@@ -1593,15 +1636,14 @@ __name(travelOneDay, "travelOneDay");
 function publishCampResult() {
   const game = window._metisGame;
   const prev = game.getState();
+  game.makeCamp();
+  const after = game.getState();
   const msgs = [];
   msgs.push("Camp.");
-  msgs.push("-1 Food.");
-  msgs.push("+1 Day.");
-  msgs.push("Crew rested.");
-  if (prev.morale < 100) {
-    const newMorale = Math.min(100, prev.morale + 15);
-    msgs.push(`Morale: ${prev.morale} -> ${newMorale}`);
-  }
+  if (after.food !== prev.food) msgs.push(`${after.food - prev.food >= 0 ? "+" : ""}${after.food - prev.food} Food`);
+  msgs.push(`Crew: ${prev.crew} -> ${after.crew}`);
+  if (after.morale !== prev.morale) msgs.push(`Morale: ${prev.morale} -> ${after.morale}`);
+  msgs.push(`${after.day - prev.day} Day(s)`);
   publishResult(msgs.join(" "));
 }
 __name(publishCampResult, "publishCampResult");
