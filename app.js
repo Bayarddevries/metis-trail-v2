@@ -1309,21 +1309,32 @@ __name(monthName, "monthName");
 var map = null;
 var tileLayer = null;
 var markerGroup = null;
+var fullTrailLine = null;
 var cartIcon = L.icon({
   iconUrl: cart_marker_default,
   iconSize: [100, 48],
   iconAnchor: [50, 24],
   popupAnchor: [0, -24]
 });
+function getInitialView() {
+  const initialNodes = NODES.slice(0, 4);
+  const lats = initialNodes.map((n) => n.lat);
+  const lons = initialNodes.map((n) => n.lon);
+  const centerLat = (Math.min(...lats) + Math.max(...lats)) / 2;
+  const centerLon = (Math.min(...lons) + Math.max(...lons)) / 2;
+  return { center: [centerLat, centerLon], zoom: 9 };
+}
+__name(getInitialView, "getInitialView");
 function initMap() {
   const el = document.getElementById("map");
   if (!el || typeof L === "undefined") return;
   if (map) return;
   if (!window.__METIS_READY__) return;
   applyTheme(el);
+  const { center, zoom } = getInitialView();
   map = L.map("map", {
-    center: [NODES[0].lat, NODES[0].lon],
-    zoom: 6,
+    center,
+    zoom,
     zoomControl: true
   });
   tileLayer = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
@@ -1331,6 +1342,13 @@ function initMap() {
     maxZoom: 18
   }).addTo(map);
   markerGroup = L.featureGroup().addTo(map);
+  const allCoords = NODES.map((n) => [n.lat, n.lon]);
+  fullTrailLine = L.polyline(allCoords, {
+    color: "#8B2500",
+    weight: 2,
+    opacity: 0.2,
+    dashArray: "6 4"
+  }).addTo(markerGroup);
   updateMap({ node: 0 });
 }
 __name(initMap, "initMap");
@@ -1338,11 +1356,33 @@ function updateMap(state) {
   if (!map) return;
   const here = NODES[state.node];
   if (!here) return;
-  const visited = NODES.slice(0, state.node + 1).map((n) => [n.lat, n.lon]);
   const next = NODES[state.node + 1];
-  map.setView([here.lat, here.lon], Math.max(map.getZoom(), 6));
+  const visited = NODES.slice(0, state.node + 1).map((n) => [n.lat, n.lon]);
+  let cartLat = here.lat;
+  let cartLon = here.lon;
+  let viewLat = cartLat;
+  let viewLon = cartLon;
+  if (next && next.dist > 0) {
+    const progress = Math.min(state.segmentDay / next.dist, 1);
+    cartLat = here.lat + (next.lat - here.lat) * progress;
+    cartLon = here.lon + (next.lon - here.lon) * progress;
+    viewLat = cartLat;
+    viewLon = cartLon;
+  }
+  map.panTo([viewLat, viewLon], { animate: true, duration: 0.3 });
   if (!markerGroup) markerGroup = L.featureGroup().addTo(map);
   markerGroup.clearLayers();
+  if (fullTrailLine) {
+    fullTrailLine.addTo(markerGroup);
+  } else {
+    const allCoords = NODES.map((n) => [n.lat, n.lon]);
+    L.polyline(allCoords, {
+      color: "#8B2500",
+      weight: 2,
+      opacity: 0.2,
+      dashArray: "6 4"
+    }).addTo(markerGroup);
+  }
   if (visited.length > 1) {
     L.polyline(visited, { color: "#8B2500", weight: 3, opacity: 0.7 }).addTo(markerGroup);
   }
@@ -1354,7 +1394,7 @@ function updateMap(state) {
       fillOpacity: 1
     }).addTo(markerGroup);
   }
-  L.marker([here.lat, here.lon], { icon: cartIcon }).addTo(markerGroup);
+  L.marker([cartLat, cartLon], { icon: cartIcon }).addTo(markerGroup);
 }
 __name(updateMap, "updateMap");
 function renderTravelLinesView(state, gameRef, result) {
