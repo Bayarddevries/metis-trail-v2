@@ -145,15 +145,14 @@ function travelOneDay() {
 function publishCampResult() {
   const game = window._metisGame;
   const prev = game.getState();
+  game.makeCamp();
+  const after = game.getState();
   const msgs = [];
   msgs.push('Camp.');
-  msgs.push('-1 Food.');
-  msgs.push('+1 Day.');
-  msgs.push('Crew rested.');
-  if (prev.morale < 100) {
-    const newMorale = Math.min(100, prev.morale + 15);
-    msgs.push(`Morale: ${prev.morale} -> ${newMorale}`);
-  }
+  if (after.food !== prev.food) msgs.push(`${after.food - prev.food >= 0 ? '+' : ''}${after.food - prev.food} Food`);
+  msgs.push(`Crew: ${prev.crew} -> ${after.crew}`);
+  if (after.morale !== prev.morale) msgs.push(`Morale: ${prev.morale} -> ${after.morale}`);
+  msgs.push(`${after.day - prev.day} Day(s)`);
   publishResult(msgs.join(' '));
 }
 
