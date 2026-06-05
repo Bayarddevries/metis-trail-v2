@@ -1517,7 +1517,6 @@ function bootstrap(seed = null) {
     clearSave();
     window.location.reload();
   };
-  render();
 }
 __name(bootstrap, "bootstrap");
 window.__METIS_BOOT__ = bootstrap;

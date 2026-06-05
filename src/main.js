@@ -102,7 +102,8 @@ export function bootstrap(seed = null) {
     window.location.reload();
   };
 
-  render();
+  // Don't call render() here — it would hide the intro overlay immediately.
+  // The intro's "Begin Journey" button calls render() on click.
 }
 
 window.__METIS_BOOT__ = bootstrap;

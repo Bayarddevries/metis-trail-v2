@@ -276,6 +276,10 @@
   .intro-card {
     text-align: center;
     max-width: 600px;
+    display: flex;
+    flex-direction: column;
+    max-height: 85vh;
+    overflow-y: auto;
   }
   .intro-card h1 {
     font-family: var(--font-heading);
@@ -318,6 +322,10 @@
     font-size: 16px;
     font-weight: 600;
     cursor: pointer;
+    position: sticky;
+    bottom: 0;
+    margin-top: auto;
+    flex-shrink: 0;
   }
   .intro-card .start-btn:hover { background: var(--clr-btn-hover); }
 
@@ -596,10 +604,31 @@
   .restart-btn:hover { background: var(--clr-btn-hover); }
 
   @media (max-width: 768px) {
-    #bottom-panel { flex-shrink: 0; min-height: 70px; padding-bottom: env(safe-area-inset-bottom); }
-    #narrative { flex: 0 1 auto; font-size: 14px; line-height: 1.6; padding: 8px 12px; max-height: 30vh; overflow-y: auto; }
-    #controls { padding: 8px 12px; gap: 6px; }
-    .ctrl-btn { flex: 1; padding: 14px 6px; font-size: 15px; font-weight: 600; min-height: 48px; border-radius: 10px; }
+    #game-container { height: 100dvh; }
+    #map-panel { flex: 1 1 auto; min-height: 0; }
+    #bottom-panel {
+      flex-shrink: 0;
+      height: auto;
+      min-height: 0;
+      border-top: 2px solid var(--clr-accent);
+    }
+    #narrative {
+      font-size: 12px;
+      line-height: 1.4;
+      padding: 4px 10px;
+      max-height: 18vh;
+      overflow-y: auto;
+    }
+    #controls {
+      position: sticky;
+      bottom: 0;
+      z-index: 100;
+      padding: 6px 10px;
+      gap: 4px;
+      background: var(--clr-bg-dark);
+      border-top: 1px solid var(--clr-accent);
+    }
+    .ctrl-btn { flex: 1; padding: 12px 4px; font-size: 13px; font-weight: 600; min-height: 44px; border-radius: 8px; }
     .overlay { z-index: 3000; }
     .overlay-card { width: 94%; max-height: 85vh; padding: 20px; margin: auto; border-width: 3px; border-radius: 12px; overflow-y: auto; }
   }
