@@ -508,6 +508,37 @@
   }
   .dice-outcome .outcome-pass { color: #2e7d32; }
   .dice-outcome .outcome-fail { color: #8b2500; }
+  .outcome-flavor {
+    font-family: var(--font-body);
+    font-size: 14px;
+    font-style: italic;
+    line-height: 1.6;
+    margin: 8px 0 6px;
+    padding: 8px 12px;
+    border-radius: 6px;
+  }
+  .outcome-flavor.success {
+    color: #2e7d32;
+    background: rgba(46, 125, 50, 0.08);
+    border-left: 3px solid #2e7d32;
+  }
+  .outcome-flavor.fail {
+    color: #8b2500;
+    background: rgba(139, 37, 0, 0.08);
+    border-left: 3px solid #8b2500;
+  }
+  .outcome-flavor.neutral {
+    color: var(--clr-ink);
+    background: rgba(0,0,0,0.04);
+    border-left: 3px solid var(--clr-accent);
+  }
+  .outcome-mechanical {
+    font-size: 12px;
+    color: var(--clr-accent);
+    font-family: var(--font-heading);
+    letter-spacing: 0.03em;
+    margin-bottom: 10px;
+  }
   #event-continue.ready {
     animation: continue-glow 2s ease-in-out infinite;
   }

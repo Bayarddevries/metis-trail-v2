@@ -206,7 +206,7 @@ function renderDicePill(result) {
   `;
 }
 
-function animateDicePill(result) {
+function animateDicePill(result, fullDiceResult) {
   const el = document.getElementById('die');
   if (!el) return;
   el.className = 'die small font-spectral spin';
@@ -223,21 +223,37 @@ function animateDicePill(result) {
       el.className = 'die small font-spectral settled ' + (result.success ? 'pass' : 'fail');
       // After settle animation, reveal outcome + Continue button
       setTimeout(() => {
-        revealDiceOutcome(result);
+        revealDiceOutcome(fullDiceResult);
       }, 500);
     }
   }, 60);
 }
 
-function revealDiceOutcome(result) {
-  // Show outcome text inside the overlay
+function revealDiceOutcome(diceResult) {
+  const result = diceResult.result;
   const outcomeEl = document.getElementById('event-dice-outcome');
   if (outcomeEl) {
+    // Roll line
     const rollHtml = `<span class="outcome-roll">Rolled ${result.roll} vs DC ${result.dc}</span>`;
     const resultHtml = result.success
       ? '<span class="outcome-pass">Success</span>'
       : '<span class="outcome-fail">Failure</span>';
-    outcomeEl.innerHTML = `${rollHtml} — ${resultHtml}`;
+
+    // Flavor text: strip "Success. " / "Failure. " prefix from result.text
+    let flavorText = result.text || '';
+    flavorText = flavorText.replace(/^(Success|Failure)\.\s*/, '');
+    const flavorClass = result.success ? 'success' : 'fail';
+    const flavorHtml = flavorText
+      ? `<p class="outcome-flavor ${flavorClass}">${flavorText}</p>`
+      : '';
+
+    // Mechanical summary (stat changes)
+    const mechText = buildEventChoiceOutcome(diceResult.stepLog, diceResult.before, window._metisGame.getState());
+    const mechHtml = mechText
+      ? `<div class="outcome-mechanical">${mechText}</div>`
+      : '';
+
+    outcomeEl.innerHTML = `${rollHtml} — ${resultHtml}${flavorHtml}${mechHtml}`;
     outcomeEl.classList.add('visible');
   }
   // Show Continue button with glow
@@ -316,23 +332,31 @@ function showEvent(game) {
       const stepLog = game.chooseEventChoice(i);
       const entry = stepLog && stepLog[0] ? stepLog[0] : null;
       const res = entry && entry.result ? entry.result : entry;
+
+      // Hide all choice buttons immediately
+      document.querySelectorAll('.choice-btn').forEach(b => { b.style.display = 'none'; });
+
       if (res && res.roll !== null && res.dc !== null) {
         // Dice roll path: animate, then wait for user to click Continue
-        btn.disabled = true;
         diceResult = { stepLog, before: prev, result: res };
         renderDicePill(res);
-        animateDicePill(res);
+        animateDicePill(res, diceResult);
         return;
       }
-      // Non-dice path: show outcome immediately, wait for user to click Continue
-      const outcome = buildEventChoiceOutcome(stepLog, prev, game.getState());
-      if (outcome) {
-        // Show brief outcome in the overlay above the Continue button
-        const oc = document.getElementById('event-dice-outcome');
-        if (oc) {
-          oc.textContent = outcome;
-          oc.classList.add('visible');
+      // Non-dice path: show flavor text + outcome, wait for user to click Continue
+      const flavorText = res && res.text ? res.text.replace(/^(Success|Failure)\.\s*/, '') : '';
+      const outcomeSummary = buildEventChoiceOutcome(stepLog, prev, game.getState());
+      const oc = document.getElementById('event-dice-outcome');
+      if (oc) {
+        let html = '';
+        if (flavorText) {
+          html += `<p class="outcome-flavor neutral">${flavorText}</p>`;
         }
+        if (outcomeSummary) {
+          html += `<div class="outcome-mechanical">${outcomeSummary}</div>`;
+        }
+        oc.innerHTML = html;
+        oc.classList.add('visible');
       }
       continueEl.style.display = 'inline-block';
       continueEl.classList.add('ready');
