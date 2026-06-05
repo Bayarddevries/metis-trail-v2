@@ -21,6 +21,11 @@ All notable changes are documented here. Format loosely follows Keep a Changelog
 - Debugging utilities: `rollHistory`, terrain guard, hook logging
 
 ### Fixed
+- Map starts zoomed in (zoom 9) centered on first 4 nodes (Fort Garry area) instead of zoom 6
+- Cart position interpolates between nodes day-by-day instead of teleporting
+- Map smoothly pans to follow cart as it moves along the trail
+- Full trail rendered as faint dashed line from the start, visible behind intro overlay
+- Map tiles styled with sepia/saturate CSS filter for aged/historical appearance
 - Intro overlay stays visible on load instead of flashing and disappearing (removed premature render() call from bootstrap)
 - Begin Journey button sticky at bottom of intro card for scrollable layouts
 - Mobile: action buttons always visible without scrolling (sticky controls bar at bottom)

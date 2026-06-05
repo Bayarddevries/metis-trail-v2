@@ -32,13 +32,23 @@ Use this file to log bugs, blockers, and known gaps during work sessions. Each i
 
 ### 23. Map should start zoomed in closer to show cart progression
 - Opened: 2026-06-05
-- Labels: enhancement
-- Summary: Map starts too zoomed out. Hard to see cart progression. Should start zoomed in enough that current position, next 2-3 nodes, and movement between nodes are clearly visible.
+- Resolved: 2026-06-05
+- Fix: Initial zoom changed from 6 to 9, centered on bounding box of first 4 nodes (Fort Garry area).
 
 ### 24. Map needs aged/historical appearance — not modern OSM tiles
 - Opened: 2026-06-05
-- Labels: enhancement
-- Summary: Modern OSM tiles show highways, contemporary infrastructure. Need period-appropriate late-1800s look: no modern roads, aged/parchment style, terrain-focused (rivers, lakes, prairie). Must work offline.
+- Resolved: 2026-06-05
+- Fix: CSS filter (sepia 0.6, saturate 0.4) on .leaflet-tile-pane for aged parchment look. Works fully offline.
+
+### 8. Users should move more slowly along the line
+- Opened: 2026-06-04
+- Resolved: 2026-06-05
+- Fix: Cart position interpolates between nodes based on segmentDay/dist. Map smoothly pans to follow cart.
+
+### 9. Show full trail line at beginning of journey
+- Opened: 2026-06-04
+- Resolved: 2026-06-05
+- Fix: Full trail drawn as faint dashed polyline in initMap(), visible from start behind intro overlay. Visited portion draws as solid line on top during gameplay.
 
 ## Resolved
 

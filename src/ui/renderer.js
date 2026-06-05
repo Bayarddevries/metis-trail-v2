@@ -11,6 +11,7 @@ function monthName(month) {
 let map = null;
 let tileLayer = null;
 let markerGroup = null;
+let fullTrailLine = null;
 
 const cartIcon = L.icon({
   iconUrl: cartMarkerUrl,
@@ -18,6 +19,16 @@ const cartIcon = L.icon({
   iconAnchor: [50, 24],
   popupAnchor: [0, -24],
 });
+
+// #23: Calculate initial view centered on the first few nodes
+function getInitialView() {
+  const initialNodes = NODES.slice(0, 4);
+  const lats = initialNodes.map(n => n.lat);
+  const lons = initialNodes.map(n => n.lon);
+  const centerLat = (Math.min(...lats) + Math.max(...lats)) / 2;
+  const centerLon = (Math.min(...lons) + Math.max(...lons)) / 2;
+  return { center: [centerLat, centerLon], zoom: 9 };
+}
 
 export function initMap() {
   const el = document.getElementById('map');
@@ -27,9 +38,11 @@ export function initMap() {
 
   applyTheme(el);
 
+  const { center, zoom } = getInitialView();
+
   map = L.map('map', {
-    center: [NODES[0].lat, NODES[0].lon],
-    zoom: 6,
+    center,
+    zoom,
     zoomControl: true,
   });
 
@@ -39,6 +52,16 @@ export function initMap() {
   }).addTo(map);
 
   markerGroup = L.featureGroup().addTo(map);
+
+  // #9: Draw full trail as faint dashed line
+  const allCoords = NODES.map(n => [n.lat, n.lon]);
+  fullTrailLine = L.polyline(allCoords, {
+    color: '#8B2500',
+    weight: 2,
+    opacity: 0.2,
+    dashArray: '6 4',
+  }).addTo(markerGroup);
+
   updateMap({ node: 0 });
 }
 
@@ -47,18 +70,48 @@ export function updateMap(state) {
   const here = NODES[state.node];
   if (!here) return;
 
-  const visited = NODES.slice(0, state.node + 1).map((n) => [n.lat, n.lon]);
   const next = NODES[state.node + 1];
+  const visited = NODES.slice(0, state.node + 1).map((n) => [n.lat, n.lon]);
 
-  map.setView([here.lat, here.lon], Math.max(map.getZoom(), 6));
+  // #8: Interpolate cart position between current and next node
+  let cartLat = here.lat;
+  let cartLon = here.lon;
+  let viewLat = cartLat;
+  let viewLon = cartLon;
+
+  if (next && next.dist > 0) {
+    const progress = Math.min(state.segmentDay / next.dist, 1);
+    cartLat = here.lat + (next.lat - here.lat) * progress;
+    cartLon = here.lon + (next.lon - here.lon) * progress;
+    viewLat = cartLat;
+    viewLon = cartLon;
+  }
+
+  // Smooth pan to follow cart
+  map.panTo([viewLat, viewLon], { animate: true, duration: 0.3 });
 
   if (!markerGroup) markerGroup = L.featureGroup().addTo(map);
   markerGroup.clearLayers();
 
+  // Re-draw full trail faint line (#9)
+  if (fullTrailLine) {
+    fullTrailLine.addTo(markerGroup);
+  } else {
+    const allCoords = NODES.map(n => [n.lat, n.lon]);
+    L.polyline(allCoords, {
+      color: '#8B2500',
+      weight: 2,
+      opacity: 0.2,
+      dashArray: '6 4',
+    }).addTo(markerGroup);
+  }
+
+  // Draw visited trail as solid line
   if (visited.length > 1) {
     L.polyline(visited, { color: '#8B2500', weight: 3, opacity: 0.7 }).addTo(markerGroup);
   }
 
+  // Next node marker
   if (next) {
     L.circleMarker([next.lat, next.lon], {
       radius: 6,
@@ -68,7 +121,8 @@ export function updateMap(state) {
     }).addTo(markerGroup);
   }
 
-  L.marker([here.lat, here.lon], { icon: cartIcon }).addTo(markerGroup);
+  // Cart marker at interpolated position (#8)
+  L.marker([cartLat, cartLon], { icon: cartIcon }).addTo(markerGroup);
 }
 
 export function renderTravelLinesView(state, gameRef, result) {
