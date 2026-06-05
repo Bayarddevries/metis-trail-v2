@@ -8,12 +8,29 @@ const cwd = process.cwd();
 
 console.log('[build] cwd=', cwd);
 
+async function download(url, dest) {
+  console.log(`[build] fetching ${url}`);
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`Download failed ${url}: ${res.status}`);
+  const buf = Buffer.from(await res.arrayBuffer());
+  await fs.writeFile(dest, buf);
+}
+
 export async function build() {
   const appRel = 'app.js';
   const outDir = path.join(cwd, 'dist');
   await fs.mkdir(outDir, { recursive: true });
 
   const appPath = path.join(outDir, appRel);
+
+  await download(
+    'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css',
+    path.join(outDir, 'leaflet.css')
+  );
+  await download(
+    'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js',
+    path.join(outDir, 'leaflet.js')
+  );
 
   const result = await esbuild.build({
     absWorkingDir: cwd,
@@ -32,7 +49,7 @@ export async function build() {
     publicPath: '',
   });
   console.log('[build] esbuild done', {
-    outputFiles: result.outputFiles?.map(o => o.path),
+    outputFiles: result.outputFiles?.map((o) => o.path),
   });
 
   const appCode = await fs.readFile(appPath, 'utf8');
