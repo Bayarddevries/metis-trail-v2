@@ -38,6 +38,11 @@ All notable changes are documented here. Format loosely follows Keep a Changelog
 - Die face now shows actual result.roll instead of generating a new random number
 - Map now initializes during bootstrap so it's ready when intro overlay is dismissed
 - Leaflet assets bundled locally (no CDN dependency) for Tailscale/offline use
+- Dice outcome now shows flavor text from event data (ok/bad strings) in overlay
+- Flavor text styled green for success, red for failure, neutral for non-dice
+- Mechanical summary (food/wear/morale changes) shown below flavor text in overlay
+- All choice buttons disappear when any choice is clicked (dice and non-dice)
+- Non-dice events also show flavor + mechanical summary in overlay
 
 ### Changed
 - Palette switched to forest/brass/cream Document scheme
