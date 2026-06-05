@@ -15,14 +15,20 @@ All notable changes are documented here. Format loosely follows Keep a Changelog
 - Cache-bust version auto-managed by build; removed manual template edits.
 - All resolved issues marked closed in GitHub.
 
+- Build script now auto-downloads `leaflet.css`/`leaflet.js` into `dist/` on every build, preventing repeated GitHub Pages 404s.
+- City/shop/event data loading failures now skip stores that lack venue/event shapes instead of bubble-breaking on undefined access.
+- Intro `updateMap({node:0})` no longer requires `segmentDay`; falls back to day 0 instead of producing `NaN` panTo to Leaflet.
+
 ### Docs
 - ISSUES.md fully reconciled with repo state.
 - CHANGELOG.md updated through current commits.
+- DEPLOYMENT.md added documenting the four underlying causes of the recurring Pages 404 failure and the recovery checklist.
 
 ### Tracked Issues
 - #25 — Map bootstrap aborts with "Invalid LatLng" RESOLVED
 - #26 — Begin Journey button click does nothing RESOLVED
 - #27 — Build script strips cache-bust query string RESOLVED
+- Pages blank page / missing Leaflet after deploy — RESOLVED
 
 ## [v0.5.1] - 2026-06-05
 
