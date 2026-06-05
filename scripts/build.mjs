@@ -42,9 +42,16 @@ export async function build() {
   let html = (await fs.readFile(templatePath, 'utf8')) || '';
 
   html = html.replace(
-    /(<script\s+type="module"\s+src=")app\.v\d+\.js(")/g,
-    `$1${appRel}$2`
+    /(<script\s+type="module"\s+src=")app\.js(\?v=\d+)?(")/g,
+    `$1${appRel}$3`
   );
+
+  // Auto-bump cache-bust version on each build
+  const versionMatch = html.match(/app\.js\?v=(\d+)/);
+  if (versionMatch) {
+    const nextVer = String(Number(versionMatch[1]) + 1);
+    html = html.replace(/app\.js\?v=\d+/, `app.js?v=${nextVer}`);
+  }
 
   const assetPaths = [...appCode.matchAll(/(?<=["'])([^"']+\.(png|jpg|svg|json))(?=["'])/g)].map((m) => m[1]);
   const unique = [...new Set(assetPaths)];
