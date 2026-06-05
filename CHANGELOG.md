@@ -4,31 +4,17 @@ All notable changes are documented here. Format loosely follows Keep a Changelog
 
 ## Unreleased
 
+### Added
+- Economy/weight schema defaults for Path A trade system
+  - `state.capacity`, `state.usedWeight`, `state.credit`, `state.perishable`
+  - Item fields: `mbValue`, `perishable`, `factionPref`, `category`
+
 ### Fixed
-- `updateMap({node:0})` passed no `segmentDay`, producing `NaN` in cart interpolation → Leaflet `Invalid LatLng` → bootstrap aborts → Begin Journey button did nothing. Guarded with `(state.segmentDay || 0)`.
-- `window.__METIS_RENDER__ = render` exposed after esbuild ESM output so `addEventListener` arrow functions can trigger re-renders.
-- Event delegation for Begin Journey moved from `#intro-overlay` to `#game-root` so the listener survives `render()` DOM rebuilds.
-- Build script regex now matches `app.js?v=N` query strings and auto-bumps the cache-bust version on every build.
-- `_metisMapInited` guard removed from `render()` because it prevented map init from ever firing on first render.
+- Camp outcome message now reflects post-rest state (crew/morale/food) instead of stale pre-camp values.
 
 ### Changed
-- Cache-bust version auto-managed by build; removed manual template edits.
-- All resolved issues marked closed in GitHub.
-
-- Build script now auto-downloads `leaflet.css`/`leaflet.js` into `dist/` on every build, preventing repeated GitHub Pages 404s.
-- City/shop/event data loading failures now skip stores that lack venue/event shapes instead of bubble-breaking on undefined access.
-- Intro `updateMap({node:0})` no longer requires `segmentDay`; falls back to day 0 instead of producing `NaN` panTo to Leaflet.
-
-### Docs
-- ISSUES.md fully reconciled with repo state.
-- CHANGELOG.md updated through current commits.
-- DEPLOYMENT.md added documenting the four underlying causes of the recurring Pages 404 failure and the recovery checklist.
-
-### Tracked Issues
-- #25 — Map bootstrap aborts with "Invalid LatLng" RESOLVED
-- #26 — Begin Journey button click does nothing RESOLVED
-- #27 — Build script strips cache-bust query string RESOLVED
-- Pages blank page / missing Leaflet after deploy — RESOLVED
+- `src/data/items.js` every item carries MB value, perishability, and faction pref with safe defaults.
+- `src/systems/engine.js` state init includes new economy fields.
 
 ## [v0.5.1] - 2026-06-05
 
@@ -46,6 +32,12 @@ All notable changes are documented here. Format loosely follows Keep a Changelog
 
 ### Changed
 - Live at https://bayarddevries.github.io/metis-trail-v2/
+- Build script auto-downloads Leaflet assets.
+- Data loading guardrails prevent bubble breaks on missing venue/event shapes.
+- Cache-bust managed by build automatically.
+
+### Docs
+- ISSUES.md reconciled; DEPLOYMENT.md added.
 
 ## [v0.5-playable] - 2026-06-04
 
@@ -56,8 +48,5 @@ All notable changes are documented here. Format loosely follows Keep a Changelog
 - esbuild image file loaders (`.png`, `.jpg`, `.svg`).
 
 ### Fixed
-- Cross-module map initialization fix so route tiles render.
-- Cart marker aspect ratio corrected (100x48 matching ~2.1:1 source ratio).
-
-### Docs
-- Marked release baseline for continuing development.
+- Cross-module map initialization so route tiles render.
+- Cart marker aspect ratio corrected (100x48).
