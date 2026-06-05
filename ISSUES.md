@@ -11,13 +11,24 @@ Use this file to log bugs, blockers, and known gaps during work sessions. Each i
 
 ### 19. Post-dice-roll outcome text + hide original choices during roll
 - Opened: 2026-06-04
+- Resolved: 2026-06-04
 - Labels: enhancement
-- Summary: (1) Choice buttons should hide once dice roll begins. (2) After dice settles, show narrative outcome text describing what actually happens based on success/failure — not just "Rolled X vs DC Y".
+- Summary: (1) All choice buttons hide when any choice is clicked. (2) After dice settles, flavor text from event data shown with green/red styling. (3) Compact mechanical summary (Food/Wear/Morale/Crew) shown below flavor text. Non-dice events also show flavor + mechanical in overlay.
 
 ### 20. Gossip mechanic needs tangible benefit
 - Opened: 2026-06-04
 - Labels: enhancement
 - Summary: Gossip action at settlements is currently empty. Should give mechanical advantage: trail condition preview, dice bonus, shortcut discovery, trade price intel, or morale boost. Needs narrative flavor text too.
+
+### 21. Intro screen flashes and disappears immediately
+- Opened: 2026-06-04
+- Resolved: 2026-06-04
+- Fix: Removed render() call from bootstrap that was hiding intro overlay. Begin Journey button is now sticky at bottom of intro card.
+
+### 22. Action buttons not visible without scrolling on mobile
+- Opened: 2026-06-04
+- Resolved: 2026-06-04
+- Fix: Controls bar is sticky at bottom on mobile. Used 100dvh for proper mobile viewport. Narrative compacted to 18vh max.
 
 ## Resolved
 
