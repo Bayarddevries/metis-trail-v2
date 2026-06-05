@@ -4,93 +4,54 @@ All notable changes are documented here. Format loosely follows Keep a Changelog
 
 ## Unreleased
 
-### Added
-- Repo scaffold with `src/core`, `src/data`, `src/systems`, `src/ui`
-- Core modules: `constants`, `calendar`, `seed` (PRNG + d20), `schema` types
-- Data files: `nodes.js`, `items.js`, `sources/index.js`
-- Systems scaffold: `engine.js`, `events.js`, `scoring.js`, `travel.js`
-- UI scaffold: `shell.js`, `renderer.js`, `theme.js`, `debug.js`
-- esbuild bundler in `scripts/build.mjs`
-- GitHub Actions Pages deploy workflow
-- Event classification labels and gritty paper texture in `.overlay-card`
-- Ledger-style amount line for bonuses/penalties in event overlay (`#event-amount`)
-- Dice roll UI with tumbling Spectral font die and pass/fail pill
-- `dice-demo.html` with three roll treatments (Ledger Stamp / Slot Machine / Tumbling Die)
-- `plan/dice-and-events.md` implementation plan
-- Source artwork and wireframe-style style options (`style-options.html`)
-- Debugging utilities: `rollHistory`, terrain guard, hook logging
-
 ### Fixed
-- Map starts zoomed in (zoom 9) centered on first 4 nodes (Fort Garry area) instead of zoom 6
-- Cart position interpolates between nodes day-by-day instead of teleporting
-- Map smoothly pans to follow cart as it moves along the trail
-- Full trail rendered as faint dashed line from the start, visible behind intro overlay
-- Map tiles styled with sepia/saturate CSS filter for aged/historical appearance
-- Intro overlay stays visible on load instead of flashing and disappearing (removed premature render() call from bootstrap)
-- Begin Journey button sticky at bottom of intro card for scrollable layouts
-- Mobile: action buttons always visible without scrolling (sticky controls bar at bottom)
-- Mobile: proper viewport height using 100dvh
-- Mobile: narrative compacted (12px, 18vh max) to save screen space
-- package-lock regenerated (dev dependency mismatch)
-- Leaflet CSS/JS load order and self-booting bundle wiring
-- Idempotent map mount and `initMap` / `updateMap` call chain
-- `renderStatusBar` refresh after travel choices
-- Event card `background` vs `background-image` conflict restoring cream fill under texture
-- Travel choice handler now reliably boots renderer, map, and overlay rewrite on first move
-- Day/month/season status bar updates now write to DOM during travel
-- Cross-module map init trigger fix with `window._metisMapInited`
-- Dice roll overlay now waits for user to click Continue instead of auto-advancing
-- Non-dice event choices also show Continue button for consistent UX
-- Dice animation has dramatic settle pose with pass/fail color glow (green/red)
-- Roll outcome (e.g. "Rolled 14 vs DC 12 — Success") shown inside overlay before Continue
-- Outcome text still publishes to narrative log below after Continue is clicked
-- Continue button has subtle brass glow pulse to draw attention
-- Die face now shows actual result.roll instead of generating a new random number
-- Map now initializes during bootstrap so it's ready when intro overlay is dismissed
-- Leaflet assets bundled locally (no CDN dependency) for Tailscale/offline use
-- Dice outcome now shows flavor text from event data (ok/bad strings) in overlay
-- Flavor text styled green for success, red for failure, neutral for non-dice
-- Mechanical summary (food/wear/morale changes) shown below flavor text in overlay
-- All choice buttons disappear when any choice is clicked (dice and non-dice)
-- Non-dice events also show flavor + mechanical summary in overlay
+- `updateMap({node:0})` passed no `segmentDay`, producing `NaN` in cart interpolation → Leaflet `Invalid LatLng` → bootstrap aborts → Begin Journey button did nothing. Guarded with `(state.segmentDay || 0)`.
+- `window.__METIS_RENDER__ = render` exposed after esbuild ESM output so `addEventListener` arrow functions can trigger re-renders.
+- Event delegation for Begin Journey moved from `#intro-overlay` to `#game-root` so the listener survives `render()` DOM rebuilds.
+- Build script regex now matches `app.js?v=N` query strings and auto-bumps the cache-bust version on every build.
+- `_metisMapInited` guard removed from `render()` because it prevented map init from ever firing on first render.
 
 ### Changed
-- Palette switched to forest/brass/cream Document scheme
-- Event card texture opacity increased for dirt effect
+- Cache-bust version auto-managed by build; removed manual template edits.
+- All resolved issues marked closed in GitHub.
 
 ### Docs
-- README.md
-- TODO.md
-- CHANGELOG.md
-- ISSUES.md
-- AGENTS.md
-- docs/pitfalls.md
-- style-options.html
-- dice-demo.html
-- plan/dice-and-events.md
+- ISSUES.md fully reconciled with repo state.
+- CHANGELOG.md updated through current commits.
 
 ### Tracked Issues
-- #23 — Map should start zoomed in closer to show cart progression
-- #24 — Map needs aged/historical appearance (not modern OSM tiles)
+- #25 — Map bootstrap aborts with "Invalid LatLng" RESOLVED
+- #26 — Begin Journey button click does nothing RESOLVED
+- #27 — Build script strips cache-bust query string RESOLVED
+
+## [v0.5.1] - 2026-06-05
+
+### Fixed
+- Intro overlay stays visible on load instead of flashing and disappearing.
+- Begin Journey button sticky at bottom of intro card.
+- Mobile: action buttons always visible without scrolling (sticky controls bar).
+- Mobile: proper viewport height using `100dvh`, narrative compacted to `18vh` max.
+- Leaflet CSS/JS bundled locally; no CDN dependency.
+- Map tiles styled with sepia/saturate CSS filter for aged/historical appearance.
+- Map starts at zoom 9 centered on Fort Garry bounding box.
+- Full trail rendered as faint dashed line from start.
+- Cart position interpolates between nodes day-by-day with smooth `panTo`.
+- Dice click-to-dismiss with outcome text, pass/fail colors, hidden choices, compact mechanical summary.
+
+### Changed
+- Live at https://bayarddevries.github.io/metis-trail-v2/
 
 ## [v0.5-playable] - 2026-06-04
 
 ### Added
 - First fully playable public release via GitHub Pages.
-- Day/month/season UI now actually advances in the status bar during travel.
-- Cross-module map initialization fix so route tiles render.
-- Verified live travel loop: Travel 1 Day → settlement modal → Continue West → next segment.
-- Cart marker icon (`art/cart_marker.png`, 1000x477 native) rendered at 100x48 on map via Leaflet `L.icon`
-- esbuild image file loaders (`.png`, `.jpg`, `.svg`) — assets referenced in JS are copied to `dist/`
+- Day/month/season UI advances in status bar during travel.
+- Cart marker icon rendered at 100x48 on map via Leaflet `L.icon`.
+- esbuild image file loaders (`.png`, `.jpg`, `.svg`).
 
 ### Fixed
-- User marker replaced from plain brown `circleMarker` to cart icon (`renderer.js`)
-- Cart marker aspect ratio corrected (was 48x48 square, now 100x48 matching ~2.1:1 source ratio)
-- Build output includes image assets alongside `app.js`
-
-### Changed
-- Live at https://bayarddevries.github.io/metis-trail-v2/
-- Git tag `v0.5.1-marker-fix` pinned to commit `a15b619`.
+- Cross-module map initialization fix so route tiles render.
+- Cart marker aspect ratio corrected (100x48 matching ~2.1:1 source ratio).
 
 ### Docs
 - Marked release baseline for continuing development.
