@@ -30,6 +30,16 @@ Use this file to log bugs, blockers, and known gaps during work sessions. Each i
 - Resolved: 2026-06-04
 - Fix: Controls bar is sticky at bottom on mobile. Used 100dvh for proper mobile viewport. Narrative compacted to 18vh max.
 
+### 23. Map should start zoomed in closer to show cart progression
+- Opened: 2026-06-05
+- Labels: enhancement
+- Summary: Map starts too zoomed out. Hard to see cart progression. Should start zoomed in enough that current position, next 2-3 nodes, and movement between nodes are clearly visible.
+
+### 24. Map needs aged/historical appearance — not modern OSM tiles
+- Opened: 2026-06-05
+- Labels: enhancement
+- Summary: Modern OSM tiles show highways, contemporary infrastructure. Need period-appropriate late-1800s look: no modern roads, aged/parchment style, terrain-focused (rivers, lakes, prairie). Must work offline.
+
 ## Resolved
 
 ### 17. Map doesn't render — initMap only called on Begin Journey click

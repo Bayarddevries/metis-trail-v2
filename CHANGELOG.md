@@ -21,6 +21,11 @@ All notable changes are documented here. Format loosely follows Keep a Changelog
 - Debugging utilities: `rollHistory`, terrain guard, hook logging
 
 ### Fixed
+- Intro overlay stays visible on load instead of flashing and disappearing (removed premature render() call from bootstrap)
+- Begin Journey button sticky at bottom of intro card for scrollable layouts
+- Mobile: action buttons always visible without scrolling (sticky controls bar at bottom)
+- Mobile: proper viewport height using 100dvh
+- Mobile: narrative compacted (12px, 18vh max) to save screen space
 - package-lock regenerated (dev dependency mismatch)
 - Leaflet CSS/JS load order and self-booting bundle wiring
 - Idempotent map mount and `initMap` / `updateMap` call chain
@@ -58,6 +63,10 @@ All notable changes are documented here. Format loosely follows Keep a Changelog
 - style-options.html
 - dice-demo.html
 - plan/dice-and-events.md
+
+### Tracked Issues
+- #23 — Map should start zoomed in closer to show cart progression
+- #24 — Map needs aged/historical appearance (not modern OSM tiles)
 
 ## [v0.5-playable] - 2026-06-04
 
