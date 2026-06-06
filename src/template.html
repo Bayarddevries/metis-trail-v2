@@ -379,6 +379,30 @@
     white-space: pre-line;
   }
 
+  .event-source {
+    font-size: 11px;
+    font-style: italic;
+    line-height: 1.5;
+    margin-bottom: 12px;
+    padding: 8px 12px;
+    border-left: 2px solid var(--clr-accent);
+    background: rgba(184,134,11,0.06);
+    color: #5a4a3a;
+  }
+  .event-source .src-quote {
+    display: block;
+    margin-bottom: 4px;
+    font-style: italic;
+  }
+  .event-source .src-attrib {
+    display: block;
+    font-size: 10px;
+    font-style: normal;
+    color: var(--clr-accent);
+    font-family: var(--font-heading);
+    letter-spacing: 0.3px;
+  }
+
   .event-amount {
     font-size: 12px;
     letter-spacing: 0.08em;
@@ -670,6 +694,7 @@
             <div id="event-location" class="event-location"></div>
           </div>
           <div id="event-text" class="event-text"></div>
+          <div id="event-source" class="event-source" style="display:none"></div>
           <div id="event-amount" class="event-amount" style="display:none"></div>
           <div id="event-stamp" class="event-stamp" style="display:none"></div>
           <div class="event-line" aria-hidden="true"></div>
@@ -715,6 +740,7 @@
 
     <div id="bottom-panel">
       <div id="narrative">Welcome to the Métis Trail. Click Begin Journey to start.</div>
+      <div id="trail-intel" style="display:none;padding:6px 10px;background:rgba(184,134,11,0.08);border-top:1px solid rgba(184,134,11,0.2);font-size:0.85em;color:#B8860B;"></div>
       <div id="controls">
         <button class="ctrl-btn" id="btn-travel">Travel 1 Day</button>
         <button class="ctrl-btn" id="btn-camp">Make Camp</button>
@@ -762,6 +788,6 @@
     </div>
   </div>
 </div>
-  <script type="module" src="./app.js?v=16"></script>
+  <script type="module" src="app.js?v=24"></script>
 </body>
 </html>

@@ -53,7 +53,8 @@ export function bootstrap(seed = null) {
     travelBtn.addEventListener('click', () => {
       const { pendingEvent, pendingSettlement, over } = game.getState();
       if (pendingEvent || pendingSettlement || over) return;
-      travelOneDay();
+      const blocked = travelOneDay();
+      if (blocked === true) return;
       window.__METIS_RENDER__();
     });
     travelBtn.setAttribute('data-metis-travel-bound', '1');
@@ -119,6 +120,14 @@ window.__METIS_PENDING_RESULT__ = text;
 function travelOneDay() {
   const game = window._metisGame;
   const prev = game.getState();
+
+  // Overload guard: check BEFORE advancing — don't consume a day just to block
+  if (prev.usedWeight > prev.capacity) {
+    showCart(game);
+    publishResult('Cart is overloaded. Offload items before traveling.');
+    return true;
+  }
+
   const result = game.travelOneDay();
   const state = game.getState();
 
@@ -184,6 +193,24 @@ function render() {
   hideOverlays();
   renderTravelLinesView(state, game, window.__METIS_PENDING_RESULT__);
   window.__METIS_PENDING_RESULT__ = null;
+  renderTrailIntel(state);
+}
+
+function renderTrailIntel(state) {
+  const el = document.getElementById('trail-intel');
+  if (!el) return;
+  const intel = (state.trailIntel || []).filter((i) => state.day - i.fromDay <= 3);
+  if (intel.length === 0) {
+    el.innerHTML = '';
+    el.style.display = 'none';
+    return;
+  }
+  el.style.display = 'block';
+  el.innerHTML = intel.map((i) => {
+    const daysOld = state.day - i.fromDay;
+    const freshness = daysOld <= 1 ? '🟢' : daysOld <= 2 ? '🟡' : '🔴';
+    return `<div class="intel-item" style="font-size:0.85em;padding:4px 0;border-bottom:1px solid rgba(0,0,0,0.08);"><span style="margin-right:4px;">${freshness}</span>${i.text}${i.bonus ? ' <span style="color:#B8860B;font-size:0.8em;">(+' + i.bonus.dcBonus + ' DC)</span>' : ''}</div>`;
+  }).join('');
 }
 
 function hideOverlays() {
@@ -282,6 +309,21 @@ function showEvent(game) {
   if (!textEl || !choicesEl) return;
 
   textEl.textContent = ev.text;
+
+  const sourceEl = document.getElementById('event-source');
+  if (sourceEl) {
+    if (ev.source && ev.source.quote) {
+      const quote = ev.source.quote;
+      const author = ev.source.author || '';
+      const work = ev.source.work || '';
+      const year = ev.source.year || '';
+      const attrib = [author, work, year].filter(Boolean).join(', ');
+      sourceEl.innerHTML = `<span class="src-quote">"${quote}"</span>` + (attrib ? `<span class="src-attrib">— ${attrib}</span>` : '');
+      sourceEl.style.display = 'block';
+    } else {
+      sourceEl.style.display = 'none';
+    }
+  }
 
   const amountEl = document.getElementById('event-amount');
   if (amountEl) {
@@ -425,6 +467,124 @@ function showSettlement(game) {
 
   const available = game.getAvailableActions();
   (available.actions || []).forEach((action) => {
+    // Special handling for craft: show recipe panel instead of a simple button
+    if (action === 'craft') {
+      const recipes = game.getAvailableRecipes();
+      if (recipes.length === 0) {
+        // Show disabled craft button with "no recipes available" sub
+        const wrap = document.createElement('div');
+        wrap.className = 'settlement-action';
+        const btn = document.createElement('button');
+        btn.className = 'ctrl-btn';
+        btn.style.display = 'flex';
+        btn.style.flexDirection = 'column';
+        btn.style.alignItems = 'flex-start';
+        btn.style.gap = '2px';
+        btn.style.opacity = '0.5';
+        btn.style.cursor = 'not-allowed';
+        const label = document.createElement('div');
+        label.className = 'settlement-action-label';
+        label.textContent = 'Craft';
+        const sub = document.createElement('div');
+        sub.className = 'settlement-action-sub';
+        sub.textContent = 'No recipes available.';
+        btn.appendChild(label);
+        btn.appendChild(sub);
+        actionsEl.appendChild(btn);
+        return;
+      }
+      // Show recipe panel
+      const recipePanel = document.createElement('div');
+      recipePanel.style.cssText = 'width:100%;margin-top:8px;padding:10px;background:rgba(46,90,62,0.08);border:1px solid rgba(46,90,62,0.3);border-radius:6px;';
+      const panelTitle = document.createElement('div');
+      panelTitle.style.cssText = 'font-family:var(--font-heading);font-size:12px;font-weight:600;color:var(--clr-accent);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px;';
+      panelTitle.textContent = 'Crafting';
+      recipePanel.appendChild(panelTitle);
+      recipes.forEach((r) => {
+        const row = document.createElement('div');
+        row.style.cssText = 'display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px;padding:6px;background:rgba(255,255,255,0.5);border-radius:4px;';
+        const inputs = r.inputs.map((inp) => `${inp.name} ×${inp.count} (${inp.have}/${inp.count})`).join(' + ');
+        const info = document.createElement('div');
+        info.style.cssText = 'flex:1;font-size:12px;';
+        info.innerHTML = `<strong>${r.output.icon || ''} ${r.name}</strong> — ${inputs} → <span style="color:var(--clr-accent);">${r.output.mbValue} MB</span>`;
+        const craftBtn = document.createElement('button');
+        craftBtn.className = 'ctrl-btn';
+        craftBtn.style.cssText = 'padding:3px 10px;font-size:11px;white-space:nowrap;';
+        craftBtn.textContent = 'Craft';
+        craftBtn.disabled = !r.inputs.every((inp) => inp.have >= inp.count);
+        if (craftBtn.disabled) craftBtn.style.opacity = '0.4';
+        craftBtn.onclick = () => {
+          hideOverlays();
+          game.craftRecipe(r.id);
+          publishResult(`Crafted ${r.name}.`);
+          window.__METIS_RENDER__();
+        };
+        row.appendChild(info);
+        row.appendChild(craftBtn);
+        recipePanel.appendChild(row);
+      });
+      actionsEl.appendChild(recipePanel);
+      return;
+    }
+
+    // Special handling for trade: show yield estimate per trade good
+    if (action === 'trade') {
+      const cart = game.getCart();
+      const tradeItems = cart.filter((i) => i.type === 'trade' && i.count > 0);
+      if (tradeItems.length === 0) {
+        const wrap = document.createElement('div');
+        wrap.className = 'settlement-action';
+        const btn = document.createElement('button');
+        btn.className = 'ctrl-btn';
+        btn.style.cssText = 'display:flex;flex-direction:column;align-items:flex-start;gap:2px;opacity:0.5;cursor:not-allowed;';
+        const label = document.createElement('div');
+        label.className = 'settlement-action-label';
+        label.textContent = 'Trade';
+        const sub = document.createElement('div');
+        sub.className = 'settlement-action-sub';
+        sub.textContent = 'No trade goods.';
+        btn.appendChild(label);
+        btn.appendChild(sub);
+        actionsEl.appendChild(btn);
+        return;
+      }
+      // Show trade panel with per-item yield estimates
+      const tradePanel = document.createElement('div');
+      tradePanel.style.cssText = 'width:100%;margin-top:8px;padding:10px;background:rgba(46,90,62,0.08);border:1px solid rgba(46,90,62,0.3);border-radius:6px;';
+      const panelTitle = document.createElement('div');
+      panelTitle.style.cssText = 'font-family:var(--font-heading);font-size:12px;font-weight:600;color:var(--clr-accent);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px;';
+      panelTitle.textContent = 'Trade';
+      tradePanel.appendChild(panelTitle);
+      tradeItems.forEach((item) => {
+        const est = game.getTradeEstimate(item.name);
+        const multStr = est && est.mult > 1 ? ' ↑' : est && est.mult < 1 ? ' ↓' : '';
+        const row = document.createElement('div');
+        row.style.cssText = 'display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px;padding:6px;background:rgba(255,255,255,0.5);border-radius:4px;';
+        const info = document.createElement('div');
+        info.style.cssText = 'flex:1;font-size:12px;';
+        info.innerHTML = `${item.icon || ''} ${item.name} ×${item.count} <span style="color:var(--clr-accent);">${est ? est.min + '-' + est.max + ' food' : ''}${multStr}</span>`;
+        const tradeBtn = document.createElement('button');
+        tradeBtn.className = 'ctrl-btn';
+        tradeBtn.style.cssText = 'padding:3px 10px;font-size:11px;white-space:nowrap;';
+        tradeBtn.textContent = 'Trade';
+        tradeBtn.onclick = () => {
+          hideOverlays();
+          const result = game.tradeItem(item.name);
+          if (result) {
+            publishResult(`Traded 1 ${result.item} → +${result.foodGain} food.`);
+          } else {
+            publishResult('Trade failed — no trade goods available.');
+          }
+          window.__METIS_RENDER__();
+        };
+        row.appendChild(info);
+        row.appendChild(tradeBtn);
+        tradePanel.appendChild(row);
+      });
+      actionsEl.appendChild(tradePanel);
+      return;
+    }
+
     const wrap = document.createElement('div');
     wrap.className = 'settlement-action';
 
@@ -476,16 +636,69 @@ function buildSettlementOutcome(action, before, after, beforeCart, afterCart) {
   if (action === 'forage') msgs.push('Foraging...');
   if (action === 'recruit') msgs.push('Reinforcements found.');
   if (action === 'rumours') msgs.push('You learn the latest trail news.');
+  if (action === 'gossip') {
+    const intel = after.trailIntel && after.trailIntel.length > 0 ? after.trailIntel[after.trailIntel.length - 1] : null;
+    if (intel && intel.text) {
+      msgs.push(`You spend a day gossiping. "${intel.text}"`);
+    } else {
+      msgs.push('You spend a day gossiping. The locals share what they know.');
+    }
+  }
   if (action === 'rest') msgs.push('Rest. Crew and supplies refreshed.');
+  if (action === 'craft') msgs.push('Item crafted.');
   if (!msgs.length) return 'Nothing changed.';
   return msgs.join(', ');
 }
 
 function showCart(game) {
+  const state = game.getState();
   const cart = game.getCart();
   const listEl = document.getElementById('inv-list');
   if (!listEl) return;
-  listEl.innerHTML = cart.map(i => `<div>${i.icon || ''} ${i.name} ×${i.count} (${i.wt * i.count} kg)</div>`).join('');
+
+  const overloaded = state.usedWeight > state.capacity;
+  const excess = state.usedWeight - state.capacity;
+
+  // Weight summary header
+  const weightBar = overloaded
+    ? `<div style="margin-bottom:10px;padding:8px;background:rgba(180,60,60,0.15);border:1px solid rgba(180,60,60,0.4);border-radius:4px;">
+        <div style="font-weight:700;color:#8B0000;">⚠ Overloaded — ${state.usedWeight} / ${state.capacity} kg</div>
+        <div style="font-size:0.9em;color:#8B0000;margin-top:2px;">Offload at least <strong>${excess} kg</strong> before traveling.</div>
+       </div>`
+    : `<div style="margin-bottom:10px;padding:8px;background:rgba(46,90,62,0.12);border:1px solid rgba(46,90,62,0.3);border-radius:4px;">
+        <div style="font-weight:700;color:#2D4A3E;">Cart — ${state.usedWeight} / ${state.capacity} kg</div>
+       </div>`;
+
+  // Item list — only show unload buttons when overloaded, and only on items with count > 0
+  const items = cart
+    .map((i) => {
+      const canUnload = overloaded && i.count > 0;
+      const mbDisplay = i.mbValue ? `<span style="font-size:0.75em;color:var(--clr-accent);margin-left:4px;">${i.mbValue} MB</span>` : '';
+      return `
+    <div class="cart-row" style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:4px 0;border-bottom:1px solid rgba(0,0,0,0.08);">
+      <span style="flex:1;">${i.icon || ''} ${i.name} ×${i.count} (${i.wt * i.count} kg)${mbDisplay}</span>
+      ${canUnload ? `<button class="ctrl-btn unload-btn" data-item="${i.name}" style="padding:2px 10px;font-size:0.85em;">Unload −${i.wt} kg</button>` : ''}
+    </div>`;
+    })
+    .join('');
+
+  listEl.innerHTML = weightBar + items;
+
+  listEl.querySelectorAll('.unload-btn').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const itemName = btn.dataset.item;
+      game.offloadItem(itemName);
+      // Refresh cart; if no longer overloaded, close overlay and re-render
+      const newState = game.getState();
+      if (newState.usedWeight <= newState.capacity) {
+        document.getElementById('cart-overlay')?.classList.remove('active');
+        window.__METIS_RENDER__();
+      } else {
+        showCart(game);
+      }
+    });
+  });
+
   document.getElementById('cart-overlay')?.classList.add('active');
 }
 
@@ -515,19 +728,21 @@ function showEnd(game) {
 }
 
 function actionLabel(a) {
-  const map = { rest: 'Rest', trade: 'Trade', repair: 'Repair', grease: 'Grease', forage: 'Forage', recruit: 'Recruit', rumours: 'Gossip', heal: 'Heal', continue: 'Continue West' };
+  const map = { rest: 'Rest', trade: 'Trade', repair: 'Repair', grease: 'Grease', forage: 'Forage', recruit: 'Recruit', rumours: 'Rumours', gossip: 'Gossip', heal: 'Heal', craft: 'Craft', continue: 'Continue West' };
   return map[a] || a;
 }
 function actionSubtitle(a) {
   const map = {
     rest: 'Crew rested, morale restored, supplies refresh.',
-    trade: 'Spend one trade good for +6-10 food.',
+    trade: 'Spend one trade good for food. Yield varies by item and settlement.',
     repair: 'Reduce wheel wear, or apply shaganappi if carried.',
     grease: 'Consume shaganappi to silence axle squeal.',
     forage: 'D20 + crew modifier; 12+ gains 1-4 food.',
     recruit: 'Rests tired crew if not exhausted.',
-    rumours: 'Advance one day, learn trail news.',
+    rumours: 'Advance one day. Hear scattered news — less reliable than proper gossip.',
+    gossip: 'Spend a day learning trail news and local gossip. Costs 1 day.',
     heal: 'Crew rested, morale restored.',
+    craft: 'Combine items into higher-value trade goods.',
     continue: 'Resume the journey.',
   };
   return map[a] || '';
