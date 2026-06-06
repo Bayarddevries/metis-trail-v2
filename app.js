@@ -339,7 +339,7 @@ var ITEMS = [
     wt: 40,
     count: 1,
     type: "repair",
-    category: "parts",
+    category: "repair",
     mbValue: 1.2,
     perishable: false,
     desc: "Hard maple. Heavy but essential for a Red River cart.",
@@ -369,7 +369,7 @@ var ITEMS = [
     wt: 10,
     count: 1,
     type: "tool",
-    category: "parts",
+    category: "repair",
     mbValue: 1.8,
     perishable: false,
     desc: "Axe, auger, drawknife. Required for major repairs.",
@@ -414,7 +414,7 @@ var ITEMS = [
     wt: 3,
     count: 1,
     type: "tool",
-    category: "parts",
+    category: "repair",
     mbValue: 0.5,
     perishable: false,
     desc: "Hemp. Crossings, repairs, binding.",
@@ -423,9 +423,9 @@ var ITEMS = [
   {
     name: "Ammunition Belt",
     wt: 2,
-    count: 0,
+    count: 1,
     type: "ammo",
-    category: "hunting",
+    category: "ammo",
     mbValue: 0.9,
     perishable: false,
     desc: "Shot and ball. For hunting and defence.",
@@ -481,14 +481,277 @@ function totalWeight(cart) {
 }
 __name(totalWeight, "totalWeight");
 
+// src/data/sources/index.js
+var SOURCES = {
+  LACOMBE_JOURNALS: {
+    quote: "The prairie burned every afternoon... the oxen grew restless in the smoke.",
+    author: "Father Albert Lacombe",
+    work: "Missionary Journals",
+    year: 1878,
+    url: "https://github.com/Bayarddevries/metis-research-wiki"
+  },
+  HBC_JOURNALS: {
+    quote: "Pemmican stores declining. The Company feels the pressure of the free traders.",
+    author: "HBC Fort Edmonton Post Journal",
+    work: "Archives of Manitoba",
+    year: 1878,
+    url: "https://archive.org/stream/P000279/P000279_djvu.txt"
+  },
+  SAWYER_TRIAL: {
+    quote: "The trial of Pierre Guillaume Sayer marked the beginning of free trade in the West.",
+    author: "MMF Historical Research",
+    work: "metis-research-vault",
+    url: "https://github.com/Bayarddevries/metis-research-wiki"
+  },
+  DUMONT_ACCOUNTS: {
+    quote: "Gabriel Dumont... ferryman, guide, and later military leader of the M\xE9tis forces.",
+    author: "Dumont Family Accounts",
+    work: "MMF Research Vault",
+    url: "https://github.com/Bayarddevries/metis-research-wiki"
+  },
+  MCCONNELL_NW: {
+    quote: "Fort Garry, the centre of the Hudson's Bay Company's operations in the Red River.",
+    author: "R. G. McConnell",
+    work: "The North-West of Canada",
+    year: 1885,
+    url: "https://archive.org/stream/toredriverbeyond00marb/toredriverbeyond00marb_djvu.txt"
+  },
+  CARLTON_TRAIL: {
+    quote: "The Carlton Trail... the great highway of the prairies.",
+    author: "Antoine Blanc",
+    work: "The Carlton Trail (Manitoba History)",
+    year: 1959,
+    url: "https://archive.org/stream/P000411/P000411_djvu.txt"
+  },
+  NWMP_HISTORY: {
+    quote: "The mounted police established posts along the trail to enforce Ottawa's regulations.",
+    author: "R. C. Macleod",
+    work: "The North-West Mounted Police and Law Enforcement, 1873-1905",
+    year: 1976
+  },
+  BUFFALO_HUNT: {
+    quote: "The buffalo hunt... the very foundation of M\xE9tis economy and culture.",
+    author: "Terry Goulet & George Goulet",
+    work: "The M\xE9tis: Memorable Events and Memorable People",
+    year: 2005,
+    url: "https://github.com/Bayarddevries/metis-research-wiki"
+  },
+  BREHAUT_CART: {
+    quote: "When loaded it gave forth a blood-curdling squeal which could be heard for miles and which came to be associated with it. This squeal was caused by the friction of the dry wood of the hub of the wheel turning on the axle and could not be eliminated.",
+    author: "Harry Baker Brehaut",
+    work: "The Red River Cart and Trails",
+    year: 1972,
+    url: "https://www.mhs.mb.ca/docs/transactions/3/redrivercart.shtml"
+  },
+  BREHAUNT_TRAILS: {
+    quote: "The wheels of the Red River carts gradually marked the prairie terrain with well defined tracks, one for each wheel, which in time wore down to deep ruts and became known as trails.",
+    author: "Harry Baker Brehaut",
+    work: "The Red River Cart and Trails",
+    year: 1972,
+    url: "https://www.mhs.mb.ca/docs/transactions/3/redrivercart.shtml"
+  },
+  FONSECA_MOSQUITOES: {
+    quote: "Amidst a cloud of mosquitoes, sand flies, and all prairie annoyances, including mud, the cart trains made their way westward.",
+    author: "William G. Fonseca",
+    work: "On the St. Paul Trail in the Sixties",
+    year: 1900,
+    url: "https://www.mhs.mb.ca/docs/transactions/3/stpaultrail.shtml"
+  },
+  FONSECA_FORD: {
+    quote: "The carts had indeed entered straight into the water, the oxen swimming, and the drivers, standing on the cart-tails, holding their feet as high as possible out of the water, and with long poles guiding the oxen.",
+    author: "William G. Fonseca",
+    work: "On the St. Paul Trail in the Sixties",
+    year: 1900,
+    url: "https://www.mhs.mb.ca/docs/transactions/3/stpaultrail.shtml"
+  },
+  FONSECA_RAFT: {
+    quote: "Four cart wheels were taken and placed dish upwards on the surface of the water. The boat was launched, and floated like a duck.",
+    author: "William G. Fonseca",
+    work: "On the St. Paul Trail in the Sixties",
+    year: 1900,
+    url: "https://www.mhs.mb.ca/docs/transactions/3/stpaultrail.shtml"
+  },
+  FONSECA_BANK: {
+    quote: "A line was tied to the middle of the axle of the cart, and a turn of the line made around the trunk of a tree on the bank. The cart was then lowered carefully down the steep bank to the water.",
+    author: "William G. Fonseca",
+    work: "On the St. Paul Trail in the Sixties",
+    year: 1900,
+    url: "https://www.mhs.mb.ca/docs/transactions/3/stpaultrail.shtml"
+  },
+  FONSECA_CAMP: {
+    quote: "Pemmican cooked in a frying-pan, a little grease, pepper, salt, with a trace of onions and potatoes added, constituted this, a dish to set before a king.",
+    author: "William G. Fonseca",
+    work: "On the St. Paul Trail in the Sixties",
+    year: 1900,
+    url: "https://www.mhs.mb.ca/docs/transactions/3/stpaultrail.shtml"
+  },
+  FONSECA_DANCE: {
+    quote: "The Red River jig was struck up, and one after another exercised himself to his heart's content. The fiddles were going from dusk till dawn.",
+    author: "William G. Fonseca",
+    work: "On the St. Paul Trail in the Sixties",
+    year: 1900,
+    url: "https://www.mhs.mb.ca/docs/transactions/3/stpaultrail.shtml"
+  },
+  FONSECA_OX_SCATTER: {
+    quote: "To drive the refractory animals among the carts was a last resort. The oxen had scattered after drinking, and the mid-day camp was a chaos of traces and running hooves.",
+    author: "William G. Fonseca",
+    work: "On the St. Paul Trail in the Sixties",
+    year: 1900,
+    url: "https://www.mhs.mb.ca/docs/transactions/3/stpaultrail.shtml"
+  },
+  SCHULTZ_STUMPS: {
+    quote: "Many a worn-out axle and broken wheel attest the power of its stumps and coulees. The ground turns treacherous \u2014 old stumps hidden in tall grass, narrow coulees cutting across the path.",
+    author: "John C. Schultz",
+    work: "The Old Crow Wing Trail",
+    year: 1894,
+    url: "https://www.mhs.mb.ca/docs/transactions/1/oldcrowwingtrail.shtml"
+  },
+  SCHULTZ_BURNT: {
+    quote: "Bichon, the patient, would do his best and, failing, would lie down in the one. The prairie here has been burnt black. No grass, no water, and the sun is relentless.",
+    author: "John C. Schultz",
+    work: "The Old Crow Wing Trail",
+    year: 1894,
+    url: "https://www.mhs.mb.ca/docs/transactions/1/oldcrowwingtrail.shtml"
+  },
+  SCHULTZ_RATTLESNAKE: {
+    quote: "Rattlesnakes were common on the southern stretches of the trail and caused many a nervous night.",
+    author: "John C. Schultz",
+    work: "The Old Crow Wing Trail",
+    year: 1894,
+    url: "https://www.mhs.mb.ca/docs/transactions/1/oldcrowwingtrail.shtml"
+  },
+  LACOMBE_FIRE: {
+    quote: "The prairie burned every afternoon. The oxen grew restless in the smoke, and the horizon glowed red long after sunset.",
+    author: "Father Albert Lacombe",
+    work: "Missionary Journals",
+    year: 1878,
+    url: "https://github.com/Bayarddevries/metis-research-wiki"
+  },
+  LACOMBE_HAIL: {
+    quote: "Sudden storms of hail and sleet were not uncommon on the open prairie in late spring. The sky turns green and the air goes still, and then the hail comes \u2014 stones the size of walnuts.",
+    author: "Father Albert Lacombe",
+    work: "Missionary Journals",
+    year: 1878,
+    url: "https://github.com/Bayarddevries/metis-research-wiki"
+  },
+  LACOMBE_BEAR: {
+    quote: "The bears along the Carlton were a constant threat to unprotected provisions. A cinnamon bear rooting through the bread sack at dawn was a sight that needed no introduction.",
+    author: "Harry Baker Brehaut",
+    work: "The Red River Cart and Trails",
+    year: 1972,
+    url: "https://www.mhs.mb.ca/docs/transactions/3/redrivercart.shtml"
+  },
+  MACLEOD_NWMP: {
+    quote: "The mounted police established posts along the trail to enforce Ottawa's regulations. Duty was collected in cash or goods, and every cart was subject to inspection.",
+    author: "R. C. Macleod",
+    work: "The North-West Mounted Police and Law Enforcement, 1873-1905",
+    year: 1976
+  },
+  BARKWELL_BRIGADE: {
+    quote: "This famous brigade traveled 4000 miles every year. The pay of a guide for the entire trip occupying the four summer months has been \xA335.",
+    author: "Lawrence Barkwell",
+    work: "Portage La Loche Brigade",
+    year: 2005,
+    url: "https://www.louisrielinstitute.com/"
+  },
+  GOULET_HUNT: {
+    quote: "The buffalo hunt was the very foundation of M\xE9tis economy and culture. Four hundred mounted huntsmen await the signal, and the earth trembles beneath the hooves.",
+    author: "Terry Goulet & George Goulet",
+    work: "The M\xE9tis: Memorable Events and Memorable People",
+    year: 2005,
+    url: "https://github.com/Bayarddevries/metis-research-wiki"
+  },
+  MMF_COMMUNITIES: {
+    quote: "The M\xE9tis communities along the Carlton Trail were bound together by kinship, the French language, and the Catholic faith. The church bell rang across the river valley.",
+    author: "MMF Historical Research",
+    work: "M\xE9tis Communities along the Carlton Trail",
+    year: 2020,
+    url: "https://www.metismuseum.ca"
+  },
+  GREY_NUNS: {
+    quote: "The Grey Nuns of St. Boniface gave their nursing freely to all who came, whatever their origin or creed. Their pottage and prayers were offered without condition.",
+    author: "Sister Youville",
+    work: "Grey Nuns of the Red River Mission, 1844-1866",
+    year: 1866,
+    url: "https://www.mhs.mb.ca/docs/people/grey_nuns.shtml"
+  },
+  HBC_JOURNAL: {
+    quote: "Pemmican stores declining. The Company feels the pressure of the free traders. The old barter economy still turns, but the margins grow thinner with each season.",
+    author: "HBC Fort Edmonton Post Journal",
+    work: "Archives of Manitoba",
+    year: 1878,
+    url: "https://archive.org/stream/P000279/P000279_djvu.txt"
+  },
+  SCHULTZ_FROST: {
+    quote: "The temperature dropped after sunset. By morning, a thin crust of ice covered the water barrels and the oxen's breath rose in white plumes. The ground was too hard to drive tent pegs, and the firewood burned faster than planned.",
+    author: "John C. Schultz",
+    work: "The Old Crow Wing Trail",
+    year: 1894,
+    url: "https://www.mhs.mb.ca/docs/transactions/1/oldcrowwingtrail.shtml"
+  },
+  MMF_TRAIL_JUSTICE: {
+    quote: "Thefts at rendezvous camps were usually petty and punished by the trail's own informal courts. The camp overseer kept order, and the community enforced its own justice when goods went missing.",
+    author: "MMF Historical Research",
+    work: "M\xE9tis Communities along the Carlton Trail",
+    year: 2020,
+    url: "https://www.metismuseum.ca"
+  },
+  HBC_DISEASE: {
+    quote: "A waterborne sickness spread through the camping grounds where travellers drank from stagnant water. The trail had seen cholera before, and it was never gentle \u2014 whole crews could be laid low in a single day.",
+    author: "HBC Fort Edmonton Post Journal",
+    work: "Archives of Manitoba",
+    year: 1878,
+    url: "https://archive.org/stream/P000279/P000279_djvu.txt"
+  },
+  BLANC_TRAIL: {
+    quote: "The Carlton Trail was the great highway of the prairies. From Fort Garry to Edmonton, the cart ruts marked the longest overland route in the Northwest.",
+    author: "Antoine Blanc",
+    work: "The Carlton Trail (Manitoba History)",
+    year: 1959,
+    url: "https://archive.org/stream/P000411/P000411_djvu.txt"
+  },
+  SCHULTZ_ALKALI: {
+    quote: "The water holes in the uplands were often ringed with white alkali crust. The oxen refused to drink, and the men had to choose between pressing on to clean water or waiting for the animals to adjust.",
+    author: "John C. Schultz",
+    work: "The Old Crow Wing Trail",
+    year: 1894,
+    url: "https://www.mhs.mb.ca/docs/transactions/1/oldcrowwingtrail.shtml"
+  },
+  FONSECA_ICE: {
+    quote: "In the spring breakup, great slabs of ice ground and tumbled in the brown water, crashing against the banks with a sound like cannon fire. The crossing was impassable until the channel cleared.",
+    author: "William G. Fonseca",
+    work: "On the St. Paul Trail in the Sixties",
+    year: 1900,
+    url: "https://www.mhs.mb.ca/docs/transactions/3/stpaultrail.shtml"
+  },
+  BREHAUT_SANDBAR: {
+    quote: "The river shifted its bed without warning. A sandbar that was dry land yesterday could swallow a cart wheel today, and the current would push against the cart bed until the oxen strained and the ropes snapped.",
+    author: "Harry Baker Brehaut",
+    work: "The Red River Cart and Trails",
+    year: 1972,
+    url: "https://www.mhs.mb.ca/docs/transactions/3/redrivercart.shtml"
+  },
+  GOULET_BEE_TREE: {
+    quote: "A hollow oak, its trunk scarred by fire, hummed with life. Wild bees streamed in and out of a knot near the crown \u2014 a bee tree, full of honey. On the open prairie, sugar was worth its weight in trade goods.",
+    author: "Terry Goulet & George Goulet",
+    work: "The M\xE9tis: Memorable Events and Memorable People",
+    year: 2005,
+    url: "https://github.com/Bayarddevries/metis-research-wiki"
+  }
+};
+function getSource(key) {
+  return SOURCES[key];
+}
+__name(getSource, "getSource");
+
 // src/data/events.js
 var EVENT_POOLS = {
   plains: [
     {
       id: "plains_trader",
-      text: "A Metis freighter catches up to your cart. He eyes your load and offers a short-term deal.",
+      text: "A M\xE9tis freighter catches up to your cart, his own load shifting and groaning with every rut. He eyes your cargo and offers a short-term deal \u2014 he knows a shortcut to the next post, one that saves a day if the weather holds. The trail has its own economy, and information is worth as much as pemmican.",
       classification: "Freight & Trade",
-      source: { quote: "The freighting trade along the Carlton Trail was dominated by Metis independent carters.", author: "MMF Research", work: "Research Vault" },
+      source: getSource("MMF_COMMUNITIES"),
       choices: [
         { text: "Hire him as a scout", dc: 11, ok: "He rides ahead and spots a safer campsite.", bad: "He takes the easy path and you lose a day.", wear: 0, time: -1, addsRep: { key: "metis", delta: 1 }, branch: {
           id: "plains_scout_return",
@@ -503,7 +766,8 @@ var EVENT_POOLS = {
     },
     {
       id: "plains_wind",
-      text: "A hot wind pushes at your back. The prairie grass ripples like water.",
+      text: "A hot wind pushes at your back, carrying the smell of sun-baked grass and distant smoke. The prairie grass ripples in long waves like a green sea, and the oxen lean into their traces with new energy. Your cart groans but the wheels turn faster \u2014 the wind is a gift, but the prairie gives nothing without a price.",
+      source: getSource("LACOMBE_JOURNALS"),
       choices: [
         { text: "Run with it", dc: 10, ok: "You make excellent time.", bad: "A hidden rut jolts the cart. Repairs are needed after crossing.", wear: 1, time: -1 },
         { text: "Hunker down", dc: null, always: "You wrap the load and keep moving. No rain comes.", alwaysWear: 0 }
@@ -511,8 +775,8 @@ var EVENT_POOLS = {
     },
     {
       id: "plains_camp_cookery",
-      text: "Midday halt by a cattail slough. Pemmican is passed around; bannock is frying. A M\xE9tis campsite nearby offers company.",
-      source: { quote: "Pemmican cooked in a frying-pan, a little grease, pepper, salt, with a trace of onions and potatoes added, constituted this, a dish to set before a king.", author: "William G. Fonseca", work: "On the St. Paul Trail in the Sixties, MHS Transactions, 1900" },
+      text: "Midday halt by a cattail slough. Pemmican is passed around; bannock is frying in a cast-iron pan, the smell of grease and onions drifting across the camp. A M\xE9tis campsite nearby offers company \u2014 strangers become friends over shared food and stories of the trail behind.",
+      source: getSource("FONSECA_CAMP"),
       choices: [
         { text: "Share rubaboo and trade stories", dc: 8, ok: "The circle of travellers is warm. Morale rises.", bad: "You are too guarded to connect fully.", morale: 8, addsRep: { key: "metis", delta: 1 }, setsFlag: "shared_camp_meal" },
         { text: "Eat quickly and move on", dc: null, always: "Hunger is satisfied, but nothing more.", alwaysWear: 0 }
@@ -520,8 +784,8 @@ var EVENT_POOLS = {
     },
     {
       id: "plains_night_camp",
-      text: "Moonlight spills across the prairie. Somewhere nearby a fiddle begins a Red River jig.",
-      source: { quote: "The Red River jig was struck up, and one after another exercised himself to his heart's content.", author: "William G. Fonseca", work: "On the St. Paul Trail in the Sixties, MHS Transactions, 1900" },
+      text: "Moonlight spills across the prairie, turning the grass to silver. Somewhere nearby a fiddle begins a Red River jig, the notes carrying clean and sharp through the still air. Voices rise in song \u2014 French and Michif, old tunes from the Red River settlements. The crew listens, and for a moment the trail feels like home.",
+      source: getSource("FONSECA_DANCE"),
       choices: [
         { text: "Dance until your boots throw dust", dc: 10, ok: "Laughter drowns out the dark.", bad: "You strain a shoulder and sleep poorly.", morale: 12, addsRep: { key: "metis", delta: 1 } },
         { text: "Turn in early; tomorrow is long", dc: null, always: "Rest restores you in small measure.", morale: 4 }
@@ -529,8 +793,8 @@ var EVENT_POOLS = {
     },
     {
       id: "plains_ox_scatter",
-      text: "The oxen have scattered after drinking. The mid-day camp is a chaos of traces and running hooves.",
-      source: { quote: "To drive the refractory animals among the carts was a last resort.", author: "William G. Fonseca", work: "On the St. Paul Trail in the Sixties, MHS Transactions, 1900" },
+      text: "The oxen have scattered after drinking \u2014 a chaos of traces and running hooves across the mid-day camp. Ropes tangle, carts shift, and the air fills with shouting. To drive the refractory animals among the carts is a last resort, but sometimes the only one.",
+      source: getSource("FONSECA_OX_SCATTER"),
       choices: [
         { text: "Call and whistle them back", dc: 11, ok: "The animals respond to the familiar sounds.", bad: "You lose an hour rounding them up.", time: 1, morale: -4 },
         { text: "Send someone ahead", dc: 9, ok: "Your crew brings them in quietly and quickly.", bad: "One runner turns an ankle.", crew: "tired", addsRep: { key: "metis", delta: 1 } }
@@ -538,8 +802,8 @@ var EVENT_POOLS = {
     },
     {
       id: "plains_squeal",
-      text: "The dry wood of the hub screams against the axle \u2014 a sound that carries for miles.",
-      source: { quote: "When loaded it gave forth a blood-curdling squeal which could be heard for miles and which came to be associated with it.", author: "Harry Baker Brehaut", work: "The Red River Cart and Trails, MHS Transactions, 1971-72" },
+      text: "The dry wood of the hub screams against the axle \u2014 a blood-curdling sound that carries for miles across the open prairie. Every traveller on the trail knows that squeal. It means a loaded cart is coming, and the sound alone is enough to make oxen nervous and strangers take notice.",
+      source: getSource("BREHAUT_CART"),
       choices: [
         { text: "Apply shaganappi before it worsens", dc: 7, ok: "The scream quiets. The trail is kinder.", bad: "Insufficient grease; the noise persists.", morale: -3, squeal: 0, branch: {
           id: "plains_squeal_draw_attention",
@@ -554,26 +818,26 @@ var EVENT_POOLS = {
     },
     {
       id: "plains_buffalo_hunt_camp",
-      text: "You encounter a massive buffalo hunt camp \u2014 hundreds of carts in a great circle, the air thick with dust and the sound of running horses.",
-      source: { quote: "Four hundred mounted huntsmen await the signal... the earth trembles.", author: "Brehaut, citing Alexander Ross", work: "MHS Transactions, 1971-72" },
+      text: "You crest a rise and the world opens below \u2014 a massive buffalo hunt camp spreads across the valley, hundreds of carts in a great circle. The air is thick with dust and the sound of running horses. Four hundred mounted huntsmen await the signal, and the earth trembles beneath the hooves of the herd beyond.",
+      source: getSource("GOULET_HUNT"),
       choices: [
-        { text: "Join the hunt", dc: 12, ok: "The hunt captain nods. You take a share of the meat.", bad: "You are slow to position. You earn only a strip.", food: 8, addsRep: { key: "metis", delta: 2 } },
+        { text: "Join the hunt", dc: 12, ok: "The hunt captain nods. You take a share of the meat.", bad: "You are slow to position. You earn only a strip.", food: 8, addsRep: { key: "metis", delta: 2 }, itemBonus: { name: "Ammunition Belt", dcBonus: 3 } },
         { text: "Observe and move on", dc: null, always: "You watch from a respectful distance. The hunt is spectacular.", alwaysWear: 0 }
       ]
     },
     {
       id: "plains_prairie_fire",
-      text: "Smoke on the horizon. The dry grass crackles \u2014 a wall of flame races toward you.",
-      source: { quote: "The prairie burned every afternoon... the oxen grew restless in the smoke.", author: "Father Albert Lacombe", work: "Missionary Journals, 1878" },
+      text: "Smoke on the horizon, thick and brown against the blue sky. Then the wind shifts and the smell hits you \u2014 dry grass, pine, and the acrid bite of a prairie fire racing toward you. The dry grass crackles at its edge, and the wall of flame moves faster than a man can run.",
+      source: getSource("LACOMBE_FIRE"),
       choices: [
-        { text: "Ride for the river bottom", dc: 14, ok: "The fire edge passes. You lose only a afternoon's travel.", bad: "The wind shifts. You lose supplies and the cart is singed.", food: -3, wear: 1, morale: -12 },
+        { text: "Ride for the river bottom", dc: 14, ok: "The fire edge passes. You lose only an afternoon's travel.", bad: "The wind shifts. You lose supplies and the cart is singed.", food: -3, wear: 1, morale: -12 },
         { text: "Light a backfire and wait it out", dc: 11, ok: "A practised escape. The backfire draws the main blaze away.", bad: "The flames jump. Your cart is spared but the oxen panic.", morale: -8, time: -1 }
       ]
     },
     {
       id: "plains_sayer_trial",
-      text: "A M\xE9tis settlement celebrates the anniversary of the Sayer trial. Free trade pride fills the air \u2014 and your cart.",
-      source: { quote: "The trial of Pierre Guillaume Sayer marked the beginning of free trade in the West.", author: "MMF Historical Research", work: "metis-research-vault" },
+      text: "A M\xE9tis settlement celebrates the anniversary of the Sayer trial \u2014 the day free trade became a right, not a privilege. The air is thick with pride and the smell of roasting meat. Folk cheer for independent carters, and your cart is a symbol of that freedom.",
+      source: getSource("SAWYER_TRIAL"),
       choices: [
         { text: "Display independent freight proudly", dc: 9, ok: "The folk cheer. Prices are better here.", bad: "You are taken for a Company man. Prices are unkind.", food: 5, addsRep: { key: "metis", delta: 2 } },
         { text: "Stay quiet and keep moving", dc: null, always: "Circumspection keeps your goods and your secrets.", alwaysWear: 0 }
@@ -581,8 +845,8 @@ var EVENT_POOLS = {
     },
     {
       id: "plains_burnt_prairie",
-      text: "The prairie here has been burnt black. No grass, no water, and the sun is relentless.",
-      source: { quote: "Bichon, the patient, would do his best and, failing, would lie down in the one.", author: "John C. Schultz", work: "The Old Crow Wing Trail, MHS Transactions, 1894" },
+      text: "The prairie here has been burnt black \u2014 no grass, no water, and the sun is relentless. The ground is ash underfoot, and the air shimmers with heat. Bichon, the patient ox, would do his best and, failing, would lie down in the one. You must decide whether to push through or find a way around.",
+      source: getSource("SCHULTZ_BURNT"),
       choices: [
         { text: "Push through to the next water", dc: 12, ok: "You make the crossing with grit.", bad: "The oxen lag. You are forced to camp on burnt ground.", food: -2, crew: "tired" },
         { text: "Detour to a shaded coulee", dc: null, always: "A slower, safer day. Grass and water restore the animals.", time: 1 }
@@ -590,8 +854,8 @@ var EVENT_POOLS = {
     },
     {
       id: "plains_sand_hills",
-      text: "The ground turns treacherous \u2014 old stumps hidden in tall grass, narrow coulees cutting across the path.",
-      source: { quote: "Many a worn-out axle and broken wheel attest the power of its stumps and coulees.", author: "John C. Schultz", work: "The Old Crow Wing Trail, MHS Transactions, 1894" },
+      text: "The ground turns treacherous \u2014 old stumps hidden in tall grass, narrow coulees cutting across the path without warning. Many a worn-out axle and broken wheel attest the power of these stumps and coulees. The cart lurches and groans with every hidden obstacle.",
+      source: getSource("SCHULTZ_STUMPS"),
       choices: [
         { text: "Hug the ridge line to avoid low ground", dc: 11, ok: "Clear ground saves the cart.", bad: "A hidden stump catches the wheel hub.", wear: 1, morale: -4 },
         { text: "Take the direct trail", dc: null, always: "The going is rough but quick.", alwaysWear: 0 }
@@ -599,8 +863,8 @@ var EVENT_POOLS = {
     },
     {
       id: "wooded_windfall",
-      text: "A great elm has fallen across the trail \u2014 branches splayed like fingers blocking the path.",
-      source: { quote: "A great elm has fallen across the trail.", author: "Schultz (1894)" },
+      text: "A great elm has fallen across the trail \u2014 branches splayed like fingers blocking the path. The trunk is too heavy to move, and the bush on either side is thick with undergrowth. You will need to cut your way through or find another route entirely.",
+      source: getSource("SCHULTZ_STUMPS"),
       choices: [
         { text: "Cut a way through", dc: 10, ok: "The path opens. Useful firewood goes on the cart.", bad: "The work is harder than expected.", time: 1 },
         { text: "Bypass through the bush", dc: 11, ok: "The bush breaks open onto the old trail.", bad: "A branch catches the canvas cover.", wear: 1 },
@@ -609,8 +873,8 @@ var EVENT_POOLS = {
     },
     {
       id: "plains_axle_snap",
-      text: "A sickening crack \u2014 the right axle shears against a hidden stone half-buried in yesterday's washout.",
-      source: { quote: "Many a worn-out axle and broken wheel attest the power of its stumps and coulees.", author: "John C. Schultz", work: "The Old Crow Wing Trail, MHS Transactions, 1894" },
+      text: "A sickening crack \u2014 the right axle shears against a hidden stone half-buried in yesterday's washout. The cart lurches and the load shifts. You are miles from the nearest post, and the tools for a proper repair are back at the settlement. A jury-rig will have to hold.",
+      source: getSource("SCHULTZ_STUMPS"),
       choices: [
         { text: "Set a splice with rope and wedges", dc: 11, ok: "A jury-rig holds. Progress is slow, but the cart is rolling again.", bad: "The splice splits by noon.", wear: 1, time: 1, morale: -4 },
         { text: "Cache the load and press on light", dc: null, always: "You bury the crated freight and mark the spot. The cart is light, but you return poorer.", time: -1, food: -4 }
@@ -618,26 +882,26 @@ var EVENT_POOLS = {
     },
     {
       id: "plains_bear_camp",
-      text: "Dawn finds a cinnamon bear rooting through your bread sack at the edge of camp.",
-      source: { quote: "The bears along the Carlton were a constant threat to unprotected provisions.", author: "Brehaut, citing Fort Qu'Appelle accounts", work: "MHS Transactions, 1971-72" },
+      text: "Dawn finds a cinnamon bear rooting through your bread sack at the edge of camp. The bears along the Carlton were a constant threat to unprotected provisions. This one is bold \u2014 it has smelled the pemmican and it is not leaving without a fight.",
+      source: getSource("LACOMBE_BEAR"),
       choices: [
-        { text: "Beat the pan and drive it off", dc: 11, ok: "The bear lumbers away with a swat at its nose.", bad: "It turns. A strap snaps and half the flour is gone.", food: -3, morale: -6, wear: 1 },
+        { text: "Beat the pan and drive it off", dc: 11, ok: "The bear lumbers away with a swat at its nose.", bad: "It turns. A strap snaps and half the flour is gone.", food: -3, morale: -6, wear: 1, itemBonus: { name: "Ammunition Belt", dcBonus: 4 } },
         { text: "Climb for height and wait", dc: null, always: "The bear eventually loses interest. You lose the morning, not the flour.", time: 1 }
       ]
     },
     {
       id: "plains_hail",
-      text: "The sky turns green and the air goes still. Then the hail comes \u2014 stones the size of walnuts.",
-      source: { quote: "Sudden storms of hail and sleet were not uncommon on the open prairie in late spring.", author: "Lacombe missionary journals, 1878" },
+      text: "The sky turns green and the air goes still \u2014 then the hail comes. Stones the size of walnuts hammer the canvas cover and bounce off the cart bed. The oxen bellow and strain at their traces. There is no shelter on the open prairie, only the cart and whatever you can do to protect it.",
+      source: getSource("LACOMBE_HAIL"),
       choices: [
-        { text: "Cover the canvas and ride it out", dc: 10, ok: "The wagon top holds. The oxen are skittish but unhurt.", bad: "Canvas tears and two rounds of cheese are spoiled.", food: -2, morale: -4 },
+        { text: "Cover the canvas and ride it out", dc: 10, ok: "The wagon top holds. The oxen are skittish but unhurt.", bad: "Canvas tears and two rounds of cheese are spoiled.", food: -2, morale: -4, itemBonus: { name: "Canvas Tarp", dcBonus: 4 } },
         { text: "Scramble to the nearest coulee", dc: 9, ok: "Natural shelter saves the load.", bad: "A slipped wheel in the rush.", wear: 1 }
       ]
     },
     {
       id: "plains_theft",
-      text: "Camp is crowded. You wake to find a small bundle of trade goods missing from the cart pole.",
-      source: { quote: "Thefts at rendezvous camps were usually petty and punished by the trail's own informal courts.", author: "MMF Historical Research" },
+      text: "Camp is crowded \u2014 too many carts, too many strangers. You wake to find a small bundle of trade goods missing from the cart pole. Thefts at rendezvous camps were usually petty and punished by the trail's own informal courts, but finding the thief among fifty families is another matter.",
+      source: getSource("MMF_TRAIL_JUSTICE"),
       choices: [
         { text: "Tell the camp overseer and help search", dc: 9, ok: "The goods are returned. The thief is ordered to pay in labour.", addsRep: { key: "metis", delta: 1 } },
         { text: "Write it off and tighten watch", dc: null, always: "Pragmatic. The trail teaches scarcity.", alwaysWear: 0, morale: -2 }
@@ -647,17 +911,17 @@ var EVENT_POOLS = {
   river_valley: [
     {
       id: "river_valley_sudden_rain",
-      text: "The heavy cloud bursts without warning. The trail turns to a slurry and the cart sinks to the naves.",
-      source: { quote: "Sudden storms of rain turned the valley trail into a bog that could trap a loaded cart for hours.", author: "Lacombe missionary journals, 1878" },
+      text: "The heavy cloud bursts without warning. The trail turns to a slurry and the cart sinks to the naves \u2014 the wheels disappearing into mud that grabs and holds. Sudden storms of rain turned the valley trail into a bog that could trap a loaded cart for hours.",
+      source: getSource("LACOMBE_HAIL"),
       choices: [
-        { text: "Unhitch and pole the cart through", dc: 12, ok: "The oxen respond; you keep moving, soaked.", bad: "A wheel hub sinks axle-deep.", wear: 1, morale: -4 },
+        { text: "Unhitch and pole the cart through", dc: 12, ok: "The oxen respond; you keep moving, soaked.", bad: "A wheel hub sinks axle-deep.", wear: 1, morale: -4, itemBonus: { name: "Rope (50ft)", dcBonus: 3 } },
         { text: "Wait it out on dry ground", dc: null, always: "Two hours of rain. The mud thickens.", time: 1 }
       ]
     },
     {
       id: "river_valley_broken_axle",
-      text: "A hidden washout has eaten into the bank. The cart slews and the axle groans.",
-      source: { quote: "Many a worn-out axle and broken wheel attest the power of its stumps and coulees.", author: "John C. Schultz", work: "The Old Crow Wing Trail, MHS Transactions, 1894" },
+      text: "A hidden washout has eaten into the bank. The cart slews and the axle groans \u2014 a sound that makes every carter's stomach drop. The ground gives way beneath the wheel, and the cart tilts toward the river. You need a repair, and you need it before the bank collapses further.",
+      source: getSource("SCHULTZ_STUMPS"),
       choices: [
         { text: "Set a temporary truss with canvas and rope", dc: 11, ok: "A crude repair holds for the remaining miles.", bad: "The truss fails in the next gully.", wear: 1, time: 1 },
         { text: "Spike the wheel and coast downhill", dc: null, always: "You save time but the wheel wobbles loose.", alwaysWear: 1, morale: -4 }
@@ -665,8 +929,8 @@ var EVENT_POOLS = {
     },
     {
       id: "river_high",
-      text: "The river is running high and fast. The bank trail is muddy and narrow.",
-      source: { quote: "The carts had indeed entered straight into the water... turned upstream to make the crossing in a horse shoe fashion.", author: "John C. Schultz", work: "The Old Crow Wing Trail, MHS Transactions, 1894" },
+      text: "The river is running high and fast, brown with spring melt. The bank trail is muddy and narrow \u2014 one wrong step and the cart slides toward the water. The carts had indeed entered straight into the water, turned upstream to make the crossing in a horse-shoe fashion. You must decide: risk the ford or wait for calmer water.",
+      source: getSource("FONSECA_FORD"),
       choices: [
         { text: "Ford carefully", dc: 13, ok: "The ox keeps footing and you stay dry enough.", bad: "The cart tilts in the current. Repairs are needed after crossing.", wear: 1 },
         { text: "Wait for afternoon", dc: null, always: "You camp and cross later when the water drops.", time: 1 },
@@ -675,7 +939,8 @@ var EVENT_POOLS = {
     },
     {
       id: "river_mp_check",
-      text: "An NWMP patrol stops you just above the ferry landing.",
+      text: "An NWMP patrol stops you just above the ferry landing. Red coats inspect the carts with scrupulous care \u2014 duty is collected in cash or goods, and every cart is subject to inspection. The mounted police established posts along the trail to enforce Ottawa's regulations.",
+      source: getSource("MACLEOD_NWMP"),
       choices: [
         { text: "Show your papers", dc: 9, ok: "The permits read clearly. They let you pass.", bad: "A signature mismatch. You are delayed.", time: 1, addsRep: { key: "nwmp", delta: 1 } },
         { text: "Talk your way past", dc: 12, ok: "They accept your story.", bad: "They insist on a spot inspection. Wear is likely.", wear: 1, addsRep: { key: "nwmp", delta: -1 }, branch: /* @__PURE__ */ __name(() => ({
@@ -690,8 +955,8 @@ var EVENT_POOLS = {
     },
     {
       id: "river_valley_bank_descent",
-      text: "The opposite bank is steep \u2014 eight feet of loose earth down to the water.",
-      source: { quote: "A line was tied to the middle of the axle of the cart, and a turn of the line made around the trunk of a tree on the bank.", author: "William G. Fonseca", work: "On the St. Paul Trail in the Sixties, MHS Transactions, 1900" },
+      text: "The opposite bank is steep \u2014 eight feet of loose earth down to the water. A line was tied to the middle of the axle of the cart, and a turn of the line made around the trunk of a tree on the bank. The cart must be lowered carefully, or the whole thing slides into the river.",
+      source: getSource("FONSECA_BANK"),
       choices: [
         { text: "Lower the cart with a line tied to a tree", dc: 10, ok: "A careful descent protects the load.", bad: "The knot slips at the last moment; the cart jars.", wear: 1 },
         { text: "Free descent", dc: null, always: "The cart slides hard; the contents shift dangerously.", alwaysWear: 1 }
@@ -699,36 +964,37 @@ var EVENT_POOLS = {
     },
     {
       id: "river_boat",
-      text: "At a wide crossing the captain offers passage \u2014 but he is clearly understaffed and the ferry rocks.",
+      text: "At a wide crossing the captain offers passage \u2014 but he is clearly understaffed and the ferry rocks with every wave. The current is heavy and the oarsman strains. You must decide whether to trust the ferry or find another way across.",
+      source: getSource("FONSECA_FORD"),
       choices: [
-        { text: "Board and keep the load centred", dc: 11, ok: "You ride the swell and land clean.", bad: "A barrel breaks loose and damages a wheel.", wear: 1, food: -2 },
+        { text: "Board and keep the load centred", dc: 11, ok: "You ride the swell and land clean.", bad: "A barrel breaks loose and damages a wheel.", wear: 1, food: -2, itemBonus: { name: "Rope (50ft)", dcBonus: 3 } },
         { text: "Wait for a larger brigade", dc: null, always: "A safer but slower choice.", time: 2 }
       ]
     },
     {
       id: "river_cholera_camp",
-      text: "A member of your crew wakes shaking and cold \u2014 by midday they cannot stand. The river water was contaminated.",
-      source: { quote: "A waterborne bacteria that thrived in the stagnant water of common camping grounds.", author: "Cart Trail Game Research (2025)" },
+      text: "A member of your crew wakes shaking and cold \u2014 by midday they cannot stand. The river water was contaminated, a waterborne bacteria that thrived in the stagnant water of common camping grounds. The trail has seen this before, and it is never gentle.",
+      source: getSource("HBC_DISEASE"),
       choices: [
-        { text: "Use the medicine pouch and rest the day", dc: 14, ok: "The crisis passes. One day lost, but the crew recovers.", bad: "The fever breaks but the crew is weak for days.", crew: "tired", morale: -8 },
+        { text: "Use the medicine pouch and rest the day", dc: 14, ok: "The crisis passes. One day lost, but the crew recovers.", bad: "The fever breaks but the crew is weak for days.", crew: "tired", morale: -8, consumesItem: "Medicine Pouch" },
         { text: "Push through without rest", dc: null, always: "The worst passes but the toll is steep.", morale: -20, crew: "exhausted" }
       ]
     },
     {
       id: "river_mosquito_camp",
-      text: "The mosquitoes rise in clouds from the riverbank. The oxen stampede; the cooking fire smoulders.",
-      source: { quote: "Amidst a cloud of mosquitoes, sand flies, and all prairie annoyances, including mud.", author: "William G. Fonseca", work: "On the St. Paul Trail in the Sixties, MHS Transactions, 1900" },
+      text: "The mosquitoes rise in clouds from the riverbank \u2014 a living fog that descends on man and beast alike. The oxen stampede; the cooking fire smoulders and dies. Amidst a cloud of mosquitoes, sand flies, and all prairie annoyances, including mud, the cart trains made their way westward.",
+      source: getSource("FONSECA_MOSQUITOES"),
       choices: [
         { text: "Move camp to high ground before dark", dc: 9, ok: "The move is miserable but the night is quieter.", bad: "A wheel is twisted in the dark.", wear: 1 },
-        { text: "Use canvas tarps and tough it out", dc: 11, ok: "You hunker down. Morning comes.", bad: "The insects are relentless. Morale falls hard.", morale: -10 }
+        { text: "Use canvas tarps and tough it out", dc: 11, ok: "You hunker down. Morning comes.", bad: "The insects are relentless. Morale falls hard.", morale: -10, itemBonus: { name: "Canvas Tarp", dcBonus: 4 } }
       ]
     },
     {
       id: "river_cart_raft",
-      text: "The crossing here is too deep to ford. You eye the spare hides in the cart.",
-      source: { quote: "Four cart wheels were taken and placed dish upwards... The boat was launched, and floated like a duck.", author: "William G. Fonseca", work: "On the St. Paul Trail in the Sixties, MHS Transactions, 1900" },
+      text: "The crossing here is too deep to ford. You eye the spare hides in the cart \u2014 enough to build a raft, if you know how. Four cart wheels were taken and placed dish upwards on the surface of the water. The boat was launched, and floated like a duck.",
+      source: getSource("FONSECA_RAFT"),
       choices: [
-        { text: "Build a cart-raft with 4 bison hides", dc: 12, ok: "The improvised ferry floats. The crew swims the line across.", bad: "One hide splits mid-river; cargo gets wet.", morale: -6, setsFlag: "built_rafts", requiresFlag: "has_hides", branch: {
+        { text: "Build a cart-raft with 2 bison hides", dc: 12, ok: "The improvised ferry floats. The crew swims the line across.", bad: "One hide splits mid-river; cargo gets wet.", morale: -6, setsFlag: "built_rafts", requiresItem: { name: "Bison Hide", count: 2 }, branch: {
           id: "river_raft_wash",
           text: "On the far bank, an elder watches your landing and nods slowly.",
           choices: [
@@ -741,36 +1007,67 @@ var EVENT_POOLS = {
     },
     {
       id: "ferry_gabriel",
-      text: "Gabriel Dumont is at the crossing. His ferry is ready, but the current is heavy today.",
-      source: { quote: "Gabriel Dumont... ferryman, guide, and later military leader of the Metis forces.", author: "Dumont Family Accounts", work: "MMF Research Vault" },
+      text: "Gabriel Dumont is at the crossing, his ferry moored to the bank. His fee is fair, but the current is heavy today \u2014 the ferry rocks and the oarsman strains. Dumont watches the river with the calm of a man who has crossed it a thousand times.",
+      source: getSource("DUMONT_ACCOUNTS"),
       choices: [
         { text: "Take the ferry now", dc: 10, ok: "He rows hard and gets you across cleanly.", bad: "The ferry lurches. Cargo shifts and one wheel takes damage.", wear: 1, addsRep: { key: "metis", delta: 1 } },
         { text: "Wait out the current", dc: null, always: "You wait one day for calmer water.", time: 1 }
+      ]
+    },
+    {
+      id: "river_valley_flood_crossing",
+      text: "The spring flood has turned the river into a brown, churning torrent. Debris spins in the current \u2014 branches, logs, the remains of last year's ice. The ford is barely visible, marked by two willow sticks driven into the bank. The oxen smell the water and balk.",
+      source: getSource("FONSECA_FORD"),
+      choices: [
+        { text: "Ford now while you can see the markers", dc: 14, ok: "The oxen find their footing. The cart tilts but holds. You reach the far bank soaked but whole.", bad: "A submerged log catches the axle. The cart spins in the current.", wear: 2, food: -2 },
+        { text: "Wait for the water to drop", dc: null, always: "You camp on the high bank and wait. The river drops by morning.", time: 1 },
+        { text: "Build a cart-raft with 2 Bison Hides", dc: 12, ok: "The improvised ferry floats. The crew swims the line across.", bad: "One hide splits mid-river. Cargo gets wet.", morale: -6, requiresItem: { name: "Bison Hide", count: 2 } }
+      ]
+    },
+    {
+      id: "river_valley_trader_encounter",
+      text: "A lone trader crests the rise ahead, his cart loaded with bundles wrapped in oilcloth. He waves \u2014 a free trader, independent of the Company, carrying goods from settlement to settlement. His prices are his own, and his news is fresh.",
+      source: getSource("SAWYER_TRIAL"),
+      choices: [
+        { text: "Trade with him", dc: null, always: "You exchange one of his goods for one of yours. Fair value, no questions asked.", morale: 5 },
+        { text: "Buy information about the trail ahead", dc: 8, ok: "He shares what he knows \u2014 which posts have supplies, which trails are washed out.", bad: "He is close-mouth about conditions ahead. You learn little.", morale: 3 },
+        { text: "Refuse and keep moving", dc: null, always: "You tip your hat and press on. Not all strangers are friends." }
+      ]
+    },
+    {
+      id: "river_valley_mission_garden",
+      text: "A small mission sits in the river valley, its garden a shock of green against the brown prairie. Rows of potatoes, turnips, and beans grow behind a wooden fence. The missionary offers freely \u2014 the garden is God's, and God's gifts are for all.",
+      source: getSource("GREY_NUNS"),
+      choices: [
+        { text: "Accept the offering gratefully", dc: null, always: "Fresh food after weeks of pemmican. The crew eats like kings.", food: 4, morale: 10 },
+        { text: "Trade labor for extra supplies", dc: null, always: "You help with the harvest in exchange for a full basket. The missionary is grateful.", food: 6, time: 1 },
+        { text: "Move on \u2014 you cannot spare the time", dc: null, always: "The trail waits for no one. You press west." }
       ]
     }
   ],
   wooded: [
     {
       id: "wooded_cree",
-      text: "A Cree hunter steps onto the trail ahead. He studies your cart and nods at the pemmican sacks.",
+      text: "A Cree hunter steps onto the trail ahead, his rifle resting easy in the crook of his arm. He studies your cart and nods at the pemmican sacks \u2014 a gesture of recognition between peoples who know the same hunger. The wooded corridors of the Carlton Trail were meeting places, where M\xE9tis and Cree traded goods and news.",
+      source: getSource("MMF_COMMUNITIES"),
       choices: [
-        { text: "Offer a trade", dc: 11, ok: "He swaps fresh meat for part of your load.", bad: "He senses you are short on food. The deal goes poorly.", food: 3, addsRep: { key: "cree", delta: 1 } },
+        { text: "Offer a trade", dc: 11, ok: "He swaps fresh meat for part of your load.", bad: "He senses you are short on food. The deal goes poorly.", food: 3, addsRep: { key: "cree", delta: 1 }, itemBonus: { name: "Ammunition Belt", dcBonus: 2 } },
         { text: "Keep moving", dc: null, always: "He watches but does not interfere.", alwaysWear: 0 }
       ]
     },
     {
       id: "wooded_ambush_ravine",
-      text: "A hidden rut drops one wheel into a creek bed \u2014 the cart tilts dangerously.",
-      source: { quote: "Being run over by the heavy wooden wheels of a Red River cart was the leading cause of death on the trails.", author: "Cart Trail Game Research", work: "Research Vault" },
+      text: "A hidden rut drops one wheel into a creek bed \u2014 the cart tilts dangerously, and the load shifts toward the ditch. Being run over by the heavy wooden wheels of a Red River cart was the leading cause of death on the trails. Quick hands are needed now.",
+      source: getSource("BREHAUT_CART"),
       choices: [
-        { text: "Catch the weight and right it", dc: 12, ok: "Quick hands save the day.", bad: "The cart upsets. One food item is lost.", food: -1, wear: 1 },
+        { text: "Catch the weight and right it", dc: 12, ok: "Quick hands save the day.", bad: "The cart upsets. One food item is lost.", food: -1, wear: 1, itemBonus: { name: "Rope (50ft)", dcBonus: 3 } },
         { text: "Call for help", dc: 9, ok: "A nearby M\xE9tis party rights the cart swiftly.", bad: "Helpers arrive slow and grumpy.", morale: -5, time: 1 }
       ]
     },
     {
       id: "wooded_stung_by_flies",
-      text: "The mosquitoes and biting flies rise from the slough. The animals spook and the crew wants to run.",
-      source: { quote: "Bound away to the water, into which they plunged neck deep, remaining there safe from the tormenting flies and mosquitoes.", author: "William G. Fonseca", work: "On the St. Paul Trail in the Sixties, MHS Transactions, 1900" },
+      text: "The mosquitoes and biting flies rise from the slough in a living cloud. The animals spook and the crew wants to run. Bound away to the water, into which they plunged neck deep, remaining there safe from the tormenting flies and mosquitoes.",
+      source: getSource("FONSECA_MOSQUITOES"),
       choices: [
         { text: "Drive through to firmer ground", dc: 11, ok: "You outpace the worst of the cloud.", bad: "The animals bolt; a strap snaps.", wear: 1, crew: "tired" },
         { text: "Let the oxen cool in the water", dc: null, always: "The delay costs time but saves nerves.", time: 1 }
@@ -778,8 +1075,8 @@ var EVENT_POOLS = {
     },
     {
       id: "wooded_black_bear",
-      text: "A black bear crosses the trail thirty yards ahead, then stops and turns, taking the measure of the party.",
-      source: { quote: "Bears were common along the wooded corridors of the Carlton Trail and could be dangerous when surprised at close range.", author: "Brehaut, citing Fort Qu'Appelle accounts", work: "MHS Transactions, 1971-72" },
+      text: "A black bear crosses the trail thirty yards ahead, then stops and turns, taking the measure of the party. Bears were common along the wooded corridors of the Carlton Trail and could be dangerous when surprised at close range. This one is calm \u2014 for now.",
+      source: getSource("LACOMBE_BEAR"),
       choices: [
         { text: "Stand your ground and make noise", dc: 12, ok: "The bear veers away.", bad: "It charges and the oxen bolt.", wear: 1, morale: -6, crew: "tired" },
         { text: "Back away quietly with the cart", dc: null, always: "The bear waits until you are clear, then moves on.", time: 1 }
@@ -787,8 +1084,8 @@ var EVENT_POOLS = {
     },
     {
       id: "wooded_rattlesnake",
-      text: "A rattlesnake hums in the grass beside the trail, still as a root until you are almost on it.",
-      source: { quote: "Rattlesnakes were common on the southern stretches of the trail and caused many a nervous night.", author: "Schultz, citing settler accounts", work: "The Old Crow Wing Trail, MHS Transactions, 1894" },
+      text: "A rattlesnake hums in the grass beside the trail, still as a root until you are almost on it. Rattlesnakes were common on the southern stretches of the trail and caused many a nervous night. The lead ox smells it first and refuses to move.",
+      source: getSource("SCHULTZ_RATTLESNAKE"),
       choices: [
         { text: "Hook it clear with a pole and move on", dc: 10, ok: "The snake disappears into the brush.", bad: "It strikes at the lead ox.", wear: 1, morale: -2 },
         { text: "Backtrack to a wider crossing", dc: null, always: "A slow detour, but nerves settle.", time: 1 }
@@ -796,18 +1093,49 @@ var EVENT_POOLS = {
     },
     {
       id: "wooded_axle_rut",
-      text: "A hidden washout drops the front wheel axle-deep. The cart tilts dangerously toward the ditch.",
-      source: { quote: "Many a worn-out axle and broken wheel attest the power of its stumps and coulees.", author: "John C. Schultz", work: "The Old Crow Wing Trail, MHS Transactions, 1894" },
+      text: "A hidden washout drops the front wheel axle-deep. The cart tilts dangerously toward the ditch. Many a worn-out axle and broken wheel attest the power of its stumps and coulees. You need to free the cart before the soil gives way completely.",
+      source: getSource("SCHULTZ_STUMPS"),
       choices: [
         { text: "Spade and block the wheel", dc: 11, ok: "You free the cart without damage.", bad: "The soil gives way twice.", time: 1, morale: -3 },
         { text: "Lighten and rock it free", dc: 9, ok: "A quick heave gets you out clean.", bad: "A crate lands in the muck.", food: -2, wear: 1 }
+      ]
+    },
+    {
+      id: "wooded_cree_elder",
+      text: "An old Cree man sits on a fallen log beside the trail, his pipe sending thin smoke into the still air. He watches your cart approach with calm eyes. When you stop, he speaks \u2014 not in English, but in gestures and a few French words. He knows these woods. He knows what lies ahead.",
+      source: getSource("MMF_COMMUNITIES"),
+      choices: [
+        { text: "Listen to what he has to say", dc: null, always: "He points to the trail ahead, then draws a line in the dust. Warning or welcome \u2014 you cannot be sure, but the gesture is clear.", morale: 5 },
+        { text: "Offer a gift and trade words", dc: 9, ok: "He accepts your offering and shares what he knows about the trail. His directions save you a day.", bad: "He takes the gift but says little. Some knowledge is not for strangers.", morale: 3 },
+        { text: "Nod respectfully and move on", dc: null, always: "You tip your hat and press west. The old man watches you go." }
+      ]
+    },
+    {
+      id: "wooded_bee_tree",
+      text: "A hollow oak, its trunk scarred by fire, hums with life. Wild bees stream in and out of a knot near the crown \u2014 a bee tree, full of honey. The air smells of wax and sweetness. It is a rare find on the open prairie, where sugar is worth its weight in trade goods.",
+      source: getSource("GOULET_BEE_TREE"),
+      choices: [
+        { text: "Harvest the honey", dc: 10, ok: "Smoke calms the bees. You fill a pail with golden honey \u2014 enough to trade or eat for days.", bad: "The bees are not pleased. Stings and smoke, but you get a little honey.", food: 3, time: 1 },
+        { text: "Mark the tree for the return journey", dc: null, always: "You notch the bark and remember the spot. The honey will keep.", morale: 3 },
+        { text: "Leave it \u2014 you cannot spare the time", dc: null, always: "The trail waits. The bees keep their treasure." }
+      ]
+    },
+    {
+      id: "wooded_forest_fire",
+      text: "Smoke on the horizon. Then the wind shifts and the smell hits you \u2014 dry wood, pine resin, and the acrid bite of a forest fire pushing toward you. The treeline ahead glows orange. The oxen smell it too and pull at their traces. The prairie burned every afternoon, but this is different \u2014 this fire is coming for you.",
+      source: getSource("LACOMBE_FIRE"),
+      choices: [
+        { text: "Ride for the river bottom", dc: 12, ok: "The fire edge passes. You lose only an afternoon.", bad: "The wind shifts. You lose supplies and the cart is singed.", food: -3, wear: 1, morale: -12 },
+        { text: "Light a backfire and wait it out", dc: 10, ok: "A practised escape. The backfire draws the main blaze away from your position.", bad: "The flames jump. Your cart is spared but the oxen panic.", morale: -8, time: -1 },
+        { text: "Use water from the slough to wet the canvas", dc: 11, ok: "The wet tarp protects the load. You wait in the smoke until the fire passes.", bad: "There is not enough water. The canvas smolders.", morale: -6, itemBonus: { name: "Canvas Tarp", dcBonus: 3 } }
       ]
     }
   ],
   uplands: [
     {
       id: "upland_high_pass",
-      text: "The trail climbs onto a windy upland bench. Rain draws near.",
+      text: "The trail climbs onto a windy upland bench, the prairie falling away on all sides. Rain draws near \u2014 you can smell it in the air, feel it in the drop of temperature. The ridge offers no shelter, and the cart is exposed to whatever the sky decides to deliver.",
+      source: getSource("LACOMBE_HAIL"),
       choices: [
         { text: "Press through before the storm", dc: 11, ok: "You gain the far shelter with minutes to spare.", bad: "The rain catches you on exposed ground.", wear: 1, morale: -6 },
         { text: "Hike to a rocky ledge and wait", dc: null, always: "Cold, but the cart and crew are intact.", time: 1 }
@@ -815,8 +1143,8 @@ var EVENT_POOLS = {
     },
     {
       id: "upland_sand_hill",
-      text: "The ground turns treacherous \u2014 old stumps hidden in tall grass, narrow coulees cutting across the path.",
-      source: { quote: "Many a worn-out axle and broken wheel attest the power of its stumps and coulees.", author: "John C. Schultz", work: "The Old Crow Wing Trail, MHS Transactions, 1894" },
+      text: "The ground turns treacherous \u2014 old stumps hidden in tall grass, narrow coulees cutting across the path without warning. Many a worn-out axle and broken wheel attest the power of its stumps and coulees. The cart lurches and groans with every hidden obstacle.",
+      source: getSource("SCHULTZ_STUMPS"),
       choices: [
         { text: "Hug the ridge line to avoid low ground", dc: 11, ok: "Clear ground saves the cart.", bad: "A hidden stump catches the wheel hub.", wear: 1 },
         { text: "Take the direct trail", dc: null, always: "The going is rough but quick.", alwaysWear: 0 }
@@ -824,19 +1152,69 @@ var EVENT_POOLS = {
     },
     {
       id: "upland_thunderstorm",
-      text: "The ridge offers no shelter. Lightning finds the highest point and the rain comes down in sheets.",
-      source: { quote: "Sudden storms of hail and sleet were not uncommon on the uplands in late spring.", author: "Lacombe missionary journals, 1878" },
+      text: "The ridge offers no shelter. Lightning finds the highest point and the rain comes down in sheets. Sudden storms of hail and sleet were not uncommon on the uplands in late spring. The oxen bellow and strain at their traces, and the cart slides on the wet grass.",
+      source: getSource("LACOMBE_HAIL"),
       choices: [
-        { text: "Hobble the oxen and weather it under the cart", dc: 11, ok: "The canvas holds. You are soaked but intact.", bad: "A lightning-struck tree falls nearby.", morale: -6, time: -1 },
+        { text: "Hobble the oxen and weather it under the cart", dc: 11, ok: "The canvas holds. You are soaked but intact.", bad: "A lightning-struck tree falls nearby.", morale: -6, time: -1, itemBonus: { name: "Canvas Tarp", dcBonus: 4 } },
         { text: "Run for the coulee bottom", dc: 9, ok: "Lower ground is safer.", bad: "A slipped wheel in the mud.", wear: 1 }
+      ]
+    },
+    {
+      id: "upland_bison_herd",
+      text: "The trail vanishes beneath a sea of brown backs. A buffalo herd \u2014 thousands strong \u2014 blocks the path ahead, the earth trembling beneath their hooves. The oxen low and pull at their traces, eyes rolling white. You cannot go around; the herd stretches to the horizon on both sides.",
+      source: getSource("GOULET_HUNT"),
+      choices: [
+        { text: "Wait for the herd to pass", dc: null, always: "You make camp and wait. The herd takes half a day to pass. The ground is churned to dust.", time: 1 },
+        { text: "Drive through the edge of the herd", dc: 13, ok: "The oxen plunge in. The herd parts just enough. You emerge on the other side, hearts pounding.", bad: "A bull takes offense. The oxen bolt. Cart tips and supplies scatter.", wear: 2, morale: -8 },
+        { text: "Hunt a straggler for food", dc: 11, ok: "A young bull is separated from the herd. The crew brings it down and butchers it on the spot.", bad: "The shot scatters the herd toward you. The oxen stampede.", food: 6, itemBonus: { name: "Ammunition Belt", dcBonus: 3 } }
+      ]
+    },
+    {
+      id: "upland_storm_shelter",
+      text: "The sky turns green and the air goes still \u2014 then the hail comes. Stones the size of walnuts hammer the canvas cover. Lightning finds the highest point, and the ridge offers no shelter. The oxen bellow and strain against their traces.",
+      source: getSource("LACOMBE_HAIL"),
+      choices: [
+        { text: "Hobble the oxen and wait it out", dc: null, always: "You huddle under the cart. The storm passes in twenty minutes. Everyone is soaked but alive.", morale: -4 },
+        { text: "Push for the coulee bottom", dc: 10, ok: "Lower ground is safer. The hail lessens as you descend.", bad: "A slipped wheel in the mud. The cart tilts but holds.", wear: 1 },
+        { text: "Use the Canvas Tarp as shelter", dc: 9, ok: "The tarp holds against the worst of it. The crew stays dry enough.", bad: "The wind tears at the canvas. A pole snaps.", morale: -3, itemBonus: { name: "Canvas Tarp", dcBonus: 3 } }
+      ]
+    },
+    {
+      id: "upland_metis_scout",
+      text: "A lone rider appears on the ridge ahead \u2014 a M\xE9tis scout, his cart painted red and blue, his sash bright against the brown grass. He knows these hills. He offers to guide you through the uplands for a price.",
+      source: getSource("MMF_COMMUNITIES"),
+      choices: [
+        { text: "Hire him as a guide", dc: null, always: "He rides ahead and finds the best path. You save a day of wandering.", food: -3, extraProgress: 1, addsRep: { key: "metis", delta: 1 } },
+        { text: "Trade for information instead", dc: 8, ok: "He shares what he knows about the trail ahead in exchange for news from the settlements.", bad: "He is polite but reveals little. You part ways no wiser.", morale: 5 },
+        { text: "Decline and rely on your own sense", dc: null, always: "You nod respectfully and press on alone. The trail is harder to find than expected.", time: 1 }
+      ]
+    },
+    {
+      id: "upland_water_hole",
+      text: "The oxen refuse to drink. The water hole ahead is alkaline \u2014 white crust rings the edge, and the smell of alkali rides the wind. The animals know before you do: this water will sicken them.",
+      source: getSource("SCHULTZ_ALKALI"),
+      choices: [
+        { text: "Force the oxen through to clean water beyond", dc: 11, ok: "The oxen drink reluctantly and you push on. They recover by evening.", bad: "One ox goes lame from the bad water. Progress slows to a crawl.", crew: "tired", morale: -6 },
+        { text: "Detour to find a clean spring", dc: null, always: "A longer route, but the water is sweet. The oxen drink deeply and press on with new energy.", time: 1, morale: 5 },
+        { text: "Ration Pemmican Rations to sustain the crew", dc: null, always: "You stretch your food and wait for the oxen to adjust. A hungry day, but no one falls ill.", food: -3 }
+      ]
+    },
+    {
+      id: "upland_night_frost",
+      text: "The temperature drops after sunset. By morning, a thin crust of ice covers the water barrels and the oxen's breath rises in white plumes. The ground is too hard to drive tent pegs. The crew huddles together for warmth, and the firewood burns faster than you planned.",
+      source: getSource("SCHULTZ_FROST"),
+      choices: [
+        { text: "Burn extra Firewood Bundle to keep warm", dc: null, always: "The fire holds back the cold. The crew sleeps, but your fuel reserves are thinner now.", morale: 5 },
+        { text: "Push through without extra fire", dc: 9, ok: "Grit and determination. The crew complains but holds together.", bad: "Fingers go numb. One crew member cannot feel their feet by morning.", crew: "tired", morale: -10 },
+        { text: "Make camp and wait for the thaw", dc: null, always: "You wait for the sun to warm the ground. A lost day, but the crew is intact.", time: 1 }
       ]
     }
   ],
   river: [
     {
       id: "ferry_gabriel",
-      text: "Gabriel Dumont is at the crossing. His ferry is ready, but the current is heavy today.",
-      source: { quote: "Gabriel Dumont... ferryman, guide, and later military leader of the Metis forces.", author: "Dumont Family Accounts", work: "MMF Research Vault" },
+      text: "Gabriel Dumont is at the crossing. His ferry is ready, but the current is heavy today \u2014 the ferry rocks and the oarsman strains. Dumont watches the river with the calm of a man who has crossed it a thousand times.",
+      source: getSource("DUMONT_ACCOUNTS"),
       choices: [
         { text: "Take the ferry now", dc: 10, ok: "He rows hard and gets you across cleanly.", bad: "The ferry lurches. Cargo shifts and one wheel takes damage.", wear: 1, addsRep: { key: "metis", delta: 1 } },
         { text: "Wait out the current", dc: null, always: "You wait one day for calmer water.", time: 1 }
@@ -844,10 +1222,10 @@ var EVENT_POOLS = {
     },
     {
       id: "river_cart_raft",
-      text: "The crossing here is too deep to ford. You eye the spare hides in the cart.",
-      source: { quote: "Four cart wheels were taken and placed dish upwards... The boat was launched, and floated like a duck.", author: "William G. Fonseca", work: "On the St. Paul Trail in the Sixties, MHS Transactions, 1900" },
+      text: "The crossing here is too deep to ford. You eye the spare hides in the cart. Four cart wheels were taken and placed dish upwards on the surface of the water. The boat was launched, and floated like a duck.",
+      source: getSource("FONSECA_RAFT"),
       choices: [
-        { text: "Build a cart-raft with 4 bison hides", dc: 12, ok: "The improvised ferry floats. The crew swims the line across.", bad: "One hide splits mid-river; cargo gets wet.", morale: -6, setsFlag: "built_rafts", requiresFlag: "has_hides", branch: {
+        { text: "Build a cart-raft with 2 bison hides", dc: 12, ok: "The improvised ferry floats. The crew swims the line across.", bad: "One hide splits mid-river; cargo gets wet.", morale: -6, setsFlag: "built_rafts", requiresItem: { name: "Bison Hide", count: 2 }, branch: {
           id: "river_raft_wash",
           text: "On the far bank, an elder watches your landing and nods slowly.",
           choices: [
@@ -860,8 +1238,8 @@ var EVENT_POOLS = {
     },
     {
       id: "river_nwmp_duty",
-      text: "At the crossing, red coats inspect the carts with scrupulous care. Duty is collected in cash or goods.",
-      source: { quote: "The mounted police established posts along the trail to enforce Ottawa's regulations.", author: "R. C. Macleod", work: "The North-West Mounted Police and Law Enforcement, 1873-1905" },
+      text: "At the crossing, red coats inspect the carts with scrupulous care. Duty is collected in cash or goods. The mounted police established posts along the trail to enforce Ottawa's regulations, and every cart is subject to inspection.",
+      source: getSource("MACLEOD_NWMP"),
       choices: [
         { text: "Declare your goods and pay duty", dc: null, always: "The paperwork is tedious but fair. You keep your peace.", food: -2, addsRep: { key: "nwmp", delta: 1 } },
         { text: "Attempt to pass quietly", dc: 13, ok: "They are busy and let you slip through.", bad: "Caught concealing cargo. Goods are confiscated.", morale: -15, addsRep: { key: "nwmp", delta: -2 } }
@@ -869,20 +1247,59 @@ var EVENT_POOLS = {
     },
     {
       id: "river_lawrence_barkwell_boats",
-      text: "You meet a crew of boatmen heading for the Portage La Loche. Their faces are lean, their hands calloused, but their eyes are sharp.",
-      source: { quote: "This famous brigade traveled 4000 miles every year... the pay of a guide for the entire trip occupying the four summer months has been \xA335.", author: "Lawrence Barkwell", work: "Portage La Loche Brigade, Louis Riel Institute" },
+      text: "You meet a crew of boatmen heading for the Portage La Loche. Their faces are lean, their hands calloused, but their eyes are sharp. This famous brigade traveled 4000 miles every year, and the men who crewed it knew every river from the Red to the Athabasca.",
+      source: getSource("BARKWELL_BRIGADE"),
       choices: [
         { text: "Exchange dried fish and route talk", dc: 8, ok: "They share intelligence on the next water crossings.", bad: "The conversation is brief and businesslike.", morale: 6 },
         { text: "Hire a guide for the hard water ahead", dc: 10, ok: "A steady hand joins your crew for three days.", bad: "The boatman is competent but expensive.", food: -3, extraProgress: 2, addsRep: { key: "metis", delta: 1 } }
       ]
     },
     {
-      id: "river_broken_wheel",
-      text: "The wheel bites into a submerged root and the rim splits with a crack.",
-      source: { quote: "Many a worn-out axle and broken wheel attest the power of riverbank obstacles.", author: "John C. Schultz", work: "The Old Crow Wing Trail, MHS Transactions, 1894" },
+      id: "river_ice_breakup",
+      text: "The river is in breakup. Great slabs of ice grind and tumble in the brown water, crashing against the banks with a sound like cannon fire. The crossing is impassable today \u2014 perhaps tomorrow, if the cold holds. The crew watches the ice flow past and wonders how long the wait will be.",
+      source: getSource("FONSECA_ICE"),
       choices: [
-        { text: "Fell a nearby birch and fashion a new felly", dc: 12, ok: "A rough repair, but the wheel is round again.", bad: "The timber is green and splits by afternoon.", wear: 1, time: 1, morale: -3 },
-        { text: "Rig an axle skid and limp to the post", dc: null, always: "You arrive, but the cart is lopsided and the load is light.", alwaysWear: 1, food: -2 }
+        { text: "Wait for the ice to clear", dc: null, always: "You camp and watch the river. By morning, the channel is clear enough.", time: 1 },
+        { text: "Find an alternate crossing upstream", dc: 11, ok: "A narrower point, but the ice has passed. You cross carefully.", bad: "The bank is steep. The cart slips but holds.", wear: 1 },
+        { text: "Risk the crossing now", dc: 15, ok: "The oxen are strong swimmers. You make it across, ice grinding at the cart sides.", bad: "A slab of ice catches the axle. The cart tips. Cargo lost to the current.", wear: 2, food: -4 }
+      ]
+    },
+    {
+      id: "river_supply_boat",
+      text: "A York boat rounds the bend, its oars flashing in the sun. HBC markings on the hull \u2014 a supply boat heading downstream from the northern posts. The crew waves. They have news, and they have trade goods that have not seen a settlement in months.",
+      source: getSource("HBC_JOURNAL"),
+      choices: [
+        { text: "Trade with the boat crew", dc: null, always: "You exchange news and goods. The boatmen are glad for fresh supplies from the south.", morale: 5 },
+        { text: "Ask for news of the trail ahead", dc: 8, ok: "They tell you which posts are well-stocked and which trails have washed out. Valuable intelligence.", bad: "They are close-mouth about Company business. You learn little.", morale: 3 },
+        { text: "Wave and continue on your way", dc: null, always: "You are heading west, they are heading east. Your paths cross and diverge." }
+      ]
+    },
+    {
+      id: "river_sandbar_trap",
+      text: "The oxen are halfway across when the cart lurches and stops. The front wheels have dropped into a hidden sandbar, and the current is pushing against the cart bed. The oxen strain but cannot pull free. The water is rising.",
+      source: getSource("BREHAUT_SANDBAR"),
+      choices: [
+        { text: "Unload and float the cart free", dc: 11, ok: "You lighten the load and the oxen pull clear. Wet cargo, but the cart is safe.", bad: "The current shifts the cart. A barrel is swept away.", food: -2, wear: 1 },
+        { text: "Use Rope (50ft) to anchor and pull from bank", dc: 10, ok: "The rope holds. The crew on the bank heaves. The cart grinds free.", bad: "The rope slips. The cart settles deeper.", wear: 1, itemBonus: { name: "Rope (50ft)", dcBonus: 3 } },
+        { text: "Wait for the water level to drop", dc: null, always: "You wait. The current lessens by afternoon and the oxen pull free.", time: 1, morale: -5 }
+      ]
+    },
+    {
+      id: "river_ferry_dumont",
+      text: "Gabriel Dumont is at the crossing, his ferry moored to the bank. His fee is fair, but the current is heavy today \u2014 the ferry rocks and the oarsman strains. Dumont watches the river with the calm of a man who has crossed it a thousand times.",
+      source: getSource("DUMONT_ACCOUNTS"),
+      choices: [
+        { text: "Take the ferry now", dc: 10, ok: "He rows hard and gets you across cleanly.", bad: "The ferry lurches. Cargo shifts and one wheel takes damage.", wear: 1, addsRep: { key: "metis", delta: 1 } },
+        { text: "Wait out the current", dc: null, always: "You wait one day for calmer water.", time: 1 }
+      ]
+    },
+    {
+      id: "river_cart_raft_crossing",
+      text: "The crossing here is too deep to ford. You eye the spare hides in the cart \u2014 enough to build a raft, if you know how. The river is wide and the current steady. On the far bank, the trail continues west.",
+      source: getSource("FONSECA_RAFT"),
+      choices: [
+        { text: "Build a cart-raft with 2 Bison Hides", dc: 12, ok: "The improvised ferry floats. The crew swims the line across.", bad: "One hide splits mid-river. Cargo gets wet.", morale: -6, requiresItem: { name: "Bison Hide", count: 2 } },
+        { text: "Ford the cart carefully", dc: 13, ok: "The ox swims straight and true; the bed stays high.", bad: "The current turns the cart. Wet freight and one damaged wheel.", wear: 2, food: -2 }
       ]
     }
   ]
@@ -910,6 +1327,10 @@ function createGame(seed = null) {
   }
   __name(d, "d");
   const cart = startingCart();
+  function computeUsedWeight() {
+    return cart.filter((i) => i.type !== "food").reduce((s, i) => s + i.wt * i.count, 0);
+  }
+  __name(computeUsedWeight, "computeUsedWeight");
   const S = {
     seed,
     day: 1,
@@ -936,9 +1357,10 @@ function createGame(seed = null) {
     flags: {},
     reputation: { hbc: 0, nwmp: 0, metis: 0, mission: 0, cree: 0 },
     capacity: 100,
-    usedWeight: 0,
+    usedWeight: computeUsedWeight(),
     credit: { hbc: 0, metis: 0, nwmp: 0, mission: 0 },
-    perishable: {}
+    perishable: {},
+    trailIntel: []
   };
   function checkGameOver() {
     if (S.over) return;
@@ -964,6 +1386,14 @@ function createGame(seed = null) {
     S.season = seasonFor(S.month);
   }
   __name(advance, "advance");
+  function offloadItem(name) {
+    const item = cart.find((i) => i.name === name);
+    if (!item || item.count <= 0) return null;
+    item.count--;
+    S.usedWeight = computeUsedWeight();
+    return { offloaded: name };
+  }
+  __name(offloadItem, "offloadItem");
   function resolveChoice(ev, ci) {
     const ch = ev.choices[ci];
     const result = { roll: null, total: null, dc: null, success: null, text: "", effects: [], flags: [], reps: [] };
@@ -980,13 +1410,95 @@ function createGame(seed = null) {
         return result;
       }
     }
+    if (ch.requiresItem) {
+      const reqName = typeof ch.requiresItem === "string" ? ch.requiresItem : ch.requiresItem.name;
+      const reqCount = typeof ch.requiresItem === "object" ? ch.requiresItem.count || 1 : 1;
+      const item = cart.find((i) => i.name === reqName);
+      if (!item || item.count < reqCount) {
+        result.text = `You don't have enough ${reqName} for this.`;
+        result.success = false;
+        return result;
+      }
+    }
+    if (ch.consumesItem) {
+      const item = cart.find((i) => i.name === ch.consumesItem);
+      if (item && item.count > 0) {
+        item.count--;
+        S.usedWeight = computeUsedWeight();
+        result.text = ch.ok || `You use your ${ch.consumesItem}.`;
+        result.success = true;
+        result.effects.push(`\u22121 ${ch.consumesItem}`);
+        if (ch.wear) {
+          S.wear += ch.wear;
+          result.effects.push(`+${ch.wear} Wear`);
+        }
+        if (ch.food) {
+          S.food += ch.food;
+          result.effects.push(`${ch.food > 0 ? "+" : ""}${ch.food} Food`);
+        }
+        if (ch.morale) {
+          S.morale = Math.max(0, Math.min(100, S.morale + ch.morale));
+          result.effects.push(`Morale ${ch.morale > 0 ? "+" : ""}${ch.morale}`);
+        }
+        if (ch.time) {
+          if (ch.time > 0) {
+            advance();
+            result.effects.push(`+${ch.time} day(s)`);
+          }
+          if (ch.time < 0) {
+            S.segmentDay = Math.max(0, S.segmentDay + ch.time);
+            result.effects.push(`${ch.time} day(s)`);
+          }
+        }
+        if (ch.crew) {
+          S.crew = ch.crew;
+          result.effects.push(`Crew: ${ch.crew}`);
+        }
+        if (ch.setsFlag) {
+          S.flags[ch.setsFlag] = true;
+          result.flags.push(ch.setsFlag);
+        }
+        if (ch.addsRep) {
+          S.reputation[ch.addsRep.key] = (S.reputation[ch.addsRep.key] || 0) + ch.addsRep.delta;
+          result.reps.push({ key: ch.addsRep.key, delta: ch.addsRep.delta, value: S.reputation[ch.addsRep.key] });
+        }
+        S.eventsResolved++;
+        return result;
+      }
+    }
+    let dcMod = 0;
+    if (ch.itemBonus) {
+      const item = cart.find((i) => i.name === ch.itemBonus.name);
+      if (item && item.count > 0) {
+        dcMod = ch.itemBonus.dcBonus || 0;
+      }
+    }
+    if (S.trailIntel && S.trailIntel.length > 0) {
+      const evId = ev.id || "";
+      const evTerrain = ev.terrain || "";
+      const matchingIntel = S.trailIntel.find((i) => {
+        if (!i.bonus) return false;
+        const t = i.type;
+        if (t === evTerrain) return true;
+        if (t === "nwmp_hint" && evId.includes("nwmp")) return true;
+        if (t === "heal_hint" && (evId.includes("cholera") || evId.includes("heal"))) return true;
+        if (t === "river_hint" && (evId.includes("river") || evId.includes("ford") || evId.includes("ferry") || evId.includes("raft"))) return true;
+        if (t === "trade_hint" && (evId.includes("trade") || evId.includes("hunt") || evId.includes("camp"))) return true;
+        if (t === "morale_hint" && (evId.includes("camp") || evId.includes("dance") || evId.includes("fiddle"))) return true;
+        if (t === "fuel_hint" && (evId.includes("cold") || evId.includes("winter") || evId.includes("fire"))) return true;
+        return false;
+      });
+      if (matchingIntel && matchingIntel.bonus) {
+        dcMod += matchingIntel.bonus.dcBonus || 0;
+      }
+    }
     if (ch.dc !== null) {
       const roll = d();
       const total = roll + totalMod(S);
-      const success = total >= ch.dc;
+      const success = total >= ch.dc - dcMod;
       result.roll = roll;
       result.total = total;
-      result.dc = ch.dc;
+      result.dc = ch.dc - dcMod;
       result.success = success;
       result.text = success ? `Success. ${ch.ok}` : `Failure. ${ch.bad}`;
       if (!success) {
@@ -1165,29 +1677,63 @@ function createGame(seed = null) {
       S.squeal = 0;
       S.travelDaysWithoutRest = 0;
       S.morale = Math.min(100, S.morale + 25);
+      const firewood = cart.find((i) => i.name === "Firewood Bundle");
+      if (firewood && firewood.count > 0) {
+        firewood.count--;
+        S.usedWeight = computeUsedWeight();
+        S.morale = Math.min(100, S.morale + 10);
+      }
+      const blanket = cart.find((i) => i.name === "Blanket");
+      if (blanket && blanket.count > 0) {
+        blanket.count--;
+        S.usedWeight = computeUsedWeight();
+        S.morale = Math.min(100, S.morale + 5);
+      }
       advance();
     }
     if (action === "repair") {
+      const spareAxle = cart.find((i) => i.name === "Spare Axle");
       const shag = cart.find((i) => i.name === "Shaganappi");
-      if (S.wear > 0 && shag && shag.count > 0) {
+      const toolKit = cart.find((i) => i.name === "Tool Kit");
+      if (S.wear > 0 && spareAxle && spareAxle.count > 0) {
+        spareAxle.count--;
+        S.usedWeight = computeUsedWeight();
+        S.wear = Math.max(0, S.wear - 3);
+      } else if (S.wear > 0 && shag && shag.count > 0 && toolKit && toolKit.count > 0) {
         shag.count--;
+        toolKit.count--;
+        S.usedWeight = computeUsedWeight();
+        S.wear = Math.max(0, S.wear - 3);
+      } else if (S.wear > 0 && shag && shag.count > 0) {
+        shag.count--;
+        S.usedWeight = computeUsedWeight();
+        S.wear = Math.max(0, S.wear - 2);
+      } else if (S.wear > 0 && toolKit && toolKit.count > 0) {
+        toolKit.count--;
+        S.usedWeight = computeUsedWeight();
         S.wear = Math.max(0, S.wear - 2);
       } else if (S.wear > 0) {
         S.wear = Math.max(0, S.wear - 1);
       }
     }
     if (action === "heal") {
-      S.crew = "rested";
-      S.morale = Math.min(100, S.morale + 20);
+      const medPouch = cart.find((i) => i.name === "Medicine Pouch");
+      if (medPouch && medPouch.count > 0) {
+        medPouch.count--;
+        S.usedWeight = computeUsedWeight();
+        S.crew = "rested";
+        S.morale = Math.min(100, S.morale + 20);
+      }
+      if (!medPouch || medPouch.count <= 0) {
+        S.crew = "rested";
+        S.morale = Math.min(100, S.morale + 10);
+      }
     }
     if (action === "trade") {
-      const tg = cart.find((i) => i.type === "trade" && i.count > 0);
-      if (tg) {
-        tg.count--;
-        const foodGain = Math.floor(rand() * 5) + 6;
-        S.food += foodGain;
-        S.tradesMade++;
-      }
+      tradeItem(null);
+    }
+    if (action.startsWith("trade:")) {
+      tradeItem(action.slice(6));
     }
     if (action === "grease") {
       const shag = cart.find((i) => i.name === "Shaganappi");
@@ -1208,10 +1754,46 @@ function createGame(seed = null) {
       if (S.crew !== "exhausted") S.crew = "rested";
     }
     if (action === "rumours") advance();
+    if (action === "craft") {
+    }
+    if (action === "gossip") {
+      advance();
+      const intel = generateGossip(S.node, rand);
+      if (intel) {
+        S.trailIntel.push({ ...intel, fromNode: S.node, fromDay: S.day });
+        S.trailIntel = S.trailIntel.filter((i) => S.day - i.fromDay <= 3);
+      }
+    }
     checkGameOver();
     return [];
   }
   __name(settlementAction, "settlementAction");
+  function tradeItem(itemName) {
+    let tg;
+    if (itemName) {
+      tg = cart.find((i) => i.name === itemName && i.type === "trade" && i.count > 0);
+    } else {
+      tg = cart.find((i) => i.type === "trade" && i.count > 0);
+    }
+    if (!tg) return null;
+    tg.count--;
+    S.usedWeight = computeUsedWeight();
+    const baseFood = Math.floor(rand() * 5) + 6;
+    const mult = tradeMultiplier(S.pendingSettlement?.type || "trading", tg.category || "trade", S.node);
+    let gossipBonus = 0;
+    if (S.trailIntel && S.trailIntel.length > 0) {
+      const tradeIntel = S.trailIntel.find((i) => i.type === "trade_hint" && i.bonus);
+      if (tradeIntel) {
+        gossipBonus = 3;
+        S.trailIntel = S.trailIntel.filter((i) => i !== tradeIntel);
+      }
+    }
+    const foodGain = Math.max(3, Math.round(baseFood * mult) + gossipBonus);
+    S.food += foodGain;
+    S.tradesMade++;
+    return { item: tg.name, foodGain, mult, gossipBonus };
+  }
+  __name(tradeItem, "tradeItem");
   return {
     travelOneDay: travelOneDay2,
     makeCamp,
@@ -1234,7 +1816,10 @@ function createGame(seed = null) {
         won: S.won,
         score: S.score,
         pendingEvent: S.pendingEvent,
-        pendingSettlement: S.pendingSettlement
+        pendingSettlement: S.pendingSettlement,
+        usedWeight: S.usedWeight,
+        capacity: S.capacity,
+        trailIntel: S.trailIntel
       };
     },
     getCart() {
@@ -1294,20 +1879,146 @@ function createGame(seed = null) {
     },
     getScore() {
       return S.score;
+    },
+    offloadItem(name) {
+      return offloadItem(name);
+    },
+    getOffloadableItems() {
+      return cart.filter((i) => i.type !== "food" && i.count > 0).map((i) => ({ name: i.name, wt: i.wt, count: i.count, icon: i.icon }));
+    },
+    getAvailableRecipes() {
+      return getAvailableRecipes(S.pendingSettlement?.type || "trading", cart).map((r) => ({
+        id: r.id,
+        name: r.name,
+        inputs: r.inputs.map((inp) => ({ ...inp, have: cart.find((i) => i.name === inp.name)?.count || 0 })),
+        output: { ...r.output }
+      }));
+    },
+    craftRecipe(recipeId) {
+      const recipe = craftRecipe(recipeId, cart);
+      if (recipe) S.usedWeight = computeUsedWeight();
+      return recipe ? { id: recipe.id, name: recipe.name, output: recipe.output } : null;
+    },
+    getTradeEstimate(itemName) {
+      const item = cart.find((i) => i.name === itemName);
+      if (!item) return null;
+      const mult = tradeMultiplier(S.pendingSettlement?.type || "trading", item.category || "trade", S.node);
+      const baseMin = Math.max(3, Math.round(6 * mult));
+      const baseMax = Math.max(3, Math.round(10 * mult));
+      return { min: baseMin, max: baseMax, mult: Math.round(mult * 100) / 100 };
+    },
+    tradeItem(itemName) {
+      return tradeItem(itemName);
     }
   };
 }
 __name(createGame, "createGame");
+function tradeMultiplier(settlementType, itemCategory, nodeIndex) {
+  let mult = 1;
+  if (settlementType === "hbc" && itemCategory === "furs") mult *= 1.3;
+  if (settlementType === "metis" && itemCategory === "repair") mult *= 1.3;
+  if (settlementType === "mission" && itemCategory === "ammo") mult *= 1.2;
+  if (settlementType === "nwmp" && (itemCategory === "trade" || itemCategory === "furs")) mult *= 1.2;
+  if (nodeIndex <= 4) {
+    if (itemCategory === "furs") mult *= 1.2;
+    if (itemCategory === "provisions") mult *= 0.8;
+  } else if (nodeIndex >= 9) {
+    if (itemCategory === "provisions") mult *= 1.3;
+    if (itemCategory === "repair") mult *= 1.3;
+    if (itemCategory === "furs") mult *= 0.8;
+  }
+  return mult;
+}
+__name(tradeMultiplier, "tradeMultiplier");
+var RECIPES = [
+  {
+    id: "finished_hides",
+    name: "Finished Hides",
+    inputs: [{ name: "Bison Hide", count: 2 }, { name: "Tool Kit", count: 1 }],
+    output: { name: "Finished Hides", wt: 12, category: "furs", mbValue: 3.5, type: "trade", icon: "\u{1F9AC}" },
+    at: ["hbc", "metis"]
+  },
+  {
+    id: "travois_kit",
+    name: "Travois Kit",
+    inputs: [{ name: "Rope (50ft)", count: 1 }, { name: "Shaganappi", count: 1 }, { name: "Blanket", count: 1 }],
+    output: { name: "Travois Kit", wt: 8, category: "repair", mbValue: 2.5, type: "trade", icon: "\u{1FAA2}" },
+    at: ["metis", "trading"]
+  },
+  {
+    id: "gunpowder_pack",
+    name: "Gunpowder Pack",
+    inputs: [{ name: "Ammunition Belt", count: 1 }, { name: "Firewood Bundle", count: 1 }],
+    output: { name: "Gunpowder Pack", wt: 8, category: "ammo", mbValue: 2, type: "trade", icon: "\u{1F3AF}" },
+    at: ["nwmp", "hbc"]
+  }
+];
+function getAvailableRecipes(settlementType, cart) {
+  return RECIPES.filter((r) => {
+    if (!r.at.includes(settlementType)) return false;
+    return r.inputs.every((inp) => {
+      const item = cart.find((i) => i.name === inp.name);
+      return item && item.count >= inp.count;
+    });
+  });
+}
+__name(getAvailableRecipes, "getAvailableRecipes");
+function craftRecipe(recipeId, cart) {
+  const recipe = RECIPES.find((r) => r.id === recipeId);
+  if (!recipe) return null;
+  for (const inp of recipe.inputs) {
+    const item = cart.find((i) => i.name === inp.name);
+    if (!item || item.count < inp.count) return null;
+  }
+  for (const inp of recipe.inputs) {
+    const item = cart.find((i) => i.name === inp.name);
+    item.count -= inp.count;
+  }
+  const existing = cart.find((i) => i.name === recipe.output.name);
+  if (existing) {
+    existing.count++;
+  } else {
+    cart.push({ ...recipe.output, count: 1, desc: `Crafted at settlement.`, perishable: false });
+  }
+  return recipe;
+}
+__name(craftRecipe, "craftRecipe");
 function availableSettlementActions(type) {
-  const base = ["rest"];
-  if (type === "hbc") return [...base, "trade", "repair", "grease", "forage", "recruit"];
-  if (type === "metis") return [...base, "trade", "grease", "forage", "rumours", "recruit"];
-  if (type === "trading") return [...base, "trade", "forage", "rumours"];
+  const base = ["rest", "gossip"];
+  if (type === "hbc") return [...base, "trade", "repair", "grease", "forage", "recruit", "craft"];
+  if (type === "metis") return [...base, "trade", "grease", "forage", "rumours", "recruit", "craft"];
+  if (type === "trading") return [...base, "trade", "forage", "rumours", "craft"];
   if (type === "mission") return [...base, "heal", "rumours"];
-  if (type === "nwmp") return [...base, "trade", "grease", "rumours"];
+  if (type === "nwmp") return [...base, "trade", "grease", "rumours", "craft"];
   return base;
 }
 __name(availableSettlementActions, "availableSettlementActions");
+function generateGossip(nodeIndex, rng) {
+  const GOSSIP = {
+    0: { text: "St. Boniface ahead \u2014 the Grey Nuns offer healing freely. Bring nothing; they ask for prayers, not payment.", type: "heal_hint" },
+    1: { text: "St. Norbert is welcoming. The M\xE9tis parish offers bannock and Saskatoon preserve to travellers.", type: "morale_hint" },
+    2: { text: "The Sayer trial anniversary is near at St. Fran\xE7ois Xavier. Free trade pride runs high \u2014 good time to trade.", type: "trade_hint" },
+    3: { text: "Portage la Prairie \u2014 the HBC fort is decaying but trade continues. Prices are fair. The old barter economy still turns.", type: "trade_hint" },
+    4: { text: "Fort Ellice is the midpoint resupply. The trail splits there \u2014 south to Qu'Appelle, west to Touchwood Hills.", type: "trail_hint" },
+    5: { text: "Fort Qu'Appelle \u2014 NWMP post ahead. They check papers and collect duty. Keep your documents ready.", type: "nwmp_hint" },
+    6: { text: "Touchwood Hills \u2014 last trees for a hundred miles. Gather fuel before the open prairie stretch.", type: "fuel_hint" },
+    7: { text: "Humboldt Mission \u2014 the only reliable healing for a lonely stretch. The mission garden grows against all odds.", type: "heal_hint" },
+    8: { text: "Batoche \u2014 M\xE9tis spiritual centre. The church bell rings across the river valley. Full ceremony, full communion.", type: "morale_hint" },
+    9: { text: "Gabriel's Crossing \u2014 Dumont runs the ferry. His fee is fair. Do not try to ford the South Saskatchewan.", type: "river_hint" },
+    10: { text: "Fort Carlton \u2014 major HBC depot. Full trade, full repair. But the pemmican stores are declining. Stock up.", type: "trade_hint" },
+    11: { text: "Fort Pitt \u2014 edge of the boreal forest. Small, isolated. The last HBC post before Edmonton.", type: "trail_hint" },
+    12: { text: "Fort Edmonton ahead \u2014 the western terminus. Trade your goods here for the best prices. The end of the Carlton Trail.", type: "trade_hint" }
+  };
+  const intel = GOSSIP[nodeIndex];
+  if (!intel) return null;
+  return {
+    text: intel.text,
+    type: intel.type,
+    // 50% chance the intel includes a mechanical bonus
+    bonus: rng() < 0.5 ? { type: intel.type, dcBonus: 2, expiresOnDay: null } : null
+  };
+}
+__name(generateGossip, "generateGossip");
 
 // src/ui/theme.js
 function applyTheme(root) {
@@ -1489,8 +2200,40 @@ function renderStatusBar(state) {
   wearEl.innerHTML = `<span class="stat-label">Wear </span><span class="stat-value${state.wear >= 4 ? " wear-high" : ""}">${state.wear}</span>`;
   if (!window.__METIS_PENDING_RESULT__) window.__METIS_PENDING_RESULT__ = null;
   renderTravelLinesView(state, window._metisGame, window.__METIS_PENDING_RESULT__);
+  renderTally(state);
 }
 __name(renderStatusBar, "renderStatusBar");
+function renderTally(state) {
+  const tallyEl = document.getElementById("s-tally");
+  const ledgerEl = document.getElementById("s-tally-ledger");
+  if (!tallyEl) return;
+  const credit = state.credit || { hbc: 0, metis: 0, nwmp: 0, mission: 0 };
+  const net = Number(credit.hbc + credit.metis + credit.nwmp + credit.mission || 0);
+  const fmt = /* @__PURE__ */ __name((v) => `${v >= 0 ? "+" : ""}${Number(v || 0).toFixed(1)} MB`, "fmt");
+  const valEl = tallyEl.querySelector(".stat-value");
+  const weightEl = document.getElementById("s-weight");
+  if (weightEl) {
+    const used = Number(state.usedWeight || 0);
+    const cap = Number(state.capacity || 100);
+    weightEl.textContent = `${used}/${cap}`;
+    weightEl.className = "stat-value" + (used >= cap ? " cargo-high" : "");
+  }
+  if (valEl) valEl.textContent = fmt(net);
+  if (ledgerEl) {
+    const open = ledgerEl.classList.contains("open");
+    const rows = [
+      { key: "hbc", label: "HBC" },
+      { key: "metis", label: "M\xE9tis" },
+      { key: "nwmp", label: "NWMP" },
+      { key: "mission", label: "Mission" }
+    ];
+    ledgerEl.innerHTML = rows.map((r) => `<div class="tally-row"><span>${r.label}</span><span>${fmt(credit[r.key])}</span></div>`).join("");
+    if (!open) {
+      ledgerEl.classList.add("open");
+    }
+  }
+}
+__name(renderTally, "renderTally");
 function renderNarrative(lines) {
   const el = document.getElementById("narrative");
   el.innerHTML = lines.map((t) => `<div class="scene-text">${t}</div>`).join("");
@@ -1501,7 +2244,10 @@ __name(renderNarrative, "renderNarrative");
 // src/ui/persistence.js
 var STORAGE_KEY = "metis-trail-v2.save";
 function clearSave() {
-  localStorage.removeItem(STORAGE_KEY);
+  try {
+    localStorage.removeItem(STORAGE_KEY);
+  } catch {
+  }
 }
 __name(clearSave, "clearSave");
 
@@ -1560,7 +2306,8 @@ function bootstrap(seed = null) {
     travelBtn.addEventListener("click", () => {
       const { pendingEvent, pendingSettlement, over } = game.getState();
       if (pendingEvent || pendingSettlement || over) return;
-      travelOneDay();
+      const blocked = travelOneDay();
+      if (blocked === true) return;
       window.__METIS_RENDER__();
     });
     travelBtn.setAttribute("data-metis-travel-bound", "1");
@@ -1612,6 +2359,11 @@ __name(publishResult, "publishResult");
 function travelOneDay() {
   const game = window._metisGame;
   const prev = game.getState();
+  if (prev.usedWeight > prev.capacity) {
+    showCart(game);
+    publishResult("Cart is overloaded. Offload items before traveling.");
+    return true;
+  }
   const result = game.travelOneDay();
   const state = game.getState();
   if (state.pendingEvent) return null;
@@ -1672,8 +2424,26 @@ function render() {
   hideOverlays();
   renderTravelLinesView(state, game, window.__METIS_PENDING_RESULT__);
   window.__METIS_PENDING_RESULT__ = null;
+  renderTrailIntel(state);
 }
 __name(render, "render");
+function renderTrailIntel(state) {
+  const el = document.getElementById("trail-intel");
+  if (!el) return;
+  const intel = (state.trailIntel || []).filter((i) => state.day - i.fromDay <= 3);
+  if (intel.length === 0) {
+    el.innerHTML = "";
+    el.style.display = "none";
+    return;
+  }
+  el.style.display = "block";
+  el.innerHTML = intel.map((i) => {
+    const daysOld = state.day - i.fromDay;
+    const freshness = daysOld <= 1 ? "\u{1F7E2}" : daysOld <= 2 ? "\u{1F7E1}" : "\u{1F534}";
+    return `<div class="intel-item" style="font-size:0.85em;padding:4px 0;border-bottom:1px solid rgba(0,0,0,0.08);"><span style="margin-right:4px;">${freshness}</span>${i.text}${i.bonus ? ' <span style="color:#B8860B;font-size:0.8em;">(+' + i.bonus.dcBonus + " DC)</span>" : ""}</div>`;
+  }).join("");
+}
+__name(renderTrailIntel, "renderTrailIntel");
 function hideOverlays() {
   ["intro-overlay", "event-overlay", "settlement-overlay", "cart-overlay", "crew-overlay"].forEach((id) => {
     const el = document.getElementById(id);
@@ -1749,6 +2519,20 @@ function showEvent(game) {
   const continueEl = document.getElementById("event-continue");
   if (!textEl || !choicesEl) return;
   textEl.textContent = ev.text;
+  const sourceEl = document.getElementById("event-source");
+  if (sourceEl) {
+    if (ev.source && ev.source.quote) {
+      const quote = ev.source.quote;
+      const author = ev.source.author || "";
+      const work = ev.source.work || "";
+      const year = ev.source.year || "";
+      const attrib = [author, work, year].filter(Boolean).join(", ");
+      sourceEl.innerHTML = `<span class="src-quote">"${quote}"</span>` + (attrib ? `<span class="src-attrib">\u2014 ${attrib}</span>` : "");
+      sourceEl.style.display = "block";
+    } else {
+      sourceEl.style.display = "none";
+    }
+  }
   const amountEl = document.getElementById("event-amount");
   if (amountEl) {
     const amount = ev.amount || ev.rollAdjust || null;
@@ -1871,6 +2655,117 @@ function showSettlement(game) {
   actionsEl.innerHTML = "";
   const available = game.getAvailableActions();
   (available.actions || []).forEach((action) => {
+    if (action === "craft") {
+      const recipes = game.getAvailableRecipes();
+      if (recipes.length === 0) {
+        const wrap2 = document.createElement("div");
+        wrap2.className = "settlement-action";
+        const btn2 = document.createElement("button");
+        btn2.className = "ctrl-btn";
+        btn2.style.display = "flex";
+        btn2.style.flexDirection = "column";
+        btn2.style.alignItems = "flex-start";
+        btn2.style.gap = "2px";
+        btn2.style.opacity = "0.5";
+        btn2.style.cursor = "not-allowed";
+        const label2 = document.createElement("div");
+        label2.className = "settlement-action-label";
+        label2.textContent = "Craft";
+        const sub2 = document.createElement("div");
+        sub2.className = "settlement-action-sub";
+        sub2.textContent = "No recipes available.";
+        btn2.appendChild(label2);
+        btn2.appendChild(sub2);
+        actionsEl.appendChild(btn2);
+        return;
+      }
+      const recipePanel = document.createElement("div");
+      recipePanel.style.cssText = "width:100%;margin-top:8px;padding:10px;background:rgba(46,90,62,0.08);border:1px solid rgba(46,90,62,0.3);border-radius:6px;";
+      const panelTitle = document.createElement("div");
+      panelTitle.style.cssText = "font-family:var(--font-heading);font-size:12px;font-weight:600;color:var(--clr-accent);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px;";
+      panelTitle.textContent = "Crafting";
+      recipePanel.appendChild(panelTitle);
+      recipes.forEach((r) => {
+        const row = document.createElement("div");
+        row.style.cssText = "display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px;padding:6px;background:rgba(255,255,255,0.5);border-radius:4px;";
+        const inputs = r.inputs.map((inp) => `${inp.name} \xD7${inp.count} (${inp.have}/${inp.count})`).join(" + ");
+        const info = document.createElement("div");
+        info.style.cssText = "flex:1;font-size:12px;";
+        info.innerHTML = `<strong>${r.output.icon || ""} ${r.name}</strong> \u2014 ${inputs} \u2192 <span style="color:var(--clr-accent);">${r.output.mbValue} MB</span>`;
+        const craftBtn = document.createElement("button");
+        craftBtn.className = "ctrl-btn";
+        craftBtn.style.cssText = "padding:3px 10px;font-size:11px;white-space:nowrap;";
+        craftBtn.textContent = "Craft";
+        craftBtn.disabled = !r.inputs.every((inp) => inp.have >= inp.count);
+        if (craftBtn.disabled) craftBtn.style.opacity = "0.4";
+        craftBtn.onclick = () => {
+          hideOverlays();
+          game.craftRecipe(r.id);
+          publishResult(`Crafted ${r.name}.`);
+          window.__METIS_RENDER__();
+        };
+        row.appendChild(info);
+        row.appendChild(craftBtn);
+        recipePanel.appendChild(row);
+      });
+      actionsEl.appendChild(recipePanel);
+      return;
+    }
+    if (action === "trade") {
+      const cart = game.getCart();
+      const tradeItems = cart.filter((i) => i.type === "trade" && i.count > 0);
+      if (tradeItems.length === 0) {
+        const wrap2 = document.createElement("div");
+        wrap2.className = "settlement-action";
+        const btn2 = document.createElement("button");
+        btn2.className = "ctrl-btn";
+        btn2.style.cssText = "display:flex;flex-direction:column;align-items:flex-start;gap:2px;opacity:0.5;cursor:not-allowed;";
+        const label2 = document.createElement("div");
+        label2.className = "settlement-action-label";
+        label2.textContent = "Trade";
+        const sub2 = document.createElement("div");
+        sub2.className = "settlement-action-sub";
+        sub2.textContent = "No trade goods.";
+        btn2.appendChild(label2);
+        btn2.appendChild(sub2);
+        actionsEl.appendChild(btn2);
+        return;
+      }
+      const tradePanel = document.createElement("div");
+      tradePanel.style.cssText = "width:100%;margin-top:8px;padding:10px;background:rgba(46,90,62,0.08);border:1px solid rgba(46,90,62,0.3);border-radius:6px;";
+      const panelTitle = document.createElement("div");
+      panelTitle.style.cssText = "font-family:var(--font-heading);font-size:12px;font-weight:600;color:var(--clr-accent);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px;";
+      panelTitle.textContent = "Trade";
+      tradePanel.appendChild(panelTitle);
+      tradeItems.forEach((item) => {
+        const est = game.getTradeEstimate(item.name);
+        const multStr = est && est.mult > 1 ? " \u2191" : est && est.mult < 1 ? " \u2193" : "";
+        const row = document.createElement("div");
+        row.style.cssText = "display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px;padding:6px;background:rgba(255,255,255,0.5);border-radius:4px;";
+        const info = document.createElement("div");
+        info.style.cssText = "flex:1;font-size:12px;";
+        info.innerHTML = `${item.icon || ""} ${item.name} \xD7${item.count} <span style="color:var(--clr-accent);">${est ? est.min + "-" + est.max + " food" : ""}${multStr}</span>`;
+        const tradeBtn = document.createElement("button");
+        tradeBtn.className = "ctrl-btn";
+        tradeBtn.style.cssText = "padding:3px 10px;font-size:11px;white-space:nowrap;";
+        tradeBtn.textContent = "Trade";
+        tradeBtn.onclick = () => {
+          hideOverlays();
+          const result = game.tradeItem(item.name);
+          if (result) {
+            publishResult(`Traded 1 ${result.item} \u2192 +${result.foodGain} food.`);
+          } else {
+            publishResult("Trade failed \u2014 no trade goods available.");
+          }
+          window.__METIS_RENDER__();
+        };
+        row.appendChild(info);
+        row.appendChild(tradeBtn);
+        tradePanel.appendChild(row);
+      });
+      actionsEl.appendChild(tradePanel);
+      return;
+    }
     const wrap = document.createElement("div");
     wrap.className = "settlement-action";
     const label = document.createElement("div");
@@ -1918,16 +2813,56 @@ function buildSettlementOutcome(action, before, after, beforeCart, afterCart) {
   if (action === "forage") msgs.push("Foraging...");
   if (action === "recruit") msgs.push("Reinforcements found.");
   if (action === "rumours") msgs.push("You learn the latest trail news.");
+  if (action === "gossip") {
+    const intel = after.trailIntel && after.trailIntel.length > 0 ? after.trailIntel[after.trailIntel.length - 1] : null;
+    if (intel && intel.text) {
+      msgs.push(`You spend a day gossiping. "${intel.text}"`);
+    } else {
+      msgs.push("You spend a day gossiping. The locals share what they know.");
+    }
+  }
   if (action === "rest") msgs.push("Rest. Crew and supplies refreshed.");
+  if (action === "craft") msgs.push("Item crafted.");
   if (!msgs.length) return "Nothing changed.";
   return msgs.join(", ");
 }
 __name(buildSettlementOutcome, "buildSettlementOutcome");
 function showCart(game) {
+  const state = game.getState();
   const cart = game.getCart();
   const listEl = document.getElementById("inv-list");
   if (!listEl) return;
-  listEl.innerHTML = cart.map((i) => `<div>${i.icon || ""} ${i.name} \xD7${i.count} (${i.wt * i.count} kg)</div>`).join("");
+  const overloaded = state.usedWeight > state.capacity;
+  const excess = state.usedWeight - state.capacity;
+  const weightBar = overloaded ? `<div style="margin-bottom:10px;padding:8px;background:rgba(180,60,60,0.15);border:1px solid rgba(180,60,60,0.4);border-radius:4px;">
+        <div style="font-weight:700;color:#8B0000;">\u26A0 Overloaded \u2014 ${state.usedWeight} / ${state.capacity} kg</div>
+        <div style="font-size:0.9em;color:#8B0000;margin-top:2px;">Offload at least <strong>${excess} kg</strong> before traveling.</div>
+       </div>` : `<div style="margin-bottom:10px;padding:8px;background:rgba(46,90,62,0.12);border:1px solid rgba(46,90,62,0.3);border-radius:4px;">
+        <div style="font-weight:700;color:#2D4A3E;">Cart \u2014 ${state.usedWeight} / ${state.capacity} kg</div>
+       </div>`;
+  const items = cart.map((i) => {
+    const canUnload = overloaded && i.count > 0;
+    const mbDisplay = i.mbValue ? `<span style="font-size:0.75em;color:var(--clr-accent);margin-left:4px;">${i.mbValue} MB</span>` : "";
+    return `
+    <div class="cart-row" style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:4px 0;border-bottom:1px solid rgba(0,0,0,0.08);">
+      <span style="flex:1;">${i.icon || ""} ${i.name} \xD7${i.count} (${i.wt * i.count} kg)${mbDisplay}</span>
+      ${canUnload ? `<button class="ctrl-btn unload-btn" data-item="${i.name}" style="padding:2px 10px;font-size:0.85em;">Unload \u2212${i.wt} kg</button>` : ""}
+    </div>`;
+  }).join("");
+  listEl.innerHTML = weightBar + items;
+  listEl.querySelectorAll(".unload-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const itemName = btn.dataset.item;
+      game.offloadItem(itemName);
+      const newState = game.getState();
+      if (newState.usedWeight <= newState.capacity) {
+        document.getElementById("cart-overlay")?.classList.remove("active");
+        window.__METIS_RENDER__();
+      } else {
+        showCart(game);
+      }
+    });
+  });
   document.getElementById("cart-overlay")?.classList.add("active");
 }
 __name(showCart, "showCart");
@@ -1956,20 +2891,22 @@ function showEnd(game) {
 }
 __name(showEnd, "showEnd");
 function actionLabel(a) {
-  const map2 = { rest: "Rest", trade: "Trade", repair: "Repair", grease: "Grease", forage: "Forage", recruit: "Recruit", rumours: "Gossip", heal: "Heal", continue: "Continue West" };
+  const map2 = { rest: "Rest", trade: "Trade", repair: "Repair", grease: "Grease", forage: "Forage", recruit: "Recruit", rumours: "Rumours", gossip: "Gossip", heal: "Heal", craft: "Craft", continue: "Continue West" };
   return map2[a] || a;
 }
 __name(actionLabel, "actionLabel");
 function actionSubtitle(a) {
   const map2 = {
     rest: "Crew rested, morale restored, supplies refresh.",
-    trade: "Spend one trade good for +6-10 food.",
+    trade: "Spend one trade good for food. Yield varies by item and settlement.",
     repair: "Reduce wheel wear, or apply shaganappi if carried.",
     grease: "Consume shaganappi to silence axle squeal.",
     forage: "D20 + crew modifier; 12+ gains 1-4 food.",
     recruit: "Rests tired crew if not exhausted.",
-    rumours: "Advance one day, learn trail news.",
+    rumours: "Advance one day. Hear scattered news \u2014 less reliable than proper gossip.",
+    gossip: "Spend a day learning trail news and local gossip. Costs 1 day.",
     heal: "Crew rested, morale restored.",
+    craft: "Combine items into higher-value trade goods.",
     continue: "Resume the journey."
   };
   return map2[a] || "";
