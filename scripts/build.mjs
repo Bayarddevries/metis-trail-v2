@@ -23,12 +23,12 @@ export async function build() {
 
   const appPath = path.join(outDir, appRel);
 
-  await download(
-    'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css',
+  await fs.copyFile(
+    path.join(cwd, 'node_modules/leaflet/dist/leaflet.css'),
     path.join(outDir, 'leaflet.css')
   );
-  await download(
-    'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js',
+  await fs.copyFile(
+    path.join(cwd, 'node_modules/leaflet/dist/leaflet.js'),
     path.join(outDir, 'leaflet.js')
   );
 
@@ -58,16 +58,16 @@ export async function build() {
   const indexPath = path.join(outDir, 'index.html');
   let html = (await fs.readFile(templatePath, 'utf8')) || '';
 
-  html = html.replace(
-    /(<script\s+type="module"\s+src=")app\.js(\?v=\d+)?(")/g,
-    `$1${appRel}$3`
-  );
-
   // Auto-bump cache-bust version on each build
   const versionMatch = html.match(/app\.js\?v=(\d+)/);
   if (versionMatch) {
     const nextVer = String(Number(versionMatch[1]) + 1);
     html = html.replace(/app\.js\?v=\d+/, `app.js?v=${nextVer}`);
+  } else {
+    html = html.replace(
+      /(<script\s+type="module"\s+src=")app\.js(")/,
+      '$1app.js?v=1$2'
+    );
   }
 
   const assetPaths = [...appCode.matchAll(/(?<=["'])([^"']+\.(png|jpg|svg|json))(?=["'])/g)].map((m) => m[1]);
