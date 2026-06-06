@@ -339,7 +339,7 @@ var ITEMS = [
     wt: 40,
     count: 1,
     type: "repair",
-    category: "repair",
+    category: "parts",
     mbValue: 1.2,
     perishable: false,
     desc: "Hard maple. Heavy but essential for a Red River cart.",
@@ -369,7 +369,7 @@ var ITEMS = [
     wt: 10,
     count: 1,
     type: "tool",
-    category: "repair",
+    category: "parts",
     mbValue: 1.8,
     perishable: false,
     desc: "Axe, auger, drawknife. Required for major repairs.",
@@ -414,7 +414,7 @@ var ITEMS = [
     wt: 3,
     count: 1,
     type: "tool",
-    category: "repair",
+    category: "parts",
     mbValue: 0.5,
     perishable: false,
     desc: "Hemp. Crossings, repairs, binding.",
@@ -423,9 +423,9 @@ var ITEMS = [
   {
     name: "Ammunition Belt",
     wt: 2,
-    count: 1,
+    count: 0,
     type: "ammo",
-    category: "ammo",
+    category: "hunting",
     mbValue: 0.9,
     perishable: false,
     desc: "Shot and ball. For hunting and defence.",
@@ -1327,10 +1327,6 @@ function createGame(seed = null) {
   }
   __name(d, "d");
   const cart = startingCart();
-  function computeUsedWeight() {
-    return cart.filter((i) => i.type !== "food").reduce((s, i) => s + i.wt * i.count, 0);
-  }
-  __name(computeUsedWeight, "computeUsedWeight");
   const S = {
     seed,
     day: 1,
@@ -1357,10 +1353,9 @@ function createGame(seed = null) {
     flags: {},
     reputation: { hbc: 0, nwmp: 0, metis: 0, mission: 0, cree: 0 },
     capacity: 100,
-    usedWeight: computeUsedWeight(),
+    usedWeight: 0,
     credit: { hbc: 0, metis: 0, nwmp: 0, mission: 0 },
-    perishable: {},
-    trailIntel: []
+    perishable: {}
   };
   function checkGameOver() {
     if (S.over) return;
@@ -1386,14 +1381,6 @@ function createGame(seed = null) {
     S.season = seasonFor(S.month);
   }
   __name(advance, "advance");
-  function offloadItem(name) {
-    const item = cart.find((i) => i.name === name);
-    if (!item || item.count <= 0) return null;
-    item.count--;
-    S.usedWeight = computeUsedWeight();
-    return { offloaded: name };
-  }
-  __name(offloadItem, "offloadItem");
   function resolveChoice(ev, ci) {
     const ch = ev.choices[ci];
     const result = { roll: null, total: null, dc: null, success: null, text: "", effects: [], flags: [], reps: [] };
@@ -1410,95 +1397,13 @@ function createGame(seed = null) {
         return result;
       }
     }
-    if (ch.requiresItem) {
-      const reqName = typeof ch.requiresItem === "string" ? ch.requiresItem : ch.requiresItem.name;
-      const reqCount = typeof ch.requiresItem === "object" ? ch.requiresItem.count || 1 : 1;
-      const item = cart.find((i) => i.name === reqName);
-      if (!item || item.count < reqCount) {
-        result.text = `You don't have enough ${reqName} for this.`;
-        result.success = false;
-        return result;
-      }
-    }
-    if (ch.consumesItem) {
-      const item = cart.find((i) => i.name === ch.consumesItem);
-      if (item && item.count > 0) {
-        item.count--;
-        S.usedWeight = computeUsedWeight();
-        result.text = ch.ok || `You use your ${ch.consumesItem}.`;
-        result.success = true;
-        result.effects.push(`\u22121 ${ch.consumesItem}`);
-        if (ch.wear) {
-          S.wear += ch.wear;
-          result.effects.push(`+${ch.wear} Wear`);
-        }
-        if (ch.food) {
-          S.food += ch.food;
-          result.effects.push(`${ch.food > 0 ? "+" : ""}${ch.food} Food`);
-        }
-        if (ch.morale) {
-          S.morale = Math.max(0, Math.min(100, S.morale + ch.morale));
-          result.effects.push(`Morale ${ch.morale > 0 ? "+" : ""}${ch.morale}`);
-        }
-        if (ch.time) {
-          if (ch.time > 0) {
-            advance();
-            result.effects.push(`+${ch.time} day(s)`);
-          }
-          if (ch.time < 0) {
-            S.segmentDay = Math.max(0, S.segmentDay + ch.time);
-            result.effects.push(`${ch.time} day(s)`);
-          }
-        }
-        if (ch.crew) {
-          S.crew = ch.crew;
-          result.effects.push(`Crew: ${ch.crew}`);
-        }
-        if (ch.setsFlag) {
-          S.flags[ch.setsFlag] = true;
-          result.flags.push(ch.setsFlag);
-        }
-        if (ch.addsRep) {
-          S.reputation[ch.addsRep.key] = (S.reputation[ch.addsRep.key] || 0) + ch.addsRep.delta;
-          result.reps.push({ key: ch.addsRep.key, delta: ch.addsRep.delta, value: S.reputation[ch.addsRep.key] });
-        }
-        S.eventsResolved++;
-        return result;
-      }
-    }
-    let dcMod = 0;
-    if (ch.itemBonus) {
-      const item = cart.find((i) => i.name === ch.itemBonus.name);
-      if (item && item.count > 0) {
-        dcMod = ch.itemBonus.dcBonus || 0;
-      }
-    }
-    if (S.trailIntel && S.trailIntel.length > 0) {
-      const evId = ev.id || "";
-      const evTerrain = ev.terrain || "";
-      const matchingIntel = S.trailIntel.find((i) => {
-        if (!i.bonus) return false;
-        const t = i.type;
-        if (t === evTerrain) return true;
-        if (t === "nwmp_hint" && evId.includes("nwmp")) return true;
-        if (t === "heal_hint" && (evId.includes("cholera") || evId.includes("heal"))) return true;
-        if (t === "river_hint" && (evId.includes("river") || evId.includes("ford") || evId.includes("ferry") || evId.includes("raft"))) return true;
-        if (t === "trade_hint" && (evId.includes("trade") || evId.includes("hunt") || evId.includes("camp"))) return true;
-        if (t === "morale_hint" && (evId.includes("camp") || evId.includes("dance") || evId.includes("fiddle"))) return true;
-        if (t === "fuel_hint" && (evId.includes("cold") || evId.includes("winter") || evId.includes("fire"))) return true;
-        return false;
-      });
-      if (matchingIntel && matchingIntel.bonus) {
-        dcMod += matchingIntel.bonus.dcBonus || 0;
-      }
-    }
     if (ch.dc !== null) {
       const roll = d();
       const total = roll + totalMod(S);
-      const success = total >= ch.dc - dcMod;
+      const success = total >= ch.dc;
       result.roll = roll;
       result.total = total;
-      result.dc = ch.dc - dcMod;
+      result.dc = ch.dc;
       result.success = success;
       result.text = success ? `Success. ${ch.ok}` : `Failure. ${ch.bad}`;
       if (!success) {
@@ -1677,63 +1582,29 @@ function createGame(seed = null) {
       S.squeal = 0;
       S.travelDaysWithoutRest = 0;
       S.morale = Math.min(100, S.morale + 25);
-      const firewood = cart.find((i) => i.name === "Firewood Bundle");
-      if (firewood && firewood.count > 0) {
-        firewood.count--;
-        S.usedWeight = computeUsedWeight();
-        S.morale = Math.min(100, S.morale + 10);
-      }
-      const blanket = cart.find((i) => i.name === "Blanket");
-      if (blanket && blanket.count > 0) {
-        blanket.count--;
-        S.usedWeight = computeUsedWeight();
-        S.morale = Math.min(100, S.morale + 5);
-      }
       advance();
     }
     if (action === "repair") {
-      const spareAxle = cart.find((i) => i.name === "Spare Axle");
       const shag = cart.find((i) => i.name === "Shaganappi");
-      const toolKit = cart.find((i) => i.name === "Tool Kit");
-      if (S.wear > 0 && spareAxle && spareAxle.count > 0) {
-        spareAxle.count--;
-        S.usedWeight = computeUsedWeight();
-        S.wear = Math.max(0, S.wear - 3);
-      } else if (S.wear > 0 && shag && shag.count > 0 && toolKit && toolKit.count > 0) {
+      if (S.wear > 0 && shag && shag.count > 0) {
         shag.count--;
-        toolKit.count--;
-        S.usedWeight = computeUsedWeight();
-        S.wear = Math.max(0, S.wear - 3);
-      } else if (S.wear > 0 && shag && shag.count > 0) {
-        shag.count--;
-        S.usedWeight = computeUsedWeight();
-        S.wear = Math.max(0, S.wear - 2);
-      } else if (S.wear > 0 && toolKit && toolKit.count > 0) {
-        toolKit.count--;
-        S.usedWeight = computeUsedWeight();
         S.wear = Math.max(0, S.wear - 2);
       } else if (S.wear > 0) {
         S.wear = Math.max(0, S.wear - 1);
       }
     }
     if (action === "heal") {
-      const medPouch = cart.find((i) => i.name === "Medicine Pouch");
-      if (medPouch && medPouch.count > 0) {
-        medPouch.count--;
-        S.usedWeight = computeUsedWeight();
-        S.crew = "rested";
-        S.morale = Math.min(100, S.morale + 20);
-      }
-      if (!medPouch || medPouch.count <= 0) {
-        S.crew = "rested";
-        S.morale = Math.min(100, S.morale + 10);
-      }
+      S.crew = "rested";
+      S.morale = Math.min(100, S.morale + 20);
     }
     if (action === "trade") {
-      tradeItem(null);
-    }
-    if (action.startsWith("trade:")) {
-      tradeItem(action.slice(6));
+      const tg = cart.find((i) => i.type === "trade" && i.count > 0);
+      if (tg) {
+        tg.count--;
+        const foodGain = Math.floor(rand() * 5) + 6;
+        S.food += foodGain;
+        S.tradesMade++;
+      }
     }
     if (action === "grease") {
       const shag = cart.find((i) => i.name === "Shaganappi");
@@ -1754,46 +1625,10 @@ function createGame(seed = null) {
       if (S.crew !== "exhausted") S.crew = "rested";
     }
     if (action === "rumours") advance();
-    if (action === "craft") {
-    }
-    if (action === "gossip") {
-      advance();
-      const intel = generateGossip(S.node, rand);
-      if (intel) {
-        S.trailIntel.push({ ...intel, fromNode: S.node, fromDay: S.day });
-        S.trailIntel = S.trailIntel.filter((i) => S.day - i.fromDay <= 3);
-      }
-    }
     checkGameOver();
     return [];
   }
   __name(settlementAction, "settlementAction");
-  function tradeItem(itemName) {
-    let tg;
-    if (itemName) {
-      tg = cart.find((i) => i.name === itemName && i.type === "trade" && i.count > 0);
-    } else {
-      tg = cart.find((i) => i.type === "trade" && i.count > 0);
-    }
-    if (!tg) return null;
-    tg.count--;
-    S.usedWeight = computeUsedWeight();
-    const baseFood = Math.floor(rand() * 5) + 6;
-    const mult = tradeMultiplier(S.pendingSettlement?.type || "trading", tg.category || "trade", S.node);
-    let gossipBonus = 0;
-    if (S.trailIntel && S.trailIntel.length > 0) {
-      const tradeIntel = S.trailIntel.find((i) => i.type === "trade_hint" && i.bonus);
-      if (tradeIntel) {
-        gossipBonus = 3;
-        S.trailIntel = S.trailIntel.filter((i) => i !== tradeIntel);
-      }
-    }
-    const foodGain = Math.max(3, Math.round(baseFood * mult) + gossipBonus);
-    S.food += foodGain;
-    S.tradesMade++;
-    return { item: tg.name, foodGain, mult, gossipBonus };
-  }
-  __name(tradeItem, "tradeItem");
   return {
     travelOneDay: travelOneDay2,
     makeCamp,
@@ -1816,10 +1651,7 @@ function createGame(seed = null) {
         won: S.won,
         score: S.score,
         pendingEvent: S.pendingEvent,
-        pendingSettlement: S.pendingSettlement,
-        usedWeight: S.usedWeight,
-        capacity: S.capacity,
-        trailIntel: S.trailIntel
+        pendingSettlement: S.pendingSettlement
       };
     },
     getCart() {
@@ -1879,146 +1711,20 @@ function createGame(seed = null) {
     },
     getScore() {
       return S.score;
-    },
-    offloadItem(name) {
-      return offloadItem(name);
-    },
-    getOffloadableItems() {
-      return cart.filter((i) => i.type !== "food" && i.count > 0).map((i) => ({ name: i.name, wt: i.wt, count: i.count, icon: i.icon }));
-    },
-    getAvailableRecipes() {
-      return getAvailableRecipes(S.pendingSettlement?.type || "trading", cart).map((r) => ({
-        id: r.id,
-        name: r.name,
-        inputs: r.inputs.map((inp) => ({ ...inp, have: cart.find((i) => i.name === inp.name)?.count || 0 })),
-        output: { ...r.output }
-      }));
-    },
-    craftRecipe(recipeId) {
-      const recipe = craftRecipe(recipeId, cart);
-      if (recipe) S.usedWeight = computeUsedWeight();
-      return recipe ? { id: recipe.id, name: recipe.name, output: recipe.output } : null;
-    },
-    getTradeEstimate(itemName) {
-      const item = cart.find((i) => i.name === itemName);
-      if (!item) return null;
-      const mult = tradeMultiplier(S.pendingSettlement?.type || "trading", item.category || "trade", S.node);
-      const baseMin = Math.max(3, Math.round(6 * mult));
-      const baseMax = Math.max(3, Math.round(10 * mult));
-      return { min: baseMin, max: baseMax, mult: Math.round(mult * 100) / 100 };
-    },
-    tradeItem(itemName) {
-      return tradeItem(itemName);
     }
   };
 }
 __name(createGame, "createGame");
-function tradeMultiplier(settlementType, itemCategory, nodeIndex) {
-  let mult = 1;
-  if (settlementType === "hbc" && itemCategory === "furs") mult *= 1.3;
-  if (settlementType === "metis" && itemCategory === "repair") mult *= 1.3;
-  if (settlementType === "mission" && itemCategory === "ammo") mult *= 1.2;
-  if (settlementType === "nwmp" && (itemCategory === "trade" || itemCategory === "furs")) mult *= 1.2;
-  if (nodeIndex <= 4) {
-    if (itemCategory === "furs") mult *= 1.2;
-    if (itemCategory === "provisions") mult *= 0.8;
-  } else if (nodeIndex >= 9) {
-    if (itemCategory === "provisions") mult *= 1.3;
-    if (itemCategory === "repair") mult *= 1.3;
-    if (itemCategory === "furs") mult *= 0.8;
-  }
-  return mult;
-}
-__name(tradeMultiplier, "tradeMultiplier");
-var RECIPES = [
-  {
-    id: "finished_hides",
-    name: "Finished Hides",
-    inputs: [{ name: "Bison Hide", count: 2 }, { name: "Tool Kit", count: 1 }],
-    output: { name: "Finished Hides", wt: 12, category: "furs", mbValue: 3.5, type: "trade", icon: "\u{1F9AC}" },
-    at: ["hbc", "metis"]
-  },
-  {
-    id: "travois_kit",
-    name: "Travois Kit",
-    inputs: [{ name: "Rope (50ft)", count: 1 }, { name: "Shaganappi", count: 1 }, { name: "Blanket", count: 1 }],
-    output: { name: "Travois Kit", wt: 8, category: "repair", mbValue: 2.5, type: "trade", icon: "\u{1FAA2}" },
-    at: ["metis", "trading"]
-  },
-  {
-    id: "gunpowder_pack",
-    name: "Gunpowder Pack",
-    inputs: [{ name: "Ammunition Belt", count: 1 }, { name: "Firewood Bundle", count: 1 }],
-    output: { name: "Gunpowder Pack", wt: 8, category: "ammo", mbValue: 2, type: "trade", icon: "\u{1F3AF}" },
-    at: ["nwmp", "hbc"]
-  }
-];
-function getAvailableRecipes(settlementType, cart) {
-  return RECIPES.filter((r) => {
-    if (!r.at.includes(settlementType)) return false;
-    return r.inputs.every((inp) => {
-      const item = cart.find((i) => i.name === inp.name);
-      return item && item.count >= inp.count;
-    });
-  });
-}
-__name(getAvailableRecipes, "getAvailableRecipes");
-function craftRecipe(recipeId, cart) {
-  const recipe = RECIPES.find((r) => r.id === recipeId);
-  if (!recipe) return null;
-  for (const inp of recipe.inputs) {
-    const item = cart.find((i) => i.name === inp.name);
-    if (!item || item.count < inp.count) return null;
-  }
-  for (const inp of recipe.inputs) {
-    const item = cart.find((i) => i.name === inp.name);
-    item.count -= inp.count;
-  }
-  const existing = cart.find((i) => i.name === recipe.output.name);
-  if (existing) {
-    existing.count++;
-  } else {
-    cart.push({ ...recipe.output, count: 1, desc: `Crafted at settlement.`, perishable: false });
-  }
-  return recipe;
-}
-__name(craftRecipe, "craftRecipe");
 function availableSettlementActions(type) {
-  const base = ["rest", "gossip"];
-  if (type === "hbc") return [...base, "trade", "repair", "grease", "forage", "recruit", "craft"];
-  if (type === "metis") return [...base, "trade", "grease", "forage", "rumours", "recruit", "craft"];
-  if (type === "trading") return [...base, "trade", "forage", "rumours", "craft"];
+  const base = ["rest"];
+  if (type === "hbc") return [...base, "trade", "repair", "grease", "forage", "recruit"];
+  if (type === "metis") return [...base, "trade", "grease", "forage", "rumours", "recruit"];
+  if (type === "trading") return [...base, "trade", "forage", "rumours"];
   if (type === "mission") return [...base, "heal", "rumours"];
-  if (type === "nwmp") return [...base, "trade", "grease", "rumours", "craft"];
+  if (type === "nwmp") return [...base, "trade", "grease", "rumours"];
   return base;
 }
 __name(availableSettlementActions, "availableSettlementActions");
-function generateGossip(nodeIndex, rng) {
-  const GOSSIP = {
-    0: { text: "St. Boniface ahead \u2014 the Grey Nuns offer healing freely. Bring nothing; they ask for prayers, not payment.", type: "heal_hint" },
-    1: { text: "St. Norbert is welcoming. The M\xE9tis parish offers bannock and Saskatoon preserve to travellers.", type: "morale_hint" },
-    2: { text: "The Sayer trial anniversary is near at St. Fran\xE7ois Xavier. Free trade pride runs high \u2014 good time to trade.", type: "trade_hint" },
-    3: { text: "Portage la Prairie \u2014 the HBC fort is decaying but trade continues. Prices are fair. The old barter economy still turns.", type: "trade_hint" },
-    4: { text: "Fort Ellice is the midpoint resupply. The trail splits there \u2014 south to Qu'Appelle, west to Touchwood Hills.", type: "trail_hint" },
-    5: { text: "Fort Qu'Appelle \u2014 NWMP post ahead. They check papers and collect duty. Keep your documents ready.", type: "nwmp_hint" },
-    6: { text: "Touchwood Hills \u2014 last trees for a hundred miles. Gather fuel before the open prairie stretch.", type: "fuel_hint" },
-    7: { text: "Humboldt Mission \u2014 the only reliable healing for a lonely stretch. The mission garden grows against all odds.", type: "heal_hint" },
-    8: { text: "Batoche \u2014 M\xE9tis spiritual centre. The church bell rings across the river valley. Full ceremony, full communion.", type: "morale_hint" },
-    9: { text: "Gabriel's Crossing \u2014 Dumont runs the ferry. His fee is fair. Do not try to ford the South Saskatchewan.", type: "river_hint" },
-    10: { text: "Fort Carlton \u2014 major HBC depot. Full trade, full repair. But the pemmican stores are declining. Stock up.", type: "trade_hint" },
-    11: { text: "Fort Pitt \u2014 edge of the boreal forest. Small, isolated. The last HBC post before Edmonton.", type: "trail_hint" },
-    12: { text: "Fort Edmonton ahead \u2014 the western terminus. Trade your goods here for the best prices. The end of the Carlton Trail.", type: "trade_hint" }
-  };
-  const intel = GOSSIP[nodeIndex];
-  if (!intel) return null;
-  return {
-    text: intel.text,
-    type: intel.type,
-    // 50% chance the intel includes a mechanical bonus
-    bonus: rng() < 0.5 ? { type: intel.type, dcBonus: 2, expiresOnDay: null } : null
-  };
-}
-__name(generateGossip, "generateGossip");
 
 // src/ui/theme.js
 function applyTheme(root) {
@@ -2200,40 +1906,8 @@ function renderStatusBar(state) {
   wearEl.innerHTML = `<span class="stat-label">Wear </span><span class="stat-value${state.wear >= 4 ? " wear-high" : ""}">${state.wear}</span>`;
   if (!window.__METIS_PENDING_RESULT__) window.__METIS_PENDING_RESULT__ = null;
   renderTravelLinesView(state, window._metisGame, window.__METIS_PENDING_RESULT__);
-  renderTally(state);
 }
 __name(renderStatusBar, "renderStatusBar");
-function renderTally(state) {
-  const tallyEl = document.getElementById("s-tally");
-  const ledgerEl = document.getElementById("s-tally-ledger");
-  if (!tallyEl) return;
-  const credit = state.credit || { hbc: 0, metis: 0, nwmp: 0, mission: 0 };
-  const net = Number(credit.hbc + credit.metis + credit.nwmp + credit.mission || 0);
-  const fmt = /* @__PURE__ */ __name((v) => `${v >= 0 ? "+" : ""}${Number(v || 0).toFixed(1)} MB`, "fmt");
-  const valEl = tallyEl.querySelector(".stat-value");
-  const weightEl = document.getElementById("s-weight");
-  if (weightEl) {
-    const used = Number(state.usedWeight || 0);
-    const cap = Number(state.capacity || 100);
-    weightEl.textContent = `${used}/${cap}`;
-    weightEl.className = "stat-value" + (used >= cap ? " cargo-high" : "");
-  }
-  if (valEl) valEl.textContent = fmt(net);
-  if (ledgerEl) {
-    const open = ledgerEl.classList.contains("open");
-    const rows = [
-      { key: "hbc", label: "HBC" },
-      { key: "metis", label: "M\xE9tis" },
-      { key: "nwmp", label: "NWMP" },
-      { key: "mission", label: "Mission" }
-    ];
-    ledgerEl.innerHTML = rows.map((r) => `<div class="tally-row"><span>${r.label}</span><span>${fmt(credit[r.key])}</span></div>`).join("");
-    if (!open) {
-      ledgerEl.classList.add("open");
-    }
-  }
-}
-__name(renderTally, "renderTally");
 function renderNarrative(lines) {
   const el = document.getElementById("narrative");
   el.innerHTML = lines.map((t) => `<div class="scene-text">${t}</div>`).join("");
@@ -2244,10 +1918,7 @@ __name(renderNarrative, "renderNarrative");
 // src/ui/persistence.js
 var STORAGE_KEY = "metis-trail-v2.save";
 function clearSave() {
-  try {
-    localStorage.removeItem(STORAGE_KEY);
-  } catch {
-  }
+  localStorage.removeItem(STORAGE_KEY);
 }
 __name(clearSave, "clearSave");
 
