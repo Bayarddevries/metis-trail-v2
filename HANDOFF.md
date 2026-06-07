@@ -1,50 +1,31 @@
 # HANDOFF — Metis Trail V2
 
-## Current State (v36)
+## Current State (v38)
 
-- **Build**: `dist/app.js?v=36`, `src/template.html` at `?v=36` (synced)
+- **Build**: `dist/app.js?v=38`, `src/template.html` at `?v=38` (synced)
 - **Live**: https://bayarddevries.github.io/metis-trail-v2/
 - **Local test**: `http://100.108.183.33:8081/index.html`
 - **Branch**: `main`, clean working tree
 
-## Verified Working (v36)
+## Verified Working (v38)
 
-- Overload guard fires: cart shows **146.5 / 100 kg — Overloaded**
-- Unload buttons remove items; cart auto-closes when under capacity
-- Settlement close (✕) button clears `pendingSettlement` — no more stuck travel
-- **Settlement overlays show correctly** at St. Boniface, St. Norbert, St. François Xavier
-- Trade panel shows per-item yield estimates with ↑/↓ indicators
-- Craft panel shows recipes filtered by settlement type
-- Gossip mechanic generates trail intel with freshness indicators (🟢🟡🔴)
-- Source-quote rendering in event overlay (`#event-source` div)
-- All 55 events verified with `getSource()` key alignment
-- 35 source entries in archive
-- Full travel chain verified: Fort Garry → St. Boniface → St. Norbert → St. François Xavier
-- **Squeal event triggers at wear ≥ 4** (35% chance/day) — axle shriek event with 3 repair/ignore choices, source citation from Brehaut
-- **6 ending types** with rich narratives, source quotes, and detailed scoring breakdowns (victory/triumphant, victory/humble, starvation, cart failure, winter, crew abandoned)
-- **Morale game over** at 0 — crew abandons the journey
-- **Score breakdown** shows: base 1000, trade goods × 120, food bonus × 12, crew bonus, days penalty, wear penalty, final total
-- Each ending includes a "how to improve" tip for next playthrough
-- **Mobile top bar** wraps into 2 rows on portrait screens (v32 fix)
+- All v37 features still working
+- **Balance pass applied**: DAILY_FOOD 1.2, wear chances reduced, repair -2, EVENT_CHANCE 0.45, triumphant threshold 1200
+- **#29 fixed**: Starvation properly detected before victory (0 wins with food ≤ 0 in 200 sims)
+- **#30 fixed**: Trade buttons labeled with item name (e.g., "Trade Bison Hide")
+- **Post-balance 200 sims**: win rate 66.5%, starvation 11%, cart failure 19.5%, avg events 8.5/game
+- Browser QA: settlement trade buttons show item names, map renders, overlays work
 
-## Recent Changes (v34–v36)
+## Recent Changes (v38)
 
-### v34 — Trim dead code (GitHub issue #28) — CLOSED
-- Removed `factionPref` from items, old squeal system (stat-based, hidden), EventBus class, createShell(), Node class, MAX_CART_KG, CREW_STATES, duplicate ferry_gabriel event, FALLBACK_EVENTS/EVENTS confusion
-- ~120 lines dead code removed
-
-### v35 — Squeal as wear-triggered event
-- Old squeal was hidden accumulation with no display. New: 35% chance per travel day at wear ≥ 4
-- Player gets event with 3 choices: lash with shaganappi (DC 9, -1 wear, +1 day), push on (morale -5), night camp repair (DC 11, -1 wear, +1 day)
-- `resolveChoice` now handles negative wear (repair reduced, clamped at 0)
-- Added `ch.morale` support to event choices
-
-### v36 — Rich endings system (GitHub issue #14) — CLOSED
-- 6 ending types: Triumphant (score ≥ 1400), Humble (score < 1400), Starvation (food ≤ 0), Cart Failure (wear ≥ 5), Winter (too late), Crew Abandoned (morale ≤ 0)
-- New `src/data/endings.js` file
-- `showEnd()` rewritten with full scoring breakdown UI
-- New source entries: FORT_EDMONTON, PEMMICAN_FAMINE, WINTER_TRAIL, MORALE
-- End-overlay HTML updated with source quote element
+### v38 — Balance Pass & Bug Fixes
+- DAILY_FOOD: 1.0 → 1.2
+- Wear accumulation: plains 0.08, river_valley 0.12, wooded 0.15
+- Settlement repair: always -2 wear (was -1 without shaganappi)
+- EVENT_CHANCE: 0.35 → 0.45
+- Triumphant threshold: 1400 → 1200
+- Fixed #29: starvation/wear/morale checks before victory condition
+- Fixed #30: trade buttons labeled with item name
 
 ## Known Issues
 
@@ -56,6 +37,9 @@ Not grep-able in esbuild bundle but works at runtime. Monitor.
 
 ### Cart overlay: no item count in unload buttons
 Buttons show "Unload −X kg" but not which item. Minor UX issue.
+
+### Win rate still above target
+66.5% win rate after balance pass (target 25-40%). May need weather system, higher food consumption, or more aggressive event penalties.
 
 ## Critical Code Paths
 
@@ -169,19 +153,34 @@ The user wants **two types of testing** (GitHub issue #5):
 
 | # | Title | Priority | Notes |
 |---|-------|----------|-------|
-| 26 | Node/location markers on map | Medium | Leaflet markers for settlements. Manny Morr's 3 pixel art images (Fort Garry, Fort Edmonton, Fort Ellice) from Google Drive folder `18BIjiLG2cdiTLOuh3lBqMY3x-u7nAIW8` are arrival cards, not map pins — tabled pending decision |
+| 26 | Node/location markers on map | Medium | Leaflet markers for settlements. Manny Morr's pixel art from Google Drive are arrival cards, not map pins — tabled pending decision |
 | 25 | Cultural review | Low | External dependency — needs human reviewer |
 | 15 | Pre-departure cart packing | Medium | Let players choose starting loadout with budget/space |
 | 13 | Weather system | Medium | Daily weather modifiers for events/outcomes/morale/wear |
 | 12 | Highscore/leaderboard | Medium | Score tracking by outcome type |
 | 10 | Basic icons | Low | Replace basic UI icons with themed artwork |
 | 6 | AI writing review | Low | Audit copy for AI-isms |
-| 5 | Testing infrastructure | **HIGH** | Headless + browser testing — this is the current priority |
+| 5 | Testing infrastructure | Medium | Phase 6 complete. Balance pass applied (v38). Win rate 66.5% — still above target. |
+
+## Balance Pass — v38 Applied
+
+All 6 recommendations from the v37 playtest have been applied:
+
+1. ✅ DAILY_FOOD 1.0 → 1.2
+2. ✅ Wear accumulation reduced (plains 0.08, river_valley 0.12, wooded 0.15)
+3. ✅ Settlement repair now always -2 wear
+4. ✅ Triumphant threshold 1400 → 1200
+5. ✅ EVENT_CHANCE 0.35 → 0.45
+6. ✅ #29 starvation bypass fixed
+
+Post-balance results: win rate 66.5%, starvation 11%, cart failure 19.5%. Win rate still above 25-40% target — further tuning may be needed (weather system, higher food consumption).
 
 ## Closed GitHub Issues (this session)
 
 | # | Title | Version |
 |---|-------|---------|
+| 30 | Duplicate trade buttons | v38 |
+| 29 | Victory bypasses starvation | v38 |
 | 28 | Trim dead features | v34 |
 | 27 | Mobile top bar clipped | v32 |
 | 20 | Gossip benefit | v26 |
@@ -192,17 +191,15 @@ The user wants **two types of testing** (GitHub issue #5):
 
 ## Files Modified (this session)
 
-- `src/systems/engine.js` — added getTradeEstimate, tradeItem, craftRecipe, getAvailableRecipes, endReason, morale game-over, negative wear, ch.morale support
-- `src/systems/events.js` — removed EventBus, duplicate ferry_gabriel
-- `src/systems/shell.js` — removed createShell()
-- `src/systems/schema.js` — removed Node class
-- `src/data/constants.js` — removed dead constants
-- `src/data/items.js` — removed factionPref
-- `src/data/sources/index.js` — added 4 new source entries
-- `src/data/endings.js` — NEW, 6 ending types
-- `src/ui/main.js` — rewrote showEnd(), removed grease, added ENDINGS import
-- `src/template.html` — end-overlay quote element, .end-source CSS, mobile status bar fix
-- `CHANGELOG.md` — v31–v36 entries
-- `HANDOFF.md` — this file
-- `TODO.md` — updated
-- `AGENTS.md` — updated with pitfalls
+- `src/systems/engine.js` — fixed #29 (starvation check before victory), reduced wear chances, repair always -2
+- `src/core/constants.js` — DAILY_FOOD 1.0→1.2, EVENT_CHANCE 0.35→0.45
+- `src/main.js` — fixed #30 (trade buttons labeled with item name), triumphant threshold 1400→1200
+- `src/template.html` — version synced to v38
+- `tests/simulate-entry.js` — NEW, headless simulation harness
+- `scripts/build-test.mjs` — NEW, esbuild bundler for test harness
+- `tests/results.json` — NEW, 200-sim raw data (×2 runs)
+- `CHANGELOG.md` — v37, v38 entries
+- `HANDOFF.md` — v38 state
+- `TODO.md` — Phase 6 complete, balance pass applied
+- `AGENTS.md` — 2 new pitfalls
+- `ISSUES.md` — #29, #30 resolved; #5 updated

@@ -569,7 +569,7 @@ function showSettlement(game) {
         const tradeBtn = document.createElement('button');
         tradeBtn.className = 'ctrl-btn';
         tradeBtn.style.cssText = 'padding:3px 10px;font-size:11px;white-space:nowrap;';
-        tradeBtn.textContent = 'Trade';
+        tradeBtn.textContent = `Trade ${item.name}`;
         tradeBtn.onclick = () => {
           hideOverlays();
           const result = game.tradeItem(item.name);
@@ -724,7 +724,7 @@ function showEnd(game) {
 
   const ending = ENDINGS[state.endReason] || ENDINGS.no_trade;
   const isVictory = state.endReason === 'victory';
-  const isHighScore = isVictory && state.score >= 1400;
+  const isHighScore = isVictory && state.score >= 1200;
 
   // Title
   titleEl.textContent = ending.title;

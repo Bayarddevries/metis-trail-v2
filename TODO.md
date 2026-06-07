@@ -61,15 +61,23 @@ Legend: `pending` | `in_progress` | `blocked` | `done`
 - [ ] Add scout/guide hire moral choices with history anchoring
 
 ## Phase 6 — Playtesting & Balance (CURRENT)
-- [ ] **Headless playtesting harness** (GitHub issue #5) — automated simulations using the real engine
-  - Write `tests/simulate-entry.js` + build script
-  - Run 100+ simulations with randomized choices
-  - Aggregate: win rate, avg score, death reasons, item usage
-  - Report balance findings in ISSUES.md
-- [ ] **Browser click-through QA** (GitHub issue #5) — visual end-to-end testing
-  - Full flow: intro → travel → events → settlement → endings
-  - Mobile layout verification
-  - Document UI/UX bugs in ISSUES.md
+- [x] **Headless playtesting harness** (GitHub issue #5) — automated simulations using the real engine
+  - [x] Write `tests/simulate-entry.js` + `scripts/build-test.mjs`
+  - [x] Run 200 simulations with randomized choices
+  - [x] Aggregate: win rate, avg score, death reasons, item usage
+  - [x] Report balance findings in ISSUES.md (see #5a, #5b)
+- [x] **Browser click-through QA** (GitHub issue #5) — visual end-to-end testing
+  - [x] Full flow: intro → travel → events → settlement → endings
+  - [x] Map rendering verified (Leaflet tiles + cart marker present)
+  - [x] Ending overlay verified (title, narrative, score breakdown, source quote)
+  - [x] Found bugs: #29 (victory bypasses starvation), #30 (duplicate trade buttons)
+- [ ] **Balance pass** — apply findings from sim data
+  - Fix win rate (70.5% → target 25-40%)
+  - Reduce cart failure rate (24% of all games)
+  - Fix #29 starvation bypass bug
+  - Fix #30 duplicate trade buttons
+  - Lower triumphant threshold (1400 → 1200)
+  - Tighten food economy
 
 ## Ongoing
 - [ ] Review and approve all historical content before merge

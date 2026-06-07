@@ -40,13 +40,25 @@ Use this file to log bugs, blockers, and known gaps during work sessions. Each i
 
 ### 5. Add in Testing (headless and browser) — CURRENT PRIORITY
 - Opened: 2026-06-04
-- **STATUS: ACTIVE — Next agent priority (Phase 6)**
+- **STATUS: COMPLETE (testing) + BALANCE PASS APPLIED — Phase 6**
 - Two tracks:
-  1. **Headless**: Automated simulations using the real engine (`src/systems/engine.js`). Run 100+ games with random choices. Aggregate: win rate, avg score, death reasons, item usage. Goal = balance tuning + bug discovery.
-  2. **Browser click-through**: Visual QA on live site (https://bayarddevries.github.io/metis-trail-v2/). Full flow: intro → travel → events → settlement → endings. Mobile verification.
-- See HANDOFF.md Phase 6 for implementation notes (engine import path issue, esbuild bundling approach).
+  1. **Headless**: ✅ COMPLETE — `tests/simulate-entry.js` + `scripts/build-test.mjs`, 200 sims × 2 runs
+  2. **Browser click-through**: ✅ COMPLETE — full flow verified, map/overlays/endings all render
+- Balance pass applied (v38): DAILY_FOOD 1.0→1.2, wear chances reduced, repair -2 wear, EVENT_CHANCE 0.35→0.45, triumphant threshold 1400→1200
+- Post-balance results (200 sims): win rate 66.5%, starvation 11%, cart failure 19.5%, avg events 8.5/game
+- Remaining: win rate still above target (25-40%). May need weather system or further tuning.
 
 ## Resolved
+
+### 30. Trade panel shows duplicate buttons
+- Opened: 2026-06-07
+- Resolved: 2026-06-07 (v38)
+- Fix: Trade buttons now labeled with item name (e.g., "Trade Bison Hide", "Trade Beaver Pelts") instead of generic "Trade"
+
+### 29. Victory condition bypasses starvation check
+- Opened: 2026-06-07
+- Resolved: 2026-06-07 (v38)
+- Fix: Added food/wear/morale checks before setting `S.won = true` in `travelOneDay()` arrival code. Starvation now properly detected before victory.
 
 ### 28. Trim dead features
 - Opened: 2026-06-06

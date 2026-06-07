@@ -2,6 +2,64 @@
 
 All notable changes are documented here. Format loosely follows Keep a Changelog.
 
+## [v38] - 2026-06-07
+
+### Balance Pass — Applied recommendations from 200-sim playtest
+
+- **DAILY_FOOD**: 1.0 → 1.2 (tighter food economy, starvation now 11% of games vs 2%)
+- **Wear accumulation**: plains 0.12→0.08, river_valley 0.18→0.12, wooded 0.22→0.15 (cart failure down from 24% to 19.5%)
+- **Settlement repair**: now always reduces wear by 2 (was 1 without shaganappi)
+- **EVENT_CHANCE**: 0.35 → 0.45 (more events per game: 8.5 vs 6.9 avg)
+- **Triumphant threshold**: 1400 → 1200 (more achievable high-end ending)
+
+### Bug Fixes
+
+- **#29**: Victory condition now checks food/wear/morale before declaring victory. Arriving at Edmonton with food ≤ 0 correctly triggers starvation ending instead of victory.
+- **#30**: Trade buttons in settlement overlay now labeled with item name (e.g., "Trade Bison Hide") instead of generic "Trade"
+
+### Post-Balance Results (200 sims)
+
+- Win rate: 66.5% (down from 70.5%)
+- Starvation: 11% (up from 2%) — food scarcity now real
+- Cart failure: 19.5% (down from 24%) — wear less aggressive
+- Avg events/game: 8.5 (up from 6.9) — more content
+- Avg final food: 14.4 (down from 20.6) — tighter economy
+- 0 wins with food ≤ 0 (was possible before #29 fix)
+
+## [v37] - 2026-06-07
+
+### Added — Playtesting Infrastructure (GitHub issue #5)
+
+- **Headless simulation harness** — `tests/simulate-entry.js` + `scripts/build-test.mjs`
+  - Bundles the real engine via esbuild for Node.js execution
+  - Runs N simulations (default 200) with weighted-random player choices
+  - Tracks: ending type, score, days, final food/wear/morale, trade goods, action frequencies
+  - Outputs aggregate stats: win rate, score distribution, death breakdown, node-by-node death map
+  - Balance analysis with actionable recommendations
+  - `--json` flag exports full results to `tests/results.json`
+
+### Test Results — 200 Simulations
+
+- **Win rate: 70.5%** — game is too easy (target: 25-40%)
+- **Cart failure: 24%** of all games — wear accumulation is the #1 killer
+- **Starvation: only 2%** — food economy is too generous
+- **Triumphant endings: 0.8%** — 1400 threshold nearly unreachable
+- **Timeout (200-day cap): 7%** — state machine loop bug
+- **Avg events/game: 6.9** — reasonable but could be higher
+- **Avg days survived: 44** — trail takes ~44 days on average
+
+### Bugs Found
+
+- **#29**: Victory condition bypasses starvation check — arriving at Edmonton with food ≤ 0 still shows "victory"
+- **#30**: Trade panel shows duplicate "Trade" buttons at settlements
+
+### Docs
+
+- Updated `ISSUES.md` — added #29, #30; expanded #5 with harness details and balance findings
+- Updated `TODO.md` — marked Phase 6 testing complete, added balance pass subtasks
+- Updated `HANDOFF.md` — v37 state, test results, bug list
+- Updated `AGENTS.md` — added pitfall: stale cart reference in offload loops
+
 ## [v36] - 2026-06-07
 
 ### Added — Rich Endings System (GitHub issue #14)

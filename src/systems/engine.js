@@ -210,7 +210,7 @@ export function createGame(seed = null) {
     S.travelDaysWithoutRest++;
     advance();
 
-    const wearChance = { plains: 0.12, river_valley: 0.18, wooded: 0.22 };
+    const wearChance = { plains: 0.08, river_valley: 0.12, wooded: 0.15 };
     if (rand() < (wearChance[NODES[S.node].terrain] || 0.2)) S.wear++;
 
     // Squeal event: at high wear, the axle's scream draws attention
@@ -243,9 +243,18 @@ export function createGame(seed = null) {
       if (S.node >= NODES.length - 1) {
         const hasTrade = cart.some((i) => i.type === 'trade' && i.count > 0);
         S.over = true;
-        S.won = hasTrade && S.wear < CONSTANTS.MAX_WEAR;
-        S.score = calcScore();
-        S.endReason = S.won ? 'victory' : 'no_trade';
+        // Check starvation/wear before declaring victory
+        if (S.food <= 0) {
+          S.endReason = 'starvation';
+        } else if (S.wear >= CONSTANTS.MAX_WEAR) {
+          S.endReason = 'cart_failure';
+        } else if (S.morale <= 0) {
+          S.endReason = 'abandoned';
+        } else {
+          S.won = hasTrade;
+          S.score = calcScore();
+          S.endReason = S.won ? 'victory' : 'no_trade';
+        }
         return stepLog;
       }
       if (n.type !== 'river') S.pendingSettlement = n;
@@ -312,7 +321,7 @@ export function createGame(seed = null) {
         shag.count--;
         S.wear = Math.max(0, S.wear - 2);
       } else if (S.wear > 0) {
-        S.wear = Math.max(0, S.wear - 1);
+        S.wear = Math.max(0, S.wear - 2);
       }
     }
     if (action === 'heal') {
