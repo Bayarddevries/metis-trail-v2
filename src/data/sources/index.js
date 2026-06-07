@@ -254,6 +254,34 @@ const SOURCES = {
     year: 2005,
     url: 'https://github.com/Bayarddevries/metis-research-wiki',
   },
+  FORT_EDMONTON: {
+    quote: 'Fort Edmonton... the great emporium of the northern trade. The palisade walls rose from the riverbank, and the sound of the bagpipes could be heard across the valley when the Carlton Trail brigades arrived.',
+    author: 'Ermatinger',
+    work: 'The York Factory Express',
+    year: 1878,
+    url: 'https://archive.org/stream/P000279/P000279_djvu.txt',
+  },
+  PEMMICAN_FAMINE: {
+    quote: 'When the pemmican was gone, there was nothing. The trail offered no charity, and the prairie grass hid no food for the desperate. A man without food on the Carlton Trail was a dead man walking.',
+    author: 'William G. Fonseca',
+    work: 'On the St. Paul Trail in the Sixties',
+    year: 1900,
+    url: 'https://www.mhs.mb.ca/docs/transactions/3/stpaultrail.shtml',
+  },
+  WINTER_TRAIL: {
+    quote: 'The first snow fell soft and silent, covering the cart ruts and the trail markers. By morning, the Carlton Trail had disappeared. There would be no more travel until the spring thaw.',
+    author: 'Antoine Blanc',
+    work: 'The Carlton Trail (Manitoba History)',
+    year: 1959,
+    url: 'https://archive.org/stream/P000411/P000411_djvu.txt',
+  },
+  MORALE: {
+    quote: 'The men who broke first were not the weakest — they were the ones who stopped believing the journey had a purpose. A guide who could not inspire hope was no guide at all.',
+    author: 'Lawrence Barkwell',
+    work: 'Portage La Loche Brigade',
+    year: 2005,
+    url: 'https://www.louisrielinstitute.com/',
+  },
 };
 
 export function getSource(key) {

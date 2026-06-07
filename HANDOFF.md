@@ -1,13 +1,13 @@
 # HANDOFF — Metis Trail V2
 
-## Current State (v35)
+## Current State (v36)
 
-- **Build**: `dist/app.js?v=35`, `src/template.html` at `?v=35` (synced)
+- **Build**: `dist/app.js?v=36`, `src/template.html` at `?v=36` (synced)
 - **Live**: https://bayarddevries.github.io/metis-trail-v2/
 - **Local test**: `http://100.108.183.33:8081/index.html`
 - **Branch**: `main`, clean working tree
 
-## Verified Working (v35)
+## Verified Working (v36)
 
 - Overload guard fires: cart shows **146.5 / 100 kg — Overloaded**
 - Unload buttons remove items; cart auto-closes when under capacity
@@ -21,6 +21,10 @@
 - 35 source entries in archive
 - Full travel chain verified: Fort Garry → St. Boniface → St. Norbert → St. François Xavier
 - **Squeal event triggers at wear ≥ 4** (35% chance/day) — axle shriek event with 3 repair/ignore choices, source citation from Brehaut
+- **6 ending types** with rich narratives, source quotes, and detailed scoring breakdowns (victory/triumphant, victory/humble, starvation, cart failure, winter, crew abandoned)
+- **Morale game over** at 0 — crew abandons the journey
+- **Score breakdown** shows: base 1000, trade goods × 120, food bonus × 12, crew bonus, days penalty, wear penalty, final total
+- Each ending includes a "how to improve" tip for next playthrough
 
 ## What Was Fixed in v32
 

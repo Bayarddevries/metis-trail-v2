@@ -54,14 +54,20 @@ export function createGame(seed = null) {
     if (S.food <= 0) {
       S.food = 0;
       S.over = true;
-      S.crew = 'exhausted';
-      S.morale = Math.max(0, S.morale - 30);
+      S.endReason = 'starvation';
     }
     if (S.wear >= CONSTANTS.MAX_WEAR) {
       S.over = true;
+      S.endReason = 'cart_failure';
     }
     if (S.season === 'early winter' && S.node < NODES.length - 1) {
       S.over = true;
+      S.endReason = 'winter';
+    }
+    if (S.morale <= 0) {
+      S.morale = 0;
+      S.over = true;
+      S.endReason = 'abandoned';
     }
   }
 
@@ -239,6 +245,7 @@ export function createGame(seed = null) {
         S.over = true;
         S.won = hasTrade && S.wear < CONSTANTS.MAX_WEAR;
         S.score = calcScore();
+        S.endReason = S.won ? 'victory' : 'no_trade';
         return stepLog;
       }
       if (n.type !== 'river') S.pendingSettlement = n;
@@ -356,6 +363,7 @@ export function createGame(seed = null) {
         segmentDay: S.segmentDay,
         over: S.over,
         won: S.won,
+        endReason: S.endReason || null,
         score: S.score,
         pendingEvent: S.pendingEvent,
         pendingSettlement: S.pendingSettlement,

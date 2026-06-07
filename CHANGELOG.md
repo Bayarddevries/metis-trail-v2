@@ -2,6 +2,25 @@
 
 All notable changes are documented here. Format loosely follows Keep a Changelog.
 
+## [v36] - 2026-06-07
+
+### Added — Rich Endings System (GitHub issue #14)
+- **6 ending types** with unique titles, narratives, source quotes, and scoring breakdowns:
+  1. **Victory — Triumphant Arrival** (score ≥ 1400): Strong finish, trade goods delivered
+  2. **Victory — Humble Arrival** (score < 1400): Barely made it, survived against odds
+  3. **Defeat — Starvation** (food ≤ 0): Ran out of food on the trail
+  4. **Defeat — Cart Failure** (wear ≥ 5): Axle broke, cart destroyed
+  5. **Defeat — Winter's Grasp** (early winter): Snow caught the party before Edmonton
+  6. **Defeat — Crew Abandoned** (morale ≤ 0): Crew gave up and refused to continue
+- Each ending includes: narrative explanation of what happened and why, thematic source quote with attribution, detailed scoring breakdown (base + bonuses - penalties), and a "how to improve" tip for next playthrough
+- New `endReason` field on game state tracks which ending to show (`victory`, `no_trade`, `starvation`, `cart_failure`, `winter`, `abandoned`)
+- New source entries: FORT_EDMONTON, PEMMICAN_FAMINE, WINTER_TRAIL, MORALE
+- `showEnd()` rewritten with full scoring breakdown UI
+- End-overlay HTML updated with source quote element and Score Breakdown header
+
+### Added
+- **Morale-based game over** — If crew morale drops to 0, the crew abandons the journey. New ending type "The Crew Has Had Enough".
+
 ## [v35] - 2026-06-07
 
 ### Added

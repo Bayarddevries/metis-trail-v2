@@ -3,6 +3,7 @@ import { mount, find } from './ui/shell.js';
 import { renderStatusBar, renderNarrative, initMap, updateMap, renderTravelLinesView } from './ui/renderer.js';
 import { saveGame, loadGame, clearSave } from './ui/persistence.js';
 import { NODES } from './data/nodes.js';
+import { ENDINGS } from './data/endings.js';
 
 export function bootstrap(seed = null) {
   const game = createGame(seed);
@@ -714,18 +715,81 @@ function showCrew(game) {
 
 function showEnd(game) {
   const state = game.getState();
+  const cart = game.getCart();
   const titleEl = document.getElementById('end-title');
   const narrativeEl = document.getElementById('end-narrative');
   const statsEl = document.getElementById('end-stats');
+  const sourceEl = document.getElementById('end-source');
   if (!titleEl || !narrativeEl || !statsEl) return;
 
-  titleEl.textContent = state.won ? 'You Made It!' : 'Journey Over';
-  narrativeEl.textContent = state.won ? `You reached Fort Edmonton on day ${state.day}. Your cart held, the crew survived, and the trade goods arrived.` : `Your journey ends on day ${state.day} on the Carlton Trail.`;
-  statsEl.innerHTML = `
-    <div class="stat-row"><span class="label">Days</span><span>${state.day}</span></div>
-    <div class="stat-row"><span class="label">Score</span><span>${state.score}</span></div>
-    <div class="score-row">Score</div>
+  const ending = ENDINGS[state.endReason] || ENDINGS.no_trade;
+  const isVictory = state.endReason === 'victory';
+  const isHighScore = isVictory && state.score >= 1400;
+
+  // Title
+  titleEl.textContent = ending.title;
+
+  // Narrative — pick high/low variant for victories
+  let narrativeText;
+  if (isVictory) {
+    narrativeText = isHighScore ? ending.narrative.high : ending.narrative.humble;
+  } else {
+    // For defeats, pick based on how far they got
+    const progress = state.getNode ? (state.node / 15) : 0;
+    narrativeText = progress > 0.6 ? ending.narrative.high : ending.narrative.humble;
+  }
+  narrativeEl.textContent = narrativeText;
+
+  // Source quote
+  if (sourceEl) {
+    const quoteData = isHighScore && ending.quoteHigh ? ending.quoteHigh : ending.quote;
+    if (quoteData && quoteData.quote) {
+      const author = quoteData.author || '';
+      const work = quoteData.work || '';
+      const year = quoteData.year || '';
+      const attrib = [author, work, year].filter(Boolean).join(', ');
+      sourceEl.innerHTML = `<span class="src-quote">"${quoteData.quote}"</span>` + (attrib ? `<span class="src-attrib">— ${attrib}</span>` : '');
+      sourceEl.style.display = 'block';
+    } else {
+      sourceEl.style.display = 'none';
+    }
+  }
+
+  // Detailed scoring breakdown
+  const tradeUnits = cart.filter((i) => i.type === 'trade' && i.count > 0).reduce((s, i) => s + i.count, 0);
+  const foodBonus = Math.min(state.food, 25);
+  const crewBonus = state.crew === 'rested' ? 30 : state.crew === 'tired' ? 10 : 0;
+  const daysPenalty = state.day * 8;
+  const wearPenalty = state.wear * state.wear * 40;
+
+  const scoreLines = [
+    { label: 'Base score', value: 1000 },
+    { label: `Trade goods (${tradeUnits} × 120)`, value: tradeUnits * 120 },
+    { label: `Food bonus (${foodBonus} × 12)`, value: foodBonus * 12 },
+    { label: `Crew condition (${state.crew})`, value: crewBonus },
+    { label: `Days on trail (${state.day} × -8)`, value: -daysPenalty },
+    { label: `Cart wear (${state.wear}² × -40)`, value: -wearPenalty },
+  ];
+
+  const totalScore = scoreLines.reduce((s, l) => s + l.value, 0);
+
+  const scoreHtml = scoreLines.map((l) => `
+    <div class="stat-row">
+      <span class="label">${l.label}</span>
+      <span>${l.value >= 0 ? '+' : ''}${l.value}</span>
+    </div>
+  `).join('') + `
+    <div class="stat-row score-row">
+      <span class="label">Final Score</span>
+      <span>${Math.max(0, totalScore)}</span>
+    </div>
+    ${!isVictory ? `<div class="stat-row" style="color:#8B2500;font-style:italic;margin-top:8px;">No trade goods delivered — score forfeit.</div>` : ''}
+    <div style="margin-top:10px;padding:8px;background:rgba(184,134,11,0.08);border-left:2px solid #B8860B;font-size:11px;color:#5a4a3a;line-height:1.5;">
+      ${ending.tip}
+    </div>
   `;
+
+  statsEl.innerHTML = scoreHtml;
   document.getElementById('end-overlay')?.classList.add('active');
 }
 
