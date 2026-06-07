@@ -87,7 +87,9 @@ export function bootstrap(seed = null) {
 
   const settlementClose = find('#settlement-close');
   if (settlementClose) settlementClose.onclick = () => {
+    game.settlementAction('continue');
     find('#settlement-overlay')?.classList.remove('active');
+    window.__METIS_RENDER__();
   };
 
   const cartClose = find('#cart-close-btn');
