@@ -1,8 +1,8 @@
 const ITEMS = [
   {
     name: 'Pemmican Rations',
-    wt: 15,
-    count: 30,
+    wt: 1.5,
+    count: 20,
     type: 'food',
     category: 'provisions',
     mbValue: 0.4,
@@ -19,7 +19,7 @@ const ITEMS = [
   },
   {
     name: 'Spare Axle',
-    wt: 40,
+    wt: 12,
     count: 1,
     type: 'repair',
     category: 'parts',
@@ -30,7 +30,7 @@ const ITEMS = [
   },
   {
     name: 'Shaganappi',
-    wt: 5,
+    wt: 2,
     count: 3,
     type: 'repair',
     category: 'repair',
@@ -49,7 +49,7 @@ const ITEMS = [
   },
   {
     name: 'Tool Kit',
-    wt: 10,
+    wt: 5,
     count: 1,
     type: 'tool',
     category: 'parts',
@@ -60,7 +60,7 @@ const ITEMS = [
   },
   {
     name: 'Bison Hide',
-    wt: 8,
+    wt: 4,
     count: 2,
     type: 'trade',
     category: 'furs',
@@ -72,7 +72,7 @@ const ITEMS = [
   },
   {
     name: 'Canvas Tarp',
-    wt: 6,
+    wt: 3,
     count: 1,
     type: 'shelter',
     category: 'shelter',
@@ -83,8 +83,8 @@ const ITEMS = [
   },
   {
     name: 'Firewood Bundle',
-    wt: 10,
-    count: 2,
+    wt: 4,
+    count: 3,
     type: 'fuel',
     category: 'fuel',
     mbValue: 0.2,
@@ -94,7 +94,7 @@ const ITEMS = [
   },
   {
     name: 'Rope (50ft)',
-    wt: 3,
+    wt: 2,
     count: 1,
     type: 'tool',
     category: 'parts',
@@ -105,8 +105,8 @@ const ITEMS = [
   },
   {
     name: 'Ammunition Belt',
-    wt: 2,
-    count: 0,
+    wt: 1,
+    count: 1,
     type: 'ammo',
     category: 'hunting',
     mbValue: 0.9,
@@ -116,7 +116,7 @@ const ITEMS = [
   },
   {
     name: 'Medicine Pouch',
-    wt: 2,
+    wt: 1,
     count: 1,
     type: 'medical',
     category: 'medical',
@@ -127,7 +127,7 @@ const ITEMS = [
   },
   {
     name: 'Blanket',
-    wt: 3,
+    wt: 2,
     count: 1,
     type: 'shelter',
     category: 'shelter',
@@ -138,7 +138,7 @@ const ITEMS = [
   },
   {
     name: 'Beaver Pelts',
-    wt: 5,
+    wt: 3,
     count: 1,
     type: 'trade',
     category: 'furs',
