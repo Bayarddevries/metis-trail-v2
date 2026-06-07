@@ -360,10 +360,18 @@ export function createGame(seed = null) {
         score: S.score,
         pendingEvent: S.pendingEvent,
         pendingSettlement: S.pendingSettlement,
+        usedWeight: totalWeight(cart),
+        capacity: S.capacity,
       };
     },
     getCart() {
       return JSON.parse(JSON.stringify(cart));
+    },
+    offloadItem(name) {
+      const idx = cart.findIndex((i) => i.name === name);
+      if (idx === -1 || cart[idx].count <= 0) return false;
+      cart[idx].count--;
+      return true;
     },
     getNodes() {
       return NODES;
