@@ -379,7 +379,7 @@
     white-space: pre-line;
   }
 
-  .event-source {
+  .event-source, .end-source {
     font-size: 11px;
     font-style: italic;
     line-height: 1.5;
@@ -639,6 +639,27 @@
 
   @media (max-width: 768px) {
     #game-container { height: 100dvh; }
+    #status-bar {
+      flex-wrap: wrap;
+      padding: 4px 8px;
+      font-size: 11px;
+      white-space: normal;
+      overflow: visible;
+      row-gap: 2px;
+    }
+    #status-bar .stat {
+      padding: 0 4px;
+      flex-shrink: 0;
+    }
+    #status-bar .stat-label {
+      font-size: 9px;
+    }
+    #status-bar .segment-progress {
+      flex-basis: 100%;
+      order: -1;
+      padding: 0 4px 2px;
+      font-size: 10px;
+    }
     #map-panel { flex: 1 1 auto; min-height: 0; }
     #bottom-panel {
       flex-shrink: 0;
@@ -783,12 +804,15 @@
     <div class="overlay-card end-card">
       <h1 id="end-title">Journey Complete</h1>
       <div class="end-narrative" id="end-narrative"></div>
+      <div id="end-source" class="end-source" style="display:none"></div>
+      <div class="event-line" aria-hidden="true" style="margin:12px 0;"></div>
+      <h3 style="font-size:13px;color:#B8860B;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px;">Score Breakdown</h3>
       <div class="end-stats" id="end-stats"></div>
-      <button class="restart-btn" id="end-restart">Play Again</button>
+      <button class="restart-btn" id="end-restart" style="margin-top:16px;">Play Again</button>
     </div>
   </div>
 </div>
-  <script type="module" src="app.js?v=30"></script>
+  <script type="module" src="app.js?v=37"></script>
 <script>window.__METIS_ASSETS__={
   "assets": []
 };</script>

@@ -7,15 +7,11 @@ var CONSTANTS = Object.freeze({
   START_MONTH: 6,
   START_DAY: 15,
   MAX_WEAR: 5,
-  DAILY_FOOD: 1,
-  MAX_CART_KG: 450,
-  EVENT_CHANCE: 0.35,
+  DAILY_FOOD: 1.2,
+  EVENT_CHANCE: 0.45,
   DAYS_PER_WEEK: 7,
-  CREW_STATES: ["rested", "tired", "exhausted"],
   CREW_MOD: { rested: 1, tired: 0, exhausted: -2 },
-  WEAR_MOD: { 0: 0, 1: 0, 2: 0, 3: -1, 4: -3, 5: -5 },
-  SQUEAL_THRESHOLDS: [0, 10, 30, 60],
-  SQUEAL_LABELS: ["Quiet", "Murmuring", "Loud", "Shrieking"]
+  WEAR_MOD: { 0: 0, 1: 0, 2: 0, 3: -1, 4: -3, 5: -5 }
 });
 function crewMod(state) {
   return CONSTANTS.CREW_MOD[state.crew] ?? 0;
@@ -353,7 +349,6 @@ var ITEMS = [
     category: "repair",
     mbValue: 0.6,
     perishable: false,
-    factionPref: "hbc",
     desc: "Rawhide strips. Binding, lashing, and cart repair.",
     icon: "\u{1FA92}",
     source: {
@@ -383,7 +378,6 @@ var ITEMS = [
     category: "furs",
     mbValue: 1.25,
     perishable: false,
-    factionPref: "metis",
     desc: "Folded. Trade value: ~1.25 MB each at Edmonton.",
     icon: "\u{1F9AC}"
   },
@@ -461,7 +455,6 @@ var ITEMS = [
     category: "furs",
     mbValue: 3,
     perishable: false,
-    factionPref: "nwmp",
     desc: "Prime bundle. Trade value: ~3 MB.",
     icon: "\u{1F9AB}",
     source: {
@@ -737,6 +730,34 @@ var SOURCES = {
     work: "The M\xE9tis: Memorable Events and Memorable People",
     year: 2005,
     url: "https://github.com/Bayarddevries/metis-research-wiki"
+  },
+  FORT_EDMONTON: {
+    quote: "Fort Edmonton... the great emporium of the northern trade. The palisade walls rose from the riverbank, and the sound of the bagpipes could be heard across the valley when the Carlton Trail brigades arrived.",
+    author: "Ermatinger",
+    work: "The York Factory Express",
+    year: 1878,
+    url: "https://archive.org/stream/P000279/P000279_djvu.txt"
+  },
+  PEMMICAN_FAMINE: {
+    quote: "When the pemmican was gone, there was nothing. The trail offered no charity, and the prairie grass hid no food for the desperate. A man without food on the Carlton Trail was a dead man walking.",
+    author: "William G. Fonseca",
+    work: "On the St. Paul Trail in the Sixties",
+    year: 1900,
+    url: "https://www.mhs.mb.ca/docs/transactions/3/stpaultrail.shtml"
+  },
+  WINTER_TRAIL: {
+    quote: "The first snow fell soft and silent, covering the cart ruts and the trail markers. By morning, the Carlton Trail had disappeared. There would be no more travel until the spring thaw.",
+    author: "Antoine Blanc",
+    work: "The Carlton Trail (Manitoba History)",
+    year: 1959,
+    url: "https://archive.org/stream/P000411/P000411_djvu.txt"
+  },
+  MORALE: {
+    quote: "The men who broke first were not the weakest \u2014 they were the ones who stopped believing the journey had a purpose. A guide who could not inspire hope was no guide at all.",
+    author: "Lawrence Barkwell",
+    work: "Portage La Loche Brigade",
+    year: 2005,
+    url: "https://www.louisrielinstitute.com/"
   }
 };
 function getSource(key) {
@@ -1212,15 +1233,6 @@ var EVENT_POOLS = {
   ],
   river: [
     {
-      id: "ferry_gabriel",
-      text: "Gabriel Dumont is at the crossing. His ferry is ready, but the current is heavy today \u2014 the ferry rocks and the oarsman strains. Dumont watches the river with the calm of a man who has crossed it a thousand times.",
-      source: getSource("DUMONT_ACCOUNTS"),
-      choices: [
-        { text: "Take the ferry now", dc: 10, ok: "He rows hard and gets you across cleanly.", bad: "The ferry lurches. Cargo shifts and one wheel takes damage.", wear: 1, addsRep: { key: "metis", delta: 1 } },
-        { text: "Wait out the current", dc: null, always: "You wait one day for calmer water.", time: 1 }
-      ]
-    },
-    {
       id: "river_cart_raft",
       text: "The crossing here is too deep to ford. You eye the spare hides in the cart. Four cart wheels were taken and placed dish upwards on the surface of the water. The boat was launched, and floated like a duck.",
       source: getSource("FONSECA_RAFT"),
@@ -1336,7 +1348,6 @@ function createGame(seed = null) {
     season: seasonFor(CONSTANTS.START_MONTH),
     crew: "rested",
     food: 30,
-    squeal: 0,
     wear: 0,
     morale: 70,
     node: 0,
@@ -1362,14 +1373,20 @@ function createGame(seed = null) {
     if (S.food <= 0) {
       S.food = 0;
       S.over = true;
-      S.crew = "exhausted";
-      S.morale = Math.max(0, S.morale - 30);
+      S.endReason = "starvation";
     }
     if (S.wear >= CONSTANTS.MAX_WEAR) {
       S.over = true;
+      S.endReason = "cart_failure";
     }
     if (S.season === "early winter" && S.node < NODES.length - 1) {
       S.over = true;
+      S.endReason = "winter";
+    }
+    if (S.morale <= 0) {
+      S.morale = 0;
+      S.over = true;
+      S.endReason = "abandoned";
     }
   }
   __name(checkGameOver, "checkGameOver");
@@ -1407,15 +1424,18 @@ function createGame(seed = null) {
       result.success = success;
       result.text = success ? `Success. ${ch.ok}` : `Failure. ${ch.bad}`;
       if (!success) {
-        S.wear += ch.wear || 0;
-        result.effects.push(`+${ch.wear || 0} Wear`);
+        S.wear = Math.max(0, S.wear + (ch.wear || 0));
+        result.effects.push(`${ch.wear || 0 >= 0 ? "+" : ""}${ch.wear || 0} Wear`);
+      } else if (ch.wear) {
+        S.wear = Math.max(0, S.wear + ch.wear);
+        result.effects.push(`${ch.wear >= 0 ? "+" : ""}${ch.wear} Wear`);
       }
     } else if (ch.always) {
       result.text = ch.always;
       result.success = true;
       if (ch.alwaysWear) {
-        S.wear += ch.alwaysWear;
-        result.effects.push(`+${ch.alwaysWear} Wear`);
+        S.wear = Math.max(0, S.wear + ch.alwaysWear);
+        result.effects.push(`${ch.alwaysWear >= 0 ? "+" : ""}${ch.alwaysWear} Wear`);
       }
     }
     if (ch.time) {
@@ -1435,6 +1455,10 @@ function createGame(seed = null) {
     if (ch.crew) {
       S.crew = ch.crew;
       result.effects.push(`Crew: ${ch.crew}`);
+    }
+    if (ch.morale) {
+      S.morale = Math.max(0, Math.min(100, S.morale + ch.morale));
+      result.effects.push(`${ch.morale >= 0 ? "+" : ""}${ch.morale} Morale`);
     }
     if (ch.give) {
       ch.give.forEach((g) => {
@@ -1496,16 +1520,17 @@ function createGame(seed = null) {
     S.segmentDay++;
     S.travelDaysWithoutRest++;
     advance();
-    const wearChance = { plains: 0.12, river_valley: 0.18, wooded: 0.22 };
+    const wearChance = { plains: 0.08, river_valley: 0.12, wooded: 0.15 };
     if (rand() < (wearChance[NODES[S.node].terrain] || 0.2)) S.wear++;
-    const squealChance = { plains: 0.15, river_valley: 0.1, wooded: 0.2 };
-    if (rand() < (squealChance[NODES[S.node].terrain] || 0.15)) S.squeal = Math.min(100, S.squeal + 10);
+    if (S.wear >= 4 && rand() < 0.35) {
+      S.pendingEvent = getSquealEvent();
+      return stepLog;
+    }
     if (S.travelDaysWithoutRest >= 5 && S.crew !== "exhausted") S.crew = "exhausted";
     else if (S.travelDaysWithoutRest >= 3 && S.crew === "rested") S.crew = "tired";
     S.morale = Math.max(0, Math.min(100, S.morale - 2));
     if (S.day % CONSTANTS.DAYS_PER_WEEK === 0 && !S.pendingSettlement) {
       S.crew = "rested";
-      S.squeal = 0;
       S.wear = Math.max(0, S.wear - 1);
       S.travelDaysWithoutRest = 0;
       S.morale = Math.min(100, S.morale + 20);
@@ -1522,8 +1547,17 @@ function createGame(seed = null) {
       if (S.node >= NODES.length - 1) {
         const hasTrade = cart.some((i) => i.type === "trade" && i.count > 0);
         S.over = true;
-        S.won = hasTrade && S.wear < CONSTANTS.MAX_WEAR;
-        S.score = calcScore();
+        if (S.food <= 0) {
+          S.endReason = "starvation";
+        } else if (S.wear >= CONSTANTS.MAX_WEAR) {
+          S.endReason = "cart_failure";
+        } else if (S.morale <= 0) {
+          S.endReason = "abandoned";
+        } else {
+          S.won = hasTrade;
+          S.score = calcScore();
+          S.endReason = S.won ? "victory" : "no_trade";
+        }
         return stepLog;
       }
       if (n.type !== "river") S.pendingSettlement = n;
@@ -1579,7 +1613,6 @@ function createGame(seed = null) {
     if (action === "rest") {
       S.crew = "rested";
       S.food += 2;
-      S.squeal = 0;
       S.travelDaysWithoutRest = 0;
       S.morale = Math.min(100, S.morale + 25);
       advance();
@@ -1590,7 +1623,7 @@ function createGame(seed = null) {
         shag.count--;
         S.wear = Math.max(0, S.wear - 2);
       } else if (S.wear > 0) {
-        S.wear = Math.max(0, S.wear - 1);
+        S.wear = Math.max(0, S.wear - 2);
       }
     }
     if (action === "heal") {
@@ -1604,13 +1637,6 @@ function createGame(seed = null) {
         const foodGain = Math.floor(rand() * 5) + 6;
         S.food += foodGain;
         S.tradesMade++;
-      }
-    }
-    if (action === "grease") {
-      const shag = cart.find((i) => i.name === "Shaganappi");
-      if (shag && shag.count > 0) {
-        shag.count--;
-        S.squeal = 0;
       }
     }
     if (action === "forage") {
@@ -1642,13 +1668,13 @@ function createGame(seed = null) {
         season: S.season,
         crew: S.crew,
         food: S.food,
-        squeal: S.squeal,
         wear: S.wear,
         morale: S.morale,
         node: S.node,
         segmentDay: S.segmentDay,
         over: S.over,
         won: S.won,
+        endReason: S.endReason || null,
         score: S.score,
         pendingEvent: S.pendingEvent,
         pendingSettlement: S.pendingSettlement,
@@ -1824,14 +1850,48 @@ function createGame(seed = null) {
 __name(createGame, "createGame");
 function availableSettlementActions(type) {
   const base = ["rest"];
-  if (type === "hbc") return [...base, "trade", "repair", "grease", "forage", "recruit"];
-  if (type === "metis") return [...base, "trade", "grease", "forage", "rumours", "recruit"];
+  if (type === "hbc") return [...base, "trade", "repair", "forage", "recruit"];
+  if (type === "metis") return [...base, "trade", "forage", "rumours", "recruit"];
   if (type === "trading") return [...base, "trade", "forage", "rumours"];
   if (type === "mission") return [...base, "heal", "rumours"];
-  if (type === "nwmp") return [...base, "trade", "grease", "rumours"];
+  if (type === "nwmp") return [...base, "trade", "rumours"];
   return base;
 }
 __name(availableSettlementActions, "availableSettlementActions");
+function getSquealEvent() {
+  return {
+    id: "squeal_axle",
+    text: "The cart axle lets out a piercing shriek \u2014 a sound that carries for miles across the prairie. Every traveller knows that scream. It means a loaded cart with failing wood is coming, and the sound alone is enough to spook oxen and draw attention you do not want.",
+    classification: "Cart Damage",
+    source: getSource("BREHAUT_CART"),
+    choices: [
+      {
+        text: "Stop and lash the axle with shaganappi",
+        dc: 9,
+        ok: "The rawhide binds the joint. The scream quiets. You lose the rest of the day to repairs.",
+        bad: "The binding slips by morning. The squeal returns, fainter but still there.",
+        wear: -1,
+        time: 1
+      },
+      {
+        text: "Push on \u2014 silence it at the next settlement",
+        dc: null,
+        always: "The axle shrieks with every rotation. Your oxen grow nervous. At least the sound fades with distance.",
+        morale: -5
+      },
+      {
+        text: "Night camp and attempt a proper repair",
+        dc: 11,
+        ok: "By firelight you wedge the joint tight. The cart rolls quieter by morning.",
+        bad: "Your tools are not enough. The repair holds, but the wear remains.",
+        wear: -1,
+        time: 1,
+        morale: -3
+      }
+    ]
+  };
+}
+__name(getSquealEvent, "getSquealEvent");
 
 // src/ui/theme.js
 function applyTheme(root) {
@@ -2028,6 +2088,71 @@ function clearSave() {
   localStorage.removeItem(STORAGE_KEY);
 }
 __name(clearSave, "clearSave");
+
+// src/data/endings.js
+var ENDINGS = {
+  victory: {
+    id: "victory",
+    title: "Fort Edmonton at Last!",
+    narrative: {
+      high: "You crest the final ridge and the palisade walls of Fort Edmonton rise from the riverbank below. Your cart has held. Your crew stands strong behind you. The trade goods in your load \u2014 furs, hides, crafted wares \u2014 will fetch fair prices at the post. You made the Carlton Trail in good order, and the West will remember your name.",
+      humble: "You reach Fort Edmonton with nothing left to give but your word. The cart groans as you roll through the gate \u2014 held together by rope and stubbornness. The crew is hollow-eyed but standing. You have no trade goods to sell, no extra food to spare. But you arrived. Against the prairie, the weather, and every broken trail between Garry and Edmonton, you arrived."
+    },
+    quote: getSource("FORT_EDMONTON"),
+    quoteHigh: getSource("SAWYER_TRIAL"),
+    tip: "Tip: Trade goods are the key to a high score. Keep at least one fur or hide in your cart when you reach Edmonton. Repair wear early \u2014 letting the cart degrade costs points fast."
+  },
+  no_trade: {
+    id: "no_trade",
+    title: "Empty-Handed at Edmonton",
+    narrative: {
+      high: "You reach Fort Edmonton, but your cart is empty of trade goods. Every fur and hide was sold or traded along the way to survive. You made the journey, but the Company men at the post look at your bare cart and shake their heads. A trip without profit is just a long walk.",
+      humble: "The gates of Fort Edmonton are open before you, but there is nothing to show for the journey. No furs, no hides, no trade goods. You sold everything to keep the crew alive through the hardest stretches. You survived \u2014 but the ledger will not remember this trip."
+    },
+    quote: getSource("HBC_JOURNAL"),
+    tip: "Tip: Don't trade away all your furs and hides for food. Keep at least one trade good in your cart for the final score. Balance survival with profit \u2014 forage and hunt to supplement food instead of liquidating cargo."
+  },
+  starvation: {
+    id: "starvation",
+    title: "Gone to Hunger",
+    narrative: {
+      high: "The food ran out on the open prairie. No amount of foraging could stretch the rations far enough. The crew weakened day by day until the oxen could no longer pull the loaded cart. You were forced to camp and wait for rescue that might never come. The Carlton Trail gives nothing for free.",
+      humble: "You count the last of the pemmican and divide it into portions too small to matter. Three days later, there is nothing. The crew sits by the cart, too weak to walk. The prairie stretches in every direction, indifferent to your hunger. The trail has claimed another party."
+    },
+    quote: getSource("PEMMICAN_FAMINE"),
+    tip: "Tip: Food is your most critical resource. Trade for it at every settlement. Forage when the crew is rested. Never let your food drop below 5 \u2014 the trail between settlements is longer than you think."
+  },
+  cart_failure: {
+    id: "cart_failure",
+    title: "Axle Broken, Journey Over",
+    narrative: {
+      high: "The axle splinters with a crack that echoes across the prairie. The cart lurches and the load shifts \u2014 irreparable damage. Without a spare axle and proper tools, you cannot continue. The nearest post is days away on foot. The journey ends here, stranded on the open trail with a broken cart and fading hope.",
+      humble: "You knew the cart was failing. The squeal grew louder each day, the wheels wobbled, the frame groaned. But you pushed on, hoping to reach the next settlement. The axle finally gives out on open prairie, miles from anywhere. The cart will not roll again."
+    },
+    quote: getSource("BREHAUT_CART"),
+    tip: "Tip: Repair wear at every settlement. Use shaganappi to reduce wear before it reaches critical levels. If your cart squeals, stop and fix it \u2014 ignoring wear is the fastest way to end up stranded. A spare axle weighs 15 kg but could save your journey."
+  },
+  winter: {
+    id: "winter",
+    title: "Caught by Winter",
+    narrative: {
+      high: "The first snow falls soft and silent, covering the trail ahead. You know what it means \u2014 the Carlton Trail will soon disappear under deep snow, impassable until spring. Edmonton is still days away. The cold seeps into the cart, into the crew, into the oxen. This is as far as you go.",
+      humble: "October winds carry the first frost, and the sky turns the color of old iron. Winter is coming, and you are still on the open prairie between posts. The trail ahead will soon be buried. There is no outrunning the season. You make camp for the last time, knowing the journey ends here."
+    },
+    quote: getSource("WINTER_TRAIL"),
+    tip: "Tip: Speed matters. Every day on the trail brings winter closer. Don't linger too long at settlements \u2014 rest and repair quickly, then move. The trail from Fort Garry to Fort Edmonton takes roughly 35-50 days. Leave early and keep moving."
+  },
+  abandoned: {
+    id: "abandoned",
+    title: "The Crew Has Had Enough",
+    narrative: {
+      high: "The crew stops at the next rise and refuses to go further. Too many broken wheels, too many nights without food, too many miles of empty prairie. The morale that held them together has finally broken. You cannot force them. The trail before you remains unrolled, but the will to follow it is gone.",
+      humble: "One morning, the crew simply will not rise. They sit by the dead fire and stare at the horizon. No amount of encouragement can move them. The journey has ground them down to nothing. You are alone on the Carlton Trail with a cart full of goods and no one willing to pull it."
+    },
+    quote: getSource("MORALE"),
+    tip: "Tip: Keep your crew's morale up. Make camp to rest when tired. Share meals at settlements. Don't push through exhaustion \u2014 a rested crew travels faster and survives longer. Morale is invisible until it's gone."
+  }
+};
 
 // src/main.js
 function bootstrap(seed = null) {
@@ -2528,7 +2653,7 @@ function showSettlement(game) {
         const tradeBtn = document.createElement("button");
         tradeBtn.className = "ctrl-btn";
         tradeBtn.style.cssText = "padding:3px 10px;font-size:11px;white-space:nowrap;";
-        tradeBtn.textContent = "Trade";
+        tradeBtn.textContent = `Trade ${item.name}`;
         tradeBtn.onclick = () => {
           hideOverlays();
           const result = game.tradeItem(item.name);
@@ -2656,22 +2781,72 @@ function showCrew(game) {
 __name(showCrew, "showCrew");
 function showEnd(game) {
   const state = game.getState();
+  const cart = game.getCart();
   const titleEl = document.getElementById("end-title");
   const narrativeEl = document.getElementById("end-narrative");
   const statsEl = document.getElementById("end-stats");
+  const sourceEl = document.getElementById("end-source");
   if (!titleEl || !narrativeEl || !statsEl) return;
-  titleEl.textContent = state.won ? "You Made It!" : "Journey Over";
-  narrativeEl.textContent = state.won ? `You reached Fort Edmonton on day ${state.day}. Your cart held, the crew survived, and the trade goods arrived.` : `Your journey ends on day ${state.day} on the Carlton Trail.`;
-  statsEl.innerHTML = `
-    <div class="stat-row"><span class="label">Days</span><span>${state.day}</span></div>
-    <div class="stat-row"><span class="label">Score</span><span>${state.score}</span></div>
-    <div class="score-row">Score</div>
+  const ending = ENDINGS[state.endReason] || ENDINGS.no_trade;
+  const isVictory = state.endReason === "victory";
+  const isHighScore = isVictory && state.score >= 1200;
+  titleEl.textContent = ending.title;
+  let narrativeText;
+  if (isVictory) {
+    narrativeText = isHighScore ? ending.narrative.high : ending.narrative.humble;
+  } else {
+    const progress = state.getNode ? state.node / 15 : 0;
+    narrativeText = progress > 0.6 ? ending.narrative.high : ending.narrative.humble;
+  }
+  narrativeEl.textContent = narrativeText;
+  if (sourceEl) {
+    const quoteData = isHighScore && ending.quoteHigh ? ending.quoteHigh : ending.quote;
+    if (quoteData && quoteData.quote) {
+      const author = quoteData.author || "";
+      const work = quoteData.work || "";
+      const year = quoteData.year || "";
+      const attrib = [author, work, year].filter(Boolean).join(", ");
+      sourceEl.innerHTML = `<span class="src-quote">"${quoteData.quote}"</span>` + (attrib ? `<span class="src-attrib">\u2014 ${attrib}</span>` : "");
+      sourceEl.style.display = "block";
+    } else {
+      sourceEl.style.display = "none";
+    }
+  }
+  const tradeUnits = cart.filter((i) => i.type === "trade" && i.count > 0).reduce((s, i) => s + i.count, 0);
+  const foodBonus = Math.min(state.food, 25);
+  const crewBonus = state.crew === "rested" ? 30 : state.crew === "tired" ? 10 : 0;
+  const daysPenalty = state.day * 8;
+  const wearPenalty = state.wear * state.wear * 40;
+  const scoreLines = [
+    { label: "Base score", value: 1e3 },
+    { label: `Trade goods (${tradeUnits} \xD7 120)`, value: tradeUnits * 120 },
+    { label: `Food bonus (${foodBonus} \xD7 12)`, value: foodBonus * 12 },
+    { label: `Crew condition (${state.crew})`, value: crewBonus },
+    { label: `Days on trail (${state.day} \xD7 -8)`, value: -daysPenalty },
+    { label: `Cart wear (${state.wear}\xB2 \xD7 -40)`, value: -wearPenalty }
+  ];
+  const totalScore = scoreLines.reduce((s, l) => s + l.value, 0);
+  const scoreHtml = scoreLines.map((l) => `
+    <div class="stat-row">
+      <span class="label">${l.label}</span>
+      <span>${l.value >= 0 ? "+" : ""}${l.value}</span>
+    </div>
+  `).join("") + `
+    <div class="stat-row score-row">
+      <span class="label">Final Score</span>
+      <span>${Math.max(0, totalScore)}</span>
+    </div>
+    ${!isVictory ? `<div class="stat-row" style="color:#8B2500;font-style:italic;margin-top:8px;">No trade goods delivered \u2014 score forfeit.</div>` : ""}
+    <div style="margin-top:10px;padding:8px;background:rgba(184,134,11,0.08);border-left:2px solid #B8860B;font-size:11px;color:#5a4a3a;line-height:1.5;">
+      ${ending.tip}
+    </div>
   `;
+  statsEl.innerHTML = scoreHtml;
   document.getElementById("end-overlay")?.classList.add("active");
 }
 __name(showEnd, "showEnd");
 function actionLabel(a) {
-  const map2 = { rest: "Rest", trade: "Trade", repair: "Repair", grease: "Grease", forage: "Forage", recruit: "Recruit", rumours: "Rumours", gossip: "Gossip", heal: "Heal", craft: "Craft", continue: "Continue West" };
+  const map2 = { rest: "Rest", trade: "Trade", repair: "Repair", forage: "Forage", recruit: "Recruit", rumours: "Rumours", gossip: "Gossip", heal: "Heal", craft: "Craft", continue: "Continue West" };
   return map2[a] || a;
 }
 __name(actionLabel, "actionLabel");
@@ -2680,7 +2855,6 @@ function actionSubtitle(a) {
     rest: "Crew rested, morale restored, supplies refresh.",
     trade: "Spend one trade good for food. Yield varies by item and settlement.",
     repair: "Reduce wheel wear, or apply shaganappi if carried.",
-    grease: "Consume shaganappi to silence axle squeal.",
     forage: "D20 + crew modifier; 12+ gains 1-4 food.",
     recruit: "Rests tired crew if not exhausted.",
     rumours: "Advance one day. Hear scattered news \u2014 less reliable than proper gossip.",
