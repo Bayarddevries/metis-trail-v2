@@ -468,15 +468,6 @@ export const EVENT_POOLS = {
   ],
   river: [
     {
-      id: 'ferry_gabriel',
-      text: 'Gabriel Dumont is at the crossing. His ferry is ready, but the current is heavy today — the ferry rocks and the oarsman strains. Dumont watches the river with the calm of a man who has crossed it a thousand times.',
-      source: getSource('DUMONT_ACCOUNTS'),
-      choices: [
-        { text: 'Take the ferry now', dc: 10, ok: 'He rows hard and gets you across cleanly.', bad: 'The ferry lurches. Cargo shifts and one wheel takes damage.', wear: 1, addsRep: { key: 'metis', delta: 1 } },
-        { text: 'Wait out the current', dc: null, always: 'You wait one day for calmer water.', time: 1 }
-      ]
-    },
-    {
       id: 'river_cart_raft',
       text: 'The crossing here is too deep to ford. You eye the spare hides in the cart. Four cart wheels were taken and placed dish upwards on the surface of the water. The boat was launched, and floated like a duck.',
       source: getSource('FONSECA_RAFT'),

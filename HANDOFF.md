@@ -1,8 +1,8 @@
 # HANDOFF — Metis Trail V2
 
-## Current State (v32)
+## Current State (v34)
 
-- **Build**: `dist/app.js?v=32`, `src/template.html` at `?v=32` (synced)
+- **Build**: `dist/app.js?v=34`, `src/template.html` at `?v=34` (synced)
 - **Live**: https://bayarddevries.github.io/metis-trail-v2/
 - **Local test**: `http://100.108.183.33:8081/index.html`
 - **Branch**: `main`, clean working tree
@@ -41,13 +41,7 @@ The trade/craft UI was built against an API that didn't exist. The methods were 
 ## Known Issues
 
 ### Build version drift
-Build script bumps `?v=N` in `dist/index.html` but NOT in `src/template.html`. After every build, manually sync `src/template.html` to match. Current: src at v29, dist at v31.
-
-### `factionPref` unused
-Items have `factionPref` field but no code reads it. Dead data.
-
-### Missions can't trade
-Settlements with `type: 'mission'` don't offer trade. May be intentional — verify with designer.
+Build script bumps `?v=N` in `dist/index.html` but NOT in `src/template.html`. After every build, manually sync `src/template.html` to match.
 
 ### `generateGossip` possibly tree-shaken
 Not grep-able in esbuild bundle but works at runtime. Monitor.
@@ -129,7 +123,7 @@ python3 -m http.server 8081 --bind 0.0.0.0
 4. **GitHub issue #13** — Weather system (seasonal travel/event effects)
 5. **GitHub issue #14** — Conditional endings (multiple ending paths)
 6. **GitHub issue #12** — Score/leaderboard (end-game scoring)
-7. **GitHub issue #28** — Trim dead features/options (cleanup)
+7. ~~GitHub issue #28~~ — Trim dead features — **DONE in v34**
 8. **GitHub issue #10** — Basic icons (UI icon set)
 9. **TODO: Second half of Carlton Trail nodes** — nodes past Fort Edmonton with citations
 10. **TODO: Scout/guide hire moral choices** — history-anchored decisions

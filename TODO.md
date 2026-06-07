@@ -50,7 +50,7 @@ Legend: `pending` | `in_progress` | `blocked` | `done`
 - [x] Mobile top bar clipped in portrait (GitHub issue #27) — CSS fix applied, status bar wraps on mobile
 - [ ] Add location/node markers on map (GitHub issue #26)
 - [ ] Basic icons (GitHub issue #10)
-- [ ] Trim dead features/options (GitHub issue #28)
+- [x] Trim dead features/options (GitHub issue #28) — squeal system, factionPref, EventBus, createShell, Node class, dead constants, duplicate event removed
 
 ## Ongoing
 - [ ] Review and approve all historical content before merge

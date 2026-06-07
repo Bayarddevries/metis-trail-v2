@@ -1,5 +1,5 @@
 import { CONSTANTS } from '../core/constants.js';
-import { crewMod, wearMod, totalMod, squealIndex } from '../core/constants.js';
+import { crewMod, wearMod, totalMod } from '../core/constants.js';
 import { advanceDate, seasonFor } from '../core/calendar.js';
 import { makeRNG, d20 } from '../core/seed.js';
 import { NODES } from '../data/nodes.js';
@@ -28,7 +28,6 @@ export function createGame(seed = null) {
     season: seasonFor(CONSTANTS.START_MONTH),
     crew: 'rested',
     food: 30,
-    squeal: 0,
     wear: 0,
     morale: 70,
     node: 0,
@@ -201,9 +200,6 @@ export function createGame(seed = null) {
     const wearChance = { plains: 0.12, river_valley: 0.18, wooded: 0.22 };
     if (rand() < (wearChance[NODES[S.node].terrain] || 0.2)) S.wear++;
 
-    const squealChance = { plains: 0.15, river_valley: 0.1, wooded: 0.2 };
-    if (rand() < (squealChance[NODES[S.node].terrain] || 0.15)) S.squeal = Math.min(100, S.squeal + 10);
-
     if (S.travelDaysWithoutRest >= 5 && S.crew !== 'exhausted') S.crew = 'exhausted';
     else if (S.travelDaysWithoutRest >= 3 && S.crew === 'rested') S.crew = 'tired';
 
@@ -211,7 +207,6 @@ export function createGame(seed = null) {
 
     if (S.day % CONSTANTS.DAYS_PER_WEEK === 0 && !S.pendingSettlement) {
       S.crew = 'rested';
-      S.squeal = 0;
       S.wear = Math.max(0, S.wear - 1);
       S.travelDaysWithoutRest = 0;
       S.morale = Math.min(100, S.morale + 20);
@@ -287,7 +282,6 @@ export function createGame(seed = null) {
     if (action === 'rest') {
       S.crew = 'rested';
       S.food += 2;
-      S.squeal = 0;
       S.travelDaysWithoutRest = 0;
       S.morale = Math.min(100, S.morale + 25);
       advance();
@@ -312,13 +306,6 @@ export function createGame(seed = null) {
         const foodGain = Math.floor(rand() * 5) + 6;
         S.food += foodGain;
         S.tradesMade++;
-      }
-    }
-    if (action === 'grease') {
-      const shag = cart.find((i) => i.name === 'Shaganappi');
-      if (shag && shag.count > 0) {
-        shag.count--;
-        S.squeal = 0;
       }
     }
     if (action === 'forage') {
@@ -350,7 +337,6 @@ export function createGame(seed = null) {
         season: S.season,
         crew: S.crew,
         food: S.food,
-        squeal: S.squeal,
         wear: S.wear,
         morale: S.morale,
         node: S.node,
@@ -542,23 +528,15 @@ export function createGame(seed = null) {
 
 function availableSettlementActions(type) {
   const base = ['rest'];
-  if (type === 'hbc') return [...base, 'trade', 'repair', 'grease', 'forage', 'recruit'];
-  if (type === 'metis') return [...base, 'trade', 'grease', 'forage', 'rumours', 'recruit'];
+  if (type === 'hbc') return [...base, 'trade', 'repair', 'forage', 'recruit'];
+  if (type === 'metis') return [...base, 'trade', 'forage', 'rumours', 'recruit'];
   if (type === 'trading') return [...base, 'trade', 'forage', 'rumours'];
   if (type === 'mission') return [...base, 'heal', 'rumours'];
-  if (type === 'nwmp') return [...base, 'trade', 'grease', 'rumours'];
+  if (type === 'nwmp') return [...base, 'trade', 'rumours'];
   return base;
 }
 
 const EVENTS = {
-  plains: [],
-  river_valley: [],
-  wooded: [],
-  uplands: [],
-  river: [],
-};
-
-const FALLBACK_EVENTS = {
   plains: [
     { id: 'plains_rough', text: "The prairie trail is rutted and slow. Your ox leans into the traces, but the ground saps momentum.", choices: [{ text: 'Press on carefully', dc: null, ok: '', bad: '', always: 'The cart creaks forward. Nothing breaks, but the day is long.', alwaysWear: 0 }, { text: 'Push the pace', dc: 10, ok: 'You find firmer ground ahead. Progress is better than expected.', bad: 'A hidden rut jolts the cart. The axle complains.', wear: 1 }] },
     { id: 'plains_wind', text: "A hot wind pushes at your back. The prairie grass ripples like water.", choices: [{ text: 'Let the wind carry you', dc: null, ok: '', bad: '', always: 'You make excellent time.' }, { text: 'Hunker against expected rain', dc: null, ok: '', bad: '', always: 'You wrap the load and keep moving. No rain comes.' }] },

@@ -730,7 +730,7 @@ function showEnd(game) {
 }
 
 function actionLabel(a) {
-  const map = { rest: 'Rest', trade: 'Trade', repair: 'Repair', grease: 'Grease', forage: 'Forage', recruit: 'Recruit', rumours: 'Rumours', gossip: 'Gossip', heal: 'Heal', craft: 'Craft', continue: 'Continue West' };
+  const map = { rest: 'Rest', trade: 'Trade', repair: 'Repair', forage: 'Forage', recruit: 'Recruit', rumours: 'Rumours', gossip: 'Gossip', heal: 'Heal', craft: 'Craft', continue: 'Continue West' };
   return map[a] || a;
 }
 function actionSubtitle(a) {
@@ -738,7 +738,6 @@ function actionSubtitle(a) {
     rest: 'Crew rested, morale restored, supplies refresh.',
     trade: 'Spend one trade good for food. Yield varies by item and settlement.',
     repair: 'Reduce wheel wear, or apply shaganappi if carried.',
-    grease: 'Consume shaganappi to silence axle squeal.',
     forage: 'D20 + crew modifier; 12+ gains 1-4 food.',
     recruit: 'Rests tired crew if not exhausted.',
     rumours: 'Advance one day. Hear scattered news — less reliable than proper gossip.',

@@ -36,7 +36,6 @@ const ITEMS = [
     category: 'repair',
     mbValue: 0.6,
     perishable: false,
-    factionPref: 'hbc',
     desc: 'Rawhide strips. Binding, lashing, and cart repair.',
     icon: '🪒',
     source: {
@@ -66,7 +65,6 @@ const ITEMS = [
     category: 'furs',
     mbValue: 1.25,
     perishable: false,
-    factionPref: 'metis',
     desc: 'Folded. Trade value: ~1.25 MB each at Edmonton.',
     icon: '🦬',
   },
@@ -144,7 +142,6 @@ const ITEMS = [
     category: 'furs',
     mbValue: 3.0,
     perishable: false,
-    factionPref: 'nwmp',
     desc: 'Prime bundle. Trade value: ~3 MB.',
     icon: '🦫',
     source: {

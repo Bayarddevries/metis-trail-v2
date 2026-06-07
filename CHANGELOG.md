@@ -2,6 +2,21 @@
 
 All notable changes are documented here. Format loosely follows Keep a Changelog.
 
+## [v34] - 2026-06-07
+
+### Cleanup — Trim dead features (GitHub issue #28)
+- Removed `factionPref` from all 3 items in `items.js` — field was never read by any code.
+- Removed entire squeal system — `squeal` state stat, `squealChance` per terrain, `SQUEAL_THRESHOLDS`/`SQUEAL_LABELS` constants, `squealIndex()` function. Squeal was tracked but never displayed. Replaced with simpler concept: grease action now directly reduces wear by 1 (consumes shaganappi).
+- Removed `grease` settlement action — was only there to reset squeal. Shaganappi is now used via the repair action at settlements.
+- Removed `EventBus` class from `events.js` — was imported in debug.js but never used.
+- Removed `createShell()` from `shell.js` — HTML is in template.js, not generated from JS.
+- Removed `Node` class from `schema.js` — typedefs kept, but the runtime class was never instantiated.
+- Removed `MAX_CART_KG: 450` from constants — actual capacity is hardcoded 100 in engine.
+- Removed `CREW_STATES` from constants — defined but never referenced.
+- Removed duplicate `ferry_gabriel` event from `river` terrain pool (kept the `river_valley` version).
+- Cleaned up `FALLBACK_EVENTS` / `EVENTS` confusion in engine.js — merged into single `EVENTS` object.
+- Net: ~120 lines dead code removed, 2 files gutted.
+
 ## [v32] - 2026-06-07
 
 ### Fixed
