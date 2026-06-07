@@ -1,13 +1,13 @@
 # HANDOFF — Metis Trail V2
 
-## Current State (v34)
+## Current State (v35)
 
-- **Build**: `dist/app.js?v=34`, `src/template.html` at `?v=34` (synced)
+- **Build**: `dist/app.js?v=35`, `src/template.html` at `?v=35` (synced)
 - **Live**: https://bayarddevries.github.io/metis-trail-v2/
 - **Local test**: `http://100.108.183.33:8081/index.html`
 - **Branch**: `main`, clean working tree
 
-## Verified Working (v31)
+## Verified Working (v35)
 
 - Overload guard fires: cart shows **146.5 / 100 kg — Overloaded**
 - Unload buttons remove items; cart auto-closes when under capacity
@@ -20,6 +20,7 @@
 - All 55 events verified with `getSource()` key alignment
 - 35 source entries in archive
 - Full travel chain verified: Fort Garry → St. Boniface → St. Norbert → St. François Xavier
+- **Squeal event triggers at wear ≥ 4** (35% chance/day) — axle shriek event with 3 repair/ignore choices, source citation from Brehaut
 
 ## What Was Fixed in v32
 

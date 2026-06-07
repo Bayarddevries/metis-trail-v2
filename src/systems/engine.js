@@ -101,15 +101,18 @@ export function createGame(seed = null) {
       result.success = success;
       result.text = success ? `Success. ${ch.ok}` : `Failure. ${ch.bad}`;
       if (!success) {
-        S.wear += ch.wear || 0;
-        result.effects.push(`+${ch.wear || 0} Wear`);
+        S.wear = Math.max(0, S.wear + (ch.wear || 0));
+        result.effects.push(`${ch.wear || 0 >= 0 ? '+' : ''}${ch.wear || 0} Wear`);
+      } else if (ch.wear) {
+        S.wear = Math.max(0, S.wear + ch.wear);
+        result.effects.push(`${ch.wear >= 0 ? '+' : ''}${ch.wear} Wear`);
       }
     } else if (ch.always) {
       result.text = ch.always;
       result.success = true;
       if (ch.alwaysWear) {
-        S.wear += ch.alwaysWear;
-        result.effects.push(`+${ch.alwaysWear} Wear`);
+        S.wear = Math.max(0, S.wear + ch.alwaysWear);
+        result.effects.push(`${ch.alwaysWear >= 0 ? '+' : ''}${ch.alwaysWear} Wear`);
       }
     }
 
@@ -130,6 +133,10 @@ export function createGame(seed = null) {
     if (ch.crew) {
       S.crew = ch.crew;
       result.effects.push(`Crew: ${ch.crew}`);
+    }
+    if (ch.morale) {
+      S.morale = Math.max(0, Math.min(100, S.morale + ch.morale));
+      result.effects.push(`${ch.morale >= 0 ? '+' : ''}${ch.morale} Morale`);
     }
     if (ch.give) {
       ch.give.forEach((g) => {
@@ -199,6 +206,12 @@ export function createGame(seed = null) {
 
     const wearChance = { plains: 0.12, river_valley: 0.18, wooded: 0.22 };
     if (rand() < (wearChance[NODES[S.node].terrain] || 0.2)) S.wear++;
+
+    // Squeal event: at high wear, the axle's scream draws attention
+    if (S.wear >= 4 && rand() < 0.35) {
+      S.pendingEvent = getSquealEvent();
+      return stepLog;
+    }
 
     if (S.travelDaysWithoutRest >= 5 && S.crew !== 'exhausted') S.crew = 'exhausted';
     else if (S.travelDaysWithoutRest >= 3 && S.crew === 'rested') S.crew = 'tired';
@@ -534,6 +547,40 @@ function availableSettlementActions(type) {
   if (type === 'mission') return [...base, 'heal', 'rumours'];
   if (type === 'nwmp') return [...base, 'trade', 'rumours'];
   return base;
+}
+
+function getSquealEvent() {
+  return {
+    id: 'squeal_axle',
+    text: 'The cart axle lets out a piercing shriek — a sound that carries for miles across the prairie. Every traveller knows that scream. It means a loaded cart with failing wood is coming, and the sound alone is enough to spook oxen and draw attention you do not want.',
+    classification: 'Cart Damage',
+    source: getSource('BREHAUT_CART'),
+    choices: [
+      {
+        text: 'Stop and lash the axle with shaganappi',
+        dc: 9,
+        ok: 'The rawhide binds the joint. The scream quiets. You lose the rest of the day to repairs.',
+        bad: 'The binding slips by morning. The squeal returns, fainter but still there.',
+        wear: -1,
+        time: 1,
+      },
+      {
+        text: 'Push on — silence it at the next settlement',
+        dc: null,
+        always: 'The axle shrieks with every rotation. Your oxen grow nervous. At least the sound fades with distance.',
+        morale: -5,
+      },
+      {
+        text: 'Night camp and attempt a proper repair',
+        dc: 11,
+        ok: 'By firelight you wedge the joint tight. The cart rolls quieter by morning.',
+        bad: 'Your tools are not enough. The repair holds, but the wear remains.',
+        wear: -1,
+        time: 1,
+        morale: -3,
+      },
+    ],
+  };
 }
 
 const EVENTS = {

@@ -2,6 +2,15 @@
 
 All notable changes are documented here. Format loosely follows Keep a Changelog.
 
+## [v35] - 2026-06-07
+
+### Added
+- **Squeal event** — When cart wear reaches 4+, there's a 35% chance per travel day of a squeal event. The axle's piercing shriek draws unwanted attention. Player chooses: lash with shaganappi (DC 9, -1 wear, +1 day), push on (morale -5), or night camp for proper repair (DC 11, -1 wear, +1 day). Event repeats if wear stays at 4+ and player ignores it. Source citation from Brehaut's Red River cart research.
+
+### Changed
+- `resolveChoice` now handles negative wear values (repair reduces wear, clamped at 0)
+- Added `ch.morale` support to event choices (previously only food/crew/wear/time/give/flags/reps)
+
 ## [v34] - 2026-06-07
 
 ### Cleanup — Trim dead features (GitHub issue #28)
