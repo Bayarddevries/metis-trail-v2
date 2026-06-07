@@ -2,6 +2,11 @@
 
 All notable changes are documented here. Format loosely follows Keep a Changelog.
 
+## [v30] - 2026-06-07
+
+### Fixed
+- **Settlement close button stuck travel** — clicking the ✕ button on the settlement overlay only hid the UI but didn't clear `pendingSettlement` in the engine. Travel button then blocked all movement because `pendingSettlement` was still set. Now calls `settlementAction('continue')` + re-renders, same as "Continue West".
+
 ## [v29] - 2026-06-07
 
 ### Changed
