@@ -2,10 +2,15 @@
 
 All notable changes are documented here. Format loosely follows Keep a Changelog.
 
+## [v29] - 2026-06-07
+
+### Changed
+- **Starting cart rebalance (take 2)** — v28 dropped weights to 85/100 kg but that was too generous; player should start forced to choose. Bumped counts and weights: Pemmican 2.5kg, Spare Axle 15kg, Bison Hide 6kg×3, Canvas Tarp 4kg×2, Firewood 6kg×3, Blanket 3kg×2, Beaver Pelts 4kg×2. Starting cart now **146.5/100 kg** — 46.5 kg over capacity. Player must unload before first travel, forcing a meaningful "what do I keep?" decision with real tradeoffs between food, repair, trade goods, and shelter.
+
 ## [v28] - 2026-06-07
 
 ### Fixed
-- **Item weight rebalance** — starting cart was 570/100 kg (absurdly overloaded). Scaled all weights to realistic values: Pemmican 15→1.5kg, Spare Axle 40→12kg, Tool Kit 10→5kg, etc. Starting cart now 85/100 kg with 15 kg headroom for trading/acquiring.
+- **Item weight rebalance** — starting cart was 570/100 kg (absurdly overloaded). Scaled all weights to realistic values. Starting cart now 85/100 kg. (Superseded by v29 — see above.)
 
 ## [v27] - 2026-06-07
 
