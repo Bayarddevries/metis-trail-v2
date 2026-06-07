@@ -47,7 +47,7 @@ Legend: `pending` | `in_progress` | `blocked` | `done`
 - [ ] Pre-departure cart packing — let players choose starting loadout
 
 ## Phase 4 — UI/UX Polish
-- [ ] Mobile top bar clipped in portrait (GitHub issue #27) — CSS fix needed
+- [x] Mobile top bar clipped in portrait (GitHub issue #27) — CSS fix applied, status bar wraps on mobile
 - [ ] Add location/node markers on map (GitHub issue #26)
 - [ ] Basic icons (GitHub issue #10)
 - [ ] Trim dead features/options (GitHub issue #28)

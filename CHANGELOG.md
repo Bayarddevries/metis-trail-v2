@@ -2,7 +2,10 @@
 
 All notable changes are documented here. Format loosely follows Keep a Changelog.
 
-## [v31] - 2026-06-07
+## [v32] - 2026-06-07
+
+### Fixed
+- **Mobile top bar clipped in portrait** (GitHub issue #27) — `#status-bar` used `white-space: nowrap; overflow: hidden` which clipped content on narrow screens. Added `@media (max-width: 768px)` rules: `flex-wrap: wrap`, reduced padding (4px 8px), smaller font (11px), `segment-progress` moves to its own row on top (`flex-basis: 100%; order: -1`). All 7 status items now visible on portrait mobile.
 
 ### Fixed
 - **Settlement overlay never showed** — `game.getTradeEstimate` was referenced in `showSettlement()` (main.js) but never implemented in the engine. The JS error silently killed the entire render, so `pendingSettlement` was set but the overlay never got `display:block`. Added `getTradeEstimate()`, `tradeItem()`, `craftRecipe()`, and `getAvailableRecipes()` to the engine's public API.

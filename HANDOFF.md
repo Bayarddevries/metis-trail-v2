@@ -1,8 +1,8 @@
 # HANDOFF — Metis Trail V2
 
-## Current State (v31)
+## Current State (v32)
 
-- **Build**: `dist/app.js?v=31`, `src/template.html` at `?v=29` (known drift — sync after build)
+- **Build**: `dist/app.js?v=32`, `src/template.html` at `?v=32` (synced)
 - **Live**: https://bayarddevries.github.io/metis-trail-v2/
 - **Local test**: `http://100.108.183.33:8081/index.html`
 - **Branch**: `main`, clean working tree
@@ -20,6 +20,11 @@
 - All 55 events verified with `getSource()` key alignment
 - 35 source entries in archive
 - Full travel chain verified: Fort Garry → St. Boniface → St. Norbert → St. François Xavier
+
+## What Was Fixed in v32
+
+### Mobile top bar clipped in portrait (GitHub issue #27)
+`#status-bar` used `white-space: nowrap; overflow: hidden` which clipped 7 flex children on narrow portrait screens. Added mobile media query that wraps the bar into 2 rows: `segment-progress` (trail name) on top, stats on bottom row. Reduced padding and font sizes for mobile fit.
 
 ## What Was Fixed in v31
 
@@ -47,8 +52,8 @@ Settlements with `type: 'mission'` don't offer trade. May be intentional — ver
 ### `generateGossip` possibly tree-shaken
 Not grep-able in esbuild bundle but works at runtime. Monitor.
 
-### Mobile top bar clipped (GitHub issue #27)
-Top bar not fully visible in portrait mode. CSS fix needed — likely `100dvh` or padding.
+### Mobile top bar clipped (GitHub issue #27) — FIXED in v32
+Status bar now wraps on mobile, all items visible in portrait.
 
 ### Cart overlay: no item count in unload buttons
 Buttons show "Unload −X kg" but not which item. Minor UX issue.
@@ -118,7 +123,7 @@ python3 -m http.server 8081 --bind 0.0.0.0
 
 ## Next Priorities (in order)
 
-1. **GitHub issue #27** — Mobile top bar clipped in portrait (CSS fix, high priority — blocks mobile testing)
+1. ~~GitHub issue #27~~ — Mobile top bar clipped — **FIXED in v32**
 2. **GitHub issue #26** — Add location/node markers on map (Leaflet markers for settlements)
 3. **GitHub issue #15** — Pre-departure cart packing (let players choose starting loadout)
 4. **GitHub issue #13** — Weather system (seasonal travel/event effects)

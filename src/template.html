@@ -639,6 +639,27 @@
 
   @media (max-width: 768px) {
     #game-container { height: 100dvh; }
+    #status-bar {
+      flex-wrap: wrap;
+      padding: 4px 8px;
+      font-size: 11px;
+      white-space: normal;
+      overflow: visible;
+      row-gap: 2px;
+    }
+    #status-bar .stat {
+      padding: 0 4px;
+      flex-shrink: 0;
+    }
+    #status-bar .stat-label {
+      font-size: 9px;
+    }
+    #status-bar .segment-progress {
+      flex-basis: 100%;
+      order: -1;
+      padding: 0 4px 2px;
+      font-size: 10px;
+    }
     #map-panel { flex: 1 1 auto; min-height: 0; }
     #bottom-panel {
       flex-shrink: 0;
@@ -788,6 +809,6 @@
     </div>
   </div>
 </div>
-  <script type="module" src="app.js?v=29"></script>
+  <script type="module" src="app.js?v=31"></script>
 </body>
 </html>
