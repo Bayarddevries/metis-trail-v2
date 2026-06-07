@@ -2,6 +2,13 @@
 
 All notable changes are documented here. Format loosely follows Keep a Changelog.
 
+## [v27] - 2026-06-07
+
+### Fixed
+- **Overload guard now works** — `getState()` was missing `usedWeight` and `capacity` fields, so the guard in `travelOneDay()` never fired. Now returns live `totalWeight(cart)` and `S.capacity`.
+- **Added `offloadItem(name)` method** to engine — previously missing, called by `showCart()` unload buttons but didn't exist at runtime.
+- Starting cart is 570/100 kg (Pemmican Rations alone are 450 kg). Player must offload before traveling.
+
 ## [v25] - 2026-06-06
 
 ### Fixed
