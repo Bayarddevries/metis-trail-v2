@@ -318,8 +318,8 @@ var NODES = [
 var ITEMS = [
   {
     name: "Pemmican Rations",
-    wt: 15,
-    count: 30,
+    wt: 2.5,
+    count: 20,
     type: "food",
     category: "provisions",
     mbValue: 0.4,
@@ -336,7 +336,7 @@ var ITEMS = [
   },
   {
     name: "Spare Axle",
-    wt: 40,
+    wt: 15,
     count: 1,
     type: "repair",
     category: "parts",
@@ -347,7 +347,7 @@ var ITEMS = [
   },
   {
     name: "Shaganappi",
-    wt: 5,
+    wt: 3,
     count: 3,
     type: "repair",
     category: "repair",
@@ -366,7 +366,7 @@ var ITEMS = [
   },
   {
     name: "Tool Kit",
-    wt: 10,
+    wt: 8,
     count: 1,
     type: "tool",
     category: "parts",
@@ -377,8 +377,8 @@ var ITEMS = [
   },
   {
     name: "Bison Hide",
-    wt: 8,
-    count: 2,
+    wt: 6,
+    count: 3,
     type: "trade",
     category: "furs",
     mbValue: 1.25,
@@ -389,8 +389,8 @@ var ITEMS = [
   },
   {
     name: "Canvas Tarp",
-    wt: 6,
-    count: 1,
+    wt: 4,
+    count: 2,
     type: "shelter",
     category: "shelter",
     mbValue: 1,
@@ -400,8 +400,8 @@ var ITEMS = [
   },
   {
     name: "Firewood Bundle",
-    wt: 10,
-    count: 2,
+    wt: 6,
+    count: 3,
     type: "fuel",
     category: "fuel",
     mbValue: 0.2,
@@ -423,7 +423,7 @@ var ITEMS = [
   {
     name: "Ammunition Belt",
     wt: 2,
-    count: 0,
+    count: 1,
     type: "ammo",
     category: "hunting",
     mbValue: 0.9,
@@ -433,7 +433,7 @@ var ITEMS = [
   },
   {
     name: "Medicine Pouch",
-    wt: 2,
+    wt: 1.5,
     count: 1,
     type: "medical",
     category: "medical",
@@ -445,7 +445,7 @@ var ITEMS = [
   {
     name: "Blanket",
     wt: 3,
-    count: 1,
+    count: 2,
     type: "shelter",
     category: "shelter",
     mbValue: 2.2,
@@ -455,8 +455,8 @@ var ITEMS = [
   },
   {
     name: "Beaver Pelts",
-    wt: 5,
-    count: 1,
+    wt: 4,
+    count: 2,
     type: "trade",
     category: "furs",
     mbValue: 3,
@@ -1651,11 +1651,19 @@ function createGame(seed = null) {
         won: S.won,
         score: S.score,
         pendingEvent: S.pendingEvent,
-        pendingSettlement: S.pendingSettlement
+        pendingSettlement: S.pendingSettlement,
+        usedWeight: totalWeight(cart),
+        capacity: S.capacity
       };
     },
     getCart() {
       return JSON.parse(JSON.stringify(cart));
+    },
+    offloadItem(name) {
+      const idx = cart.findIndex((i) => i.name === name);
+      if (idx === -1 || cart[idx].count <= 0) return false;
+      cart[idx].count--;
+      return true;
     },
     getNodes() {
       return NODES;
