@@ -8,6 +8,11 @@ All notable changes are documented here. Format loosely follows Keep a Changelog
 - **Settlement overlay never showed** — `game.getTradeEstimate` was referenced in `showSettlement()` (main.js) but never implemented in the engine. The JS error silently killed the entire render, so `pendingSettlement` was set but the overlay never got `display:block`. Added `getTradeEstimate()`, `tradeItem()`, `craftRecipe()`, and `getAvailableRecipes()` to the engine's public API.
 - **Starting cart weight rebalance** — bumped to realistic values: Pemmican 2.5kg×20=50, Spare Axle 15kg, Bison Hide 6kg×3, Canvas Tarp 4kg×2, Firewood 6kg×3, Beaver Pelts 4kg×2. Total: **146.5 kg vs 100 kg capacity** — forces strategic unload decision at game start.
 
+### Docs
+- Updated `HANDOFF.md` with full v31 state, verified features, known issues, critical code paths, and next priorities.
+- Updated `TODO.md` — checked off all completed items (overload guard, settlement close, trade/craft engine methods, gossip, trade economy, item wiring, event text refactor, source-quote audit). Added Phase 4 (UI/UX Polish) with mobile and map marker items.
+- Updated `AGENTS.md` — added 3 new pitfalls: engine API methods must exist before UI calls them, item field is `wt` not `weight`, `generateGossip` tree-shaking risk. Added handoff rule to commit/push all changes.
+
 ## [v30] - 2026-06-07
 
 ### Fixed

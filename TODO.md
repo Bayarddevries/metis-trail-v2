@@ -10,6 +10,9 @@ Legend: `pending` | `in_progress` | `blocked` | `done`
 - [x] Fix map initialization during bootstrap (map ready when intro dismissed)
 - [x] Dice roll click-to-dismiss with dramatic settle animation
 - [x] Cart marker icon on map (replaced plain circleMarker)
+- [x] Fix build script version drift (single-pass regex, no double-increment)
+- [x] Remove dead CDN download() from build script
+- [x] Add leaflet to package.json (was missing, broke CI)
 - [ ] Standardize conventional commit messages across all contributors
 - [ ] Add minimal doc comments to each exported function in `src/systems/engine.js`
 
@@ -19,6 +22,15 @@ Legend: `pending` | `in_progress` | `blocked` | `done`
 - [x] Event text refactor — all events use `getSource('KEY')` pattern, 2-4 sentence vivid narrative + grounding quote
 - [x] Source-quote mismatch audit — all 55 events verified, 7 mismatches fixed (v25)
 - [x] Event source rendering — `#event-source` element in overlay displays quote + attribution (v24)
+- [x] Overload guard fix — `getState()` returns `usedWeight` + `capacity`, cart auto-opens when over
+- [x] Settlement close (✕) button clears `pendingSettlement` (v30)
+- [x] Add missing trade/craft engine methods — getTradeEstimate, tradeItem, craftRecipe, getAvailableRecipes (v31)
+- [x] Starting cart rebalance — 146.5 kg vs 100 kg capacity, forces unload decision
+- [x] Gossip mechanic — trail intel, DC bonuses, trade hints, freshness indicators
+- [x] Trade economy — multiplier by settlement type × item category × trail position
+- [x] Crafting system — 3 recipes (Finished Hides, Travois Kit, Gunpowder Pack)
+- [x] Item system wiring — all 12 items integrated into repair/rest/heal/events
+- [x] itemBonus/consumesItem/requiresItem event choice fields
 - [ ] Implement `mountDebugUI` conditionally with `?debug=1`
 - [ ] Add minimal unit tests for calendar and PRNG
 - [ ] Add save/load validation and migration-ready schema version
@@ -30,7 +42,18 @@ Legend: `pending` | `in_progress` | `blocked` | `done`
 - [x] Add trade good recipes and economy arcs
 - [ ] Add scout/guide hire moral choices with history anchoring
 - [ ] Polish end-game scoring and local leaderboard
+- [ ] Weather system — seasonal effects on travel and events
+- [ ] Conditional endings — multiple ending paths
+- [ ] Pre-departure cart packing — let players choose starting loadout
+
+## Phase 4 — UI/UX Polish
+- [ ] Mobile top bar clipped in portrait (GitHub issue #27) — CSS fix needed
+- [ ] Add location/node markers on map (GitHub issue #26)
+- [ ] Basic icons (GitHub issue #10)
+- [ ] Trim dead features/options (GitHub issue #28)
 
 ## Ongoing
 - [ ] Review and approve all historical content before merge
 - [ ] Keep this file updated after each work session
+- [ ] Cultural review of project and story elements (GitHub issue #25)
+- [ ] Review content for AI writing trends (GitHub issue #6)
