@@ -5,6 +5,7 @@ All notable changes are documented here. Format loosely follows Keep a Changelog
 ## [v36] - 2026-06-07
 
 ### Added — Rich Endings System (GitHub issue #14)
+
 - **6 ending types** with unique titles, narratives, source quotes, and scoring breakdowns:
   1. **Victory — Triumphant Arrival** (score ≥ 1400): Strong finish, trade goods delivered
   2. **Victory — Humble Arrival** (score < 1400): Barely made it, survived against odds
@@ -19,7 +20,16 @@ All notable changes are documented here. Format loosely follows Keep a Changelog
 - End-overlay HTML updated with source quote element and Score Breakdown header
 
 ### Added
+
 - **Morale-based game over** — If crew morale drops to 0, the crew abandons the journey. New ending type "The Crew Has Had Enough".
+
+### Docs
+
+- Updated `HANDOFF.md` — full v36 state, all verified features, known issues, critical code paths, Phase 6 playtesting plan
+- Updated `TODO.md` — added Phase 5 (Content & Mechanics) and Phase 6 (Playtesting & Balance), marked #14 and #28 done
+- Updated `AGENTS.md` — added 2 new pitfalls: headless testing engine import path, playtesting randomization strategy
+- Updated `ISSUES.md` — moved #3, #14, #16, #18, #20, #28 to Resolved; marked #5 as current priority with detailed implementation notes
+- GitHub issues closed: #14 (conditional endings), #28 (trim dead features)
 
 ## [v35] - 2026-06-07
 

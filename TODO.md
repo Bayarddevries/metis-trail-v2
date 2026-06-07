@@ -52,6 +52,25 @@ Legend: `pending` | `in_progress` | `blocked` | `done`
 - [ ] Basic icons (GitHub issue #10)
 - [x] Trim dead features/options (GitHub issue #28) — squeal system, factionPref, EventBus, createShell, Node class, dead constants, duplicate event removed
 
+## Phase 5 — Content & Mechanics Expansion
+- [x] Conditional endings (GitHub issue #14) — 6 ending types with narratives, source quotes, scoring (v36)
+- [ ] Pre-departure cart packing (GitHub issue #15) — let players choose starting loadout
+- [ ] Weather system (GitHub issue #13) — seasonal effects on travel and events
+- [ ] Highscore/leaderboard (GitHub issue #12) — score tracking by outcome type
+- [ ] Add second half of Carlton Trail nodes with citations
+- [ ] Add scout/guide hire moral choices with history anchoring
+
+## Phase 6 — Playtesting & Balance (CURRENT)
+- [ ] **Headless playtesting harness** (GitHub issue #5) — automated simulations using the real engine
+  - Write `tests/simulate-entry.js` + build script
+  - Run 100+ simulations with randomized choices
+  - Aggregate: win rate, avg score, death reasons, item usage
+  - Report balance findings in ISSUES.md
+- [ ] **Browser click-through QA** (GitHub issue #5) — visual end-to-end testing
+  - Full flow: intro → travel → events → settlement → endings
+  - Mobile layout verification
+  - Document UI/UX bugs in ISSUES.md
+
 ## Ongoing
 - [ ] Review and approve all historical content before merge
 - [ ] Keep this file updated after each work session

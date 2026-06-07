@@ -25,23 +25,26 @@
 - **Morale game over** at 0 — crew abandons the journey
 - **Score breakdown** shows: base 1000, trade goods × 120, food bonus × 12, crew bonus, days penalty, wear penalty, final total
 - Each ending includes a "how to improve" tip for next playthrough
+- **Mobile top bar** wraps into 2 rows on portrait screens (v32 fix)
 
-## What Was Fixed in v32
+## Recent Changes (v34–v36)
 
-### Mobile top bar clipped in portrait (GitHub issue #27)
-`#status-bar` used `white-space: nowrap; overflow: hidden` which clipped 7 flex children on narrow portrait screens. Added mobile media query that wraps the bar into 2 rows: `segment-progress` (trail name) on top, stats on bottom row. Reduced padding and font sizes for mobile fit.
+### v34 — Trim dead code (GitHub issue #28) — CLOSED
+- Removed `factionPref` from items, old squeal system (stat-based, hidden), EventBus class, createShell(), Node class, MAX_CART_KG, CREW_STATES, duplicate ferry_gabriel event, FALLBACK_EVENTS/EVENTS confusion
+- ~120 lines dead code removed
 
-## What Was Fixed in v31
+### v35 — Squeal as wear-triggered event
+- Old squeal was hidden accumulation with no display. New: 35% chance per travel day at wear ≥ 4
+- Player gets event with 3 choices: lash with shaganappi (DC 9, -1 wear, +1 day), push on (morale -5), night camp repair (DC 11, -1 wear, +1 day)
+- `resolveChoice` now handles negative wear (repair reduced, clamped at 0)
+- Added `ch.morale` support to event choices
 
-### Settlement overlay never showed (critical)
-`showSettlement()` in `main.js` called `game.getTradeEstimate()` — a method referenced in UI code but **never implemented in the engine**. The JS error silently killed the entire render function. `pendingSettlement` was correctly set by the engine, but the overlay never got `display:block`. Fixed by adding all four missing methods to `src/systems/engine.js`:
-- `getTradeEstimate(itemName)` → `{min, max, mult}`
-- `tradeItem(itemName)` → trades specific item, returns `{item, foodGain}`
-- `getAvailableRecipes()` → recipes filtered by settlement type with `have` counts
-- `craftRecipe(recipeId)` → consumes inputs, adds crafted output
-
-### Root cause
-The trade/craft UI was built against an API that didn't exist. The methods were called in `showSettlement()` but never defined in the engine's public API. No error was visible to the player — the overlay just never appeared.
+### v36 — Rich endings system (GitHub issue #14) — CLOSED
+- 6 ending types: Triumphant (score ≥ 1400), Humble (score < 1400), Starvation (food ≤ 0), Cart Failure (wear ≥ 5), Winter (too late), Crew Abandoned (morale ≤ 0)
+- New `src/data/endings.js` file
+- `showEnd()` rewritten with full scoring breakdown UI
+- New source entries: FORT_EDMONTON, PEMMICAN_FAMINE, WINTER_TRAIL, MORALE
+- End-overlay HTML updated with source quote element
 
 ## Known Issues
 
@@ -50,9 +53,6 @@ Build script bumps `?v=N` in `dist/index.html` but NOT in `src/template.html`. A
 
 ### `generateGossip` possibly tree-shaken
 Not grep-able in esbuild bundle but works at runtime. Monitor.
-
-### Mobile top bar clipped (GitHub issue #27) — FIXED in v32
-Status bar now wraps on mobile, all items visible in portrait.
 
 ### Cart overlay: no item count in unload buttons
 Buttons show "Unload −X kg" but not which item. Minor UX issue.
@@ -103,6 +103,15 @@ Buttons show "Unload −X kg" but not which item. Minor UX issue.
 - Quotes rendered in `#event-source` div in event overlay
 - All quotes verified for thematic alignment with event content
 
+### Scoring system (currently used only in endings)
+- Base: 1000
+- Trade goods: count × 120
+- Food bonus: count × 12
+- Crew condition bonus
+- Days penalty: −8/day
+- Wear penalty: −40 × wear²
+- Threshold: ≥ 1400 = Triumphant, < 1400 = Humble
+
 ## Build & Deploy
 
 ```bash
@@ -120,25 +129,80 @@ cd /home/bayarddevries/metis-trail-v2-repo/dist
 python3 -m http.server 8081 --bind 0.0.0.0
 ```
 
-## Next Priorities (in order)
+## Next Priorities — PHASE 6: Playtesting & Balance
 
-1. ~~GitHub issue #27~~ — Mobile top bar clipped — **FIXED in v32**
-2. **GitHub issue #26** — Add location/node markers on map (Leaflet markers for settlements)
-3. **GitHub issue #15** — Pre-departure cart packing (let players choose starting loadout)
-4. **GitHub issue #13** — Weather system (seasonal travel/event effects)
-5. **GitHub issue #14** — Conditional endings (multiple ending paths)
-6. **GitHub issue #12** — Score/leaderboard (end-game scoring)
-7. ~~GitHub issue #28~~ — Trim dead features — **DONE in v34**
-8. **GitHub issue #10** — Basic icons (UI icon set)
-9. **TODO: Second half of Carlton Trail nodes** — nodes past Fort Edmonton with citations
-10. **TODO: Scout/guide hire moral choices** — history-anchored decisions
-11. **TODO: `mountDebugUI` with `?debug=1`** — conditional debug panel
-12. **TODO: Unit tests** — calendar and PRNG
-13. **TODO: Save/load validation** — schema version migration
+The user wants **two types of testing** (GitHub issue #5):
+
+### 1. Headless Playtesting Harness
+- Run 100s of automated game simulations using the real engine (`src/systems/engine.js`)
+- No UI needed — call engine methods directly: `travelOneDay()`, `settlementAction()`, event choices
+- Goal: find balance issues (is the game too hard/easy?), edge cases (can you get stuck?), and economy exploits
+- Suggested approach:
+  - Write a test harness in `tests/simulate.js` that imports the engine
+  - Run N simulations with randomized player choices
+  - Log outcomes: ending type, score, days, death reason, items remaining
+  - Aggregate stats: win rate, avg score, most common death, item usage frequencies
+- The engine is a pure JS module with no DOM dependency — it can be `require()`/`import()`-ed directly from Node/bun
+- Key engine entry point: the factory function in `src/systems/engine.js` that returns `{ getState, setState, travelOneDay, ... }`
+- **IMPORTANT**: You cannot import `src/systems/engine.js` directly from bun/node because it imports from relative paths. You'll need to either:
+  - Use `bun --conditions=source tests/simulate.js` (if bun supports it), or
+  - Create a bunfig.toml with path aliases, or
+  - Run the harness inside the bundled dist/app.js context (use esbuild to bundle a test entry point)
+- **Simplest path**: Write the harness as an esbuild entry point like `tests/simulate-entry.js` that imports the source modules the same way `src/main.js` does, then `bun scripts/build-test.mjs` to bundle it for Node
+
+### 2. Browser Click-Through Testing
+- Non-headless, visual QA of the full user experience
+- Use the browser tool (Hermes built-in) to load https://bayarddevries.github.io/metis-trail-v2/ and click through the game
+- Verify: overlays appear/disappear correctly, buttons work, flow from intro → travel → events → settlement → endings works end-to-end
+- Pay special attention to mobile layout (user tests on real mobile devices)
+- **browser_click does NOT reliably trigger addEventListener on mobile** — if user says button doesn't work, it's real. Verify via JS click or real device.
+
+### Suggested First Steps for Next Agent
+1. Read this file, TODO.md, AGENTS.md, CHANGELOG.md
+2. Read `src/systems/engine.js` to understand the public API for headless testing
+3. Build the headless harness first — it's higher value for balance tuning
+4. Run 100+ simulations, report aggregate stats
+5. Then do browser click-through QA on the live site
+6. Document findings in ISSUES.md
+
+## Open GitHub Issues
+
+| # | Title | Priority | Notes |
+|---|-------|----------|-------|
+| 26 | Node/location markers on map | Medium | Leaflet markers for settlements. Manny Morr's 3 pixel art images (Fort Garry, Fort Edmonton, Fort Ellice) from Google Drive folder `18BIjiLG2cdiTLOuh3lBqMY3x-u7nAIW8` are arrival cards, not map pins — tabled pending decision |
+| 25 | Cultural review | Low | External dependency — needs human reviewer |
+| 15 | Pre-departure cart packing | Medium | Let players choose starting loadout with budget/space |
+| 13 | Weather system | Medium | Daily weather modifiers for events/outcomes/morale/wear |
+| 12 | Highscore/leaderboard | Medium | Score tracking by outcome type |
+| 10 | Basic icons | Low | Replace basic UI icons with themed artwork |
+| 6 | AI writing review | Low | Audit copy for AI-isms |
+| 5 | Testing infrastructure | **HIGH** | Headless + browser testing — this is the current priority |
+
+## Closed GitHub Issues (this session)
+
+| # | Title | Version |
+|---|-------|---------|
+| 28 | Trim dead features | v34 |
+| 27 | Mobile top bar clipped | v32 |
+| 20 | Gossip benefit | v26 |
+| 18 | Deeper event text | v24 |
+| 16 | Economy/trade | v26 |
+| 14 | Conditional endings | v36 |
+| 3 | Research-archive citations | v24 |
 
 ## Files Modified (this session)
 
-- `src/systems/engine.js` — added getTradeEstimate, tradeItem, craftRecipe, getAvailableRecipes
-- `src/main.js` — settlement overlay calls the above methods
-- `CHANGELOG.md` — v31 entry
+- `src/systems/engine.js` — added getTradeEstimate, tradeItem, craftRecipe, getAvailableRecipes, endReason, morale game-over, negative wear, ch.morale support
+- `src/systems/events.js` — removed EventBus, duplicate ferry_gabriel
+- `src/systems/shell.js` — removed createShell()
+- `src/systems/schema.js` — removed Node class
+- `src/data/constants.js` — removed dead constants
+- `src/data/items.js` — removed factionPref
+- `src/data/sources/index.js` — added 4 new source entries
+- `src/data/endings.js` — NEW, 6 ending types
+- `src/ui/main.js` — rewrote showEnd(), removed grease, added ENDINGS import
+- `src/template.html` — end-overlay quote element, .end-source CSS, mobile status bar fix
+- `CHANGELOG.md` — v31–v36 entries
 - `HANDOFF.md` — this file
+- `TODO.md` — updated
+- `AGENTS.md` — updated with pitfalls
