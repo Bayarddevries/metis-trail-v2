@@ -1665,6 +1665,105 @@ function createGame(seed = null) {
       cart[idx].count--;
       return true;
     },
+    getTradeEstimate(itemName) {
+      const item = cart.find((i) => i.name === itemName);
+      if (!item) return null;
+      const n = NODES[S.node];
+      const baseMin = 4;
+      const baseMax = 8;
+      const settleMult = { hbc: 1.3, nwmp: 1.1, metis: 1, trading: 1.2, mission: 0.8 }[n.type] || 1;
+      const catMult = { furs: 1.4, trade: 1.2, ammo: 1.1, repair: 0.9, food: 0.7, shelter: 0.8, fuel: 0.6, medical: 1, tool: 0.9, hunting: 1 }[item.type] || 1;
+      const trailMult = 1 + S.node / NODES.length * 0.3;
+      const mult = settleMult * catMult * trailMult;
+      return {
+        min: Math.round(baseMin * mult),
+        max: Math.round(baseMax * mult),
+        mult: Math.round(mult * 100) / 100
+      };
+    },
+    tradeItem(itemName) {
+      const idx = cart.findIndex((i) => i.name === itemName);
+      if (idx === -1 || cart[idx].count <= 0) return null;
+      cart[idx].count--;
+      const est = this.getTradeEstimate(itemName);
+      const foodGain = Math.floor(rand() * (est.max - est.min + 1)) + est.min;
+      S.food += foodGain;
+      S.tradesMade++;
+      return { item: itemName, foodGain };
+    },
+    getAvailableRecipes() {
+      const recipes = [
+        {
+          id: "finished_hides",
+          name: "Finished Hides",
+          inputs: [
+            { name: "Bison Hide", count: 2 },
+            { name: "Shaganappi", count: 1 }
+          ],
+          output: { name: "Finished Hides", icon: "\u{1F7EB}", mbValue: 3.5 },
+          settlement: "hbc"
+        },
+        {
+          id: "travois_kit",
+          name: "Travois Kit",
+          inputs: [
+            { name: "Shaganappi", count: 2 },
+            { name: "Rope (50ft)", count: 1 }
+          ],
+          output: { name: "Travois Kit", icon: "\u{1F6D2}", mbValue: 2.5 },
+          settlement: "metis"
+        },
+        {
+          id: "gunpowder_pack",
+          name: "Gunpowder Pack",
+          inputs: [
+            { name: "Ammunition Belt", count: 1 },
+            { name: "Tool Kit", count: 1 }
+          ],
+          output: { name: "Gunpowder Pack", icon: "\u{1F4A5}", mbValue: 4 },
+          settlement: "nwmp"
+        }
+      ];
+      return recipes.filter((r) => {
+        const n = NODES[S.node];
+        return !r.settlement || r.settlement === n.type;
+      }).map((r) => ({
+        ...r,
+        inputs: r.inputs.map((inp) => {
+          const have = cart.find((c) => c.name === inp.name)?.count || 0;
+          return { ...inp, have };
+        })
+      }));
+    },
+    craftRecipe(recipeId) {
+      const recipes = this.getAvailableRecipes();
+      const recipe = recipes.find((r) => r.id === recipeId);
+      if (!recipe) return null;
+      for (const inp of recipe.inputs) {
+        const item = cart.find((c) => c.name === inp.name);
+        if (!item || item.count < inp.count) return null;
+      }
+      for (const inp of recipe.inputs) {
+        const item = cart.find((c) => c.name === inp.name);
+        item.count -= inp.count;
+      }
+      const existing = cart.find((c) => c.name === recipe.output.name);
+      if (existing) {
+        existing.count++;
+      } else {
+        cart.push({
+          name: recipe.output.name,
+          icon: recipe.output.icon,
+          type: "trade",
+          category: "furs",
+          wt: 3,
+          count: 1,
+          mbValue: recipe.output.mbValue,
+          desc: `Crafted: ${recipe.output.name}.`
+        });
+      }
+      return recipe.output.name;
+    },
     getNodes() {
       return NODES;
     },
