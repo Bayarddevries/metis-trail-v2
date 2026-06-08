@@ -398,6 +398,20 @@ function showEvent(game) {
     const btn = document.createElement('button');
     btn.className = 'choice-btn';
     btn.textContent = ch.text;
+    const costParts = [];
+    if (typeof ch.dc === 'number') costParts.push(`DC ${ch.dc}`);
+    if (typeof ch.food === 'number' && ch.food < 0) costParts.push(`${ch.food} food`);
+    if (typeof ch.wear === 'number' && ch.wear > 0) costParts.push(`+${ch.wear} wear`);
+    if (typeof ch.morale === 'number' && ch.morale < 0) costParts.push(`${ch.morale} morale`);
+    if (typeof ch.time === 'number' && ch.time > 0) costParts.push(`+${ch.time} day`);
+    if (ch.requiresItem) costParts.push(`requires ${ch.requiresItem.name}×${ch.requiresItem.count}`);
+    const costText = costParts.join(' · ');
+    if (costText) {
+      const sub = document.createElement('div');
+      sub.className = 'choice-cost';
+      sub.textContent = costText;
+      btn.appendChild(sub);
+    }
     btn.onclick = () => {
       const prev = game.getState();
       const stepLog = game.chooseEventChoice(i);
