@@ -282,6 +282,34 @@ const SOURCES = {
     year: 2005,
     url: 'https://www.louisrielinstitute.com/',
   },
+  BREHAUT_ABANDONED: {
+    quote: 'Abandoned campsites along the trail were common — travellers who had moved on left behind fire pits, cached goods, and sometimes tools too heavy to carry. The prairie recycled everything.',
+    author: 'Harry Baker Brehaut',
+    work: 'The Red River Cart and Trails',
+    year: 1972,
+    url: 'https://www.mhs.mb.ca/docs/transactions/3/redrivercart.shtml',
+  },
+  FONSECA_SUPPLY_CACHE: {
+    quote: 'The half-breeds and freighters often cached supplies along the trail — bundles wrapped in oilcloth and buried beneath a cairn of stones, marked for the return journey.',
+    author: 'William G. Fonseca',
+    work: 'On the St. Paul Trail in the Sixties',
+    year: 1900,
+    url: 'https://www.mhs.mb.ca/docs/transactions/3/stpaultrail.shtml',
+  },
+  BREHAUT_AMMO: {
+    quote: 'Ammunition was precious on the trail. Traders carried spare shot and ball, and a traveller who found a cache of either considered themselves fortunate beyond measure.',
+    author: 'Harry Baker Brehaut',
+    work: 'The Red River Cart and Trails',
+    year: 1972,
+    url: 'https://www.mhs.mb.ca/docs/transactions/3/redrivercart.shtml',
+  },
+  GOULET_HIDE: {
+    quote: 'Bison hides were the currency of the prairie. A single hide could buy a week\'s provisions at any post, and a cartload was a fortune. Travellers cached them along the trail like buried treasure.',
+    author: 'Terry Goulet & George Goulet',
+    work: 'The Métis: Memorable Events and Memorable People',
+    year: 2005,
+    url: 'https://github.com/Bayarddevries/metis-research-wiki',
+  },
 };
 
 export function getSource(key) {

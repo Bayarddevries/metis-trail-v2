@@ -1,7 +1,7 @@
 # HANDOFF — Metis Trail V2
 
 **Last updated:** 2026-06-08 by OWL
-**Version:** v61 (dist), template synced to v56 for next build
+**Version:** v62 (dist), template synced for next build
 **Server:** http://100.108.183.33:5173/ (python3 -m http.server in dist/)
 **Branch:** main, clean tree, pushed to origin
 
@@ -9,7 +9,17 @@
 
 ## Session Summary (2026-06-08)
 
-### v49 — Settlement button transparency + duplicate stat headings
+### v62 — Item-giving events for crafting input replenishment
+- 4 new events that give crafting input items as rewards, making crafting a renewable system:
+  - `plains_abandoned_camp`: find 2× Shaganappi at a cached campsite (plains pool)
+  - `plains_hbc_cache`: find 1× Bison Hide from an HBC supply cache (plains pool)
+  - `wooded_rope_find`: find 1× Rope (50ft) left beside the trail (wooded pool)
+  - `river_valley_ammo_trader`: trade 3 food for 1× Ammunition Belt (river_valley pool)
+- All use existing `give` code path in `resolveChoice()` — no engine changes
+- New source entries: `BREHAUT_ABANDONED`, `FONSECA_SUPPLY_CACHE`, `BREHAUT_AMMO`, `GOULET_HIDE`
+- Files: `src/data/events.js`, `src/data/sources/index.js`
+
+### v61 — Crafting discoverability hint (#33)
 - `.settlement-action-btn.secondary-action`: `var(--clr-bg)` → opaque `#d4c9b4`
 - `.settlement-action-btn.utility-action`: `rgba(255,255,255,0.45)` → `rgba(210,200,180,0.92)`
 - Duplicate stat headings (#43): replaced `innerHTML` with `textContent` + `className` on stat-value spans in `renderStatusBar()`. Template labels are now the sole label source.
@@ -95,7 +105,8 @@ curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:5173/
 - **#10** — Basic icons
 
 ### Resolved (2026-06-08)
-- **#33** — Crafting discoverability in settlement UI — v56. Hint line below desc when recipes available.
+- ** crafting inputs closed-system gap** — v62. Added 4 item-giving events so players can acquire Shaganappi, Bison Hide, Rope, Ammunition Belt mid-trail. Crafting is now a renewable system.
+- **#33** — Crafting discoverability in settlement UI — v61. Hint line below desc when recipes available.
 - **#26** — Add location/node markers on map — v55. Color-coded by settlement type, tooltips show names.
 - **#35** — Reduce action-dense screens by grouping secondary actions — v54. Primary actions always visible; craft behind "More actions ▶" toggle.
 - **#34** — Audit and consolidate action verbs — v53.
@@ -134,8 +145,8 @@ curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:5173/
 
 ### Phase 7 — Cart UX & Crafting
 - [x] Cart weight, category tooltips, pre-departure overlay done
+- [x] Crafting inputs replenishable via events (v62 — 4 item-giving events)
 - [ ] Remove duplicate "Trade" action button in settlement UI
-- [ ] HBC crafting: `finished_hides` recipe exists but HBC `availableSettlementActions()` doesn't include `'craft'`
 
 ### Phase 8 — Win Rate Normalization
 - [x] Balance baseline accepted

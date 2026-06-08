@@ -2,6 +2,21 @@
 
 All notable changes are documented here. Format loosely follows Keep a Changelog.
 
+## [v62] - 2026-06-08
+
+### Added — Item-giving events for crafting input replenishment
+
+- 4 new events added to the event pools that give crafting input items as rewards:
+  - `plains_abandoned_camp` (plains): find 2× Shaganappi at a cached campsite
+  - `plains_hbc_cache` (plains): find 1× Bison Hide from an HBC supply cache
+  - `wooded_rope_find` (wooded): find 1× Rope (50ft) left beside the trail
+  - `river_valley_ammo_trader` (river_valley): trade 3 food for 1× Ammunition Belt
+- All use the existing `give` code path in `resolveChoice()` — no engine changes needed
+- New source entries: `BREHAUT_ABANDONED`, `FONSECA_SUPPLY_CACHE`, `BREHAUT_AMMO`, `GOULET_HIDE`
+- Crafting inputs (Shaganappi, Bison Hide, Rope, Ammunition Belt) are no longer a closed system — players can now acquire them mid-trail
+
+Files: `src/data/events.js`, `src/data/sources/index.js`.
+
 ## [v56] - 2026-06-08
 
 ### Added — Crafting discoverability hint in settlement UI (#33)

@@ -155,6 +155,26 @@ export const EVENT_POOLS = {
       ]
     },
     {
+      id: 'plains_abandoned_camp',
+      text: 'You pass a ring of stones where a campfire once burned — the ash is cold, but someone left a bundle half-buried beneath a cairn. Travellers along the Carlton Trail cached supplies for the return journey, and this one was never reclaimed. The prairie recycled everything, but today the recycling benefits you.',
+      classification: 'Supply Find',
+      source: getSource('BREHAUT_ABANDONED'),
+      choices: [
+        { text: 'Search the cache', dc: 8, ok: 'You find strips of dried rawhide — shaganappi, still supple. Useful for repairs or crafting.', bad: 'The cache has been picked over. Only dust and a few scraps of hide remain.', give: [{ name: 'Shaganappi', amt: 2 }], morale: 5 },
+        { text: 'Leave it — mark the spot for the return', dc: null, always: 'You notch a tree and remember the spot. The cache will keep.', morale: 2 },
+      ]
+    },
+    {
+      id: 'plains_hbc_cache',
+      text: 'Beneath a flat stone cairn beside the trail, you find a oilcloth bundle stamped with the HBC monogram. A supply cache from a Company freighter who never made it back — the hide and contents are still sound, wrapped tight against the weather. The Company\'s loss is your gain.',
+      classification: 'Supply Find',
+      source: getSource('FONSECA_SUPPLY_CACHE'),
+      choices: [
+        { text: 'Open the cache', dc: 9, ok: 'Inside: a folded bison hide, still cured and ready for trade or crafting. The Company\'s loss is your gain.', bad: 'The bundle is damp. The hide is salvageable but the tools inside are rusted.', give: [{ name: 'Bison Hide', amt: 1 }], morale: 5 },
+        { text: 'Report it at the next post', dc: null, always: 'You rebury the cache and note the location. The Company can sort it out.', addsRep: { key: 'hbc', delta: 1 } },
+      ]
+    },
+    {
       id: 'plains_theft',
       text: 'Camp is crowded — too many carts, too many strangers. You wake to find a small bundle of trade goods missing from the cart pole. Thefts at rendezvous camps were usually petty and punished by the trail\'s own informal courts, but finding the thief among fifty families is another matter.',
       source: getSource('MMF_TRAIL_JUSTICE'),
@@ -299,6 +319,16 @@ export const EVENT_POOLS = {
         { text: 'Trade labor for extra supplies', dc: null, always: 'You help with the harvest in exchange for a full basket. The missionary is grateful.', food: 6, time: 1 },
         { text: 'Move on — you cannot spare the time', dc: null, always: 'The trail waits for no one. You press west.' }
       ]
+    },
+    {
+      id: 'river_valley_ammo_trader',
+      text: 'A Métis hunter sits on his cart at the river crossing, mending a rifle sling. He has spare ammunition — shot and ball wrapped in a leather belt — and he is willing to part with it. Ammunition was precious on the trail, and traders who carried spare were the most welcome sight on the prairie.',
+      classification: 'Supply Find',
+      source: getSource('BREHAUT_AMMO'),
+      choices: [
+        { text: 'Trade food for the ammunition belt', dc: 9, ok: 'He accepts your offer. The belt is sound — enough shot for several hunts or defence.', bad: 'He wants more than you can spare. The deal falls through.', give: [{ name: 'Ammunition Belt', amt: 1 }], food: -3, morale: 3 },
+        { text: 'Ask where he found it', dc: null, always: 'He gestures vaguely upstream. "The trail provides." You press on.', morale: 2 },
+      ]
     }
   ],
   wooded: [
@@ -384,6 +414,16 @@ export const EVENT_POOLS = {
         { text: 'Ride for the river bottom', dc: 12, ok: 'The fire edge passes. You lose only an afternoon.', bad: 'The wind shifts. You lose supplies and the cart is singed.', food: -3, wear: 1, morale: -12 },
         { text: 'Light a backfire and wait it out', dc: 10, ok: 'A practised escape. The backfire draws the main blaze away from your position.', bad: 'The flames jump. Your cart is spared but the oxen panic.', morale: -8, time: -1 },
         { text: 'Use water from the slough to wet the canvas', dc: 11, ok: 'The wet tarp protects the load. You wait in the smoke until the fire passes.', bad: 'There is not enough water. The canvas smolders.', morale: -6, itemBonus: { name: 'Canvas Tarp', dcBonus: 3 } }
+      ]
+    },
+    {
+      id: 'wooded_rope_find',
+      text: 'A length of hemp rope lies coiled beside the trail, half-buried in leaf litter. Someone\'s cart broke a lash line and left the rest behind — fifty feet of sound rope, still supple. In the wooded corridors of the Carlton Trail, useful things turned up in the strangest places.',
+      classification: 'Supply Find',
+      source: getSource('BREHAUT_ABANDONED'),
+      choices: [
+        { text: 'Take the rope', dc: null, always: 'You coil it and add it to the cart. Useful for crossings, repairs, or crafting.', give: [{ name: 'Rope (50ft)', amt: 1 }], morale: 3 },
+        { text: 'Leave it — someone may return for it', dc: null, always: 'You press on. The rope is not yours to take.', morale: 1 },
       ]
     }
   ],
