@@ -27,6 +27,11 @@ Use this file to log bugs, blockers, and known gaps during work sessions. Each i
 - Resolved: 2026-06-08 (v50)
 - Fix: Round to 1 decimal after DAILY_FOOD subtraction; Math.floor() on display in status bar and camp overlay.
 
+### 31. Prune redundant settlement/camp actions
+- Opened: 2026-06-07
+- Resolved: 2026-06-08 (v52)
+- Fix: Removed `recruit` (dominated by `rest`), `forage` (camp version better), `rumours` (no mechanical effect) from all settlement types. Removed dead settlementAction() handlers.
+
 ### 32. Overlay sequence broken — pre-departure shows before intro
 - Opened: 2026-06-07
 - Resolved: 2026-06-07 (v44 per TODO.md)
@@ -34,7 +39,8 @@ Use this file to log bugs, blockers, and known gaps during work sessions. Each i
 
 ### 33. HBC crafting recipe unreachable
 - Opened: 2026-06-07
-- Status: Data exists (recipe `finished_hides`) but HBC `availableSettlementActions()` doesn't include `'craft'`. Low priority — add 'craft' to HBC or reassign recipe.
+- Resolved: 2026-06-07 (v41 — 'craft' added to HBC actions)
+- Note: HBC `availableSettlementActions()` now includes 'craft'. Recipe `finished_hides` with `settlement: 'hbc'` is reachable.
 
 ### 34. Camp overlay loses action panel on reopen
 - Opened: 2026-06-07

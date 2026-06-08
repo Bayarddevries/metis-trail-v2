@@ -1,7 +1,7 @@
 # HANDOFF — Metis Trail V2
 
 **Last updated:** 2026-06-08 by OWL
-**Version:** v56 (dist), template synced to v51 for next build
+**Version:** v57 (dist), template synced to v52 for next build
 **Server:** http://100.108.183.33:5173/ (python3 -m http.server in dist/)
 **Branch:** main, clean tree, pushed to origin
 
@@ -20,6 +20,13 @@
 - **#29 (dice timing):** Pass/fail pill removed from `renderDicePill()`. Outcome only appears in `revealDiceOutcome()` after dice settle. File: `src/main.js`
 - **#37 (Gabriel Dumont duplicate):** Removed `river_ferry_dumont` from river event pool. `ferry_gabriel` (river_valley pool) remains as the single Dumont event. File: `src/data/events.js`
 - **#36 (first travel settlement):** Skip `pendingSettlement` when `S.node <= 1`. Player gets one clean travel before first settlement. File: `src/systems/engine.js`
+
+### v52 — Prune redundant settlement actions (#31)
+- Removed `recruit` (dominated by `rest`), `forage` (camp version better), `rumours` (no mechanical effect) from all settlement types.
+- Removed dead `settlementAction()` handlers for pruned actions.
+- Settlement action counts: HBC 4, Métis 3, Trading 2, Mission 2, NWMP 3.
+- Camp actions unchanged — all 7 have clear distinct tradeoffs.
+- Files: `src/systems/engine.js`
 
 ### v51 — Dice outcome animation sync (#29 follow-up)
 - Replaced hardcoded 500ms timeout with `animationend` event on die element. Outcome reveals exactly when `dice-settle` CSS animation (450ms) completes. Includes `revealed`-guard + fallback timeout.
@@ -52,7 +59,6 @@ curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:5173/
 - **(local #32)** — Overlay sequence: pre-departure shows before intro (was local ISSUES.md #32, may overlap with original fix in bootstrap)
 
 ### Enhancements (prioritized)
-- **#31** — Prune redundant settlement/camp actions (e.g. Recruit) — Ready
 - **#34** — Audit and consolidate primary/secondary action verbs — p2
 - **#33** — Crafting discoverability in settlement UI — p3
 - **#35** — Reduce action-dense screens by grouping secondary actions — p3
@@ -61,6 +67,9 @@ curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:5173/
 - **#13** — Weather system
 - **#12** — Highscore/leaderboard
 - **#10** — Basic icons
+
+### Resolved (2026-06-08)
+- **#31** — Prune redundant settlement/camp actions — v52. Removed `recruit` (dominated by `rest`), `forage` (camp version better), `rumours` (no mechanical effect) from all settlement types.
 
 ### External (no code)
 - **#25** — Cultural/peer review

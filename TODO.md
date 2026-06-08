@@ -92,8 +92,8 @@ Legend: `pending` | `in_progress` | `blocked` | `done`
 - [x] Main.js: `showPreDeparture()` with full UI logic
 - [x] Overlay sequence fixed — intro now precedes pre-departure (#32)
 - [x] Version drift sync — `src/template.html` matches `dist/index.html` (v44)
-- [ ] Remove duplicate “Trade” action button from settlement UI when both trade panel toggle and trade action render
-- [ ] HBC crafting: reassign `finished_hides` from `hbc` to a settlement type that already exposes `craft`
+- [x] HBC crafting reachable: 'craft' action confirmed present in HBC `availableSettlementActions()` (was already added in v41)
+- [x] Settlement actions pruned: removed `recruit`/`forage`/`rumours` — all dominated by other actions (#31, v52)
 
 ## Phase 8 — Win Rate Normalization & Polish (CURRENT)
 - [x] Post-balance baseline accepted: 300-run realistic-choice sim results shipped as current balance

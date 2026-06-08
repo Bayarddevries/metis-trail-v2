@@ -2,6 +2,26 @@
 
 All notable changes are documented here. Format loosely follows Keep a Changelog.
 
+## [v52] - 2026-06-08
+
+### Changed — Pruned redundant settlement actions (#31)
+
+- Removed `recruit` from HBC and Métis settlements — strictly dominated by `rest` (rest does everything recruit does plus +2 food, +25 morale).
+- Removed `forage` from all settlements — camp forage is strictly better (similar/better yields, no day cost).
+- Removed `rumours` from all settlements — no mechanical effect (just advanced 1 day with no outcome).
+- Removed dead `settlementAction()` handlers for `forage`, `recruit`, `rumours` from engine.
+
+**Settlement actions after pruning:**
+- HBC: rest, trade, repair, craft (4 → was 7)
+- Métis: rest, craft, trade (3 → was 6)
+- Trading: rest, trade (2 → was 4)
+- Mission: rest, heal (2 → was 3)
+- NWMP: rest, craft, trade (3 → was 4)
+
+Camp actions unchanged — all 7 have clear distinct cost/benefit tradeoffs.
+
+Files: `src/systems/engine.js`.
+
 ## [v51] - 2026-06-08
 
 ### Fixed — Dice outcome timing (#29 follow-up)
