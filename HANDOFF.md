@@ -1,7 +1,7 @@
 # HANDOFF — Metis Trail V2
 
 **Last updated:** 2026-06-08 by OWL
-**Version:** v58 (dist), template synced to v53 for next build
+**Version:** v59 (dist), template synced to v54 for next build
 **Server:** http://100.108.183.33:5173/ (python3 -m http.server in dist/)
 **Branch:** main, clean tree, pushed to origin
 
@@ -20,6 +20,13 @@
 - **#29 (dice timing):** Pass/fail pill removed from `renderDicePill()`. Outcome only appears in `revealDiceOutcome()` after dice settle. File: `src/main.js`
 - **#37 (Gabriel Dumont duplicate):** Removed `river_ferry_dumont` from river event pool. `ferry_gabriel` (river_valley pool) remains as the single Dumont event. File: `src/data/events.js`
 - **#36 (first travel settlement):** Skip `pendingSettlement` when `S.node <= 1`. Player gets one clean travel before first settlement. File: `src/systems/engine.js`
+
+### v54 — Grouped secondary settlement actions (#35)
+- Primary actions always visible; secondary (craft) behind "More actions ▶" toggle
+- Toggle text: "More actions ▶" / "Less ▲"
+- No toggle on settlements with no secondary actions
+- Extracted `renderSettlementAction()` helper, simplified empty-state buttons
+- Files: `src/main.js`, `src/template.html`
 
 ### v53 — Consolidated action verb style (#34)
 - Single pattern across all panels: verb-first label, cost inline, single line
@@ -70,7 +77,6 @@ curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:5173/
 
 ### Enhancements (prioritized)
 - **#33** — Crafting discoverability in settlement UI — p3
-- **#35** — Reduce action-dense screens by grouping secondary actions — p3
 - **#26** — Add location/node markers on map
 - **#15** — Pre-departure cart packing (exists in code, blocked by overlay sequence)
 - **#13** — Weather system
@@ -78,7 +84,8 @@ curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:5173/
 - **#10** — Basic icons
 
 ### Resolved (2026-06-08)
-- **#34** — Audit and consolidate action verbs — v53. Single pattern: verb-first label, cost inline, single line. Applied to Travel, Camp, and Settlement panels.
+- **#35** — Reduce action-dense screens by grouping secondary actions — v54. Primary actions always visible; craft behind "More actions ▶" toggle.
+- **#34** — Audit and consolidate action verbs — v53.
 - **#31** — Prune redundant settlement/camp actions — v52.
 
 ### External (no code)

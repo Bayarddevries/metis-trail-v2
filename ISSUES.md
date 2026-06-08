@@ -27,6 +27,11 @@ Use this file to log bugs, blockers, and known gaps during work sessions. Each i
 - Resolved: 2026-06-08 (v50)
 - Fix: Round to 1 decimal after DAILY_FOOD subtraction; Math.floor() on display in status bar and camp overlay.
 
+### 35. Reduce action-dense screens by grouping secondary actions
+- Opened: 2026-06-08
+- Resolved: 2026-06-08 (v54)
+- Fix: Primary actions always visible; secondary (craft) behind "More actions ▶" toggle. No toggle on settlements with no secondary actions.
+
 ### 34. Audit and consolidate primary/secondary action verbs
 - Opened: 2026-06-08
 - Resolved: 2026-06-08 (v53)

@@ -506,144 +506,154 @@ function showSettlement(game) {
   actionsEl.innerHTML = '';
 
   const available = game.getAvailableActions();
+  const primaryActions = [];
+  const secondaryActions = [];
   (available.actions || []).forEach((action) => {
-    // Special handling for craft: show recipe panel instead of a simple button
-    if (action === 'craft') {
-      const recipes = game.getAvailableRecipes();
-      if (recipes.length === 0) {
-        // Show disabled craft button with "no recipes available" sub
-        const wrap = document.createElement('div');
-        wrap.className = 'settlement-action';
-        const btn = document.createElement('button');
-        btn.className = 'ctrl-btn';
-        btn.style.display = 'flex';
-        btn.style.flexDirection = 'column';
-        btn.style.alignItems = 'flex-start';
-        btn.style.gap = '2px';
-        btn.style.opacity = '0.5';
-        btn.style.cursor = 'not-allowed';
-        const label = document.createElement('div');
-        label.className = 'settlement-action-label';
-        label.textContent = 'Craft';
-        const sub = document.createElement('div');
-        sub.className = 'settlement-action-sub';
-        sub.textContent = 'No recipes available.';
-        btn.appendChild(label);
-        btn.appendChild(sub);
-        actionsEl.appendChild(btn);
-        return;
-      }
-      // Show recipe panel
-      const recipePanel = document.createElement('div');
-      recipePanel.style.cssText = 'width:100%;margin-top:8px;padding:10px;background:rgba(46,90,62,0.08);border:1px solid rgba(46,90,62,0.3);border-radius:6px;';
-      const panelTitle = document.createElement('div');
-      panelTitle.style.cssText = 'font-family:var(--font-heading);font-size:12px;font-weight:600;color:var(--clr-accent);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px;';
-      panelTitle.textContent = 'Crafting';
-      recipePanel.appendChild(panelTitle);
-      recipes.forEach((r) => {
-        const row = document.createElement('div');
-        row.style.cssText = 'display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px;padding:6px;background:rgba(255,255,255,0.5);border-radius:4px;';
-        const inputs = r.inputs.map((inp) => `${inp.name} ×${inp.count} (${inp.have}/${inp.count})`).join(' + ');
-        const info = document.createElement('div');
-        info.style.cssText = 'flex:1;font-size:12px;';
-        info.innerHTML = `<strong>${r.output.icon || ''} ${r.name}</strong> — ${inputs}`;
-        const craftBtn = document.createElement('button');
-        craftBtn.className = 'ctrl-btn';
-        craftBtn.style.cssText = 'padding:3px 10px;font-size:11px;white-space:nowrap;';
-        craftBtn.textContent = 'Craft';
-        craftBtn.disabled = !r.inputs.every((inp) => inp.have >= inp.count);
-        if (craftBtn.disabled) craftBtn.style.opacity = '0.4';
-        craftBtn.onclick = () => {
-          hideOverlays();
-          game.craftRecipe(r.id);
-          publishResult(`Crafted ${r.name}.`);
-          window.__METIS_RENDER__();
-        };
-        row.appendChild(info);
-        row.appendChild(craftBtn);
-        recipePanel.appendChild(row);
-      });
-      actionsEl.appendChild(recipePanel);
-      return;
-    }
-
-    // Special handling for trade: show yield estimate per trade good
-    if (action === 'trade') {
-      const cart = game.getCart();
-      const tradeItems = cart.filter((i) => i.type === 'trade' && i.count > 0);
-      if (tradeItems.length === 0) {
-        const wrap = document.createElement('div');
-        wrap.className = 'settlement-action';
-        const btn = document.createElement('button');
-        btn.className = 'ctrl-btn';
-        btn.style.cssText = 'display:flex;flex-direction:column;align-items:flex-start;gap:2px;opacity:0.5;cursor:not-allowed;';
-        const label = document.createElement('div');
-        label.className = 'settlement-action-label';
-        label.textContent = 'Trade';
-        const sub = document.createElement('div');
-        sub.className = 'settlement-action-sub';
-        sub.textContent = 'No trade goods.';
-        btn.appendChild(label);
-        btn.appendChild(sub);
-        actionsEl.appendChild(btn);
-        return;
-      }
-      // Show trade panel with per-item yield estimates
-      const tradePanel = document.createElement('div');
-      tradePanel.style.cssText = 'width:100%;margin-top:8px;padding:10px;background:rgba(46,90,62,0.08);border:1px solid rgba(46,90,62,0.3);border-radius:6px;';
-      const panelTitle = document.createElement('div');
-      panelTitle.style.cssText = 'font-family:var(--font-heading);font-size:12px;font-weight:600;color:var(--clr-accent);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px;';
-      panelTitle.textContent = 'Trade';
-      tradePanel.appendChild(panelTitle);
-      tradeItems.forEach((item) => {
-        const est = game.getTradeEstimate(item.name);
-        const multStr = est && est.mult > 1 ? ' ↑' : est && est.mult < 1 ? ' ↓' : '';
-        const row = document.createElement('div');
-        row.style.cssText = 'display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px;padding:6px;background:rgba(255,255,255,0.5);border-radius:4px;';
-        const info = document.createElement('div');
-        info.style.cssText = 'flex:1;font-size:12px;';
-        info.innerHTML = `${item.icon || ''} ${item.name} ×${item.count} <span style="color:var(--clr-accent);">${est ? est.min + '-' + est.max + ' food' : ''}${multStr}</span>`;
-        const tradeBtn = document.createElement('button');
-        tradeBtn.className = 'ctrl-btn';
-        tradeBtn.style.cssText = 'padding:3px 10px;font-size:11px;white-space:nowrap;';
-        tradeBtn.textContent = `Trade ${item.name}`;
-        tradeBtn.onclick = () => {
-          hideOverlays();
-          const result = game.tradeItem(item.name);
-          if (result) {
-            publishResult(`Traded 1 ${result.item} → +${result.foodGain} food.`);
-          } else {
-            publishResult('Trade failed — no trade goods available.');
-          }
-          window.__METIS_RENDER__();
-        };
-        row.appendChild(info);
-        row.appendChild(tradeBtn);
-        tradePanel.appendChild(row);
-      });
-      actionsEl.appendChild(tradePanel);
-      return;
-    }
-
-    const btn = document.createElement('button');
-    btn.className = 'ctrl-btn settlement-action-btn';
-    if (['trade', 'repair', 'rest', 'heal'].includes(action)) btn.classList.add('primary-action');
-    else if (['craft'].includes(action)) btn.classList.add('secondary-action');
-    else btn.classList.add('utility-action');
-    btn.textContent = actionLabel(action);
-    btn.onclick = () => {
-      hideOverlays();
-      game.settlementAction(action);
-      const after = game.getState();
-      const afterCart = game.getCart();
-      const outcome = buildSettlementOutcome(action, before, after, beforeCart, afterCart);
-      if (outcome) publishResult(outcome);
-      window.__METIS_RENDER__();
-    };
-    actionsEl.appendChild(btn);
+    if (['craft'].includes(action)) secondaryActions.push(action);
+    else primaryActions.push(action);
   });
 
+  // Render primary actions (always visible)
+  primaryActions.forEach((action) => {
+    renderSettlementAction(actionsEl, action, game, before, beforeCart);
+  });
+
+  // Render secondary actions behind collapsible toggle
+  if (secondaryActions.length > 0) {
+    const toggleBtn = document.createElement('button');
+    toggleBtn.className = 'settlement-more-toggle';
+    toggleBtn.textContent = 'More actions ▶';
+
+    const secondaryEl = document.createElement('div');
+    secondaryEl.className = 'settlement-secondary-actions';
+
+    toggleBtn.addEventListener('click', () => {
+      const isExpanded = secondaryEl.classList.toggle('expanded');
+      toggleBtn.textContent = isExpanded ? 'Less ▲' : 'More actions ▶';
+    });
+
+    secondaryActions.forEach((action) => {
+      renderSettlementAction(secondaryEl, action, game, before, beforeCart);
+    });
+
+    actionsEl.appendChild(toggleBtn);
+    actionsEl.appendChild(secondaryEl);
+  }
+
   document.getElementById('settlement-overlay')?.classList.add('active');
+}
+
+function renderSettlementAction(container, action, game, before, beforeCart) {
+  // Special handling for craft: show recipe panel instead of a simple button
+  if (action === 'craft') {
+    const recipes = game.getAvailableRecipes();
+    if (recipes.length === 0) {
+      const btn = document.createElement('button');
+      btn.className = 'ctrl-btn settlement-action-btn secondary-action';
+      btn.style.opacity = '0.5';
+      btn.style.cursor = 'not-allowed';
+      btn.textContent = 'Craft — No recipes available';
+      container.appendChild(btn);
+      return;
+    }
+    const recipePanel = document.createElement('div');
+    recipePanel.style.cssText = 'width:100%;margin-top:8px;padding:10px;background:rgba(46,90,62,0.08);border:1px solid rgba(46,90,62,0.3);border-radius:6px;';
+    const panelTitle = document.createElement('div');
+    panelTitle.style.cssText = 'font-family:var(--font-heading);font-size:12px;font-weight:600;color:var(--clr-accent);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px;';
+    panelTitle.textContent = 'Crafting';
+    recipePanel.appendChild(panelTitle);
+    recipes.forEach((r) => {
+      const row = document.createElement('div');
+      row.style.cssText = 'display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px;padding:6px;background:rgba(255,255,255,0.5);border-radius:4px;';
+      const inputs = r.inputs.map((inp) => `${inp.name}×${inp.count} (${inp.have}/${inp.count})`).join(' + ');
+      const info = document.createElement('div');
+      info.style.cssText = 'flex:1;font-size:12px;';
+      info.innerHTML = `<strong>${r.output.icon || ''} ${r.name}</strong> — ${inputs}`;
+      const craftBtn = document.createElement('button');
+      craftBtn.className = 'ctrl-btn';
+      craftBtn.style.cssText = 'padding:3px 10px;font-size:11px;white-space:nowrap;';
+      craftBtn.textContent = 'Craft';
+      craftBtn.disabled = !r.inputs.every((inp) => inp.have >= inp.count);
+      if (craftBtn.disabled) craftBtn.style.opacity = '0.4';
+      craftBtn.onclick = () => {
+        hideOverlays();
+        game.craftRecipe(r.id);
+        publishResult(`Crafted ${r.name}.`);
+        window.__METIS_RENDER__();
+      };
+      row.appendChild(info);
+      row.appendChild(craftBtn);
+      recipePanel.appendChild(row);
+    });
+    container.appendChild(recipePanel);
+    return;
+  }
+
+  // Special handling for trade: show yield estimate per trade good
+  if (action === 'trade') {
+    const cart = game.getCart();
+    const tradeItems = cart.filter((i) => i.type === 'trade' && i.count > 0);
+    if (tradeItems.length === 0) {
+      const btn = document.createElement('button');
+      btn.className = 'ctrl-btn settlement-action-btn primary-action';
+      btn.style.opacity = '0.5';
+      btn.style.cursor = 'not-allowed';
+      btn.textContent = 'Trade — No trade goods';
+      container.appendChild(btn);
+      return;
+    }
+    const tradePanel = document.createElement('div');
+    tradePanel.style.cssText = 'width:100%;margin-top:8px;padding:10px;background:rgba(46,90,62,0.08);border:1px solid rgba(46,90,62,0.3);border-radius:6px;';
+    const panelTitle = document.createElement('div');
+    panelTitle.style.cssText = 'font-family:var(--font-heading);font-size:12px;font-weight:600;color:var(--clr-accent);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px;';
+    panelTitle.textContent = 'Trade';
+    tradePanel.appendChild(panelTitle);
+    tradeItems.forEach((item) => {
+      const est = game.getTradeEstimate(item.name);
+      const multStr = est && est.mult > 1 ? ' ↑' : est && est.mult < 1 ? ' ↓' : '';
+      const row = document.createElement('div');
+      row.style.cssText = 'display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px;padding:6px;background:rgba(255,255,255,0.5);border-radius:4px;';
+      const info = document.createElement('div');
+      info.style.cssText = 'flex:1;font-size:12px;';
+      info.innerHTML = `${item.icon || ''} ${item.name} ×${item.count} <span style="color:var(--clr-accent);">${est ? est.min + '-' + est.max + ' food' : ''}${multStr}</span>`;
+      const tradeBtn = document.createElement('button');
+      tradeBtn.className = 'ctrl-btn';
+      tradeBtn.style.cssText = 'padding:3px 10px;font-size:11px;white-space:nowrap;';
+      tradeBtn.textContent = `Trade ${item.name}`;
+      tradeBtn.onclick = () => {
+        hideOverlays();
+        const result = game.tradeItem(item.name);
+        if (result) {
+          publishResult(`Traded 1 ${result.item} → +${result.foodGain} food.`);
+        } else {
+          publishResult('Trade failed — no trade goods available.');
+        }
+        window.__METIS_RENDER__();
+      };
+      row.appendChild(info);
+      row.appendChild(tradeBtn);
+      tradePanel.appendChild(row);
+    });
+    container.appendChild(tradePanel);
+    return;
+  }
+
+  // Generic action button (rest, repair, heal)
+  const btn = document.createElement('button');
+  btn.className = 'ctrl-btn settlement-action-btn';
+  if (['rest', 'repair', 'heal'].includes(action)) btn.classList.add('primary-action');
+  else btn.classList.add('secondary-action');
+  btn.textContent = actionLabel(action);
+  btn.onclick = () => {
+    hideOverlays();
+    game.settlementAction(action);
+    const after = game.getState();
+    const afterCart = game.getCart();
+    const outcome = buildSettlementOutcome(action, before, after, beforeCart, afterCart);
+    if (outcome) publishResult(outcome);
+    window.__METIS_RENDER__();
+  };
+  container.appendChild(btn);
 }
 
 function buildSettlementOutcome(action, before, after, beforeCart, afterCart) {

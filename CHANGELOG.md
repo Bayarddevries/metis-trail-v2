@@ -2,6 +2,20 @@
 
 All notable changes are documented here. Format loosely follows Keep a Changelog.
 
+## [v54] - 2026-06-08
+
+### Changed — Grouped secondary settlement actions behind collapsible toggle (#35)
+
+- Primary actions (rest, trade, repair, heal) always visible
+- Secondary actions (craft) hidden behind "More actions ▶" toggle
+- Toggle expands to show secondary actions with "Less ▲" label
+- No toggle shown on settlements with no secondary actions (Trading, Mission)
+- Extracted `renderSettlementAction()` helper to avoid code duplication between primary/secondary rendering
+- Simplified empty-state buttons (no more label+subtitle divs, single text line)
+- Removed unused `.settlement-action` wrapper div references
+
+Files: `src/main.js`, `src/template.html`.
+
 ## [v53] - 2026-06-08
 
 ### Changed — Consolidated action verb style across all panels (#34)

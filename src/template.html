@@ -564,6 +564,34 @@
     opacity: 0.85;
     line-height: 1.35;
   }
+  .settlement-more-toggle {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 6px 0;
+    margin-top: 4px;
+    font-family: var(--font-heading);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--clr-accent);
+    background: none;
+    border: none;
+    border-top: 1px solid rgba(26,20,16,0.12);
+    cursor: pointer;
+  }
+  .settlement-more-toggle:hover {
+    color: var(--clr-ink);
+  }
+  .settlement-secondary-actions {
+    display: none;
+    grid-template-columns: 1fr;
+    gap: 6px;
+    padding-top: 4px;
+  }
+  .settlement-secondary-actions.expanded {
+    display: grid;
+  }
 
   .event-text {
     font-size: 14px;
@@ -1089,7 +1117,10 @@
     </div>
   </div>
 </div>
-  <script type="module" src="app.js?v=58"></script>
+  <script type="module" src="app.js?v=59"></script>
+<script>window.__METIS_ASSETS__={
+  "assets": []
+};</script>
 <script>window.__METIS_ASSETS__={
   "assets": []
 };</script>
