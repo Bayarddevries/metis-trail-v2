@@ -149,17 +149,17 @@
   }
   .ctrl-btn.primary:hover { background: var(--clr-btn-hover); }
   .ctrl-btn.secondary {
-    background: var(--clr-bg);
+    background: var(--clr-bg-dark);
     color: var(--clr-ink);
     border: 2px solid var(--clr-accent);
   }
-  .ctrl-btn.secondary:hover { background: #efe5d4; }
+  .ctrl-btn.secondary:hover { background: #C7B898; }
   .ctrl-btn.ghost {
-    background: rgba(255,255,255,0.35);
+    background: rgba(255,255,255,0.75);
     color: var(--clr-ink);
-    border: 1.5px solid rgba(26,20,16,0.18);
+    border: 2px solid rgba(26,20,16,0.35);
   }
-  .ctrl-btn.ghost:hover { background: rgba(255,255,255,0.65); }
+  .ctrl-btn.ghost:hover { background: rgba(255,255,255,0.95); }
   .ctrl-btn:hover { background: var(--clr-btn-hover); color: var(--clr-btn-text); }
   .ctrl-btn:disabled { background: #8a9a7a; cursor: not-allowed; }
   .secondary-btns {
@@ -510,9 +510,44 @@
     gap: 6px;
   }
   .settlement-actions .ctrl-btn {
-    flex: 1;
-    min-width: 120px;
-    text-align: center;
+    min-height: 44px;
+  }
+  .settlement-action-btn.primary-action {
+    background: var(--clr-ink);
+    color: var(--clr-bg);
+    border: 2px solid var(--clr-ink);
+  }
+  .settlement-action-btn.primary-action:hover {
+    background: var(--clr-btn-hover);
+    color: var(--clr-bg);
+  }
+  .settlement-action-btn.secondary-action {
+    background: var(--clr-bg);
+    color: var(--clr-ink);
+    border: 2px solid var(--clr-accent);
+  }
+  .settlement-action-btn.secondary-action:hover {
+    background: #efe5d4;
+    color: var(--clr-ink);
+  }
+  .settlement-action-btn.utility-action {
+    background: rgba(255,255,255,0.45);
+    color: var(--clr-ink);
+    border: 1.5px solid rgba(26,20,16,0.18);
+  }
+  .settlement-action-btn.utility-action:hover {
+    background: rgba(255,255,255,0.75);
+    color: var(--clr-ink);
+  }
+  .settlement-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+  @media (min-width: 520px) {
+    .settlement-actions.wide .settlement-action-btn {
+      min-width: 220px;
+    }
   }
   .settlement-action-label {
     font-family: var(--font-heading);
@@ -1054,7 +1089,22 @@
     </div>
   </div>
 </div>
-  <script type="module" src="app.js?v=46"></script>
+  <script type="module" src="app.js?v=52"></script>
+<script>window.__METIS_ASSETS__={
+  "assets": []
+};</script>
+<script>window.__METIS_ASSETS__={
+  "assets": []
+};</script>
+<script>window.__METIS_ASSETS__={
+  "assets": []
+};</script>
+<script>window.__METIS_ASSETS__={
+  "assets": []
+};</script>
+<script>window.__METIS_ASSETS__={
+  "assets": []
+};</script>
 <script>window.__METIS_ASSETS__={
   "assets": []
 };</script>

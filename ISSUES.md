@@ -34,14 +34,21 @@ Use this file to log bugs, blockers, and known gaps during work sessions. Each i
 - Impact: Cannot complete browser QA steps reliably from this session.
 
 
+### 43. Duplicate stat headings in status bar
+- Opened: 2026-06-08
+- Labels: bug, ui
+- Summary: Wear, food, and other stat headings are rendered twice in the top status bar, so labels appear duplicated instead of once per stat.
+- Evidence: Live feedback on desktop.
+- Fix: Audit status bar render logic and remove duplicate label output per stat.
+
 ### 32. Overlay sequence broken — pre-departure shows before intro
 - Opened: 2026-06-07
 - Labels: bug, ux
-- Summary: `bootstrap()` in `src/main.js` immediately activates `#predeparture-overlay` and deactivates `#intro-overlay` because engine initial state has `preDeparture: true`. Player never sees the intro screen with "Begin Journey" button.
-- Root cause: `src/systems/engine.js` line 50 sets `preDeparture: true` in initial state. `bootstrap()` lines 32-37 check this and swap overlays on load.
-- Expected: Intro overlay → click "Begin Journey" → pre-departure overlay → confirm → game start.
-- Actual: Pre-departure shows immediately; "Begin Journey" click hides intro but never activates pre-departure.
-- Fix: In `bootstrap()`, always show intro first. On `#intro-start` click, hide intro AND activate pre-departure overlay. Then on `#pd-confirm`, hide pre-departure and start game.
+- Summary: bootstrap() in src/main.js immediately activates #predeparture-overlay and deactivates #intro-overlay because engine initial state has preDeparture: true. Player never sees the intro screen with “Begin Journey” button.
+- Root cause: src/systems/engine.js line 50 sets preDeparture: true in initial state. bootstrap() lines 32-37 check this and swap overlays on load.
+- Expected: Intro overlay → click “Begin Journey” → pre-departure overlay → confirm → game start.
+- Actual: Pre-departure shows immediately; “Begin Journey” click hides intro but never activates pre-departure.
+- Fix: In bootstrap(), always show intro first. On #intro-start click, hide intro AND activate pre-departure overlay. Then on #pd-confirm, hide pre-departure and start game.
 
 ### 33. HBC crafting recipe unreachable
 - Opened: 2026-06-07

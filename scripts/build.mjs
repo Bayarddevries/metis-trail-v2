@@ -52,25 +52,28 @@ export async function build() {
     outputFiles: result.outputFiles?.map((o) => o.path),
   });
 
-  const appCode = await fs.readFile(appPath, 'utf8');
-
+  // Auto-bump cache-bust version on each build
   const templatePath = path.join(cwd, 'src', 'template.html');
   const indexPath = path.join(outDir, 'index.html');
-  let html = (await fs.readFile(templatePath, 'utf8')) || '';
+  let templateHtml = (await fs.readFile(templatePath, 'utf8')) || '';
+  let indexHtml = (await fs.readFile(indexPath, 'utf8')) || '';
 
-  // Auto-bump cache-bust version on each build
-  const versionMatch = html.match(/app\.js\?v=(\d+)/);
-  if (versionMatch) {
-    const nextVer = String(Number(versionMatch[1]) + 1);
-    html = html.replace(/app\.js\?v=\d+/, `app.js?v=${nextVer}`);
-  } else {
-    html = html.replace(
-      /(<script\s+type="module"\s+src=")app\.js(")/,
-      '$1app.js?v=1$2'
-    );
-  }
+  const bumpVersion = (html) => {
+    const versionMatch = html.match(/app\.js\?v=(\d+)/);
+    if (versionMatch) {
+      const nextVer = String(Number(versionMatch[1]) + 1);
+      return html.replace(/app\.js\?v=\d+/, `app.js?v=${nextVer}`);
+    }
+    return html.replace(/(<script\s+type="module"\s+src=")app\.js(")/, '$1app.js?v=1$2');
+  };
 
-  const assetPaths = [...appCode.matchAll(/(?<=["'])([^"']+\.(png|jpg|svg|json))(?=["'])/g)].map((m) => m[1]);
+  templateHtml = bumpVersion(templateHtml);
+  indexHtml = bumpVersion(indexHtml);
+
+  const appCode = await fs.readFile(appPath, 'utf8');
+
+
+  const assetPaths = [...appCode.matchAll(/(?<=[\"'])([^\"']+\.(png|jpg|svg|json))(?=["'])/g)].map((m) => m[1]);
   const unique = [...new Set(assetPaths)];
   const assets = [];
   for (const p of unique) {
@@ -81,12 +84,17 @@ export async function build() {
     );
   }
   const manifest = JSON.stringify({ assets }, null, 2);
-  html = html.replace(
+  indexHtml = indexHtml.replace(
+    '</body>',
+    `${manifest ? '<script>window.__METIS_ASSETS__=' + manifest + ';</script>' : ''}\n</body>`
+  );
+  templateHtml = templateHtml.replace(
     '</body>',
     `${manifest ? '<script>window.__METIS_ASSETS__=' + manifest + ';</script>' : ''}\n</body>`
   );
 
-  await fs.writeFile(indexPath, html);
+  await fs.writeFile(indexPath, indexHtml);
+  await fs.writeFile(templatePath, templateHtml);
 
   const stamp = `\nif (!window.__METIS_BOOTED__) { window.__METIS_BOOTED__ = true; try { bootstrap(); } catch (e) { console.error("Metis boot error:", e); } }`;
   await fs.writeFile(appPath, appCode + stamp);
