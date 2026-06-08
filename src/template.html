@@ -8,18 +8,18 @@
 <script src="leaflet.js"></script>
 <style>
   :root {
-    --clr-bg: #E8DCC8;
-    --clr-bg-dark: #D6C8A8;
-    --clr-ink: #1E2B26;
-    --clr-accent: #B8860B;
+    --clr-bg: #CFC1A4;
+    --clr-bg-dark: #B8AA8A;
+    --clr-ink: #1A1A18;
+    --clr-accent: #8C6A2A;
     --clr-border: #4A5D55;
-    --clr-status-bg: #2D4A3E;
-    --clr-status-text: #FAF3E7;
-    --clr-status-accent: #B8860B;
-    --clr-overlay-bg: rgba(30,43,38,0.92);
-    --clr-card-bg: #FAF3E7;
+    --clr-status-bg: #243B32;
+    --clr-status-text: #F2E9D8;
+    --clr-status-accent: #C99A3B;
+    --clr-overlay-bg: rgba(22,28,24,0.94);
+    --clr-card-bg: #E6DBC4;
     --clr-btn-bg: #2D4A3E;
-    --clr-btn-text: #FAF3E7;
+    --clr-btn-text: #F2E9D8;
     --clr-btn-hover: #1E2B26;
     --font-heading: 'Playfair Display', 'Georgia', serif;
     --font-body: 'EB Garamond', 'Georgia', serif;
@@ -87,7 +87,7 @@
   #map {
     width: 100%;
     height: 100%;
-    background: #D8CCB0;
+    background: #BFB195;
   }
 
   #map .leaflet-tile-pane {
@@ -108,7 +108,7 @@
     display: flex;
     flex-direction: column;
     border-top: 3px solid var(--clr-accent);
-    background: var(--clr-bg);
+    background: var(--clr-bg-dark);
   }
   #narrative {
     flex: 1;
@@ -117,6 +117,9 @@
     font-family: var(--font-body);
     font-size: 14px;
     line-height: 1.65;
+    background: rgba(255,255,255,0.06);
+    border-top: 1px solid rgba(255,255,255,0.08);
+    color: #3a3025;
   }
 
   #controls {
@@ -523,10 +526,11 @@
   }
 
   .event-text {
-    font-size: 13px;
-    line-height: 1.65;
+    font-size: 14px;
+    line-height: 1.7;
     margin-bottom: 10px;
     white-space: pre-line;
+    color: #2f2a22;
   }
 
   .event-source, .end-source {
