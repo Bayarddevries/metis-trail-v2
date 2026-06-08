@@ -1,45 +1,86 @@
 # HANDOFF — Metis Trail V2
 
-## Current State (v38)
+## Current State (v47 — camp reopen bug fixed, uncommitted)
+- **Build**: `dist/app.js?v=46`, `src/template.html` at `?v=45` (pending manual sync)
+- **Live**: https://bayarddevries.github.io/metis-trail-v2/ (still on v37 until pushed)
+- **Local test**: `http://100.108.183.33:9001/index.html` (currently serving older build)
+- **Branch**: `main` on `0bda15e`, **uncommitted changes** (v41-v47 work)
+- **Servers**: python3 -m http.server 9001 from `dist/` (pid 2995742); `8081` earlier (likely stale)
 
-- **Build**: `dist/app.js?v=38`, `src/template.html` at `?v=38` (synced)
-- **Live**: https://bayarddevries.github.io/metis-trail-v2/
-- **Local test**: `http://100.108.183.33:8081/index.html`
-- **Branch**: `main`, clean working tree
+## Verified Working (v47 build path)
 
-## Verified Working (v38)
+- Camp overlay action panel reliably visible across multiple opens after one-action-at-a-time flow fixed
+- Continue button still dismisses overlay after a camp action and resets result/actions state for next camp use
+- All previous v41-v46 features unchanged by the fix
 
-- All v37 features still working
-- **Balance pass applied**: DAILY_FOOD 1.2, wear chances reduced, repair -2, EVENT_CHANCE 0.45, triumphant threshold 1200
-- **#29 fixed**: Starvation properly detected before victory (0 wins with food ≤ 0 in 200 sims)
-- **#30 fixed**: Trade buttons labeled with item name (e.g., "Trade Bison Hide")
-- **Post-balance 200 sims**: win rate 66.5%, starvation 11%, cart failure 19.5%, avg events 8.5/game
-- Browser QA: settlement trade buttons show item names, map renders, overlays work
+### Version drift note
+`src/template.html` is currently at `?v=45`; `dist/index.html` is now at `?v=46`. Next build requires manual template sync before rebuilding.
 
-## Recent Changes (v38)
+## Known Bugs (v47)
 
-### v38 — Balance Pass & Bug Fixes
-- DAILY_FOOD: 1.0 → 1.2
-- Wear accumulation: plains 0.08, river_valley 0.12, wooded 0.15
-- Settlement repair: always -2 wear (was -1 without shaganappi)
-- EVENT_CHANCE: 0.35 → 0.45
-- Triumphant threshold: 1400 → 1200
-- Fixed #29: starvation/wear/morale checks before victory condition
-- Fixed #30: trade buttons labeled with item name
+### Path server drift (unchanged)
+Same local path rules as before and it complains a socket already in use about every 2-3 minutes.
+
+### Camp overlay sequence guard
+If `showCamp()` is called while `pendingEvent` or `pendingSettlement` is set, it returns early without opening the overlay. This is intentional and safe, but hard for players to understand if they see no feedback. Add a small status hint later.
+
+## Verified Working (v44)
+- All previous v38/v39 features still working
+- Category hints render in cart overlay during overload
+- Crafting panel available at Métis and NWMP settlements
+- MB currency display removed from cart and crafting UI
+- Pre-departure overlay renders with briefing, category legend, weight tracking, +/- controls, Auto-Pack
+- Local build verified on Tailscale: `http://100.108.183.33:8081/index.html`
+
+## Known Bugs (v44)
+
+### Overlay sequence broken — pre-departure shows before intro
+- **Root cause**: `src/systems/engine.js` sets `preDeparture: true` in initial state (line 50). `bootstrap()` in `src/main.js` (lines 32-37) immediately activates `#predeparture-overlay` and deactivates `#intro-overlay` on load.
+- **Expected flow**: Intro overlay (with "Begin Journey") → click → pre-departure overlay → confirm → game start.
+- **Actual flow**: Pre-departure shows immediately; "Begin Journey" click hides intro but never activates pre-departure (already active but never re-shown).
+- **Fix needed**: In `bootstrap()`, always show intro first. On `#intro-start` click, hide intro AND activate pre-departure overlay. Then on `#pd-confirm`, hide pre-departure and start game.
+- **Files**: `src/main.js` (bootstrap, lines 32-58), `src/template.html` (both overlays present with correct IDs).
+
+### HBC crafting recipe unreachable
+- Recipe `finished_hides` exists with `settlement: 'hbc'` in `getAvailableRecipes()` but HBC action list does NOT include `'craft'`. Player can never access it.
+- Either add `'craft'` to HBC actions in `availableSettlementActions()` or reassign recipe to a settlement type that has it.
+
+## Recent Changes (v41-v44)
+
+### v41 — Cart UX / Crafting Exposure (Issue #31)
+- Reduced starting `Pemmican Rations` from 20 to 15 and `Firewood Bundle` from 3 to 2, dropping starting weight to ~128 kg
+- Added `getCategoryHint()` in `src/main.js` for per-category tooltips in the cart overlay
+- Removed `mbValue` MB display from crafting-panel recipes and cart item rows (data preserved in engine/items/recipes)
+- Exposed `'craft'` as a settlement action for `metis` and `nwmp` nodes in `src/systems/engine.js`
+
+### v42 — Version sync fix
+- Build bumped to v42 automatically; `src/template.html` manually synced to v42
+
+### v43 — Pre-departure overlay implementation
+- Added `#predeparture-overlay` to `src/template.html` with briefing, category legend, weight display, item list, +/- controls, Confirm Loadout, Auto-Pack
+- Added CSS for `.predeparture-briefing`, `.category-legend`, `.pd-row`, `.predeparture-weight`, `.predeparture-actions`
+- Added `getPreDepartureItems()`, `setPreDepartureCount()`, `confirmPreDeparture()` to engine
+- Added `showPreDeparture()` to `src/main.js` with full UI logic
+
+### v44 — Build auto-bump
+- Build script bumped `dist/index.html` to v44; `src/template.html` still at v43 (drift persists)
 
 ## Known Issues
 
-### Build version drift
-Build script bumps `?v=N` in `dist/index.html` but NOT in `src/template.html`. After every build, manually sync `src/template.html` to match.
+### Build version drift (PARTIALLY RESOLVED)
+Build script bumps `?v=N` in `dist/index.html` but NOT in `src/template.html`. After every build, manually sync `src/template.html` to match. The script should be fixed to update both.
 
 ### `generateGossip` possibly tree-shaken
 Not grep-able in esbuild bundle but works at runtime. Monitor.
 
-### Cart overlay: no item count in unload buttons
-Buttons show "Unload −X kg" but not which item. Minor UX issue.
+### Cart overlay: unload buttons lack item name
+Buttons show "Unload −X kg" but not which item. Data-attribute carries item name so clicks work, but UX is unclear. Minor.
 
 ### Win rate still above target
 66.5% win rate after balance pass (target 25-40%). May need weather system, higher food consumption, or more aggressive event penalties.
+
+### HBC crafting recipe unreachable
+Recipe `finished_hides` exists with `settlement: 'hbc'` in `getAvailableRecipes()` but HBC action list does NOT include `'craft'`. Player can never access it. Either add `'craft'` to HBC actions or reassign recipe to a settlement type that has it.
 
 ## Critical Code Paths
 

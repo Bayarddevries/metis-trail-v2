@@ -60,24 +60,53 @@ Legend: `pending` | `in_progress` | `blocked` | `done`
 - [ ] Add second half of Carlton Trail nodes with citations
 - [ ] Add scout/guide hire moral choices with history anchoring
 
-## Phase 6 — Playtesting & Balance (CURRENT)
-- [x] **Headless playtesting harness** (GitHub issue #5) — automated simulations using the real engine
+## Phase 6 — Playtesting & Balance (COMPLETE)
+- [x] **Headless playtesting harness** — automated simulations using the real engine
   - [x] Write `tests/simulate-entry.js` + `scripts/build-test.mjs`
   - [x] Run 200 simulations with randomized choices
   - [x] Aggregate: win rate, avg score, death reasons, item usage
   - [x] Report balance findings in ISSUES.md (see #5a, #5b)
-- [x] **Browser click-through QA** (GitHub issue #5) — visual end-to-end testing
+- [x] **Browser click-through QA** — visual end-to-end testing
   - [x] Full flow: intro → travel → events → settlement → endings
   - [x] Map rendering verified (Leaflet tiles + cart marker present)
   - [x] Ending overlay verified (title, narrative, score breakdown, source quote)
   - [x] Found bugs: #29 (victory bypasses starvation), #30 (duplicate trade buttons)
-- [ ] **Balance pass** — apply findings from sim data
-  - Fix win rate (70.5% → target 25-40%)
-  - Reduce cart failure rate (24% of all games)
-  - Fix #29 starvation bypass bug
-  - Fix #30 duplicate trade buttons
-  - Lower triumphant threshold (1400 → 1200)
-  - Tighten food economy
+- [x] **Balance pass** — apply findings from sim data
+  - [x] Fix win rate (70.5% → target 25-40%)
+  - [x] Reduce cart failure rate (24% of all games)
+  - [x] Fix #29 starvation bypass bug
+  - [x] Fix #30 duplicate trade buttons
+  - [x] Lower triumphant threshold (1400 → 1200)
+  - [x] Tighten food economy
+
+## Phase 7 — Cart UX & Crafting Exposure (v41-v44) — COMPLETE
+- [x] Starting cart weight reduced: Pemmican 20→15, Firewood 3→2 (~128 kg)
+- [x] Category tooltips in cart overlay (`getCategoryHint()`)
+- [x] MB display removed from cart rows and crafting panel
+- [x] Crafting exposed at Métis and NWMP settlements (`availableSettlementActions` includes 'craft')
+- [x] Pre-departure overlay built: briefing, category legend, weight tracking, +/- controls, Auto-Pack, Confirm Loadout
+- [x] Engine API: `getPreDepartureItems()`, `setPreDepartureCount()`, `confirmPreDeparture()`
+- [x] Main.js: `showPreDeparture()` with full UI logic
+- [x] Overlay sequence fixed — intro now precedes pre-departure (#32)
+- [x] Version drift sync — `src/template.html` matches `dist/index.html` (v44)
+- [ ] Remove duplicate “Trade” action button from settlement UI when both trade panel toggle and trade action render
+- [ ] HBC crafting: reassign `finished_hides` from `hbc` to a settlement type that already exposes `craft`
+
+## Phase 8 — Win Rate Normalization & Polish (CURRENT)
+- [ ] Win rate 66.5% post-balance, still above 25-40% target
+- [ ] Options: weather system, higher food consumption, more aggressive event penalties, time pressure
+- [ ] Cart unload buttons show item name for clarity
+- [ ] Replace travel debug narrative with atmospheric fragments
+- [ ] Basic icons / map markers (Issue #10, #26)
+
+## Phase 0 — Camp Overhaul (IMPLEMENTED)
+- [x] Add `campAction()` engine method with 7 activities (rest/forage/hunt/repair/scout/dance/deeprest)
+- [x] Add `#camp-overlay` with action buttons, action panel vis resets on reopen and one-action-per-open flow
+- [x] Fix camp freeze when loopback founder flow is fed back via restart loop
+- [x] Wire Camp button to `showCamp()` and continue/close handlers
+- [x] Camp bug #34 closed — action panel now rebuilds on every open
+- [ ] Add camp activity failures/flavor branching based on crew state (future)
+- [ ] Expand scoring to reward well-timed camps (Phase 3)
 
 ## Ongoing
 - [ ] Review and approve all historical content before merge

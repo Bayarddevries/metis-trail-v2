@@ -339,6 +339,128 @@
   }
   .intro-card .start-btn:hover { background: var(--clr-btn-hover); }
 
+  .predeparture-subtitle {
+    font-size: 13px;
+    color: var(--clr-accent);
+    font-style: italic;
+    margin-bottom: 14px;
+  }
+  .predeparture-weight {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px;
+    border-radius: 6px;
+    margin-bottom: 12px;
+    font-family: var(--font-heading);
+    font-size: 15px;
+    font-weight: 600;
+  }
+  .predeparture-weight.over { background: rgba(180,60,60,0.15); border: 1px solid rgba(180,60,60,0.4); color: #8B0000; }
+  .predeparture-weight.at-capacity { background: rgba(184,134,11,0.15); border: 1px solid rgba(184,134,11,0.4); color: #B8860B; }
+  .predeparture-weight.under { background: rgba(46,90,62,0.12); border: 1px solid rgba(46,90,62,0.3); color: #2D4A3E; }
+  .predeparture-weight .over { color: #8B0000; }
+  .predeparture-weight .at-capacity { color: #B8860B; }
+  .predeparture-weight .under { color: #2D4A3E; }
+  .predeparture-briefing {
+    margin-bottom: 14px;
+    padding: 12px;
+    background: rgba(26,20,16,0.04);
+    border: 1px solid rgba(46,90,62,0.15);
+    border-radius: 6px;
+    font-size: 12px;
+    line-height: 1.5;
+  }
+  .predeparture-briefing p { margin: 6px 0; }
+  .briefing-hint { color: #6b5c4a; font-style: italic; margin-top: 4px !important; }
+  .category-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 10px;
+  }
+  .cat-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 8px;
+    background: rgba(255,255,255,0.6);
+    border: 1px solid rgba(0,0,0,0.06);
+    border-radius: 4px;
+    font-size: 11px;
+    white-space: nowrap;
+  }
+  .cat-icon { font-size: 12px; }
+  #predeparture-list { max-height: 300px; overflow-y: auto; margin-bottom: 12px; }
+  .pd-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px;
+    background: rgba(255,255,255,0.5);
+    border: 1px solid rgba(0,0,0,0.06);
+    border-radius: 6px;
+    margin-bottom: 6px;
+  }
+  .pd-item-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+    min-width: 0;
+  }
+  .pd-icon { font-size: 18px; }
+  .pd-name { font-weight: 600; font-size: 14px; }
+  .pd-category-hint {
+    font-size: 11px;
+    color: #6b5c4a;
+    font-style: italic;
+    max-width: 200px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .pd-controls {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+  }
+  .pd-minus, .pd-plus {
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    border: 1px solid var(--clr-accent);
+    background: var(--clr-card-bg);
+    color: var(--clr-ink);
+    font-family: var(--font-heading);
+    font-size: 16px;
+    cursor: pointer;
+  }
+  .pd-minus:hover, .pd-plus:hover { background: var(--clr-bg-dark); }
+  .pd-minus:disabled, .pd-plus:disabled { opacity: 0.4; cursor: not-allowed; }
+  .pd-count {
+    min-width: 36px;
+    text-align: center;
+    font-weight: 600;
+    font-size: 15px;
+    font-family: var(--font-heading);
+  }
+  .pd-weight {
+    font-size: 12px;
+    color: var(--clr-accent);
+    font-family: var(--font-heading);
+    min-width: 60px;
+    text-align: right;
+  }
+  .predeparture-actions {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+    margin-top: 8px;
+  }
+
   .settlement-desc {
     font-size: 13px;
     line-height: 1.6;
@@ -637,6 +759,21 @@
   }
   .restart-btn:hover { background: var(--clr-btn-hover); }
 
+  /* Camp overlay */
+  #camp-overlay .overlay-card { border-color: #4a6741; }
+  .camp-header { font-family: var(--font-heading); font-size: 18px; font-weight: 700; color: var(--clr-ink); margin-bottom: 6px; }
+  .camp-sub { font-size: 12px; color: #5a4a3a; margin-bottom: 12px; font-style: italic; }
+  .camp-status { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+  .camp-pill { padding: 5px 10px; background: rgba(255,255,255,0.65); border: 1px solid rgba(0,0,0,0.08); border-radius: 999px; font-size: 12px; font-family: var(--font-heading); font-weight: 600; }
+  .camp-actions { display: grid; grid-template-columns: 1fr; gap: 6px; }
+  .camp-action-btn { width: 100%; text-align: left; padding: 10px 12px; background: var(--clr-bg-dark); border: 2px solid var(--clr-accent); border-radius: 6px; cursor: pointer; font-family: var(--font-heading); color: var(--clr-ink); }
+  .camp-action-btn:hover:not(:disabled) { background: #e3d6bc; }
+  .camp-action-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .camp-action-label { font-size: 13px; font-weight: 700; }
+  .camp-action-cost { font-size: 11px; color: #6b5d4a; margin-top: 2px; }
+  .camp-result { margin-top: 12px; padding: 10px; background: rgba(255,255,255,0.65); border: 1px solid rgba(0,0,0,0.08); border-radius: 6px; font-size: 13px; line-height: 1.5; }
+  .camp-close-row { display: flex; justify-content: flex-end; margin-top: 10px; }
+
   @media (max-width: 768px) {
     #game-container { height: 100dvh; }
     #status-bar {
@@ -800,6 +937,56 @@
     </div>
   </div>
 
+  <div class="overlay" id="predeparture-overlay">
+    <div class="overlay-card" style="max-width: 520px;">
+      <h2>Pack Your Cart</h2>
+      <p class="predeparture-subtitle">Fort Garry Outfitters — 100 kg capacity</p>
+      
+      <div class="predeparture-briefing">
+        <p><strong>Outfitter's Brief:</strong> "Five hundred and sixty-seven miles to Fort Edmonton. You've got until November before the snow buries the Carlton Trail. Your Red River cart carries 100 kg max — every kilogram counts."</p>
+        <p class="briefing-hint"><em>Choose wisely. Overloaded carts break axles. Underloaded carts starve.</em></p>
+        <div class="category-legend">
+          <span class="cat-item"><span class="cat-icon">🥩</span> <strong>Food</strong> — 1 food/day. Run out, you die.</span>
+          <span class="cat-item"><span class="cat-icon">🛠️</span> <strong>Repair/Parts</strong> — Axles, shaganappi, tools. Cart wear accumulates daily; no parts = stranded.</span>
+          <span class="cat-item"><span class="cat-icon">🦬</span> <strong>Trade Goods</strong> — Hides, pelts. Your payday at Edmonton. Need ≥1 to win.</span>
+          <span class="cat-item"><span class="cat-icon">⛺</span> <strong>Shelter/Fuel</strong> — Tarp, blankets, firewood. Cold nights kill unprepared crews.</span>
+          <span class="cat-item"><span class="cat-icon">🫙</span> <strong>Medical/Ammo</strong> — Medicine, shot. Events punish the unprepared.</span>
+        </div>
+      </div>
+      
+      <div id="predeparture-weight" class="predeparture-weight">
+        <span id="pd-weight-current">128</span> / 100 kg 
+        <span id="pd-weight-status" class="over">28 kg over</span>
+      </div>
+      
+      <div id="predeparture-list"></div>
+      
+      <div class="predeparture-actions">
+        <button id="pd-confirm" class="ctrl-btn" disabled>Confirm Loadout</button>
+        <button id="pd-auto" class="ctrl-btn" style="background:var(--clr-muted)">Auto-Pack (Balanced)</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="overlay" id="camp-overlay">
+    <div class="overlay-card">
+      <button class="close-btn" id="camp-close-btn">✕</button>
+      <h2 class="camp-header">Make Camp</h2>
+      <div class="camp-sub" id="camp-sub">Day 1 — on the trail</div>
+      <div class="camp-status" id="camp-status">
+        <span class="camp-pill">Food: <span id="camp-food">30</span></span>
+        <span class="camp-pill">Wear: <span id="camp-wear">0</span></span>
+        <span class="camp-pill">Morale: <span id="camp-morale">70</span></span>
+        <span class="camp-pill">Crew: <span id="camp-crew">rested</span></span>
+      </div>
+      <div class="camp-actions" id="camp-actions"></div>
+      <div class="camp-result" id="camp-result" style="display:none;"></div>
+      <div class="camp-close-row">
+        <button class="ctrl-btn" id="camp-continue">Continue West</button>
+      </div>
+    </div>
+  </div>
+
   <div class="overlay" id="end-overlay">
     <div class="overlay-card end-card">
       <h1 id="end-title">Journey Complete</h1>
@@ -812,7 +999,7 @@
     </div>
   </div>
 </div>
-  <script type="module" src="app.js?v=37"></script>
+  <script type="module" src="app.js?v=46"></script>
 <script>window.__METIS_ASSETS__={
   "assets": []
 };</script>

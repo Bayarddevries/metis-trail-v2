@@ -2,6 +2,75 @@
 
 All notable changes are documented here. Format loosely follows Keep a Changelog.
 
+## [v47] - 2026-06-07
+
+### Fixed — Camp overlay reopen state (Action panel hidden after first camp)
+- `showCamp()` rebuilt action buttons but never reset the panel visibility on subsequent opens, so after one action click the Camp overlay could open with no actions visible on future turns.
+- Root cause: `actionsEl.style.display = 'none'` was only set on first click, never cleared before rebuild.
+- Fix: `showCamp()` now explicitly sets `actionsEl.style.display = 'grid'` and `actionsEl.style.visibility = 'visible'` before rebuilding buttons.
+- Build: `bun scripts/build.mjs` passes; `dist/index.html` at `app.js?v=46`.
+
+### Opened — UX / pruning follow-ups (GitHub issues)
+- #35 Reduce action-dense screens by grouping secondary actions
+- #34 Audit and consolidate primary/secondary action verbs
+- #33 Crafting discoverability in settlement UI
+- #32 Balance pass on unforgiving events (medicine pouch)
+- #31 Prune redundant settlement/camp actions (e.g. Recruit)
+
+## [v46] - 2026-06-07
+## [v44] - 2026-06-07
+
+### Fixed — Pre-departure overlay narrative & category legend (v43→v44)
+- Added `predeparture-briefing` narrative block to `#predeparture-overlay` explaining the journey context (Red River → Edmonton, Hudson's Bay Company contract).
+- Added `category-legend` with 5 item categories: 🥩 Food (1 food/day), 🛠️ Repair (axles, shaganappi, tools), 🦬 Trade (hides, pelts), ⛺ Shelter (tarp, blankets, firewood), 🫙 Medical (medicine, shot).
+- Each category includes concise purpose text to inform player loadout decisions.
+- CSS for `.predeparture-briefing`, `.category-legend`, `.cat-item` in `src/template.html`.
+- Build: auto-bumped `dist/index.html` to `app.js?v=44` (version drift: `src/template.html` still has no version; build script increments dist only).
+
+### Known Blocking Bug — Overlay sequence (Issue #32)
+- `bootstrap()` in `src/main.js` immediately activates `#predeparture-overlay` and deactivates `#intro-overlay` because engine initial state has `preDeparture: true`.
+- Player never sees the intro screen with "Begin Journey" button.
+- Fix required: `bootstrap()` must show intro first; `#intro-start` click must activate pre-departure; `#pd-confirm` must start game.
+
+## [v43] - 2026-06-07
+
+### Added — Pre-departure cart packing overlay (GitHub issue #15 / Issue #31)
+- New `#predeparture-overlay` with full UI: weight tracking (used/100kg), +/- controls per item, Auto-Pack (Balanced), Confirm Loadout (disabled until weight ≤ capacity).
+- Engine API: `getPreDepartureItems()`, `setPreDepartureCount(itemId, count)`, `confirmPreDeparture()`.
+- `main.js`: `showPreDeparture()` renders overlay, updates weight, handles +/- clicks, auto-pack, confirm.
+- Starting items available: Pemmican Rations, Firewood Bundle, Bison Hide, Beaver Pelts, Shaganappi, Axe, Spare Axle, Tarp, Blankets, Medicine, Shot, Trade Goods.
+- Cart capacity: 100 kg. Starting preset (~128 kg) forces informed offload decisions.
+
+### Fixed — Crafting exposure & MB removal (v41 work carried forward)
+- Crafting now exposed at Métis and NWMP settlements via `availableSettlementActions()` returning `'craft'`.
+- MB display removed from cart rows and crafting panel (`mbValue` retained in data for future economy).
+- Category tooltips in cart overlay via `getCategoryHint()`.
+
+## [v42] - 2026-06-07
+
+### Fixed — Version sync after build
+- Build auto-bumped `dist/index.html` to v42 but `src/template.html` was still at v41.
+- Manually synced `src/template.html` to `app.js?v=42` so next build won't double-increment.
+
+### Docs
+- Updated `HANDOFF.md` — v41→v42 state, uncommitted working tree noted, known issues updated (HBC craft gap added), version drift noted as partially resolved.
+- Updated `TODO.md` — Phase 6 balance pass subtasks marked complete.
+- Updated `ISSUES.md` — #5 refreshed with v41/v42 context, #31 confirmed resolved. 
+- Identified and documented **gap: HBC crafting recipe unreachable** — `finished_hides` recipe defined for `settlement: 'hbc'` but HBC action list lacks `'craft'`. Player can never access it.
+
+## [v41] - 2026-06-07
+
+### Fixed — Starting cart offload rebalance (Issue #31)
+
+- Reduced starting `Pemmican Rations` count: `20 → 15` (−12.5 kg)
+- Reduced `Firewood Bundle` count: `3 → 2` (−6 kg)
+- Starting cart total: **~128 kg** (down from 146.5 kg) — still overloaded by 28 kg vs 100 kg capacity, but the first offload is no longer a near-total purge of useful items.
+- Added category tooltips in cart overlay via `getCategoryHint()` so players can see what each item type is for before discarding.
+- Removed “MB” currency display from crafting-panel recipes and cart item rows. `mbValue` remains in item/recipe data for possible future economy work.
+- Exposed `'craft'` as a settlement action at Métis and NWMP settlements via `availableSettlementActions()`.
+- Files changed: `src/data/items.js`, `src/main.js`, `src/systems/engine.js`
+- Browser verified on Tailscale build: versions synced, no console errors on load.
+
 ## [v38] - 2026-06-07
 
 ### Balance Pass — Applied recommendations from 200-sim playtest
@@ -12,12 +81,7 @@ All notable changes are documented here. Format loosely follows Keep a Changelog
 - **EVENT_CHANCE**: 0.35 → 0.45 (more events per game: 8.5 vs 6.9 avg)
 - **Triumphant threshold**: 1400 → 1200 (more achievable high-end ending)
 
-### Bug Fixes
-
-- **#29**: Victory condition now checks food/wear/morale before declaring victory. Arriving at Edmonton with food ≤ 0 correctly triggers starvation ending instead of victory.
-- **#30**: Trade buttons in settlement overlay now labeled with item name (e.g., "Trade Bison Hide") instead of generic "Trade"
-
-### Post-Balance Results (200 sims)
+### Balance Pass — Applied recommendations from 200-sim playtest
 
 - Win rate: 66.5% (down from 70.5%)
 - Starvation: 11% (up from 2%) — food scarcity now real
@@ -27,8 +91,6 @@ All notable changes are documented here. Format loosely follows Keep a Changelog
 - 0 wins with food ≤ 0 (was possible before #29 fix)
 
 ## [v37] - 2026-06-07
-
-### Added — Playtesting Infrastructure (GitHub issue #5)
 
 - **Headless simulation harness** — `tests/simulate-entry.js` + `scripts/build-test.mjs`
   - Bundles the real engine via esbuild for Node.js execution

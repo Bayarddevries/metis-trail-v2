@@ -315,7 +315,7 @@ var ITEMS = [
   {
     name: "Pemmican Rations",
     wt: 2.5,
-    count: 20,
+    count: 7,
     type: "food",
     category: "provisions",
     mbValue: 0.4,
@@ -373,7 +373,7 @@ var ITEMS = [
   {
     name: "Bison Hide",
     wt: 6,
-    count: 3,
+    count: 2,
     type: "trade",
     category: "furs",
     mbValue: 1.25,
@@ -395,7 +395,7 @@ var ITEMS = [
   {
     name: "Firewood Bundle",
     wt: 6,
-    count: 3,
+    count: 1,
     type: "fuel",
     category: "fuel",
     mbValue: 0.2,
@@ -1366,7 +1366,8 @@ function createGame(seed = null) {
     capacity: 100,
     usedWeight: 0,
     credit: { hbc: 0, metis: 0, nwmp: 0, mission: 0 },
-    perishable: {}
+    perishable: {},
+    preDeparture: false
   };
   function checkGameOver() {
     if (S.over) return;
@@ -1651,6 +1652,11 @@ function createGame(seed = null) {
       if (S.crew !== "exhausted") S.crew = "rested";
     }
     if (action === "rumours") advance();
+    if (action === "craft") {
+      const recipes = game.getAvailableRecipes();
+      if (recipes.length === 0) return { error: "No recipes available" };
+      advance();
+    }
     checkGameOver();
     return [];
   }
@@ -1679,7 +1685,8 @@ function createGame(seed = null) {
         pendingEvent: S.pendingEvent,
         pendingSettlement: S.pendingSettlement,
         usedWeight: totalWeight(cart),
-        capacity: S.capacity
+        capacity: S.capacity,
+        preDeparture: S.preDeparture
       };
     },
     getCart() {
@@ -1761,6 +1768,101 @@ function createGame(seed = null) {
         })
       }));
     },
+    campAction(type) {
+      const action = String(type || "").toLowerCase();
+      const costItems = [];
+      const effects = [];
+      if (action === "rest") {
+        if (S.food < 1) return { error: "Not enough food to rest." };
+        S.food -= 1;
+        costItems.push({ name: "Food", count: -1 });
+        const roll = d() + crewMod(S);
+        if (roll >= 15) {
+          S.crew = "rested";
+          S.morale = Math.max(0, Math.min(100, S.morale + 20));
+          S.wear = Math.max(0, S.wear - 1);
+          S.travelDaysWithoutRest = 0;
+          effects.push("Wonderful rest.", "Crew rested", "Morale +20", "Wear -1");
+        } else if (roll >= 8) {
+          S.crew = "rested";
+          S.morale = Math.max(0, Math.min(100, S.morale + 15));
+          S.wear = Math.max(0, S.wear - 1);
+          S.travelDaysWithoutRest = 0;
+          effects.push("Crew rested", "Morale +15", "Wear -1");
+        } else {
+          S.crew = "tired";
+          S.morale = Math.max(0, Math.min(100, S.morale + 5));
+          S.travelDaysWithoutRest = 0;
+          effects.push("Rough night.", "Morale +5", "Crew tired");
+        }
+      } else if (action === "forage") {
+        const roll = d() + crewMod(S);
+        const baseGain = Math.floor(Math.random() * 6) + (roll >= 12 ? 6 : roll >= 8 ? 4 : 1);
+        S.food += baseGain;
+        if (roll >= 12) {
+          effects.push(`Excellent foraging. +${baseGain} Food`);
+        } else if (roll >= 8) {
+          effects.push(`Foraged +${baseGain} Food`);
+        } else if (roll >= 5) {
+          effects.push(`Lean haul. +${baseGain} Food`);
+        } else {
+          effects.push("Found little today.");
+        }
+      } else if (action === "hunt") {
+        const ammo = cart.find((i) => i.name === "Ammunition Belt");
+        if (!ammo || ammo.count < 1) return { error: "Need 1 Ammunition Belt to hunt." };
+        ammo.count -= 1;
+        costItems.push({ name: "Ammunition Belt", count: -1 });
+        advance();
+        const roll = d() + crewMod(S);
+        if (roll >= 10) {
+          const gained = Math.floor(Math.random() * 9) + 6;
+          S.food += gained;
+          effects.push(`+${gained} Food`);
+        } else if (roll <= 5) {
+          effects.push("Shot went wide. No food gained.");
+        } else {
+          effects.push("Close. Food scarce today.");
+        }
+      } else if (action === "repair") {
+        const shag = cart.find((i) => i.name === "Shaganappi");
+        if (!shag || shag.count < 1) return { error: "Need 1 Shaganappi to repair." };
+        shag.count -= 1;
+        costItems.push({ name: "Shaganappi", count: -1 });
+        const hasAxle = cart.some((i) => i.name === "Spare Axle");
+        const repaired = hasAxle ? 3 : 2;
+        S.wear = Math.max(0, S.wear - repaired);
+        effects.push(`Wear -${repaired}`);
+      } else if (action === "scout") {
+        advance();
+        const roll = d() + crewMod(S);
+        if (roll >= 12) {
+          const n = NODES[S.node + 1];
+          const terrain = n && n.terrain || "plains";
+          effects.push(`Scout succeeded. Next leg is ${terrain.replace(/_/g, " ")}.`);
+        } else {
+          effects.push("Scout returned with nothing clear to report.");
+        }
+      } else if (action === "dance") {
+        const bonus = S.crew === "rested" ? 12 : S.crew === "tired" ? 8 : 5;
+        S.morale = Math.max(0, Math.min(100, S.morale + bonus));
+        effects.push(`Morale +${bonus}`);
+      } else if (action === "deeprest") {
+        if (S.food < 2) return { error: "Need 2 Food for a deep rest." };
+        S.food -= 2;
+        S.crew = "rested";
+        S.morale = Math.max(0, Math.min(100, S.morale + 30));
+        S.wear = Math.max(0, S.wear - 2);
+        S.travelDaysWithoutRest = 0;
+        effects.push("+2 Food spent", "Crew rested", "Morale +30", "Wear -2");
+        advance();
+        advance();
+      } else {
+        return { error: "Unknown camp action." };
+      }
+      if (effects.length === 0 && costItems.length === 0) effects.push("Nothing changes.");
+      return { day: S.day, effects, costItems };
+    },
     craftRecipe(recipeId) {
       const recipes = this.getAvailableRecipes();
       const recipe = recipes.find((r) => r.id === recipeId);
@@ -1772,6 +1874,19 @@ function createGame(seed = null) {
       for (const inp of recipe.inputs) {
         const item = cart.find((c) => c.name === inp.name);
         item.count -= inp.count;
+      }
+      if (recipe.consumedOnUse) {
+        if (recipe.id === "raft" && !S.flags.raftUsed) {
+          S.flags.raftUsed = true;
+          S.trailIntel = S.trailIntel || [];
+          return { applied: "raft" };
+        }
+        if (recipe.id === "signal_fire") {
+          S.trailIntel = S.trailIntel || [];
+          S.trailIntel.push({ fromDay: S.day, text: "Signal fire lit.", bonus: { dcBonus: 2 } });
+          return { applied: "signal_fire" };
+        }
+        return null;
       }
       const existing = cart.find((c) => c.name === recipe.output.name);
       if (existing) {
@@ -1844,17 +1959,43 @@ function createGame(seed = null) {
     },
     getScore() {
       return S.score;
+    },
+    getPreDepartureItems() {
+      return cart.map((item) => ({
+        name: item.name,
+        wt: item.wt,
+        maxCount: item.count,
+        currentCount: item.count,
+        category: item.category,
+        desc: item.desc,
+        icon: item.icon,
+        mbValue: item.mbValue
+      }));
+    },
+    setPreDepartureCount(itemName, newCount) {
+      const item = cart.find((i) => i.name === itemName);
+      if (!item) return false;
+      const maxCount = item.count;
+      const clamped = Math.max(0, Math.min(newCount, maxCount));
+      item.count = clamped;
+      S.usedWeight = totalWeight(cart);
+      return true;
+    },
+    confirmPreDeparture() {
+      S.preDeparture = false;
+      S.usedWeight = totalWeight(cart);
+      return cart.map((i) => ({ name: i.name, count: i.count, wt: i.wt }));
     }
   };
 }
 __name(createGame, "createGame");
 function availableSettlementActions(type) {
   const base = ["rest"];
-  if (type === "hbc") return [...base, "trade", "repair", "forage", "recruit"];
-  if (type === "metis") return [...base, "trade", "forage", "rumours", "recruit"];
+  if (type === "hbc") return [...base, "trade", "repair", "forage", "recruit", "craft"];
+  if (type === "metis") return [...base, "craft", "trade", "forage", "rumours", "recruit"];
   if (type === "trading") return [...base, "trade", "forage", "rumours"];
   if (type === "mission") return [...base, "heal", "rumours"];
-  if (type === "nwmp") return [...base, "trade", "rumours"];
+  if (type === "nwmp") return [...base, "craft", "trade", "rumours"];
   return base;
 }
 __name(availableSettlementActions, "availableSettlementActions");
@@ -2156,25 +2297,25 @@ var ENDINGS = {
 
 // src/main.js
 function bootstrap(seed = null) {
-  const game = createGame(seed);
-  window._metisGame = game;
+  const game2 = createGame(seed);
+  window._metisGame = game2;
   window.__METIS_READY__ = true;
   window.__METIS_DEBUG__ = {
     get state() {
-      return game.getState();
+      return game2.getState();
     },
     get cart() {
-      return game.getCart();
+      return game2.getCart();
     },
     get crew() {
-      return game.getCrew();
+      return game2.getCrew();
     },
     get node() {
-      return game.getCurrentNode();
+      return game2.getCurrentNode();
     },
-    travel: /* @__PURE__ */ __name(() => game.travelOneDay(), "travel"),
-    camp: /* @__PURE__ */ __name(() => game.makeCamp(), "camp"),
-    choose: /* @__PURE__ */ __name((i) => game.chooseEventChoice(i), "choose"),
+    travel: /* @__PURE__ */ __name(() => game2.travelOneDay(), "travel"),
+    camp: /* @__PURE__ */ __name(() => game2.makeCamp(), "camp"),
+    choose: /* @__PURE__ */ __name((i) => game2.chooseEventChoice(i), "choose"),
     reroll: /* @__PURE__ */ __name((s) => {
       const g = createGame(s);
       window._metisGame = g;
@@ -2187,18 +2328,26 @@ function bootstrap(seed = null) {
     console.error("Metis bootstrap aborted: #game-root is missing.");
     return;
   }
+  const state = game2.getState();
   renderNarrative(["Welcome to the M\xE9tis Trail. Click Begin Journey to start."]);
+  document.getElementById("intro-overlay")?.classList.add("active");
+  document.getElementById("predeparture-overlay")?.classList.remove("active");
   initMap();
   const gameRoot = find("#game-root");
   if (gameRoot) {
     gameRoot.addEventListener("click", (e) => {
       if (e.target.closest("#intro-start")) {
-        const overlay = find("#intro-overlay");
-        if (overlay) {
-          overlay.classList.remove("active");
-          overlay.setAttribute("hidden", "");
+        const introOverlay = find("#intro-overlay");
+        if (introOverlay) {
+          introOverlay.classList.remove("active");
+          introOverlay.setAttribute("hidden", "");
         }
-        window.__METIS_RENDER__();
+        const currentState = game2.getState();
+        if (currentState.preDeparture) {
+          showPreDeparture(game2);
+        } else {
+          window.__METIS_RENDER__();
+        }
       }
     });
   } else {
@@ -2207,7 +2356,7 @@ function bootstrap(seed = null) {
   const travelBtn = find("#btn-travel");
   if (travelBtn) {
     travelBtn.addEventListener("click", () => {
-      const { pendingEvent, pendingSettlement, over } = game.getState();
+      const { pendingEvent, pendingSettlement, over } = game2.getState();
       if (pendingEvent || pendingSettlement || over) return;
       const blocked = travelOneDay();
       if (blocked === true) return;
@@ -2215,29 +2364,29 @@ function bootstrap(seed = null) {
     });
     travelBtn.setAttribute("data-metis-travel-bound", "1");
   }
+  const campClose = find("#camp-close-btn");
+  const campContinue = find("#camp-continue");
+  if (campClose) campClose.onclick = () => find("#camp-overlay")?.classList.remove("active");
+  if (campContinue) campContinue.onclick = () => find("#camp-overlay")?.classList.remove("active");
   const campBtn = find("#btn-camp");
-  if (campBtn) campBtn.onclick = () => {
-    publishCampResult();
-    game.makeCamp();
-    window.__METIS_RENDER__();
-  };
+  if (campBtn) campBtn.onclick = () => showCamp(game2);
   const cartBtn = find("#btn-cart");
-  if (cartBtn) cartBtn.onclick = () => showCart(game);
+  if (cartBtn) cartBtn.onclick = () => showCart(game2);
   const crewBtn = find("#btn-crew");
-  if (crewBtn) crewBtn.onclick = () => showCrew(game);
+  if (crewBtn) crewBtn.onclick = () => showCrew(game2);
   const eventContinue = find("#event-continue");
   if (eventContinue) eventContinue.onclick = () => {
     find("#event-overlay")?.classList.remove("active");
   };
   const settlementContinue = find("#settlement-continue");
   if (settlementContinue) settlementContinue.onclick = () => {
-    game.settlementAction("continue");
+    game2.settlementAction("continue");
     find("#settlement-overlay")?.classList.remove("active");
     window.__METIS_RENDER__();
   };
   const settlementClose = find("#settlement-close");
   if (settlementClose) settlementClose.onclick = () => {
-    game.settlementAction("continue");
+    game2.settlementAction("continue");
     find("#settlement-overlay")?.classList.remove("active");
     window.__METIS_RENDER__();
   };
@@ -2262,15 +2411,15 @@ function publishResult(text) {
 }
 __name(publishResult, "publishResult");
 function travelOneDay() {
-  const game = window._metisGame;
-  const prev = game.getState();
+  const game2 = window._metisGame;
+  const prev = game2.getState();
   if (prev.usedWeight > prev.capacity) {
-    showCart(game);
+    showCart(game2);
     publishResult("Cart is overloaded. Offload items before traveling.");
     return true;
   }
-  const result = game.travelOneDay();
-  const state = game.getState();
+  const result = game2.travelOneDay();
+  const state = game2.getState();
   if (state.pendingEvent) return null;
   const msgs = [];
   msgs.push("Day advances.");
@@ -2279,7 +2428,7 @@ function travelOneDay() {
   if (state.wear > prev.wear) msgs.push(`${state.wear - prev.wear} Wear added.`);
   if (state.morale < prev.morale) msgs.push(`Morale: ${prev.morale} -> ${state.morale}`);
   if (state.node > prev.node) {
-    msgs.push(`Arrived at: ${game.getCurrentNode().name}`);
+    msgs.push(`Arrived at: ${game2.getCurrentNode().name}`);
   } else if (state.node === prev.node && state.over) {
     msgs.push("Journey ends here.");
   } else if (state.node === prev.node) {
@@ -2290,44 +2439,34 @@ function travelOneDay() {
   return result;
 }
 __name(travelOneDay, "travelOneDay");
-function publishCampResult() {
-  const game = window._metisGame;
-  const prev = game.getState();
-  game.makeCamp();
-  const after = game.getState();
-  const msgs = [];
-  msgs.push("Camp.");
-  if (after.food !== prev.food) msgs.push(`${after.food - prev.food >= 0 ? "+" : ""}${after.food - prev.food} Food`);
-  msgs.push(`Crew: ${prev.crew} -> ${after.crew}`);
-  if (after.morale !== prev.morale) msgs.push(`Morale: ${prev.morale} -> ${after.morale}`);
-  msgs.push(`${after.day - prev.day} Day(s)`);
-  publishResult(msgs.join(" "));
-}
-__name(publishCampResult, "publishCampResult");
 function render() {
-  const game = window._metisGame;
-  if (!game) return;
+  const game2 = window._metisGame;
+  if (!game2) return;
   if (!window._metisMapInited && window.__METIS_READY__ && document.getElementById("intro-overlay")?.classList.contains("active")) {
     initMap();
     window._metisMapInited = true;
   }
-  const state = game.getState();
+  const state = game2.getState();
   renderStatusBar(state);
   updateMap(state);
   if (state.over) {
-    showEnd(game);
+    showEnd(game2);
+    return;
+  }
+  if (state.preDeparture) {
+    showPreDeparture(game2);
     return;
   }
   if (state.pendingEvent) {
-    showEvent(game);
+    showEvent(game2);
     return;
   }
   if (state.pendingSettlement) {
-    showSettlement(game);
+    showSettlement(game2);
     return;
   }
   hideOverlays();
-  renderTravelLinesView(state, game, window.__METIS_PENDING_RESULT__);
+  renderTravelLinesView(state, game2, window.__METIS_PENDING_RESULT__);
   window.__METIS_PENDING_RESULT__ = null;
   renderTrailIntel(state);
 }
@@ -2416,8 +2555,8 @@ function revealDiceOutcome(diceResult) {
   }
 }
 __name(revealDiceOutcome, "revealDiceOutcome");
-function showEvent(game) {
-  const ev = game.getPendingEvent();
+function showEvent(game2) {
+  const ev = game2.getPendingEvent();
   if (!ev) return;
   const textEl = document.getElementById("event-text");
   const choicesEl = document.getElementById("event-choices");
@@ -2467,7 +2606,7 @@ function showEvent(game) {
   continueEl.onclick = () => {
     continueEl.classList.remove("ready");
     if (diceResult) {
-      const outcome = buildEventChoiceOutcome(diceResult.stepLog, diceResult.before, game.getState());
+      const outcome = buildEventChoiceOutcome(diceResult.stepLog, diceResult.before, game2.getState());
       if (outcome) publishResult(outcome);
       diceResult = null;
     }
@@ -2481,8 +2620,8 @@ function showEvent(game) {
     btn.className = "choice-btn";
     btn.textContent = ch.text;
     btn.onclick = () => {
-      const prev = game.getState();
-      const stepLog = game.chooseEventChoice(i);
+      const prev = game2.getState();
+      const stepLog = game2.chooseEventChoice(i);
       const entry = stepLog && stepLog[0] ? stepLog[0] : null;
       const res = entry && entry.result ? entry.result : entry;
       document.querySelectorAll(".choice-btn").forEach((b) => {
@@ -2501,7 +2640,7 @@ function showEvent(game) {
         if (flavorText) {
           html += `<p class="outcome-flavor neutral">${flavorText}</p>`;
         }
-        const afterState = game.getState();
+        const afterState = game2.getState();
         const mechMsgs = [];
         if (afterState.food !== prev.food) mechMsgs.push(`${afterState.food - prev.food >= 0 ? "+" : ""}${afterState.food - prev.food} Food`);
         if (afterState.wear !== prev.wear) mechMsgs.push(`Wear ${afterState.wear - prev.wear >= 0 ? "+" : ""}${afterState.wear - prev.wear}`);
@@ -2547,10 +2686,10 @@ function buildEventChoiceOutcome(stepLog, before, after) {
   return msgs.join(", ");
 }
 __name(buildEventChoiceOutcome, "buildEventChoiceOutcome");
-function showSettlement(game) {
-  const next = game.getCurrentNode();
-  const before = game.getState();
-  const beforeCart = game.getCart();
+function showSettlement(game2) {
+  const next = game2.getCurrentNode();
+  const before = game2.getState();
+  const beforeCart = game2.getCart();
   const nameEl = document.getElementById("settlement-name");
   const descEl = document.getElementById("settlement-desc");
   const actionsEl = document.getElementById("settlement-actions");
@@ -2558,10 +2697,10 @@ function showSettlement(game) {
   nameEl.textContent = next.name;
   descEl.textContent = next.desc;
   actionsEl.innerHTML = "";
-  const available = game.getAvailableActions();
+  const available = game2.getAvailableActions();
   (available.actions || []).forEach((action) => {
     if (action === "craft") {
-      const recipes = game.getAvailableRecipes();
+      const recipes = game2.getAvailableRecipes();
       if (recipes.length === 0) {
         const wrap2 = document.createElement("div");
         wrap2.className = "settlement-action";
@@ -2596,7 +2735,7 @@ function showSettlement(game) {
         const inputs = r.inputs.map((inp) => `${inp.name} \xD7${inp.count} (${inp.have}/${inp.count})`).join(" + ");
         const info = document.createElement("div");
         info.style.cssText = "flex:1;font-size:12px;";
-        info.innerHTML = `<strong>${r.output.icon || ""} ${r.name}</strong> \u2014 ${inputs} \u2192 <span style="color:var(--clr-accent);">${r.output.mbValue} MB</span>`;
+        info.innerHTML = `<strong>${r.output.icon || ""} ${r.name}</strong> \u2014 ${inputs}`;
         const craftBtn = document.createElement("button");
         craftBtn.className = "ctrl-btn";
         craftBtn.style.cssText = "padding:3px 10px;font-size:11px;white-space:nowrap;";
@@ -2605,7 +2744,7 @@ function showSettlement(game) {
         if (craftBtn.disabled) craftBtn.style.opacity = "0.4";
         craftBtn.onclick = () => {
           hideOverlays();
-          game.craftRecipe(r.id);
+          game2.craftRecipe(r.id);
           publishResult(`Crafted ${r.name}.`);
           window.__METIS_RENDER__();
         };
@@ -2617,7 +2756,7 @@ function showSettlement(game) {
       return;
     }
     if (action === "trade") {
-      const cart = game.getCart();
+      const cart = game2.getCart();
       const tradeItems = cart.filter((i) => i.type === "trade" && i.count > 0);
       if (tradeItems.length === 0) {
         const wrap2 = document.createElement("div");
@@ -2643,7 +2782,7 @@ function showSettlement(game) {
       panelTitle.textContent = "Trade";
       tradePanel.appendChild(panelTitle);
       tradeItems.forEach((item) => {
-        const est = game.getTradeEstimate(item.name);
+        const est = game2.getTradeEstimate(item.name);
         const multStr = est && est.mult > 1 ? " \u2191" : est && est.mult < 1 ? " \u2193" : "";
         const row = document.createElement("div");
         row.style.cssText = "display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px;padding:6px;background:rgba(255,255,255,0.5);border-radius:4px;";
@@ -2656,7 +2795,7 @@ function showSettlement(game) {
         tradeBtn.textContent = `Trade ${item.name}`;
         tradeBtn.onclick = () => {
           hideOverlays();
-          const result = game.tradeItem(item.name);
+          const result = game2.tradeItem(item.name);
           if (result) {
             publishResult(`Traded 1 ${result.item} \u2192 +${result.foodGain} food.`);
           } else {
@@ -2689,9 +2828,9 @@ function showSettlement(game) {
     btn.appendChild(sub);
     btn.onclick = () => {
       hideOverlays();
-      game.settlementAction(action);
-      const after = game.getState();
-      const afterCart = game.getCart();
+      game2.settlementAction(action);
+      const after = game2.getState();
+      const afterCart = game2.getCart();
       const outcome = buildSettlementOutcome(action, before, after, beforeCart, afterCart);
       if (outcome) publishResult(outcome);
       window.__METIS_RENDER__();
@@ -2732,25 +2871,21 @@ function buildSettlementOutcome(action, before, after, beforeCart, afterCart) {
   return msgs.join(", ");
 }
 __name(buildSettlementOutcome, "buildSettlementOutcome");
-function showCart(game) {
-  const state = game.getState();
-  const cart = game.getCart();
+function showCart(game2) {
+  const state = game2.getState();
+  const cart = game2.getCart();
   const listEl = document.getElementById("inv-list");
   if (!listEl) return;
   const overloaded = state.usedWeight > state.capacity;
   const excess = state.usedWeight - state.capacity;
-  const weightBar = overloaded ? `<div style="margin-bottom:10px;padding:8px;background:rgba(180,60,60,0.15);border:1px solid rgba(180,60,60,0.4);border-radius:4px;">
-        <div style="font-weight:700;color:#8B0000;">\u26A0 Overloaded \u2014 ${state.usedWeight} / ${state.capacity} kg</div>
-        <div style="font-size:0.9em;color:#8B0000;margin-top:2px;">Offload at least <strong>${excess} kg</strong> before traveling.</div>
-       </div>` : `<div style="margin-bottom:10px;padding:8px;background:rgba(46,90,62,0.12);border:1px solid rgba(46,90,62,0.3);border-radius:4px;">
-        <div style="font-weight:700;color:#2D4A3E;">Cart \u2014 ${state.usedWeight} / ${state.capacity} kg</div>
-       </div>`;
+  const weightBar = overloaded ? `<div style="margin-bottom:10px;padding:8px;background:rgba(180,60,60,0.15);border:1px solid rgba(180,60,60,0.4);border-radius:4px;"><div style="font-weight:700;color:#8B0000;">\u26A0 Overloaded \u2014 ${state.usedWeight} / ${state.capacity} kg</div><div style="font-size:0.9em;color:#8B0000;margin-top:2px;">Offload at least <strong>${excess} kg</strong> before traveling.</div></div>` : `<div style="margin-bottom:10px;padding:8px;background:rgba(46,90,62,0.12);border:1px solid rgba(46,90,62,0.3);border-radius:4px;"><div style="font-weight:700;color:#2D4A3E;">Cart \u2014 ${state.usedWeight} / ${state.capacity} kg</div></div>`;
   const items = cart.map((i) => {
     const canUnload = overloaded && i.count > 0;
-    const mbDisplay = i.mbValue ? `<span style="font-size:0.75em;color:var(--clr-accent);margin-left:4px;">${i.mbValue} MB</span>` : "";
+    const hint = i.category ? getCategoryHint(i.category) : "";
+    const desc = i.desc ? `<div style="font-size:0.8em;color:#5a4a3a;margin-top:2px;">${i.desc}</div>` : "";
     return `
-    <div class="cart-row" style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:4px 0;border-bottom:1px solid rgba(0,0,0,0.08);">
-      <span style="flex:1;">${i.icon || ""} ${i.name} \xD7${i.count} (${i.wt * i.count} kg)${mbDisplay}</span>
+    <div class="cart-row" style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:6px 0;border-bottom:1px solid rgba(0,0,0,0.08);">
+      <span style="flex:1;"><span style="font-weight:600;">${i.icon || ""} ${i.name} \xD7${i.count} (${i.wt * i.count} kg)</span>${hint ? `<div style="font-size:0.75em;color:#6b5c4a;">${hint}</div>` : ""}${desc}</span>
       ${canUnload ? `<button class="ctrl-btn unload-btn" data-item="${i.name}" style="padding:2px 10px;font-size:0.85em;">Unload \u2212${i.wt} kg</button>` : ""}
     </div>`;
   }).join("");
@@ -2758,30 +2893,239 @@ function showCart(game) {
   listEl.querySelectorAll(".unload-btn").forEach((btn) => {
     btn.addEventListener("click", () => {
       const itemName = btn.dataset.item;
-      game.offloadItem(itemName);
-      const newState = game.getState();
+      game2.offloadItem(itemName);
+      const newState = game2.getState();
       if (newState.usedWeight <= newState.capacity) {
         document.getElementById("cart-overlay")?.classList.remove("active");
         window.__METIS_RENDER__();
       } else {
-        showCart(game);
+        showCart(game2);
       }
     });
   });
   document.getElementById("cart-overlay")?.classList.add("active");
 }
 __name(showCart, "showCart");
-function showCrew(game) {
-  const c = game.getCrew();
+function getCategoryHint(category) {
+  const map2 = {
+    provisions: "Restores food when needed.",
+    repair: "Reduces cart wear at settlements.",
+    parts: "Used for cart repair and crafting.",
+    furs: "Trade value: high at Edmonton.",
+    shelter: "Survival aid; shelters crew from weather.",
+    fuel: "Required for cold nights and some recipes.",
+    hunting: "Event bonuses and ammunition support.",
+    medical: "Restores crew condition when injured or ill.",
+    tool: "Enables repair and advanced crafting.",
+    ammo: "Hunting and defensive event bonuses."
+  };
+  return map2[category] || "";
+}
+__name(getCategoryHint, "getCategoryHint");
+function showPreDeparture(game2) {
+  const items = game2.getPreDepartureItems();
+  const state = game2.getState();
+  const listEl = document.getElementById("predeparture-list");
+  const weightEl = document.getElementById("predeparture-weight");
+  const currentEl = document.getElementById("pd-weight-current");
+  const statusEl = document.getElementById("pd-weight-status");
+  const confirmBtn = document.getElementById("pd-confirm");
+  const autoBtn = document.getElementById("pd-auto");
+  if (!listEl || !weightEl || !currentEl || !statusEl || !confirmBtn) return;
+  const autoPack = {
+    "Pemmican Rations": 10,
+    "Spare Axle": 1,
+    "Shaganappi": 3,
+    "Tool Kit": 1,
+    "Bison Hide": 2,
+    "Canvas Tarp": 1,
+    "Firewood Bundle": 1,
+    "Rope (50ft)": 1,
+    "Ammunition Belt": 1,
+    "Medicine Pouch": 1,
+    "Blanket": 1,
+    "Beaver Pelts": 1
+  };
+  function recalc() {
+    let total = 0;
+    items.forEach((item) => {
+      total += item.wt * item.currentCount;
+    });
+    currentEl.textContent = total.toFixed(1);
+    const diff = total - state.capacity;
+    weightEl.classList.remove("over", "at-capacity", "under");
+    statusEl.classList.remove("over", "at-capacity", "under");
+    if (diff > 0) {
+      weightEl.classList.add("over");
+      statusEl.classList.add("over");
+      statusEl.textContent = `${diff.toFixed(1)} kg over`;
+      confirmBtn.disabled = true;
+    } else if (diff === 0) {
+      weightEl.classList.add("at-capacity");
+      statusEl.classList.add("at-capacity");
+      statusEl.textContent = "At capacity";
+      confirmBtn.disabled = false;
+    } else {
+      weightEl.classList.add("under");
+      statusEl.classList.add("under");
+      statusEl.textContent = `${Math.abs(diff).toFixed(1)} kg spare`;
+      confirmBtn.disabled = false;
+    }
+  }
+  __name(recalc, "recalc");
+  function renderList() {
+    listEl.innerHTML = items.map((item) => {
+      const hint = item.category ? getCategoryHint(item.category) : "";
+      const itemWeight = (item.wt * item.currentCount).toFixed(1);
+      return `
+    <div class="pd-row" data-item="${item.name}">
+      <div class="pd-item-info">
+        <span class="pd-icon">${item.icon || ""}</span>
+        <span class="pd-name">${item.name}</span>
+        <span class="pd-category-hint">${hint}</span>
+      </div>
+      <div class="pd-controls">
+        <button class="pd-minus" data-item="${item.name}" ${item.currentCount <= 0 ? "disabled" : ""}>\u2212</button>
+        <span class="pd-count">${item.currentCount}</span>
+        <button class="pd-plus" data-item="${item.name}" ${item.currentCount >= item.maxCount ? "disabled" : ""}>+</button>
+        <span class="pd-weight">${itemWeight} kg</span>
+      </div>
+    </div>`;
+    }).join("");
+    listEl.querySelectorAll(".pd-minus").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const name = btn.dataset.item;
+        const item = items.find((i) => i.name === name);
+        if (item && item.currentCount > 0) {
+          item.currentCount--;
+          game2.setPreDepartureCount(name, item.currentCount);
+          recalc();
+          renderList();
+        }
+      });
+    });
+    listEl.querySelectorAll(".pd-plus").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const name = btn.dataset.item;
+        const item = items.find((i) => i.name === name);
+        if (item && item.currentCount < item.maxCount) {
+          item.currentCount++;
+          game2.setPreDepartureCount(name, item.currentCount);
+          recalc();
+          renderList();
+        }
+      });
+    });
+  }
+  __name(renderList, "renderList");
+  confirmBtn.onclick = () => {
+    game2.confirmPreDeparture();
+    document.getElementById("predeparture-overlay")?.classList.remove("active");
+    window.__METIS_RENDER__();
+  };
+  autoBtn.onclick = () => {
+    Object.entries(autoPack).forEach(([name, count]) => {
+      const item = items.find((i) => i.name === name);
+      if (item) {
+        item.currentCount = count;
+        game2.setPreDepartureCount(name, count);
+      }
+    });
+    recalc();
+    renderList();
+  };
+  recalc();
+  renderList();
+  document.getElementById("predeparture-overlay")?.classList.add("active");
+}
+__name(showPreDeparture, "showPreDeparture");
+function showCrew(game2) {
+  const c = game2.getCrew();
   const el = document.getElementById("crew-status");
   if (!el) return;
   el.innerHTML = `<div>State: ${c.state}</div><div>Morale: ${c.morale}</div><div>Modifier: ${c.mod}</div>`;
   document.getElementById("crew-overlay")?.classList.add("active");
 }
 __name(showCrew, "showCrew");
-function showEnd(game) {
-  const state = game.getState();
-  const cart = game.getCart();
+function showCamp(game2) {
+  const state = game2.getState();
+  if (state.over || state.pendingEvent || state.pendingSettlement) return;
+  const foodEl = document.getElementById("camp-food");
+  const wearEl = document.getElementById("camp-wear");
+  const moraleEl = document.getElementById("camp-morale");
+  const crewEl = document.getElementById("camp-crew");
+  const subEl = document.getElementById("camp-sub");
+  const resultEl = document.getElementById("camp-result");
+  const actionsEl = document.getElementById("camp-actions");
+  if (foodEl) foodEl.textContent = state.food;
+  if (wearEl) wearEl.textContent = state.wear;
+  if (moraleEl) moraleEl.textContent = state.morale;
+  if (crewEl) crewEl.textContent = state.crew;
+  if (subEl) subEl.textContent = `Day ${state.day} \u2014 ${state.season}`;
+  if (resultEl) {
+    resultEl.style.display = "none";
+    resultEl.textContent = "";
+  }
+  const actions = [
+    { type: "rest", label: "Rest Up", cost: "1 food, 0 days" },
+    { type: "forage", label: "Forage", cost: "1 day, no items" },
+    { type: "hunt", label: "Hunt", cost: "1 Ammunition Belt, 1 day" },
+    { type: "repair", label: "Repair Cart", cost: "1 Shaganappi, 0 days" },
+    { type: "scout", label: "Scout Ahead", cost: "1 day, no items" },
+    { type: "dance", label: "Dance / Fiddle", cost: "0 days, no items" },
+    { type: "deeprest", label: "Deep Rest", cost: "2 food, 2 days" }
+  ];
+  if (actionsEl) {
+    actionsEl.innerHTML = "";
+    actionsEl.style.display = "grid";
+    actionsEl.style.visibility = "visible";
+    actions.forEach((a) => {
+      const btn = document.createElement("button");
+      btn.className = "camp-action-btn";
+      btn.innerHTML = `<div class="camp-action-label">${a.label}</div><div class="camp-action-cost">${a.cost}</div>`;
+      btn.addEventListener("click", () => {
+        const result = game2.campAction(a.type);
+        const errEl = document.getElementById("camp-result");
+        if (!result) {
+          if (errEl) {
+            errEl.style.display = "block";
+            errEl.textContent = "No result.";
+          }
+          return;
+        }
+        if (result.error) {
+          if (errEl) {
+            errEl.style.display = "block";
+            errEl.textContent = result.error;
+          }
+          return;
+        }
+        const after = game2.getState();
+        if (foodEl) foodEl.textContent = after.food;
+        if (wearEl) wearEl.textContent = after.wear;
+        if (moraleEl) moraleEl.textContent = after.morale;
+        if (crewEl) crewEl.textContent = after.crew;
+        if (subEl) subEl.textContent = `Day ${after.day} \u2014 ${after.season}`;
+        if (errEl) {
+          errEl.style.display = "block";
+          errEl.textContent = (result?.effects || []).join("\n");
+        }
+        const continueEl = document.getElementById("camp-continue");
+        if (continueEl) continueEl.style.display = "inline-block";
+        actionsEl.style.display = "none";
+      });
+      actionsEl.appendChild(btn);
+      btn.setAttribute("data-camp-type", a.type);
+      if (a.type === "deeprest") btn.classList.add("costs-days");
+      if (a.type === "scout") btn.classList.add("costs-days");
+    });
+  }
+  document.getElementById("camp-overlay")?.classList.add("active");
+}
+__name(showCamp, "showCamp");
+function showEnd(game2) {
+  const state = game2.getState();
+  const cart = game2.getCart();
   const titleEl = document.getElementById("end-title");
   const narrativeEl = document.getElementById("end-narrative");
   const statsEl = document.getElementById("end-stats");

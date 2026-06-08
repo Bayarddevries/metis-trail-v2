@@ -4,7 +4,30 @@ Use this file to log bugs, blockers, and known gaps during work sessions. Each i
 
 ## Active
 
-### 26. Begin adding in location/node markers
+### 32. Overlay sequence broken — pre-departure shows before intro
+- Opened: 2026-06-07
+- Labels: bug, ux
+- Summary: `bootstrap()` in `src/main.js` immediately activates `#predeparture-overlay` and deactivates `#intro-overlay` because engine initial state has `preDeparture: true`. Player never sees the intro screen with "Begin Journey" button.
+- Root cause: `src/systems/engine.js` line 50 sets `preDeparture: true` in initial state. `bootstrap()` lines 32-37 check this and swap overlays on load.
+- Expected: Intro overlay → click "Begin Journey" → pre-departure overlay → confirm → game start.
+- Actual: Pre-departure shows immediately; "Begin Journey" click hides intro but never activates pre-departure.
+- Fix: In `bootstrap()`, always show intro first. On `#intro-start` click, hide intro AND activate pre-departure overlay. Then on `#pd-confirm`, hide pre-departure and start game.
+
+### 33. HBC crafting recipe unreachable
+- Opened: 2026-06-07
+- Labels: bug, crafting
+- Summary: Recipe `finished_hides` exists with `settlement: 'hbc'` in `getAvailableRecipes()` but HBC action list does NOT include `'craft'`. Player can never access it.
+- Fix: Either add `'craft'` to HBC actions in `availableSettlementActions()` or reassign recipe to a settlement type that has it.
+
+### 34. Camp overlay loses action panel on reopen
+- Opened: 2026-06-07
+- Labels: bug, ux
+- Summary: After one camp action click, `showCamp()` hides the action buttons and shows a Continue button. On future Camp opens the action list is invisible, leaving only a blank Continue/result area.
+- Root cause: `actionsEl.style.display = 'none'` set on click was never reset before rebuilding.
+- Fix: Forced `actionsEl.style.display = 'grid'` and `actionsEl.style.visibility = 'visible'` in `showCamp()` before rebuilding buttons.
+- Files: `src/main.js` `showCamp()` lines 869-933.
+
+## Resolved
 - Opened: 2026-06-05
 - Labels: enhancement
 - Summary: Visual markers on the map for settlements/nodes along the trail. Leaflet markers for each location.
@@ -18,6 +41,7 @@ Use this file to log bugs, blockers, and known gaps during work sessions. Each i
 - Opened: 2026-06-04
 - Labels: enhancement
 - Summary: Pre-departure cart packing phase with budget/space constraints. Player-driven starting loadout.
+- Notes: v43 implements this as the pre-departure overlay with 100kg capacity, category legend, and Auto-Pack. BLOCKED by overlay sequence bug (#32).
 
 ### 13. Weather system addition
 - Opened: 2026-06-04
@@ -40,13 +64,21 @@ Use this file to log bugs, blockers, and known gaps during work sessions. Each i
 
 ### 5. Add in Testing (headless and browser) — CURRENT PRIORITY
 - Opened: 2026-06-04
-- **STATUS: COMPLETE (testing) + BALANCE PASS APPLIED — Phase 6**
+- **STATUS: COMPLETE — Phase 6**
 - Two tracks:
   1. **Headless**: ✅ COMPLETE — `tests/simulate-entry.js` + `scripts/build-test.mjs`, 200 sims × 2 runs
   2. **Browser click-through**: ✅ COMPLETE — full flow verified, map/overlays/endings all render
 - Balance pass applied (v38): DAILY_FOOD 1.0→1.2, wear chances reduced, repair -2 wear, EVENT_CHANCE 0.35→0.45, triumphant threshold 1400→1200
 - Post-balance results (200 sims): win rate 66.5%, starvation 11%, cart failure 19.5%, avg events 8.5/game
-- Remaining: win rate still above target (25-40%). May need weather system or further tuning.
+- Subsequent v41/v44 changes: cart weight reduction, category hints, MB removal, crafting exposure, pre-departure overlay — no balance changes, so win rate projection still valid.
+- Remaining: win rate still above 25-40% target. Weather system or food economy further tuning needed.
+
+### 31. Starting cart offload is too punishing for new players
+- Opened: 2026-06-07
+- Labels: balance, ux
+- Summary: The initial 146.5 kg vs 100 kg overload forces players to discard items without enough information about their future utility. The offload threshold is too aggressive, removing most useful items before travel begins.
+- Notes: v41 reduced starting Pemmican (20→15) and Firewood Bundle (3→2), dropping starting weight to ~128 kg. Added cart tooltip/hints (`getCategoryHint()`) so early offload is informed rather than blind. Pre-departure overlay (v43) lets players choose loadout before travel.
+- Status: Resolved in v41/v43.
 
 ## Resolved
 

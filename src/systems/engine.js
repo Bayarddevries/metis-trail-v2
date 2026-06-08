@@ -47,6 +47,7 @@ export function createGame(seed = null) {
     usedWeight: 0,
     credit: { hbc: 0, metis: 0, nwmp: 0, mission: 0 },
     perishable: {},
+    preDeparture: false,
   };
 
   function checkGameOver() {
@@ -349,6 +350,13 @@ export function createGame(seed = null) {
       if (S.crew !== 'exhausted') S.crew = 'rested';
     }
     if (action === 'rumours') advance();
+    if (action === 'craft') {
+      const recipes = game.getAvailableRecipes();
+      if (recipes.length === 0) return { error: 'No recipes available' };
+      // Note: The actual crafting is done via the UI buttons which call game.craftRecipe()
+      // This just advances time for the crafting activity
+      advance();
+    }
     checkGameOver();
     return [];
   }
@@ -359,27 +367,28 @@ export function createGame(seed = null) {
     chooseEventChoice,
     settlementAction,
     getState() {
-      return {
-        day: S.day,
-        month: S.month,
-        year: S.year,
-        season: S.season,
-        crew: S.crew,
-        food: S.food,
-        wear: S.wear,
-        morale: S.morale,
-        node: S.node,
-        segmentDay: S.segmentDay,
-        over: S.over,
-        won: S.won,
-        endReason: S.endReason || null,
-        score: S.score,
-        pendingEvent: S.pendingEvent,
-        pendingSettlement: S.pendingSettlement,
-        usedWeight: totalWeight(cart),
-        capacity: S.capacity,
-      };
-    },
+        return {
+          day: S.day,
+          month: S.month,
+          year: S.year,
+          season: S.season,
+          crew: S.crew,
+          food: S.food,
+          wear: S.wear,
+          morale: S.morale,
+          node: S.node,
+          segmentDay: S.segmentDay,
+          over: S.over,
+          won: S.won,
+          endReason: S.endReason || null,
+          score: S.score,
+          pendingEvent: S.pendingEvent,
+          pendingSettlement: S.pendingSettlement,
+          usedWeight: totalWeight(cart),
+          capacity: S.capacity,
+          preDeparture: S.preDeparture,
+        };
+      },
     getCart() {
       return JSON.parse(JSON.stringify(cart));
     },
@@ -466,6 +475,103 @@ export function createGame(seed = null) {
           }),
         }));
     },
+    campAction(type) {
+      const action = String(type || '').toLowerCase();
+      const costItems = [];
+      const effects = [];
+      if (action === 'rest') {
+        if (S.food < 1) return { error: 'Not enough food to rest.' };
+        S.food -= 1;
+        costItems.push({ name: 'Food', count: -1 });
+        const roll = d() + crewMod(S);
+        if (roll >= 15) {
+          S.crew = 'rested';
+          S.morale = Math.max(0, Math.min(100, S.morale + 20));
+          S.wear = Math.max(0, S.wear - 1);
+          S.travelDaysWithoutRest = 0;
+          effects.push('Wonderful rest.', 'Crew rested', 'Morale +20', 'Wear -1');
+        } else if (roll >= 8) {
+          S.crew = 'rested';
+          S.morale = Math.max(0, Math.min(100, S.morale + 15));
+          S.wear = Math.max(0, S.wear - 1);
+          S.travelDaysWithoutRest = 0;
+          effects.push('Crew rested', 'Morale +15', 'Wear -1');
+        } else {
+          S.crew = 'tired';
+          S.morale = Math.max(0, Math.min(100, S.morale + 5));
+          S.travelDaysWithoutRest = 0;
+          effects.push('Rough night.', 'Morale +5', 'Crew tired');
+        }
+      } else if (action === 'forage') {
+        const roll = d() + crewMod(S);
+        const baseGain = Math.floor(Math.random() * 6) + (roll >= 12 ? 6 : roll >= 8 ? 4 : 1);
+        S.food += baseGain;
+        if (roll >= 12) {
+          effects.push(`Excellent foraging. +${baseGain} Food`);
+        } else if (roll >= 8) {
+          effects.push(`Foraged +${baseGain} Food`);
+        } else if (roll >= 5) {
+          effects.push(`Lean haul. +${baseGain} Food`);
+        } else {
+          effects.push('Found little today.');
+        }
+      } else if (action === 'hunt') {
+        const ammo = cart.find((i) => i.name === 'Ammunition Belt');
+        if (!ammo || ammo.count < 1) return { error: 'Need 1 Ammunition Belt to hunt.' };
+        ammo.count -= 1;
+        costItems.push({ name: 'Ammunition Belt', count: -1 });
+        advance();
+        const roll = d() + crewMod(S);
+        if (roll >= 10) {
+          const gained = Math.floor(Math.random() * 9) + 6;
+          S.food += gained;
+          effects.push(`+${gained} Food`);
+        } else if (roll <= 5) {
+          effects.push('Shot went wide. No food gained.');
+        } else {
+          effects.push('Close. Food scarce today.');
+        }
+      } else if (action === 'repair') {
+        const shag = cart.find((i) => i.name === 'Shaganappi');
+        if (!shag || shag.count < 1) return { error: 'Need 1 Shaganappi to repair.' };
+        shag.count -= 1;
+        costItems.push({ name: 'Shaganappi', count: -1 });
+        const hasAxle = cart.some((i) => i.name === 'Spare Axle');
+        const repaired = hasAxle ? 3 : 2;
+        S.wear = Math.max(0, S.wear - repaired);
+        effects.push(`Wear -${repaired}`);
+      } else if (action === 'scout') {
+        advance();
+        const roll = d() + crewMod(S);
+        if (roll >= 12) {
+          const n = NODES[S.node + 1];
+          const terrain = (n && n.terrain) || 'plains';
+          effects.push(`Scout succeeded. Next leg is ${terrain.replace(/_/g, ' ')}.`);
+        } else {
+          effects.push('Scout returned with nothing clear to report.');
+        }
+      } else if (action === 'dance') {
+        const bonus = S.crew === 'rested' ? 12 : S.crew === 'tired' ? 8 : 5;
+        S.morale = Math.max(0, Math.min(100, S.morale + bonus));
+        effects.push(`Morale +${bonus}`);
+      } else if (action === 'deeprest') {
+        if (S.food < 2) return { error: 'Need 2 Food for a deep rest.' };
+        S.food -= 2;
+        S.crew = 'rested';
+        S.morale = Math.max(0, Math.min(100, S.morale + 30));
+        S.wear = Math.max(0, S.wear - 2);
+        S.travelDaysWithoutRest = 0;
+        effects.push('+2 Food spent', 'Crew rested', 'Morale +30', 'Wear -2');
+        advance();
+        advance();
+      } else {
+        return { error: 'Unknown camp action.' };
+      }
+
+      if (effects.length === 0 && costItems.length === 0) effects.push('Nothing changes.');
+      return { day: S.day, effects, costItems };
+    },
+
     craftRecipe(recipeId) {
       const recipes = this.getAvailableRecipes();
       const recipe = recipes.find((r) => r.id === recipeId);
@@ -480,7 +586,20 @@ export function createGame(seed = null) {
         const item = cart.find((c) => c.name === inp.name);
         item.count -= inp.count;
       }
-      // Add output as a trade good
+      // Add output as a trade good, or apply situational craft
+      if (recipe.consumedOnUse) {
+        if (recipe.id === 'raft' && !S.flags.raftUsed) {
+          S.flags.raftUsed = true;
+          S.trailIntel = S.trailIntel || [];
+          return { applied: 'raft' };
+        }
+        if (recipe.id === 'signal_fire') {
+          S.trailIntel = S.trailIntel || [];
+          S.trailIntel.push({ fromDay: S.day, text: 'Signal fire lit.', bonus: { dcBonus: 2 } });
+          return { applied: 'signal_fire' };
+        }
+        return null;
+      }
       const existing = cart.find((c) => c.name === recipe.output.name);
       if (existing) {
         existing.count++;
@@ -498,6 +617,7 @@ export function createGame(seed = null) {
       }
       return recipe.output.name;
     },
+
     getNodes() {
       return NODES;
     },
@@ -553,16 +673,42 @@ export function createGame(seed = null) {
     getScore() {
       return S.score;
     },
+    getPreDepartureItems() {
+      return cart.map((item) => ({
+        name: item.name,
+        wt: item.wt,
+        maxCount: item.count,
+        currentCount: item.count,
+        category: item.category,
+        desc: item.desc,
+        icon: item.icon,
+        mbValue: item.mbValue,
+      }));
+    },
+    setPreDepartureCount(itemName, newCount) {
+      const item = cart.find((i) => i.name === itemName);
+      if (!item) return false;
+      const maxCount = item.count;
+      const clamped = Math.max(0, Math.min(newCount, maxCount));
+      item.count = clamped;
+      S.usedWeight = totalWeight(cart);
+      return true;
+    },
+    confirmPreDeparture() {
+      S.preDeparture = false;
+      S.usedWeight = totalWeight(cart);
+      return cart.map((i) => ({ name: i.name, count: i.count, wt: i.wt }));
+    },
   };
 }
 
 function availableSettlementActions(type) {
   const base = ['rest'];
-  if (type === 'hbc') return [...base, 'trade', 'repair', 'forage', 'recruit'];
-  if (type === 'metis') return [...base, 'trade', 'forage', 'rumours', 'recruit'];
+  if (type === 'hbc') return [...base, 'trade', 'repair', 'forage', 'recruit', 'craft'];
+  if (type === 'metis') return [...base, 'craft', 'trade', 'forage', 'rumours', 'recruit'];
   if (type === 'trading') return [...base, 'trade', 'forage', 'rumours'];
   if (type === 'mission') return [...base, 'heal', 'rumours'];
-  if (type === 'nwmp') return [...base, 'trade', 'rumours'];
+  if (type === 'nwmp') return [...base, 'craft', 'trade', 'rumours'];
   return base;
 }
 

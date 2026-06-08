@@ -2,7 +2,7 @@ const ITEMS = [
   {
     name: 'Pemmican Rations',
     wt: 2.5,
-    count: 20,
+    count: 7,
     type: 'food',
     category: 'provisions',
     mbValue: 0.4,
@@ -60,7 +60,7 @@ const ITEMS = [
   {
     name: 'Bison Hide',
     wt: 6,
-    count: 3,
+    count: 2,
     type: 'trade',
     category: 'furs',
     mbValue: 1.25,
@@ -82,7 +82,7 @@ const ITEMS = [
   {
     name: 'Firewood Bundle',
     wt: 6,
-    count: 3,
+    count: 1,
     type: 'fuel',
     category: 'fuel',
     mbValue: 0.2,

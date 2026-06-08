@@ -27,7 +27,13 @@ export function bootstrap(seed = null) {
     console.error('Metis bootstrap aborted: #game-root is missing.');
     return;
   }
+
+  const state = game.getState();
+
+  // Always show intro first — pre-departure activates after "Begin Journey" click
   renderNarrative(['Welcome to the Métis Trail. Click Begin Journey to start.']);
+  document.getElementById('intro-overlay')?.classList.add('active');
+  document.getElementById('predeparture-overlay')?.classList.remove('active');
 
   // Always init the map so it's ready behind the intro overlay
   initMap();
@@ -37,12 +43,18 @@ export function bootstrap(seed = null) {
   if (gameRoot) {
     gameRoot.addEventListener('click', (e) => {
       if (e.target.closest('#intro-start')) {
-        const overlay = find('#intro-overlay');
-        if (overlay) {
-          overlay.classList.remove('active');
-          overlay.setAttribute('hidden', '');
+        const introOverlay = find('#intro-overlay');
+        if (introOverlay) {
+          introOverlay.classList.remove('active');
+          introOverlay.setAttribute('hidden', '');
         }
-        window.__METIS_RENDER__();
+        // If pre-departure is enabled, show it now
+        const currentState = game.getState();
+        if (currentState.preDeparture) {
+          showPreDeparture(game);
+        } else {
+          window.__METIS_RENDER__();
+        }
       }
     });
   } else {
@@ -61,12 +73,13 @@ export function bootstrap(seed = null) {
     travelBtn.setAttribute('data-metis-travel-bound', '1');
   }
 
+  const campClose = find('#camp-close-btn');
+  const campContinue = find('#camp-continue');
+  if (campClose) campClose.onclick = () => find('#camp-overlay')?.classList.remove('active');
+  if (campContinue) campContinue.onclick = () => find('#camp-overlay')?.classList.remove('active');
+
   const campBtn = find('#btn-camp');
-  if (campBtn) campBtn.onclick = () => {
-    publishCampResult();
-    game.makeCamp();
-    window.__METIS_RENDER__();
-  };
+  if (campBtn) campBtn.onclick = () => showCamp(game);
 
   const cartBtn = find('#btn-cart');
   if (cartBtn) cartBtn.onclick = () => showCart(game);
@@ -183,6 +196,10 @@ function render() {
 
   if (state.over) {
     showEnd(game);
+    return;
+  }
+  if (state.preDeparture) {
+    showPreDeparture(game);
     return;
   }
   if (state.pendingEvent) {
@@ -509,7 +526,7 @@ function showSettlement(game) {
         const inputs = r.inputs.map((inp) => `${inp.name} ×${inp.count} (${inp.have}/${inp.count})`).join(' + ');
         const info = document.createElement('div');
         info.style.cssText = 'flex:1;font-size:12px;';
-        info.innerHTML = `<strong>${r.output.icon || ''} ${r.name}</strong> — ${inputs} → <span style="color:var(--clr-accent);">${r.output.mbValue} MB</span>`;
+        info.innerHTML = `<strong>${r.output.icon || ''} ${r.name}</strong> — ${inputs}`;
         const craftBtn = document.createElement('button');
         craftBtn.className = 'ctrl-btn';
         craftBtn.style.cssText = 'padding:3px 10px;font-size:11px;white-space:nowrap;';
@@ -662,24 +679,18 @@ function showCart(game) {
   const overloaded = state.usedWeight > state.capacity;
   const excess = state.usedWeight - state.capacity;
 
-  // Weight summary header
   const weightBar = overloaded
-    ? `<div style="margin-bottom:10px;padding:8px;background:rgba(180,60,60,0.15);border:1px solid rgba(180,60,60,0.4);border-radius:4px;">
-        <div style="font-weight:700;color:#8B0000;">⚠ Overloaded — ${state.usedWeight} / ${state.capacity} kg</div>
-        <div style="font-size:0.9em;color:#8B0000;margin-top:2px;">Offload at least <strong>${excess} kg</strong> before traveling.</div>
-       </div>`
-    : `<div style="margin-bottom:10px;padding:8px;background:rgba(46,90,62,0.12);border:1px solid rgba(46,90,62,0.3);border-radius:4px;">
-        <div style="font-weight:700;color:#2D4A3E;">Cart — ${state.usedWeight} / ${state.capacity} kg</div>
-       </div>`;
+    ? `<div style="margin-bottom:10px;padding:8px;background:rgba(180,60,60,0.15);border:1px solid rgba(180,60,60,0.4);border-radius:4px;"><div style="font-weight:700;color:#8B0000;">⚠ Overloaded — ${state.usedWeight} / ${state.capacity} kg</div><div style="font-size:0.9em;color:#8B0000;margin-top:2px;">Offload at least <strong>${excess} kg</strong> before traveling.</div></div>`
+    : `<div style="margin-bottom:10px;padding:8px;background:rgba(46,90,62,0.12);border:1px solid rgba(46,90,62,0.3);border-radius:4px;"><div style="font-weight:700;color:#2D4A3E;">Cart — ${state.usedWeight} / ${state.capacity} kg</div></div>`;
 
-  // Item list — only show unload buttons when overloaded, and only on items with count > 0
   const items = cart
     .map((i) => {
       const canUnload = overloaded && i.count > 0;
-      const mbDisplay = i.mbValue ? `<span style="font-size:0.75em;color:var(--clr-accent);margin-left:4px;">${i.mbValue} MB</span>` : '';
+      const hint = i.category ? getCategoryHint(i.category) : '';
+      const desc = i.desc ? `<div style="font-size:0.8em;color:#5a4a3a;margin-top:2px;">${i.desc}</div>` : '';
       return `
-    <div class="cart-row" style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:4px 0;border-bottom:1px solid rgba(0,0,0,0.08);">
-      <span style="flex:1;">${i.icon || ''} ${i.name} ×${i.count} (${i.wt * i.count} kg)${mbDisplay}</span>
+    <div class="cart-row" style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:6px 0;border-bottom:1px solid rgba(0,0,0,0.08);">
+      <span style="flex:1;"><span style="font-weight:600;">${i.icon || ''} ${i.name} ×${i.count} (${i.wt * i.count} kg)</span>${hint ? `<div style="font-size:0.75em;color:#6b5c4a;">${hint}</div>` : ''}${desc}</span>
       ${canUnload ? `<button class="ctrl-btn unload-btn" data-item="${i.name}" style="padding:2px 10px;font-size:0.85em;">Unload −${i.wt} kg</button>` : ''}
     </div>`;
     })
@@ -705,12 +716,225 @@ function showCart(game) {
   document.getElementById('cart-overlay')?.classList.add('active');
 }
 
+function getCategoryHint(category) {
+  const map = {
+    provisions: 'Restores food when needed.',
+    repair: 'Reduces cart wear at settlements.',
+    parts: 'Used for cart repair and crafting.',
+    furs: 'Trade value: high at Edmonton.',
+    shelter: 'Survival aid; shelters crew from weather.',
+    fuel: 'Required for cold nights and some recipes.',
+    hunting: 'Event bonuses and ammunition support.',
+    medical: 'Restores crew condition when injured or ill.',
+    tool: 'Enables repair and advanced crafting.',
+    ammo: 'Hunting and defensive event bonuses.',
+  };
+  return map[category] || '';
+}
+
+function showPreDeparture(game) {
+  const items = game.getPreDepartureItems();
+  const state = game.getState();
+  const listEl = document.getElementById('predeparture-list');
+  const weightEl = document.getElementById('predeparture-weight');
+  const currentEl = document.getElementById('pd-weight-current');
+  const statusEl = document.getElementById('pd-weight-status');
+  const confirmBtn = document.getElementById('pd-confirm');
+  const autoBtn = document.getElementById('pd-auto');
+
+  if (!listEl || !weightEl || !currentEl || !statusEl || !confirmBtn) return;
+
+  // Auto-pack preset (balanced loadout ~92.5 kg)
+  const autoPack = {
+    'Pemmican Rations': 10,
+    'Spare Axle': 1,
+    'Shaganappi': 3,
+    'Tool Kit': 1,
+    'Bison Hide': 2,
+    'Canvas Tarp': 1,
+    'Firewood Bundle': 1,
+    'Rope (50ft)': 1,
+    'Ammunition Belt': 1,
+    'Medicine Pouch': 1,
+    'Blanket': 1,
+    'Beaver Pelts': 1,
+  };
+
+  function recalc() {
+    let total = 0;
+    items.forEach(item => {
+      total += item.wt * item.currentCount;
+    });
+    currentEl.textContent = total.toFixed(1);
+    const diff = total - state.capacity;
+    weightEl.classList.remove('over', 'at-capacity', 'under');
+    statusEl.classList.remove('over', 'at-capacity', 'under');
+    if (diff > 0) {
+      weightEl.classList.add('over');
+      statusEl.classList.add('over');
+      statusEl.textContent = `${diff.toFixed(1)} kg over`;
+      confirmBtn.disabled = true;
+    } else if (diff === 0) {
+      weightEl.classList.add('at-capacity');
+      statusEl.classList.add('at-capacity');
+      statusEl.textContent = 'At capacity';
+      confirmBtn.disabled = false;
+    } else {
+      weightEl.classList.add('under');
+      statusEl.classList.add('under');
+      statusEl.textContent = `${Math.abs(diff).toFixed(1)} kg spare`;
+      confirmBtn.disabled = false;
+    }
+  }
+
+  function renderList() {
+    listEl.innerHTML = items.map(item => {
+      const hint = item.category ? getCategoryHint(item.category) : '';
+      const itemWeight = (item.wt * item.currentCount).toFixed(1);
+      return `
+    <div class="pd-row" data-item="${item.name}">
+      <div class="pd-item-info">
+        <span class="pd-icon">${item.icon || ''}</span>
+        <span class="pd-name">${item.name}</span>
+        <span class="pd-category-hint">${hint}</span>
+      </div>
+      <div class="pd-controls">
+        <button class="pd-minus" data-item="${item.name}" ${item.currentCount <= 0 ? 'disabled' : ''}>−</button>
+        <span class="pd-count">${item.currentCount}</span>
+        <button class="pd-plus" data-item="${item.name}" ${item.currentCount >= item.maxCount ? 'disabled' : ''}>+</button>
+        <span class="pd-weight">${itemWeight} kg</span>
+      </div>
+    </div>`;
+    }).join('');
+
+    // Bind +/- buttons
+    listEl.querySelectorAll('.pd-minus').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const name = btn.dataset.item;
+        const item = items.find(i => i.name === name);
+        if (item && item.currentCount > 0) {
+          item.currentCount--;
+          game.setPreDepartureCount(name, item.currentCount);
+          recalc();
+          renderList();
+        }
+      });
+    });
+    listEl.querySelectorAll('.pd-plus').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const name = btn.dataset.item;
+        const item = items.find(i => i.name === name);
+        if (item && item.currentCount < item.maxCount) {
+          item.currentCount++;
+          game.setPreDepartureCount(name, item.currentCount);
+          recalc();
+          renderList();
+        }
+      });
+    });
+  }
+
+  confirmBtn.onclick = () => {
+    game.confirmPreDeparture();
+    document.getElementById('predeparture-overlay')?.classList.remove('active');
+    window.__METIS_RENDER__();
+  };
+
+  autoBtn.onclick = () => {
+    Object.entries(autoPack).forEach(([name, count]) => {
+      const item = items.find(i => i.name === name);
+      if (item) {
+        item.currentCount = count;
+        game.setPreDepartureCount(name, count);
+      }
+    });
+    recalc();
+    renderList();
+  };
+
+  // Initial render
+  recalc();
+  renderList();
+  document.getElementById('predeparture-overlay')?.classList.add('active');
+}
+
 function showCrew(game) {
   const c = game.getCrew();
   const el = document.getElementById('crew-status');
   if (!el) return;
   el.innerHTML = `<div>State: ${c.state}</div><div>Morale: ${c.morale}</div><div>Modifier: ${c.mod}</div>`;
   document.getElementById('crew-overlay')?.classList.add('active');
+}
+
+function showCamp(game) {
+  const state = game.getState();
+  if (state.over || state.pendingEvent || state.pendingSettlement) return;
+  const foodEl = document.getElementById('camp-food');
+  const wearEl = document.getElementById('camp-wear');
+  const moraleEl = document.getElementById('camp-morale');
+  const crewEl = document.getElementById('camp-crew');
+  const subEl = document.getElementById('camp-sub');
+  const resultEl = document.getElementById('camp-result');
+  const actionsEl = document.getElementById('camp-actions');
+
+  if (foodEl) foodEl.textContent = state.food;
+  if (wearEl) wearEl.textContent = state.wear;
+  if (moraleEl) moraleEl.textContent = state.morale;
+  if (crewEl) crewEl.textContent = state.crew;
+  if (subEl) subEl.textContent = `Day ${state.day} — ${state.season}`;
+  if (resultEl) { resultEl.style.display = 'none'; resultEl.textContent = ''; }
+
+  const actions = [
+    { type: 'rest', label: 'Rest Up', cost: '1 food, 0 days' },
+    { type: 'forage', label: 'Forage', cost: '1 day, no items' },
+    { type: 'hunt', label: 'Hunt', cost: '1 Ammunition Belt, 1 day' },
+    { type: 'repair', label: 'Repair Cart', cost: '1 Shaganappi, 0 days' },
+    { type: 'scout', label: 'Scout Ahead', cost: '1 day, no items' },
+    { type: 'dance', label: 'Dance / Fiddle', cost: '0 days, no items' },
+    { type: 'deeprest', label: 'Deep Rest', cost: '2 food, 2 days' },
+  ];
+
+  if (actionsEl) {
+    actionsEl.innerHTML = '';
+    actionsEl.style.display = 'grid';
+    actionsEl.style.visibility = 'visible';
+    actions.forEach((a) => {
+      const btn = document.createElement('button');
+      btn.className = 'camp-action-btn';
+      btn.innerHTML = `<div class="camp-action-label">${a.label}</div><div class="camp-action-cost">${a.cost}</div>`;
+      btn.addEventListener('click', () => {
+        const result = game.campAction(a.type);
+        const errEl = document.getElementById('camp-result');
+        if (!result) {
+          if (errEl) { errEl.style.display = 'block'; errEl.textContent = 'No result.'; }
+          return;
+        }
+        if (result.error) {
+          if (errEl) { errEl.style.display = 'block'; errEl.textContent = result.error; }
+          return;
+        }
+        const after = game.getState();
+        if (foodEl) foodEl.textContent = after.food;
+        if (wearEl) wearEl.textContent = after.wear;
+        if (moraleEl) moraleEl.textContent = after.morale;
+        if (crewEl) crewEl.textContent = after.crew;
+        if (subEl) subEl.textContent = `Day ${after.day} — ${after.season}`;
+        if (errEl) {
+          errEl.style.display = 'block';
+          errEl.textContent = (result?.effects || []).join('\n');
+        }
+        const continueEl = document.getElementById('camp-continue');
+        if (continueEl) continueEl.style.display = 'inline-block';
+        actionsEl.style.display = 'none';
+        });
+        actionsEl.appendChild(btn);
+        btn.setAttribute('data-camp-type', a.type);
+        if (a.type === 'deeprest') btn.classList.add('costs-days');
+        if (a.type === 'scout') btn.classList.add('costs-days');
+    });
+  }
+
+  document.getElementById('camp-overlay')?.classList.add('active');
 }
 
 function showEnd(game) {
