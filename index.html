@@ -121,25 +121,53 @@
 
   #controls {
     display: flex;
+    flex-direction: column;
     padding: 6px 16px;
-    gap: 5px;
+    gap: 6px;
     border-top: 1px solid var(--clr-accent);
     background: var(--clr-bg-dark);
     flex-shrink: 0;
   }
   .ctrl-btn {
-    padding: 6px 16px;
+    padding: 10px 14px;
     background: var(--clr-btn-bg);
     color: var(--clr-btn-text);
     border: none;
-    border-radius: 6px;
+    border-radius: 8px;
     font-family: var(--font-heading);
-    font-size: 12px;
-    font-weight: 500;
+    font-size: 13px;
+    font-weight: 600;
     cursor: pointer;
+    min-height: 44px;
   }
-  .ctrl-btn:hover { background: var(--clr-btn-hover); }
+  .ctrl-btn.primary {
+    background: var(--clr-ink);
+    color: var(--clr-bg);
+  }
+  .ctrl-btn.primary:hover { background: var(--clr-btn-hover); }
+  .ctrl-btn.secondary {
+    background: var(--clr-bg);
+    color: var(--clr-ink);
+    border: 2px solid var(--clr-accent);
+  }
+  .ctrl-btn.secondary:hover { background: #efe5d4; }
+  .ctrl-btn.ghost {
+    background: rgba(255,255,255,0.35);
+    color: var(--clr-ink);
+    border: 1.5px solid rgba(26,20,16,0.18);
+  }
+  .ctrl-btn.ghost:hover { background: rgba(255,255,255,0.65); }
+  .ctrl-btn:hover { background: var(--clr-btn-hover); color: var(--clr-btn-text); }
   .ctrl-btn:disabled { background: #8a9a7a; cursor: not-allowed; }
+  .secondary-btns {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  @media (max-width: 520px) {
+    .secondary-btns { grid-template-columns: 1fr; }
+  }
 
   .overlay {
     display: none;
@@ -900,10 +928,12 @@
       <div id="narrative">Welcome to the Métis Trail. Click Begin Journey to start.</div>
       <div id="trail-intel" style="display:none;padding:6px 10px;background:rgba(184,134,11,0.08);border-top:1px solid rgba(184,134,11,0.2);font-size:0.85em;color:#B8860B;"></div>
       <div id="controls">
-        <button class="ctrl-btn" id="btn-travel">Travel 1 Day</button>
-        <button class="ctrl-btn" id="btn-camp">Make Camp</button>
-        <button class="ctrl-btn" id="btn-cart">Cart</button>
-        <button class="ctrl-btn" id="btn-crew">Crew</button>
+        <button class="ctrl-btn primary" id="btn-travel">Travel 1 Day</button>
+        <button class="ctrl-btn secondary" id="btn-camp">Make Camp</button>
+        <div class="secondary-btns">
+          <button class="ctrl-btn ghost" id="btn-cart">Cart</button>
+          <button class="ctrl-btn ghost" id="btn-crew">Crew</button>
+        </div>
       </div>
     </div>
   </div>
