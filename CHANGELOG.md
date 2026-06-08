@@ -2,6 +2,19 @@
 
 All notable changes are documented here. Format loosely follows Keep a Changelog.
 
+## [v56] - 2026-06-08
+
+### Added — Crafting discoverability hint in settlement UI (#33)
+
+- When a settlement has matching recipes, a hint line now appears below the settlement description:
+  - Single recipe: "⚗️ Crafting: Finished Hides — 2×Bison Hide + 1×Shaganappi"
+  - Multiple recipes: "⚗️ Crafting available (2 recipes)"
+- Hidden when no recipes match the current settlement type
+- Styled as small italic text with a subtle top border separator
+- Hint element is reused across settlement visits (created once, toggled visible/hidden)
+
+Files: `src/main.js`, `src/template.html`, `dist/index.html`.
+
 ## [v55] - 2026-06-08
 
 ### Added — Location/node markers on map (#26)

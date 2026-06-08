@@ -505,6 +505,25 @@ function showSettlement(game) {
   descEl.textContent = next.desc;
   actionsEl.innerHTML = '';
 
+  // Crafting discoverability hint (#33)
+  const recipes = game.getAvailableRecipes();
+  let craftHintEl = document.getElementById('settlement-craft-hint');
+  if (!craftHintEl) {
+    craftHintEl = document.createElement('div');
+    craftHintEl.id = 'settlement-craft-hint';
+    craftHintEl.className = 'settlement-craft-hint';
+    descEl.parentNode.insertBefore(craftHintEl, descEl.nextSibling);
+  }
+  if (recipes.length > 0) {
+    const summary = recipes.length === 1
+      ? `⚗️ Crafting: ${recipes[0].name} — ${recipes[0].inputs.map(i => `${i.count}×${i.name}`).join(' + ')}`
+      : `⚗️ Crafting available (${recipes.length} recipe${recipes.length > 1 ? 's' : ''})`;
+    craftHintEl.textContent = summary;
+    craftHintEl.style.display = 'block';
+  } else {
+    craftHintEl.style.display = 'none';
+  }
+
   const available = game.getAvailableActions();
   const primaryActions = [];
   const secondaryActions = [];

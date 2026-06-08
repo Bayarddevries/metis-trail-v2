@@ -27,6 +27,11 @@ Use this file to log bugs, blockers, and known gaps during work sessions. Each i
 - Resolved: 2026-06-08 (v50)
 - Fix: Round to 1 decimal after DAILY_FOOD subtraction; Math.floor() on display in status bar and camp overlay.
 
+### 33. Crafting discoverability in settlement UI
+- Opened: 2026-06-07
+- Resolved: 2026-06-08 (v56)
+- Fix: Added hint line below settlement description when recipes are available. Shows recipe name + inputs for single recipe, count for multiple. Hidden when no recipes match.
+
 ### 26. Add location/node markers on map
 - Opened: 2026-06-07
 - Resolved: 2026-06-08 (v55)
