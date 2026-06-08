@@ -1,21 +1,167 @@
-# HANDOFF — Metis Trail V2 Session HW Handoff
+# HANDOFF — Metis Trail V2
 
-## Session Summary
-- 2026-06-08: Fixed remaining transparent settlement buttons (.secondary-action, .utility-action) in template CSS. Fixed #43 duplicate stat headings by replacing innerHTML with textContent in renderStatusBar(). Rebuilt to v49.
-- Local server: http://100.108.183.33:5173/
-- Button CSS changes: secondary-action now uses opaque #d4c9b4; utility-action uses rgba(210,200,180,0.92).
+**Last updated:** 2026-06-08 by OWL
+**Version:** v56 (dist), template synced to v51 for next build
+**Server:** http://100.108.183.33:5173/ (python3 -m http.server in dist/)
+**Branch:** main, clean tree, pushed to origin
 
-## Remaining UI Work
-- Active issues: #32 (overlay sequence), #33 (HBC crafting), #42 (Playwright tooling blocker)
+---
 
-## Blockers
-- #42: Playwright click selector resolution fails in current session — blocks browser QA.
+## Session Summary (2026-06-08)
 
-## Status
-- dist/index.html is built out to v49.
-- src/template.html synced to v53 for next build.
-- ISSUES.md: #43 resolved, remaining active issues intact.
+### v49 — Settlement button transparency + duplicate stat headings
+- `.settlement-action-btn.secondary-action`: `var(--clr-bg)` → opaque `#d4c9b4`
+- `.settlement-action-btn.utility-action`: `rgba(255,255,255,0.45)` → `rgba(210,200,180,0.92)`
+- Duplicate stat headings (#43): replaced `innerHTML` with `textContent` + `className` on stat-value spans in `renderStatusBar()`. Template labels are now the sole label source.
+- Files: `src/template.html`, `src/ui/renderer.js`, `dist/index.html`
 
-## Usage
-- Rebuild/build: `bun scripts/build.mjs`
-- Serve for test: `python3 -m http.server` in `dist/` on the desired port (5173 recommended).
+### v50 — 4 low-hanging bug fixes (#29, #30, #36, #37)
+- **#30 (food decimals):** `DAILY_FOOD = 1.2` caused float values. Fixed with `Math.round(...*10)/10` after subtraction, `Math.floor()` on display in status bar and camp overlay. Files: `src/systems/engine.js`, `src/ui/renderer.js`, `src/main.js`
+- **#29 (dice timing):** Pass/fail pill removed from `renderDicePill()`. Outcome only appears in `revealDiceOutcome()` after dice settle. File: `src/main.js`
+- **#37 (Gabriel Dumont duplicate):** Removed `river_ferry_dumont` from river event pool. `ferry_gabriel` (river_valley pool) remains as the single Dumont event. File: `src/data/events.js`
+- **#36 (first travel settlement):** Skip `pendingSettlement` when `S.node <= 1`. Player gets one clean travel before first settlement. File: `src/systems/engine.js`
+
+### v51 — Dice outcome animation sync (#29 follow-up)
+- Replaced hardcoded 500ms timeout with `animationend` event on die element. Outcome reveals exactly when `dice-settle` CSS animation (450ms) completes. Includes `revealed`-guard + fallback timeout.
+- File: `src/main.js`
+
+---
+
+## Build & Serve
+
+```bash
+# Rebuild
+cd /home/bayarddevries/metis-trail-v2-repo
+bun scripts/build.mjs
+
+# Serve (port 5173, not 8080 which is qBittorrent)
+cd dist && python3 -m http.server 5173
+
+# Verify
+curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:5173/
+```
+
+**Note:** Build script bumps `?v=N` in both `dist/index.html` and `src/template.html`. After every build, verify `src/template.html` matches or the next build will double-increment.
+
+---
+
+## Open Issues (GitHub)
+
+### Bugs
+- **#32** — Balance pass on unforgiving events (medicine pouch) — p2
+- **(local #32)** — Overlay sequence: pre-departure shows before intro (was local ISSUES.md #32, may overlap with original fix in bootstrap)
+
+### Enhancements (prioritized)
+- **#31** — Prune redundant settlement/camp actions (e.g. Recruit) — Ready
+- **#34** — Audit and consolidate primary/secondary action verbs — p2
+- **#33** — Crafting discoverability in settlement UI — p3
+- **#35** — Reduce action-dense screens by grouping secondary actions — p3
+- **#26** — Add location/node markers on map
+- **#15** — Pre-departure cart packing (exists in code, blocked by overlay sequence)
+- **#13** — Weather system
+- **#12** — Highscore/leaderboard
+- **#10** — Basic icons
+
+### External (no code)
+- **#25** — Cultural/peer review
+- **#6** — AI writing trend review
+- **(local #42)** — Playwright tooling blocker (can't browser-verify clicks)
+
+---
+
+## TODO.md Status
+
+### Phase 1 — Foundation
+- [x] All core items done
+- [ ] Standardize conventional commit messages
+- [ ] Add doc comments to exported `engine.js` functions
+
+### Phase 2 — Core Systems
+- [x] All event/system items done
+- [ ] `mountDebugUI` behind `?debug=1`
+- [ ] Unit tests for calendar and PRNG
+- [ ] Save/load validation + schema version
+
+### Phase 3/5 — Content & Mechanics
+- [x] Items, crafting, trade, endings all done
+- [ ] Add second half of Carlton Trail nodes
+- [ ] Weather system
+- [ ] Pre-departure cart packing (blocked by overlay sequence bug)
+
+### Phase 4 — UI/UX Polish
+- [x] Mobile bar, button hierarchy, camp grouping, settlement polish done
+- [ ] Location/node markers on map (#26)
+- [ ] Basic icons (#10)
+
+### Phase 7 — Cart UX & Crafting
+- [x] Cart weight, category tooltips, pre-departure overlay done
+- [ ] Remove duplicate "Trade" action button in settlement UI
+- [ ] HBC crafting: `finished_hides` recipe exists but HBC `availableSettlementActions()` doesn't include `'craft'`
+
+### Phase 8 — Win Rate Normalization
+- [x] Balance baseline accepted
+- [ ] Win rate 66.5% vs 25-40% target — weather/food tuning options remain
+- [ ] Replace travel debug narrative with atmospheric fragments
+- [ ] Cart unload buttons show item name
+
+---
+
+## Known Pitfalls (from AGENTS.md)
+
+- **Map init timing:** Always call `initMap()` during `bootstrap()`, not deferred.
+- **Port 8080:** qBittorrent uses it. Serve dev on 5173.
+- **Browser verification:** Playwright click is broken on mobile; use JS click or real device.
+- **Build version drift:** Template is source of truth; sync after every build.
+- **Engine API:** Every method called from `main.js` MUST exist on engine's return object or the render function silently dies.
+- **Item field name:** Items use `wt` for weight, not `weight`.
+- **`pendingSettlement` blocks travel:** Both "Continue West" and "✕" must call `settlementAction('continue')`.
+- **Stale cart reference:** Never cache `game.getCart()` during offload loops — `offloadItem()` mutates internally.
+- **Template CSS vs dist CSS:** The build script reads from existing `dist/index.html` (not `src/template.html`) for the base. CSS changes in `src/template.html` must also be patched into `dist/index.html` directly.
+
+---
+
+## Project Structure
+
+```
+metis-trail-v2-repo/
+├── src/
+│   ├── main.js              # Entry point, UI bindings, event handlers
+│   ├── template.html        # HTML template with inline CSS
+│   ├── ui/
+│   │   ├── renderer.js      # renderStatusBar, renderNarrative, map init
+│   │   ├── persistence.js   # Save/load
+│   │   ├── theme.js         # Theme application
+│   │   ├── shell.js         # Shell UI
+│   │   └── debug.js         # Debug panel
+│   ├── systems/
+│   │   ├── engine.js        # Core game engine (state, travel, events, items)
+│   │   ├── events.js        # Event picking, resolution
+│   │   ├── travel.js        # Travel helpers
+│   │   └── scoring.js       # Score calculation
+│   ├── core/
+│   │   ├── constants.js     # DAILY_FOOD, MAX_WEAR, etc.
+│   │   ├── calendar.js      # Day/month/season advancement
+│   │   ├── schema.js        # State schema
+│   │   └── seed.js          # Initial state seeding
+│   └── data/
+│       ├── events.js        # EVENT_POOLS (by terrain), pickEventForTerrain
+│       ├── items.js         # 12 item definitions (field name: `wt`)
+│       ├── nodes.js         # Trail nodes with lat/lon/type/terrain
+│       └── sources/index.js # 35+ primary source entries
+├── dist/                    # Built output (bun scripts/build.mjs)
+│   ├── index.html           # Generated from template
+│   ├── app.js               # Bundled JS
+│   └── leaflet.{js,css}     # Bundled Leaflet
+├── scripts/
+│   ├── build.mjs            # esbuild + version bump + asset manifest
+│   └── build-test.mjs       # Test harness build
+├── tests/
+│   ├── simulate-entry.js    # Headless playtesting (200 sims)
+│   └── simulate-entry.sh    # Runner script
+├── docs/                    # Design docs, interface reports
+├── art/                     # Pixel art assets (cart marker, etc.)
+├── ISSUES.md                # Local issue tracking (may be stale vs GitHub)
+├── TODO.md                  # Full task breakdown by phase
+├── CHANGELOG.md             # Version history
+└── HANDOFF.md               # This file
+```

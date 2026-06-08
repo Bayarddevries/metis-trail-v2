@@ -2,6 +2,13 @@
 
 All notable changes are documented here. Format loosely follows Keep a Changelog.
 
+## [v51] - 2026-06-08
+
+### Fixed — Dice outcome timing (#29 follow-up)
+- Pass/fail outcome text was on a hardcoded 500ms timeout, slightly out of sync with the dice-settle CSS animation (450ms).
+- Fix: replaced timeout with `animationend` event listener on the die element. Outcome now reveals exactly when the settle animation completes. Includes `revealed`-guard to prevent double-fire from the 500ms fallback timeout.
+- File: `src/main.js`.
+
 ## [v50] - 2026-06-08
 
 ### Fixed — Food showing decimal places in status bar (#30)
