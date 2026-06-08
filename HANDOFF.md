@@ -146,7 +146,7 @@ curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:5173/
 ### Phase 7 — Cart UX & Crafting
 - [x] Cart weight, category tooltips, pre-departure overlay done
 - [x] Crafting inputs replenishable via events (v62 — 4 item-giving events)
-- [ ] Remove duplicate "Trade" action button in settlement UI
+- [x] Duplicate Trade button resolved (v53 — inline panel, no separate toggle)
 
 ### Phase 8 — Win Rate Normalization
 - [x] Balance baseline accepted
