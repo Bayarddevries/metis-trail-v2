@@ -898,39 +898,57 @@ function showCamp(game) {
     actionsEl.innerHTML = '';
     actionsEl.style.display = 'grid';
     actionsEl.style.visibility = 'visible';
+    const groups = [
+      { label: 'Recovery', types: new Set(['rest', 'deeprest']) },
+      { label: 'Trail work', types: new Set(['forage', 'hunt', 'scout']) },
+      { label: 'Upkeep', types: new Set(['repair', 'dance']) },
+    ];
+    const groupMap = new Map();
     actions.forEach((a) => {
-      const btn = document.createElement('button');
-      btn.className = 'camp-action-btn';
-      btn.innerHTML = `<div class="camp-action-label">${a.label}</div><div class="camp-action-cost">${a.cost}</div>`;
-      btn.addEventListener('click', () => {
-        const result = game.campAction(a.type);
-        const errEl = document.getElementById('camp-result');
-        if (!result) {
-          if (errEl) { errEl.style.display = 'block'; errEl.textContent = 'No result.'; }
-          return;
-        }
-        if (result.error) {
-          if (errEl) { errEl.style.display = 'block'; errEl.textContent = result.error; }
-          return;
-        }
-        const after = game.getState();
-        if (foodEl) foodEl.textContent = after.food;
-        if (wearEl) wearEl.textContent = after.wear;
-        if (moraleEl) moraleEl.textContent = after.morale;
-        if (crewEl) crewEl.textContent = after.crew;
-        if (subEl) subEl.textContent = `Day ${after.day} — ${after.season}`;
-        if (errEl) {
-          errEl.style.display = 'block';
-          errEl.textContent = (result?.effects || []).join('\n');
-        }
-        const continueEl = document.getElementById('camp-continue');
-        if (continueEl) continueEl.style.display = 'inline-block';
-        actionsEl.style.display = 'none';
+      const entry = groups.find((g) => g.types.has(a.type));
+      if (!entry) return;
+      if (!groupMap.has(entry.label)) groupMap.set(entry.label, []);
+      groupMap.get(entry.label).push(a);
+    });
+
+    groupMap.forEach((list, label) => {
+      const header = document.createElement('div');
+      header.className = 'camp-group';
+      header.textContent = label;
+      actionsEl.appendChild(header);
+      list.forEach((a) => {
+        const btn = document.createElement('button');
+        btn.className = 'camp-action-btn';
+        btn.innerHTML = `<div class="camp-action-label">${a.label}</div><div class="camp-action-cost">${a.cost}</div>`;
+        btn.addEventListener('click', () => {
+          const result = game.campAction(a.type);
+          const errEl = document.getElementById('camp-result');
+          if (!result) {
+            if (errEl) { errEl.style.display = 'block'; errEl.textContent = 'No result.'; }
+            return;
+          }
+          if (result.error) {
+            if (errEl) { errEl.style.display = 'block'; errEl.textContent = result.error; }
+            return;
+          }
+          const after = game.getState();
+          if (foodEl) foodEl.textContent = after.food;
+          if (wearEl) wearEl.textContent = after.wear;
+          if (moraleEl) moraleEl.textContent = after.morale;
+          if (crewEl) crewEl.textContent = after.crew;
+          if (subEl) subEl.textContent = `Day ${after.day} — ${after.season}`;
+          if (errEl) {
+            errEl.style.display = 'block';
+            errEl.textContent = (result?.effects || []).join('\n');
+          }
+          const continueEl = document.getElementById('camp-continue');
+          if (continueEl) continueEl.style.display = 'inline-block';
+          actionsEl.style.display = 'none';
         });
         actionsEl.appendChild(btn);
         btn.setAttribute('data-camp-type', a.type);
-        if (a.type === 'deeprest') btn.classList.add('costs-days');
-        if (a.type === 'scout') btn.classList.add('costs-days');
+        if (a.type === 'deeprest' || a.type === 'scout') btn.classList.add('costs-days');
+      });
     });
   }
 
