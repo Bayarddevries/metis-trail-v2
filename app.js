@@ -2731,6 +2731,21 @@ function showSettlement(game2) {
   nameEl.textContent = next.name;
   descEl.textContent = next.desc;
   actionsEl.innerHTML = "";
+  const recipes = game2.getAvailableRecipes();
+  let craftHintEl = document.getElementById("settlement-craft-hint");
+  if (!craftHintEl) {
+    craftHintEl = document.createElement("div");
+    craftHintEl.id = "settlement-craft-hint";
+    craftHintEl.className = "settlement-craft-hint";
+    descEl.parentNode.insertBefore(craftHintEl, descEl.nextSibling);
+  }
+  if (recipes.length > 0) {
+    const summary = recipes.length === 1 ? `\u2697\uFE0F Crafting: ${recipes[0].name} \u2014 ${recipes[0].inputs.map((i) => `${i.count}\xD7${i.name}`).join(" + ")}` : `\u2697\uFE0F Crafting available (${recipes.length} recipe${recipes.length > 1 ? "s" : ""})`;
+    craftHintEl.textContent = summary;
+    craftHintEl.style.display = "block";
+  } else {
+    craftHintEl.style.display = "none";
+  }
   const available = game2.getAvailableActions();
   const primaryActions = [];
   const secondaryActions = [];
