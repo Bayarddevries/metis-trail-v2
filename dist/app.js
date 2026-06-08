@@ -2173,10 +2173,7 @@ function renderTravelLinesView(state, gameRef, result) {
     lines.push(`${here.name} \u2014 Day ${state.day}`);
     if (here.desc) lines.push(here.desc);
   }
-  if (next) {
-    lines.push(`Next: ${next.name}`);
-    if (next.desc) lines.push(next.desc);
-  }
+  if (next) lines.push(`Next: ${next.name}`);
   if (result) lines.push(result);
   if (!lines.length) lines.push("On the trail...");
   renderNarrative(lines);
@@ -2619,6 +2616,20 @@ function showEvent(game2) {
     const btn = document.createElement("button");
     btn.className = "choice-btn";
     btn.textContent = ch.text;
+    const costParts = [];
+    if (typeof ch.dc === "number") costParts.push(`DC ${ch.dc}`);
+    if (typeof ch.food === "number" && ch.food < 0) costParts.push(`${ch.food} food`);
+    if (typeof ch.wear === "number" && ch.wear > 0) costParts.push(`+${ch.wear} wear`);
+    if (typeof ch.morale === "number" && ch.morale < 0) costParts.push(`${ch.morale} morale`);
+    if (typeof ch.time === "number" && ch.time > 0) costParts.push(`+${ch.time} day`);
+    if (ch.requiresItem) costParts.push(`requires ${ch.requiresItem.name}\xD7${ch.requiresItem.count}`);
+    const costText = costParts.join(" \xB7 ");
+    if (costText) {
+      const sub = document.createElement("div");
+      sub.className = "choice-cost";
+      sub.textContent = costText;
+      btn.appendChild(sub);
+    }
     btn.onclick = () => {
       const prev = game2.getState();
       const stepLog = game2.chooseEventChoice(i);
