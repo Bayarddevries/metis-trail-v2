@@ -27,6 +27,11 @@ Use this file to log bugs, blockers, and known gaps during work sessions. Each i
 - Resolved: 2026-06-08 (v50)
 - Fix: Round to 1 decimal after DAILY_FOOD subtraction; Math.floor() on display in status bar and camp overlay.
 
+### 34. Audit and consolidate primary/secondary action verbs
+- Opened: 2026-06-08
+- Resolved: 2026-06-08 (v53)
+- Fix: Single pattern across all panels — verb-first label, cost inline, single line. Removed dead actionLabel/actionSubtitle entries. Settlement buttons simplified from label+subtitle divs to single text line.
+
 ### 31. Prune redundant settlement/camp actions
 - Opened: 2026-06-07
 - Resolved: 2026-06-08 (v52)

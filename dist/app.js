@@ -2700,8 +2700,8 @@ function showSettlement(game2) {
     if (action === "craft") {
       const recipes = game2.getAvailableRecipes();
       if (recipes.length === 0) {
-        const wrap2 = document.createElement("div");
-        wrap2.className = "settlement-action";
+        const wrap = document.createElement("div");
+        wrap.className = "settlement-action";
         const btn2 = document.createElement("button");
         btn2.className = "ctrl-btn";
         btn2.style.display = "flex";
@@ -2710,14 +2710,14 @@ function showSettlement(game2) {
         btn2.style.gap = "2px";
         btn2.style.opacity = "0.5";
         btn2.style.cursor = "not-allowed";
-        const label2 = document.createElement("div");
-        label2.className = "settlement-action-label";
-        label2.textContent = "Craft";
-        const sub2 = document.createElement("div");
-        sub2.className = "settlement-action-sub";
-        sub2.textContent = "No recipes available.";
-        btn2.appendChild(label2);
-        btn2.appendChild(sub2);
+        const label = document.createElement("div");
+        label.className = "settlement-action-label";
+        label.textContent = "Craft";
+        const sub = document.createElement("div");
+        sub.className = "settlement-action-sub";
+        sub.textContent = "No recipes available.";
+        btn2.appendChild(label);
+        btn2.appendChild(sub);
         actionsEl.appendChild(btn2);
         return;
       }
@@ -2757,19 +2757,19 @@ function showSettlement(game2) {
       const cart = game2.getCart();
       const tradeItems = cart.filter((i) => i.type === "trade" && i.count > 0);
       if (tradeItems.length === 0) {
-        const wrap2 = document.createElement("div");
-        wrap2.className = "settlement-action";
+        const wrap = document.createElement("div");
+        wrap.className = "settlement-action";
         const btn2 = document.createElement("button");
         btn2.className = "ctrl-btn";
         btn2.style.cssText = "display:flex;flex-direction:column;align-items:flex-start;gap:2px;opacity:0.5;cursor:not-allowed;";
-        const label2 = document.createElement("div");
-        label2.className = "settlement-action-label";
-        label2.textContent = "Trade";
-        const sub2 = document.createElement("div");
-        sub2.className = "settlement-action-sub";
-        sub2.textContent = "No trade goods.";
-        btn2.appendChild(label2);
-        btn2.appendChild(sub2);
+        const label = document.createElement("div");
+        label.className = "settlement-action-label";
+        label.textContent = "Trade";
+        const sub = document.createElement("div");
+        sub.className = "settlement-action-sub";
+        sub.textContent = "No trade goods.";
+        btn2.appendChild(label);
+        btn2.appendChild(sub);
         actionsEl.appendChild(btn2);
         return;
       }
@@ -2808,25 +2808,12 @@ function showSettlement(game2) {
       actionsEl.appendChild(tradePanel);
       return;
     }
-    const wrap = document.createElement("div");
-    wrap.className = "settlement-action";
-    const label = document.createElement("div");
-    label.className = "settlement-action-label";
-    label.textContent = actionLabel(action);
-    const sub = document.createElement("div");
-    sub.className = "settlement-action-sub";
-    sub.textContent = actionSubtitle(action);
     const btn = document.createElement("button");
     btn.className = "ctrl-btn settlement-action-btn";
     if (["trade", "repair", "rest", "heal"].includes(action)) btn.classList.add("primary-action");
-    else if (["craft", "gossip", "forage"].includes(action)) btn.classList.add("secondary-action");
+    else if (["craft"].includes(action)) btn.classList.add("secondary-action");
     else btn.classList.add("utility-action");
-    btn.style.display = "flex";
-    btn.style.flexDirection = "column";
-    btn.style.alignItems = "flex-start";
-    btn.style.gap = "2px";
-    btn.appendChild(label);
-    btn.appendChild(sub);
+    btn.textContent = actionLabel(action);
     btn.onclick = () => {
       hideOverlays();
       game2.settlementAction(action);
@@ -3068,13 +3055,13 @@ function showCamp(game2) {
     resultEl.textContent = "";
   }
   const actions = [
-    { type: "rest", label: "Rest Up", cost: "1 food, 0 days" },
-    { type: "forage", label: "Forage", cost: "1 day, no items" },
-    { type: "hunt", label: "Hunt", cost: "1 Ammunition Belt, 1 day" },
-    { type: "repair", label: "Repair Cart", cost: "1 Shaganappi, 0 days" },
-    { type: "scout", label: "Scout Ahead", cost: "1 day, no items" },
-    { type: "dance", label: "Dance / Fiddle", cost: "0 days, no items" },
-    { type: "deeprest", label: "Deep Rest", cost: "2 food, 2 days" }
+    { type: "rest", label: "Rest", cost: "1 food" },
+    { type: "forage", label: "Forage", cost: "1 day" },
+    { type: "hunt", label: "Hunt", cost: "1 ammo \xB7 1 day" },
+    { type: "repair", label: "Repair", cost: "1 shaganappi" },
+    { type: "scout", label: "Scout", cost: "1 day" },
+    { type: "dance", label: "Dance", cost: "free" },
+    { type: "deeprest", label: "Deep Rest", cost: "2 food \xB7 2 days" }
   ];
   if (actionsEl) {
     actionsEl.innerHTML = "";
@@ -3208,26 +3195,16 @@ function showEnd(game2) {
 }
 __name(showEnd, "showEnd");
 function actionLabel(a) {
-  const map2 = { rest: "Rest at Settlement", trade: "Trade", repair: "Repair Cart", forage: "Forage Nearby", recruit: "Reinforce Crew", rumours: "Trail Rumours", gossip: "Ask Around", heal: "Treat Crew", craft: "Crafting", reinforce: "Reinforce Party" };
+  const map2 = {
+    rest: "Rest \xB7 1 day \xB7 +2 food \xB7 +25 morale",
+    trade: "Trade",
+    repair: "Repair \xB7 \u22122 wear",
+    heal: "Heal \xB7 +20 morale",
+    craft: "Craft"
+  };
   return map2[a] || a;
 }
 __name(actionLabel, "actionLabel");
-function actionSubtitle(a) {
-  const map2 = {
-    rest: "Restore crew condition and refresh supplies.",
-    trade: "Sell trade goods for food; yield varies by settlement type.",
-    repair: "Reduce cart wear. Stronger effect with shaganappi/spare parts.",
-    forage: "Spend a day scouting for local resources.",
-    recruit: "Find extra hands and reinforce the party.",
-    rumours: "Pass a day for scattered trail talk \u2014 less reliable than local gossip.",
-    gossip: "Spend a day hearing news and tips from locals.",
-    heal: "Treat injuries and illness; stronger with medical supplies.",
-    craft: "Combine items into higher-value goods at settlements that support it.",
-    reinforce: "Add support to the party for the next leg of the trail."
-  };
-  return map2[a] || "";
-}
-__name(actionSubtitle, "actionSubtitle");
 window.__METIS_RENDER__ = render;
 export {
   bootstrap

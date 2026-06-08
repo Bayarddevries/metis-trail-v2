@@ -625,28 +625,12 @@ function showSettlement(game) {
       return;
     }
 
-    const wrap = document.createElement('div');
-    wrap.className = 'settlement-action';
-
-    const label = document.createElement('div');
-    label.className = 'settlement-action-label';
-    label.textContent = actionLabel(action);
-
-    const sub = document.createElement('div');
-    sub.className = 'settlement-action-sub';
-    sub.textContent = actionSubtitle(action);
-
     const btn = document.createElement('button');
     btn.className = 'ctrl-btn settlement-action-btn';
     if (['trade', 'repair', 'rest', 'heal'].includes(action)) btn.classList.add('primary-action');
-    else if (['craft', 'gossip', 'forage'].includes(action)) btn.classList.add('secondary-action');
+    else if (['craft'].includes(action)) btn.classList.add('secondary-action');
     else btn.classList.add('utility-action');
-    btn.style.display = 'flex';
-    btn.style.flexDirection = 'column';
-    btn.style.alignItems = 'flex-start';
-    btn.style.gap = '2px';
-    btn.appendChild(label);
-    btn.appendChild(sub);
+    btn.textContent = actionLabel(action);
     btn.onclick = () => {
       hideOverlays();
       game.settlementAction(action);
@@ -908,13 +892,13 @@ function showCamp(game) {
   if (resultEl) { resultEl.style.display = 'none'; resultEl.textContent = ''; }
 
   const actions = [
-    { type: 'rest', label: 'Rest Up', cost: '1 food, 0 days' },
-    { type: 'forage', label: 'Forage', cost: '1 day, no items' },
-    { type: 'hunt', label: 'Hunt', cost: '1 Ammunition Belt, 1 day' },
-    { type: 'repair', label: 'Repair Cart', cost: '1 Shaganappi, 0 days' },
-    { type: 'scout', label: 'Scout Ahead', cost: '1 day, no items' },
-    { type: 'dance', label: 'Dance / Fiddle', cost: '0 days, no items' },
-    { type: 'deeprest', label: 'Deep Rest', cost: '2 food, 2 days' },
+    { type: 'rest', label: 'Rest', cost: '1 food' },
+    { type: 'forage', label: 'Forage', cost: '1 day' },
+    { type: 'hunt', label: 'Hunt', cost: '1 ammo · 1 day' },
+    { type: 'repair', label: 'Repair', cost: '1 shaganappi' },
+    { type: 'scout', label: 'Scout', cost: '1 day' },
+    { type: 'dance', label: 'Dance', cost: 'free' },
+    { type: 'deeprest', label: 'Deep Rest', cost: '2 food · 2 days' },
   ];
 
   if (actionsEl) {
@@ -1059,23 +1043,17 @@ function showEnd(game) {
 }
 
 function actionLabel(a) {
-  const map = { rest: 'Rest at Settlement', trade: 'Trade', repair: 'Repair Cart', forage: 'Forage Nearby', recruit: 'Reinforce Crew', rumours: 'Trail Rumours', gossip: 'Ask Around', heal: 'Treat Crew', craft: 'Crafting', reinforce: 'Reinforce Party' };
+  const map = {
+    rest: 'Rest · 1 day · +2 food · +25 morale',
+    trade: 'Trade',
+    repair: 'Repair · −2 wear',
+    heal: 'Heal · +20 morale',
+    craft: 'Craft',
+  };
   return map[a] || a;
 }
 function actionSubtitle(a) {
-  const map = {
-    rest: 'Restore crew condition and refresh supplies.',
-    trade: 'Sell trade goods for food; yield varies by settlement type.',
-    repair: 'Reduce cart wear. Stronger effect with shaganappi/spare parts.',
-    forage: 'Spend a day scouting for local resources.',
-    recruit: 'Find extra hands and reinforce the party.',
-    rumours: 'Pass a day for scattered trail talk — less reliable than local gossip.',
-    gossip: 'Spend a day hearing news and tips from locals.',
-    heal: 'Treat injuries and illness; stronger with medical supplies.',
-    craft: 'Combine items into higher-value goods at settlements that support it.',
-    reinforce: 'Add support to the party for the next leg of the trail.'
-  };
-  return map[a] || '';
+  return '';
 }
 
 // Expose render globally for event listener callbacks

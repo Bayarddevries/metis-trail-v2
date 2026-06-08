@@ -2,6 +2,29 @@
 
 All notable changes are documented here. Format loosely follows Keep a Changelog.
 
+## [v53] - 2026-06-08
+
+### Changed — Consolidated action verb style across all panels (#34)
+
+**Pattern:** verb-first label, cost inline in single line. No explanatory subtitles.
+
+| Panel | Before | After |
+|-------|--------|-------|
+| Travel | "Travel 1 Day" / "Make Camp" | "Travel" / "Camp" |
+| Camp | "Rest Up" / "Repair Cart" / "Scout Ahead" / "Dance / Fiddle" | "Rest" / "Repair" / "Scout" / "Dance" |
+| Camp cost | "1 food, 0 days" / "1 day, no items" | "1 food" / "1 day" / "free" |
+| Settlement | "Rest at Settlement" + prose subtitle | "Rest · 1 day · +2 food · +25 morale" |
+| Settlement | "Repair Cart" + prose subtitle | "Repair · −2 wear" |
+| Settlement | "Treat Crew" + prose subtitle | "Heal · +20 morale" |
+| Settlement | "Crafting" | "Craft" |
+
+- Removed dead `forage`/`recruit`/`rumours` entries from actionLabel/actionSubtitle
+- Settlement buttons now render as single text line (no label+subtitle divs)
+- Removed unused `settlement-action-label` / `settlement-action-sub` DOM elements
+- Removed unused `.settlement-action` wrapper div
+
+Files: `src/template.html`, `src/main.js`.
+
 ## [v52] - 2026-06-08
 
 ### Changed — Pruned redundant settlement actions (#31)
