@@ -1631,18 +1631,6 @@ function createGame(seed = null) {
         S.tradesMade++;
       }
     }
-    if (action === "forage") {
-      const roll = d() + crewMod(S);
-      if (roll >= 12) {
-        const gain = Math.floor(rand() * 4) + 1;
-        S.food += gain;
-      }
-      advance();
-    }
-    if (action === "recruit") {
-      if (S.crew !== "exhausted") S.crew = "rested";
-    }
-    if (action === "rumours") advance();
     if (action === "craft") {
       const recipes = game.getAvailableRecipes();
       if (recipes.length === 0) return { error: "No recipes available" };
@@ -1982,11 +1970,11 @@ function createGame(seed = null) {
 __name(createGame, "createGame");
 function availableSettlementActions(type) {
   const base = ["rest"];
-  if (type === "hbc") return [...base, "trade", "repair", "forage", "recruit", "craft"];
-  if (type === "metis") return [...base, "craft", "trade", "forage", "rumours", "recruit"];
-  if (type === "trading") return [...base, "trade", "forage", "rumours"];
-  if (type === "mission") return [...base, "heal", "rumours"];
-  if (type === "nwmp") return [...base, "craft", "trade", "rumours"];
+  if (type === "hbc") return [...base, "trade", "repair", "craft"];
+  if (type === "metis") return [...base, "craft", "trade"];
+  if (type === "trading") return [...base, "trade"];
+  if (type === "mission") return [...base, "heal"];
+  if (type === "nwmp") return [...base, "craft", "trade"];
   return base;
 }
 __name(availableSettlementActions, "availableSettlementActions");
