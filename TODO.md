@@ -52,6 +52,7 @@ Legend: `pending` | `in_progress` | `blocked` | `done`
 - [x] Lane A interface enhancements: aged palette, button hierarchy, camp grouping, status urgency, travel narrative dedupe, close-buttons touch hardening
 - [x] `docs/interface-enhancement-report.html` — interface audit with prioritized improvement options
 - [x] Touch-target hardening: `.action-primary/.action-secondary/.action-ghost`, min 44px viewport height target
+- [x] Settlements UI polish: explicit action labels/subtitles, primary/secondary/utility visual hierarchy, stronger buttons, clearer trade/craft disabled/empty states
 - [x] Fix #27 duplicate texture buckets (dead `const`) removed
 - [x] Fix #37 access-denied retry loop replaced by deterministic nav error handling
 - [x] Fix #38 meshgroup auto-centering after async tree load

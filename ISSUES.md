@@ -4,6 +4,36 @@ Use this file to log bugs, blockers, and known gaps during work sessions. Each i
 
 ## Active
 
+### 42. MCP Playwright click selector resolution fails in current session
+- Opened: 2026-06-08
+- Labels: tooling, qa, blocked
+- Summary: Playwright navigation works, but click targeting via button text/ref/@id forms does not resolve in this session. This blocks browser verification of UI changes.
+- Evidence: browser_navigate succeeded; browser_click failed for `button "Begin Journey"`, `@e61`, `button[name="Begin Journey"]` with selector parse/resolution errors.
+- Workaround: Verify UI changes via source inspection and local server checks instead of automated clicks, until the MCP Playwright backend is restored.
+- Impact: Cannot complete browser QA steps reliably from this session.
+
+### 42. MCP Playwright click selector resolution fails in current session
+- Opened: 2026-06-08
+- Labels: tooling, qa, blocked
+- Summary: Playwright navigation works, but click targeting via button text/ref/@id forms does not resolve in this session. This blocks browser verification of UI changes.
+- Evidence: browser_navigate succeeded; browser_click failed for `button "Begin Journey"`, `@e61`, `button[name="Begin Journey"]` with selector parse/resolution errors.
+- Workaround: Verify UI changes via source inspection and local server checks instead of automated clicks, until the MCP Playwright backend is restored.
+- Impact: Cannot complete browser QA steps reliably from this session.
+# Issues
+
+Use this file to log bugs, blockers, and known gaps during work sessions. Each item should be short, searchable, and include a short reproduction or evidence note.
+
+## Active
+
+### 42. MCP Playwright click selector resolution fails in current session
+- Opened: 2026-06-08
+- Labels: tooling, qa, blocked
+- Summary: Playwright navigation works, but click targeting via button text/ref/@id forms does not resolve in this session. This blocks browser verification of UI changes.
+- Evidence: browser_navigate succeeded; browser_click failed for `button "Begin Journey"`, `@e61`, `button[name="Begin Journey"]` with selector parse/resolution errors.
+- Workaround: Verify UI changes via source inspection and local server checks instead of automated clicks, until the MCP Playwright backend is restored.
+- Impact: Cannot complete browser QA steps reliably from this session.
+
+
 ### 32. Overlay sequence broken — pre-departure shows before intro
 - Opened: 2026-06-07
 - Labels: bug, ux

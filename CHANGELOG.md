@@ -2,6 +2,20 @@
 
 All notable changes are documented here. Format loosely follows Keep a Changelog.
 
+## [v48] - 2026-06-08
+### Changed — Settlement UI clarity and button hierarchy
+- Explicit action labels/subtitles: `Rest at Settlement`, `Repair Cart`, `Treat Crew`, `Reinforce Crew`, `Ask Around`, etc.
+- Visual action tiers in settlement overlay:
+  - primary: trade / repair / rest / heal
+  - secondary: craft / gossip / forage
+  - utility: rumours / recruit / other
+- Added `.settlement-action-btn` class with primary/secondary/utility variants and 44px min-height touch target enforcement.
+- Kept trade/craft disabled/empty states clear and readable so players know why an action is unavailable.
+
+### Docs
+- Updated `HANDOFF.md` to reflect settlements polish pass and verified UI states.
+- Logged tooling blocker in `ISSUES.md` #42.
+
 ## [v47] - 2026-06-07
 
 ### Fixed — Camp overlay reopen state (Action panel hidden after first camp)
