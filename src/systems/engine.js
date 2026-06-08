@@ -206,7 +206,7 @@ export function createGame(seed = null) {
   function travelOneDay() {
     if (S.over || S.pendingSettlement) return stepLog;
     const nextDist = NODES[S.node + 1]?.dist || 1;
-    S.food -= CONSTANTS.DAILY_FOOD;
+    S.food = Math.max(0, Math.round((S.food - CONSTANTS.DAILY_FOOD) * 10) / 10);
     S.segmentDay++;
     S.travelDaysWithoutRest++;
     advance();
@@ -258,7 +258,7 @@ export function createGame(seed = null) {
         }
         return stepLog;
       }
-      if (n.type !== 'river') S.pendingSettlement = n;
+      if (n.type !== 'river' && S.node > 1) S.pendingSettlement = n;
       return stepLog;
     }
 

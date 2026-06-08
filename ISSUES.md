@@ -120,6 +120,30 @@ Use this file to log bugs, blockers, and known gaps during work sessions. Each i
 
 ## Resolved
 
+### 36. Day 1 first travel triggers settlement overlay
+- Opened: 2026-06-08
+- Resolved: 2026-06-08 (v50)
+- Labels: bug, ux
+- Fix: skip `pendingSettlement` when `S.node <= 1` (first arrival after start)
+
+### 37. Gabriel Dumont at every ferry crossing
+- Opened: 2026-06-08
+- Resolved: 2026-06-08 (v50)
+- Labels: bug, content
+- Fix: removed duplicate `river_ferry_dumont` event from river pool
+
+### 30. Food showing decimal places
+- Opened: 2026-06-08
+- Resolved: 2026-06-08 (v50)
+- Labels: bug, ui
+- Fix: round after daily consumption, Math.floor() on display
+
+### 29. Pass/fail during dice roll animation
+- Opened: 2026-06-08
+- Resolved: 2026-06-08 (v50)
+- Labels: bug, ux
+- Fix: removed pass/fail pill from renderDicePill(), outcome shows after settle animation
+
 ### 43. Duplicate stat headings in status bar
 - Opened: 2026-06-08
 - Resolved: 2026-06-08 (v49)

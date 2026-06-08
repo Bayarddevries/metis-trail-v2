@@ -252,7 +252,6 @@ function renderDicePill(result) {
     <div class="roll-label">Roll</div>
     <div id="die" class="die small font-spectral">-</div>
     <div class="roll-label">DC ${result.dc}</div>
-    <div class="roll-result ${result.success ? 'pass' : 'fail'}">${result.success ? 'Pass' : 'Fail'}</div>
   `;
 }
 
@@ -894,7 +893,7 @@ function showCamp(game) {
   const resultEl = document.getElementById('camp-result');
   const actionsEl = document.getElementById('camp-actions');
 
-  if (foodEl) foodEl.textContent = state.food;
+  if (foodEl) foodEl.textContent = Math.floor(state.food);
   if (wearEl) wearEl.textContent = state.wear;
   if (moraleEl) moraleEl.textContent = state.morale;
   if (crewEl) crewEl.textContent = state.crew;

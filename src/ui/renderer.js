@@ -171,7 +171,7 @@ export function renderStatusBar(state) {
   else if (crewState === 'rested') crewCls += ' crew-rested';
   crewEl.textContent = String(state.crew);
   crewEl.className = crewCls;
-  foodEl.textContent = String(state.food);
+  foodEl.textContent = String(Math.floor(state.food));
   foodEl.className = 'stat-value' + (state.food <= 5 ? ' food-low' : '');
   wearEl.textContent = String(state.wear);
   wearEl.className = 'stat-value' + (state.wear >= 4 ? ' wear-high' : '');

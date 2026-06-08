@@ -2,6 +2,28 @@
 
 All notable changes are documented here. Format loosely follows Keep a Changelog.
 
+## [v50] - 2026-06-08
+
+### Fixed — Food showing decimal places in status bar (#30)
+- `DAILY_FOOD = 1.2` (balance pass) caused floating-point food values (e.g., 28.6, 27.4).
+- Fix: round to 1 decimal after daily consumption; `Math.floor()` on display in both status bar and camp overlay.
+- Files: `src/systems/engine.js`, `src/ui/renderer.js`, `src/main.js`.
+
+### Fixed — Pass/fail shown during dice roll animation (#29)
+- `renderDicePill()` displayed a "Pass"/"Fail" pill immediately on render, before the dice animation settled.
+- Fix: removed the pass/fail pill from `renderDicePill()`. Outcome now only appears in `revealDiceOutcome()` after the settle animation completes (500ms delay).
+- File: `src/main.js`.
+
+### Fixed — Gabriel Dumont event at every ferry crossing (#37)
+- Two identical Gabriel Dumont events existed: `ferry_gabriel` (river_valley pool) and `river_ferry_dumont` (river pool).
+- Fix: removed `river_ferry_dumont` from the river event pool. Dumont now appears only once.
+- File: `src/data/events.js`.
+
+### Fixed — Day 1 first travel triggers settlement overlay (#36)
+- Arriving at St. Boniface (node 1, type 'mission') immediately triggered `pendingSettlement`, blocking Travel/Camp/Cart/Crew on the very first travel.
+- Fix: skip `pendingSettlement` when `S.node <= 1` (first arrival after start). Player gets one clean travel before the first settlement.
+- File: `src/systems/engine.js`.
+
 ## [v49] - 2026-06-08
 
 ### Fixed — Settlement button transparency (secondary/utility actions unreadable)
