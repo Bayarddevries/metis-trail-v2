@@ -2830,7 +2830,10 @@ function showSettlement(game2) {
     sub.className = "settlement-action-sub";
     sub.textContent = actionSubtitle(action);
     const btn = document.createElement("button");
-    btn.className = "ctrl-btn";
+    btn.className = "ctrl-btn settlement-action-btn";
+    if (["trade", "repair", "rest", "heal"].includes(action)) btn.classList.add("primary-action");
+    else if (["craft", "gossip", "forage"].includes(action)) btn.classList.add("secondary-action");
+    else btn.classList.add("utility-action");
     btn.style.display = "flex";
     btn.style.flexDirection = "column";
     btn.style.alignItems = "flex-start";
@@ -3218,22 +3221,22 @@ function showEnd(game2) {
 }
 __name(showEnd, "showEnd");
 function actionLabel(a) {
-  const map2 = { rest: "Rest", trade: "Trade", repair: "Repair", forage: "Forage", recruit: "Recruit", rumours: "Rumours", gossip: "Gossip", heal: "Heal", craft: "Craft", continue: "Continue West" };
+  const map2 = { rest: "Rest at Settlement", trade: "Trade", repair: "Repair Cart", forage: "Forage Nearby", recruit: "Reinforce Crew", rumours: "Trail Rumours", gossip: "Ask Around", heal: "Treat Crew", craft: "Crafting", reinforce: "Reinforce Party" };
   return map2[a] || a;
 }
 __name(actionLabel, "actionLabel");
 function actionSubtitle(a) {
   const map2 = {
-    rest: "Crew rested, morale restored, supplies refresh.",
-    trade: "Spend one trade good for food. Yield varies by item and settlement.",
-    repair: "Reduce wheel wear, or apply shaganappi if carried.",
-    forage: "D20 + crew modifier; 12+ gains 1-4 food.",
-    recruit: "Rests tired crew if not exhausted.",
-    rumours: "Advance one day. Hear scattered news \u2014 less reliable than proper gossip.",
-    gossip: "Spend a day learning trail news and local gossip. Costs 1 day.",
-    heal: "Crew rested, morale restored.",
-    craft: "Combine items into higher-value trade goods.",
-    continue: "Resume the journey."
+    rest: "Restore crew condition and refresh supplies.",
+    trade: "Sell trade goods for food; yield varies by settlement type.",
+    repair: "Reduce cart wear. Stronger effect with shaganappi/spare parts.",
+    forage: "Spend a day scouting for local resources.",
+    recruit: "Find extra hands and reinforce the party.",
+    rumours: "Pass a day for scattered trail talk \u2014 less reliable than local gossip.",
+    gossip: "Spend a day hearing news and tips from locals.",
+    heal: "Treat injuries and illness; stronger with medical supplies.",
+    craft: "Combine items into higher-value goods at settlements that support it.",
+    reinforce: "Add support to the party for the next leg of the trail."
   };
   return map2[a] || "";
 }
