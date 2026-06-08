@@ -2,6 +2,21 @@
 
 All notable changes are documented here. Format loosely follows Keep a Changelog.
 
+## [v55] - 2026-06-08
+
+### Added — Location/node markers on map (#26)
+
+- All 16 trail nodes now shown as colored circle markers on the map
+- Color-coded by settlement type: HBC=dark red, Métis=green, NWMP=blue, Mission=gold, Trading=brown, River=blue
+- Current node: larger radius (9px), filled with type color, thicker border
+- Visited nodes: small gray circles (5px, 0.6 opacity)
+- Future nodes: medium circles (6px), type-colored border, light fill
+- Hover/tap tooltip shows node name (styled to match game aesthetic)
+- Replaced old single next-node marker with full trail markers
+- Tooltip CSS: `.node-tooltip` — dark background, uppercase, game font
+
+Files: `src/ui/renderer.js`, `src/template.html`, `dist/index.html`.
+
 ## [v54] - 2026-06-08
 
 ### Changed — Grouped secondary settlement actions behind collapsible toggle (#35)

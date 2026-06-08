@@ -1,7 +1,7 @@
 # HANDOFF — Metis Trail V2
 
 **Last updated:** 2026-06-08 by OWL
-**Version:** v59 (dist), template synced to v54 for next build
+**Version:** v60 (dist), template synced to v55 for next build
 **Server:** http://100.108.183.33:5173/ (python3 -m http.server in dist/)
 **Branch:** main, clean tree, pushed to origin
 
@@ -20,6 +20,13 @@
 - **#29 (dice timing):** Pass/fail pill removed from `renderDicePill()`. Outcome only appears in `revealDiceOutcome()` after dice settle. File: `src/main.js`
 - **#37 (Gabriel Dumont duplicate):** Removed `river_ferry_dumont` from river event pool. `ferry_gabriel` (river_valley pool) remains as the single Dumont event. File: `src/data/events.js`
 - **#36 (first travel settlement):** Skip `pendingSettlement` when `S.node <= 1`. Player gets one clean travel before first settlement. File: `src/systems/engine.js`
+
+### v55 — Added location/node markers on map (#26)
+- All 16 trail nodes shown as colored circle markers
+- Color-coded by settlement type (HBC=red, Métis=green, NWMP=blue, Mission=gold, Trading=brown, River=blue)
+- Current node: larger (9px), filled; visited: small gray (5px); future: medium (6px)
+- Tooltips on hover/tap show node name
+- Files: `src/ui/renderer.js`, `src/template.html`, `dist/index.html`
 
 ### v54 — Grouped secondary settlement actions (#35)
 - Primary actions always visible; secondary (craft) behind "More actions ▶" toggle
@@ -77,13 +84,13 @@ curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:5173/
 
 ### Enhancements (prioritized)
 - **#33** — Crafting discoverability in settlement UI — p3
-- **#26** — Add location/node markers on map
 - **#15** — Pre-departure cart packing (exists in code, blocked by overlay sequence)
 - **#13** — Weather system
 - **#12** — Highscore/leaderboard
 - **#10** — Basic icons
 
 ### Resolved (2026-06-08)
+- **#26** — Add location/node markers on map — v55. Color-coded by settlement type, tooltips show names.
 - **#35** — Reduce action-dense screens by grouping secondary actions — v54. Primary actions always visible; craft behind "More actions ▶" toggle.
 - **#34** — Audit and consolidate action verbs — v53.
 - **#31** — Prune redundant settlement/camp actions — v52.

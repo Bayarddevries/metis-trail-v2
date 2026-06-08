@@ -111,15 +111,53 @@ export function updateMap(state) {
     L.polyline(visited, { color: '#8B2500', weight: 3, opacity: 0.7 }).addTo(markerGroup);
   }
 
-  // Next node marker
-  if (next) {
-    L.circleMarker([next.lat, next.lon], {
-      radius: 6,
-      color: '#1A1410',
-      fillColor: '#E8DCC8',
-      fillOpacity: 1,
+  // Node markers for all nodes
+  const typeColors = {
+    hbc: '#8B2500',
+    metis: '#2E6A4A',
+    nwmp: '#1A3C6E',
+    mission: '#B8860B',
+    trading: '#6B4423',
+    river: '#4A90D9',
+  };
+  NODES.forEach((n, i) => {
+    const isHere = i === state.node;
+    const isVisited = i < state.node;
+    const isFuture = i > state.node;
+
+    let radius, color, fillColor, fillOpacity, weight;
+    if (isHere) {
+      radius = 9;
+      color = typeColors[n.type] || '#1A1410';
+      fillColor = typeColors[n.type] || '#E8DCC8';
+      fillOpacity = 1;
+      weight = 3;
+    } else if (isVisited) {
+      radius = 5;
+      color = '#888';
+      fillColor = '#bbb';
+      fillOpacity = 0.6;
+      weight = 1.5;
+    } else {
+      radius = 6;
+      color = typeColors[n.type] || '#1A1410';
+      fillColor = '#E8DCC8';
+      fillOpacity = 0.9;
+      weight = 2;
+    }
+
+    L.circleMarker([n.lat, n.lon], {
+      radius,
+      color,
+      fillColor,
+      fillOpacity,
+      weight,
+    }).bindTooltip(n.name, {
+      direction: 'top',
+      offset: [0, -8],
+      className: 'node-tooltip',
     }).addTo(markerGroup);
-  }
+  });
 
   // Cart marker at interpolated position (#8)
   L.marker([cartLat, cartLon], { icon: cartIcon }).addTo(markerGroup);

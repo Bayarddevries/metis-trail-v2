@@ -27,6 +27,11 @@ Use this file to log bugs, blockers, and known gaps during work sessions. Each i
 - Resolved: 2026-06-08 (v50)
 - Fix: Round to 1 decimal after DAILY_FOOD subtraction; Math.floor() on display in status bar and camp overlay.
 
+### 26. Add location/node markers on map
+- Opened: 2026-06-07
+- Resolved: 2026-06-08 (v55)
+- Fix: Added colored circle markers for all 16 trail nodes. Color-coded by settlement type (HBC=red, Métis=green, NWMP=blue, Mission=gold, Trading=brown, River=blue). Current node larger (9px), visited small gray (5px), future medium (6px). Tooltips show node names.
+
 ### 35. Reduce action-dense screens by grouping secondary actions
 - Opened: 2026-06-08
 - Resolved: 2026-06-08 (v54)
