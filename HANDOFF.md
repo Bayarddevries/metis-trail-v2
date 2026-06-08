@@ -4,10 +4,17 @@
 - **Build**: `dist/app.js?v=46`, `src/template.html` synced to `?v=46`
 - **Live**: https://bayarddevries.github.io/metis-trail-v2/
 - **Branch**: `main`
-- **Recent UI work**: darker aged palette, primary/secondary/ghost button hierarchy, camp action grouping, status urgency states, event cost/risk display, travel narrative dedupe, close-button touch hardening, interface enhancement report
+- **Recent UI work**: settlements UI polish — explicit action labels/subtitles, primary/secondary/utility visual hierarchy, stronger button readability, clear empty/disabled trade+craft states
 - **Balance decision**: 300-run realistic-choice sim showed 88.7% victory, 4.0% cart failure, 7.3% starvation. User accepted these outcomes. No balance numbers were changed.
 - **Known issue**: #36 — Day 1 first travel can resolve to settlement overlay that blocks primary actions. Left as decision point.
 - **Tests**: `tests/balance-sim.mjs` added for realistic-choice playtest simulation
+- **Settlements polish**: clearer buttons, safer trade/craft disabled/empty states, overlay-focused copy improvements
+
+## Verified Working (current pass)
+- Settlement overlay renders with labeled action buttons and subtitles
+- Action button hierarchy: primary actions (trade/repair/rest/heal), secondary (craft/gossip/forage), utility (rumours/recruit/filler)
+- Trade/craft disabled/empty states render as disabled panels with explanatory text
+- All previous features remain intact post-build
 
 ## Verified Working (v47 build path)
 
