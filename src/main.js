@@ -270,10 +270,17 @@ function animateDicePill(result, fullDiceResult) {
       el.textContent = String(result.roll);
       // Dramatic final pose: remove spin, add settle animation + pass/fail color
       el.className = 'die small font-spectral settled ' + (result.success ? 'pass' : 'fail');
-      // After settle animation, reveal outcome + Continue button
-      setTimeout(() => {
+      // After settle animation ends, reveal outcome + Continue button
+      let revealed = false;
+      const doReveal = () => {
+        if (revealed) return;
+        revealed = true;
+        el.removeEventListener('animationend', doReveal);
         revealDiceOutcome(fullDiceResult);
-      }, 500);
+      };
+      el.addEventListener('animationend', doReveal);
+      // Fallback: if animationend doesn't fire (e.g. no CSS), show after 500ms
+      setTimeout(doReveal, 500);
     }
   }, 60);
 }

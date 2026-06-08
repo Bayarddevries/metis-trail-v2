@@ -2510,9 +2510,15 @@ function animateDicePill(result, fullDiceResult) {
       clearInterval(id);
       el.textContent = String(result.roll);
       el.className = "die small font-spectral settled " + (result.success ? "pass" : "fail");
-      setTimeout(() => {
+      let revealed = false;
+      const doReveal = /* @__PURE__ */ __name(() => {
+        if (revealed) return;
+        revealed = true;
+        el.removeEventListener("animationend", doReveal);
         revealDiceOutcome(fullDiceResult);
-      }, 500);
+      }, "doReveal");
+      el.addEventListener("animationend", doReveal);
+      setTimeout(doReveal, 500);
     }
   }, 60);
 }
