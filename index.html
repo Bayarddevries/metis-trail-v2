@@ -93,6 +93,21 @@
   #map .leaflet-tile-pane {
     filter: sepia(0.6) saturate(0.4) contrast(0.9) brightness(0.95);
   }
+  #map .node-tooltip {
+    background: rgba(26,20,16,0.85);
+    color: #E8DCC8;
+    border: 1px solid rgba(232,220,200,0.3);
+    border-radius: 4px;
+    padding: 3px 8px;
+    font-family: var(--font-heading);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+  }
+  #map .node-tooltip::before {
+    border-top-color: rgba(26,20,16,0.85);
+  }
 
   .map-frame {
     position: absolute;
@@ -1089,7 +1104,13 @@
     </div>
   </div>
 </div>
-  <script type="module" src="app.js?v=59"></script>
+  <script type="module" src="app.js?v=61"></script>
+<script>window.__METIS_ASSETS__={
+  "assets": []
+};</script>
+<script>window.__METIS_ASSETS__={
+  "assets": []
+};</script>
 <script>window.__METIS_ASSETS__={
   "assets": []
 };</script>
