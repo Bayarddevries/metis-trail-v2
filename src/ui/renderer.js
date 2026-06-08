@@ -173,7 +173,7 @@ export function renderStatusBar(state) {
   else if (crewState === 'exhausted') crewCls += ' crew-exhausted';
   else if (crewState === 'rested') crewCls += ' crew-rested';
   crewEl.innerHTML = `<span class="stat-label">Crew </span><span class="${crewCls}">${state.crew}</span>`;
-  foodEl.innerHTML = `<span class="stat-label">Food </span><span class="stat-value${state.food <= 4 ? ' food-low' : ''}">${state.food}</span>`;
+  foodEl.innerHTML = `<span class="stat-label">Food </span><span class="stat-value${state.food <= 5 ? ' food-low' : ''}">${state.food}</span>`;
   wearEl.innerHTML = `<span class="stat-label">Wear </span><span class="stat-value${state.wear >= 4 ? ' wear-high' : ''}">${state.wear}</span>`;
 
   if (!window.__METIS_PENDING_RESULT__) window.__METIS_PENDING_RESULT__ = null;
