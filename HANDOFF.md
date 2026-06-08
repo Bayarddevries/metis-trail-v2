@@ -1,11 +1,13 @@
 # HANDOFF — Metis Trail V2
 
-## Current State (v47 — camp reopen bug fixed, uncommitted)
-- **Build**: `dist/app.js?v=46`, `src/template.html` at `?v=45` (pending manual sync)
-- **Live**: https://bayarddevries.github.io/metis-trail-v2/ (still on v37 until pushed)
-- **Local test**: `http://100.108.183.33:9001/index.html` (currently serving older build)
-- **Branch**: `main` on `0bda15e`, **uncommitted changes** (v41-v47 work)
-- **Servers**: python3 -m http.server 9001 from `dist/` (pid 2995742); `8081` earlier (likely stale)
+## Current State (lane A UI polish complete, balance baseline accepted)
+- **Build**: `dist/app.js?v=46`, `src/template.html` synced to `?v=46`
+- **Live**: https://bayarddevries.github.io/metis-trail-v2/
+- **Branch**: `main`
+- **Recent UI work**: darker aged palette, primary/secondary/ghost button hierarchy, camp action grouping, status urgency states, event cost/risk display, travel narrative dedupe, close-button touch hardening, interface enhancement report
+- **Balance decision**: 300-run realistic-choice sim showed 88.7% victory, 4.0% cart failure, 7.3% starvation. User accepted these outcomes. No balance numbers were changed.
+- **Known issue**: #36 — Day 1 first travel can resolve to settlement overlay that blocks primary actions. Left as decision point.
+- **Tests**: `tests/balance-sim.mjs` added for realistic-choice playtest simulation
 
 ## Verified Working (v47 build path)
 
@@ -14,12 +16,15 @@
 - All previous v41-v46 features unchanged by the fix
 
 ### Version drift note
-`src/template.html` is currently at `?v=45`; `dist/index.html` is now at `?v=46`. Next build requires manual template sync before rebuilding.
+`src/template.html` is currently at `?v=46`; `dist/index.html` is at `?v=46`. Drift cleared.
 
 ## Known Bugs (v47)
 
-### Path server drift (unchanged)
-Same local path rules as before and it complains a socket already in use about every 2-3 minutes.
+### Day 1 settlement soft-lock (Issue #36)
+- Observed behavior: after Begin Journey, first Travel 1 Day can lead straight into a settlement overlay.
+- That blocks Travel/Camp/Cart/Crew until dismissed.
+- Root cause is likely a render/side-effect path in main.js showSettlement(), not necessarily an engine state error.
+- Currently left as a decision point.
 
 ### Camp overlay sequence guard
 If `showCamp()` is called while `pendingEvent` or `pendingSettlement` is set, it returns early without opening the overlay. This is intentional and safe, but hard for players to understand if they see no feedback. Add a small status hint later.
@@ -30,7 +35,6 @@ If `showCamp()` is called while `pendingEvent` or `pendingSettlement` is set, it
 - Crafting panel available at Métis and NWMP settlements
 - MB currency display removed from cart and crafting UI
 - Pre-departure overlay renders with briefing, category legend, weight tracking, +/- controls, Auto-Pack
-- Local build verified on Tailscale: `http://100.108.183.33:8081/index.html`
 
 ## Known Bugs (v44)
 
@@ -77,7 +81,7 @@ Not grep-able in esbuild bundle but works at runtime. Monitor.
 Buttons show "Unload −X kg" but not which item. Data-attribute carries item name so clicks work, but UX is unclear. Minor.
 
 ### Win rate still above target
-66.5% win rate after balance pass (target 25-40%). May need weather system, higher food consumption, or more aggressive event penalties.
+66.5% win rate after balance pass (target 25-40%). User accepted realistic-choice sim results: 88.7% victory, 4.0% cart failure, 7.3% starvation. Further tuning is optional.
 
 ### HBC crafting recipe unreachable
 Recipe `finished_hides` exists with `settlement: 'hbc'` in `getAvailableRecipes()` but HBC action list does NOT include `'craft'`. Player can never access it. Either add `'craft'` to HBC actions or reassign recipe to a settlement type that has it.
@@ -154,93 +158,52 @@ cd /home/bayarddevries/metis-trail-v2-repo/dist
 python3 -m http.server 8081 --bind 0.0.0.0
 ```
 
-## Next Priorities — PHASE 6: Playtesting & Balance
+## Next Priorities — POST UI/BALANCE BASELINE
 
-The user wants **two types of testing** (GitHub issue #5):
+### Immediate
+- Keep UI polish iterations going: settlements buttons styling, more overlay consistency
+- Investigate or decide on Issue #36 Day 1 settlement flow
+- Continue version-drift mitigation
 
-### 1. Headless Playtesting Harness
-- Run 100s of automated game simulations using the real engine (`src/systems/engine.js`)
-- No UI needed — call engine methods directly: `travelOneDay()`, `settlementAction()`, event choices
-- Goal: find balance issues (is the game too hard/easy?), edge cases (can you get stuck?), and economy exploits
-- Suggested approach:
-  - Write a test harness in `tests/simulate.js` that imports the engine
-  - Run N simulations with randomized player choices
-  - Log outcomes: ending type, score, days, death reason, items remaining
-  - Aggregate stats: win rate, avg score, most common death, item usage frequencies
-- The engine is a pure JS module with no DOM dependency — it can be `require()`/`import()`-ed directly from Node/bun
-- Key engine entry point: the factory function in `src/systems/engine.js` that returns `{ getState, setState, travelOneDay, ... }`
-- **IMPORTANT**: You cannot import `src/systems/engine.js` directly from bun/node because it imports from relative paths. You'll need to either:
-  - Use `bun --conditions=source tests/simulate.js` (if bun supports it), or
-  - Create a bunfig.toml with path aliases, or
-  - Run the harness inside the bundled dist/app.js context (use esbuild to bundle a test entry point)
-- **Simplest path**: Write the harness as an esbuild entry point like `tests/simulate-entry.js` that imports the source modules the same way `src/main.js` does, then `bun scripts/build-test.mjs` to bundle it for Node
-
-### 2. Browser Click-Through Testing
-- Non-headless, visual QA of the full user experience
-- Use the browser tool (Hermes built-in) to load https://bayarddevries.github.io/metis-trail-v2/ and click through the game
-- Verify: overlays appear/disappear correctly, buttons work, flow from intro → travel → events → settlement → endings works end-to-end
-- Pay special attention to mobile layout (user tests on real mobile devices)
-- **browser_click does NOT reliably trigger addEventListener on mobile** — if user says button doesn't work, it's real. Verify via JS click or real device.
-
-### Suggested First Steps for Next Agent
-1. Read this file, TODO.md, AGENTS.md, CHANGELOG.md
-2. Read `src/systems/engine.js` to understand the public API for headless testing
-3. Build the headless harness first — it's higher value for balance tuning
-4. Run 100+ simulations, report aggregate stats
-5. Then do browser click-through QA on the live site
-6. Document findings in ISSUES.md
+### Later
+- Weather system
+- Highscore/leaderboard
+- Second-half trail nodes
+- Cultural review / AI-writing audit
 
 ## Open GitHub Issues
 
 | # | Title | Priority | Notes |
 |---|-------|----------|-------|
-| 26 | Node/location markers on map | Medium | Leaflet markers for settlements. Manny Morr's pixel art from Google Drive are arrival cards, not map pins — tabled pending decision |
-| 25 | Cultural review | Low | External dependency — needs human reviewer |
-| 15 | Pre-departure cart packing | Medium | Let players choose starting loadout with budget/space |
-| 13 | Weather system | Medium | Daily weather modifiers for events/outcomes/morale/wear |
-| 12 | Highscore/leaderboard | Medium | Score tracking by outcome type |
-| 10 | Basic icons | Low | Replace basic UI icons with themed artwork |
-| 6 | AI writing review | Low | Audit copy for AI-isms |
-| 5 | Testing infrastructure | Medium | Phase 6 complete. Balance pass applied (v38). Win rate 66.5% — still above target. |
-
-## Balance Pass — v38 Applied
-
-All 6 recommendations from the v37 playtest have been applied:
-
-1. ✅ DAILY_FOOD 1.0 → 1.2
-2. ✅ Wear accumulation reduced (plains 0.08, river_valley 0.12, wooded 0.15)
-3. ✅ Settlement repair now always -2 wear
-4. ✅ Triumphant threshold 1400 → 1200
-5. ✅ EVENT_CHANCE 0.35 → 0.45
-6. ✅ #29 starvation bypass fixed
-
-Post-balance results: win rate 66.5%, starvation 11%, cart failure 19.5%. Win rate still above 25-40% target — further tuning may be needed (weather system, higher food consumption).
+| 36 | Day 1 settlement overlay blocks primary actions | Medium | Decision point, not patched |
+| 35 | Reduce action-dense screens by grouping secondary actions | Medium | In progress via UI polish |
+| 34 | Audit and consolidate primary/secondary action verbs | Medium | Camp grouping done; broader audit pending |
+| 33 | Crafting discoverability in settlement UI | Medium | Settlement UI restyle may address this |
+| 32 | Balance pass on unforgiving events (medicine pouch) | Medium | Balance baseline accepted; tuning optional |
+| 31 | Prune redundant settlement/camp actions | Medium | Camp overhaul done; settlement pruning remains |
+| 26 | Node/location markers on map | Medium | Pending art/assets decision |
+| 25 | Cultural review | Low | Needs external reviewer |
+| 15 | Pre-departure cart packing | Medium | Implemented; iterating |
+| 13 | Weather system | Medium | Future |
+| 12 | Highscore/leaderboard | Medium | Future |
+| 10 | Basic icons | Low | Waiting on assets |
+| 6 | AI writing review | Low | Periodic/optional |
 
 ## Closed GitHub Issues (this session)
 
 | # | Title | Version |
 |---|-------|---------|
-| 30 | Duplicate trade buttons | v38 |
-| 29 | Victory bypasses starvation | v38 |
-| 28 | Trim dead features | v34 |
-| 27 | Mobile top bar clipped | v32 |
-| 20 | Gossip benefit | v26 |
-| 18 | Deeper event text | v24 |
-| 16 | Economy/trade | v26 |
-| 14 | Conditional endings | v36 |
-| 3 | Research-archive citations | v24 |
+| — | Lane A UI polish shipped | v46 |
+| — | Touch-target hardening shipped | v46 |
+| — | Realistic-choice balance baseline documented | current |
 
 ## Files Modified (this session)
 
-- `src/systems/engine.js` — fixed #29 (starvation check before victory), reduced wear chances, repair always -2
-- `src/core/constants.js` — DAILY_FOOD 1.0→1.2, EVENT_CHANCE 0.35→0.45
-- `src/main.js` — fixed #30 (trade buttons labeled with item name), triumphant threshold 1400→1200
-- `src/template.html` — version synced to v38
-- `tests/simulate-entry.js` — NEW, headless simulation harness
-- `scripts/build-test.mjs` — NEW, esbuild bundler for test harness
-- `tests/results.json` — NEW, 200-sim raw data (×2 runs)
-- `CHANGELOG.md` — v37, v38 entries
-- `HANDOFF.md` — v38 state
-- `TODO.md` — Phase 6 complete, balance pass applied
-- `AGENTS.md` — 2 new pitfalls
-- `ISSUES.md` — #29, #30 resolved; #5 updated
+- `src/template.html` — touch-target hardening, version sync to v46
+- `dist/index.html` — rebuilt artifact
+- `tests/balance-sim.mjs` — NEW realistic-choice playtest harness
+- `docs/interface-enhancement-report.html` — refreshed interface audit report
+- `CHANGELOG.md` — interface + testing docs
+- `HANDOFF.md` — current state refresh
+- `TODO.md` — lane A marked complete, balance baseline noted
+- `ISSUES.md` — #36 added for Day 1 settlement blocker

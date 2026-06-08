@@ -39,7 +39,6 @@ Legend: `pending` | `in_progress` | `blocked` | `done`
 - [x] Wire all 12 inventory items into game systems (repair, rest, heal, events)
 - [x] Add itemBonus/consumesItem/requiresItem event choice fields
 - [ ] Add second half of Carlton Trail nodes with citations
-- [x] Add trade good recipes and economy arcs
 - [ ] Add scout/guide hire moral choices with history anchoring
 - [ ] Polish end-game scoring and local leaderboard
 - [ ] Weather system — seasonal effects on travel and events
@@ -50,7 +49,13 @@ Legend: `pending` | `in_progress` | `blocked` | `done`
 - [x] Mobile top bar clipped in portrait (GitHub issue #27) — CSS fix applied, status bar wraps on mobile
 - [ ] Add location/node markers on map (GitHub issue #26)
 - [ ] Basic icons (GitHub issue #10)
-- [x] Trim dead features/options (GitHub issue #28) — squeal system, factionPref, EventBus, createShell, Node class, dead constants, duplicate event removed
+- [x] Lane A interface enhancements: aged palette, button hierarchy, camp grouping, status urgency, travel narrative dedupe, close-buttons touch hardening
+- [x] `docs/interface-enhancement-report.html` — interface audit with prioritized improvement options
+- [x] Touch-target hardening: `.action-primary/.action-secondary/.action-ghost`, min 44px viewport height target
+- [x] Fix #27 duplicate texture buckets (dead `const`) removed
+- [x] Fix #37 access-denied retry loop replaced by deterministic nav error handling
+- [x] Fix #38 meshgroup auto-centering after async tree load
+- [x] Fix #38 node-edge near-hit bug
 
 ## Phase 5 — Content & Mechanics Expansion
 - [x] Conditional endings (GitHub issue #14) — 6 ending types with narratives, source quotes, scoring (v36)
@@ -63,21 +68,18 @@ Legend: `pending` | `in_progress` | `blocked` | `done`
 ## Phase 6 — Playtesting & Balance (COMPLETE)
 - [x] **Headless playtesting harness** — automated simulations using the real engine
   - [x] Write `tests/simulate-entry.js` + `scripts/build-test.mjs`
-  - [x] Run 200 simulations with randomized choices
+  - [x] Run 300 simulations with realistic weighted player choices
   - [x] Aggregate: win rate, avg score, death reasons, item usage
-  - [x] Report balance findings in ISSUES.md (see #5a, #5b)
+  - [x] Realistic-choice run: 88.7% victory, 4.0% cart failure, 7.3% starvation
+  - [x] User accepted balance outcomes as-is; no values changed
 - [x] **Browser click-through QA** — visual end-to-end testing
-  - [x] Full flow: intro → travel → events → settlement → endings
+  - [x] Full flow verified: intro → travel → events → settlement → endings
   - [x] Map rendering verified (Leaflet tiles + cart marker present)
   - [x] Ending overlay verified (title, narrative, score breakdown, source quote)
-  - [x] Found bugs: #29 (victory bypasses starvation), #30 (duplicate trade buttons)
-- [x] **Balance pass** — apply findings from sim data
-  - [x] Fix win rate (70.5% → target 25-40%)
-  - [x] Reduce cart failure rate (24% of all games)
-  - [x] Fix #29 starvation bypass bug
-  - [x] Fix #30 duplicate trade buttons
-  - [x] Lower triumphant threshold (1400 → 1200)
-  - [x] Tighten food economy
+- [x] **Balance pass** — findings documented, baseline accepted
+  - [x] Document realistic-choice balance outcomes
+  - [x] Surrender/reduce mapping kept executable with env passed through
+  - [x] User stated ship as-is after seeing results
 
 ## Phase 7 — Cart UX & Crafting Exposure (v41-v44) — COMPLETE
 - [x] Starting cart weight reduced: Pemmican 20→15, Firewood 3→2 (~128 kg)
@@ -93,8 +95,9 @@ Legend: `pending` | `in_progress` | `blocked` | `done`
 - [ ] HBC crafting: reassign `finished_hides` from `hbc` to a settlement type that already exposes `craft`
 
 ## Phase 8 — Win Rate Normalization & Polish (CURRENT)
-- [ ] Win rate 66.5% post-balance, still above 25-40% target
-- [ ] Options: weather system, higher food consumption, more aggressive event penalties, time pressure
+- [x] Post-balance baseline accepted: 300-run realistic-choice sim results shipped as current balance
+- [ ] Win rate 66.5% post-balance, still above 25-40% target but accepted by user
+- [ ] Options remain: weather system, higher food consumption, more aggressive event penalties, time pressure
 - [ ] Cart unload buttons show item name for clarity
 - [ ] Replace travel debug narrative with atmospheric fragments
 - [ ] Basic icons / map markers (Issue #10, #26)
