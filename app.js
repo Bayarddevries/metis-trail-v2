@@ -1297,15 +1297,6 @@ var EVENT_POOLS = {
       ]
     },
     {
-      id: "river_ferry_dumont",
-      text: "Gabriel Dumont is at the crossing, his ferry moored to the bank. His fee is fair, but the current is heavy today \u2014 the ferry rocks and the oarsman strains. Dumont watches the river with the calm of a man who has crossed it a thousand times.",
-      source: getSource("DUMONT_ACCOUNTS"),
-      choices: [
-        { text: "Take the ferry now", dc: 10, ok: "He rows hard and gets you across cleanly.", bad: "The ferry lurches. Cargo shifts and one wheel takes damage.", wear: 1, addsRep: { key: "metis", delta: 1 } },
-        { text: "Wait out the current", dc: null, always: "You wait one day for calmer water.", time: 1 }
-      ]
-    },
-    {
       id: "river_cart_raft_crossing",
       text: "The crossing here is too deep to ford. You eye the spare hides in the cart \u2014 enough to build a raft, if you know how. The river is wide and the current steady. On the far bank, the trail continues west.",
       source: getSource("FONSECA_RAFT"),
@@ -1517,7 +1508,7 @@ function createGame(seed = null) {
   function travelOneDay2() {
     if (S.over || S.pendingSettlement) return stepLog;
     const nextDist = NODES[S.node + 1]?.dist || 1;
-    S.food -= CONSTANTS.DAILY_FOOD;
+    S.food = Math.max(0, Math.round((S.food - CONSTANTS.DAILY_FOOD) * 10) / 10);
     S.segmentDay++;
     S.travelDaysWithoutRest++;
     advance();
@@ -1561,7 +1552,7 @@ function createGame(seed = null) {
         }
         return stepLog;
       }
-      if (n.type !== "river") S.pendingSettlement = n;
+      if (n.type !== "river" && S.node > 1) S.pendingSettlement = n;
       return stepLog;
     }
     const ev = pickEvent();
@@ -2208,7 +2199,7 @@ function renderStatusBar(state) {
   else if (crewState === "rested") crewCls += " crew-rested";
   crewEl.textContent = String(state.crew);
   crewEl.className = crewCls;
-  foodEl.textContent = String(state.food);
+  foodEl.textContent = String(Math.floor(state.food));
   foodEl.className = "stat-value" + (state.food <= 5 ? " food-low" : "");
   wearEl.textContent = String(state.wear);
   wearEl.className = "stat-value" + (state.wear >= 4 ? " wear-high" : "");
@@ -2503,7 +2494,6 @@ function renderDicePill(result) {
     <div class="roll-label">Roll</div>
     <div id="die" class="die small font-spectral">-</div>
     <div class="roll-label">DC ${result.dc}</div>
-    <div class="roll-result ${result.success ? "pass" : "fail"}">${result.success ? "Pass" : "Fail"}</div>
   `;
 }
 __name(renderDicePill, "renderDicePill");
@@ -3074,7 +3064,7 @@ function showCamp(game2) {
   const subEl = document.getElementById("camp-sub");
   const resultEl = document.getElementById("camp-result");
   const actionsEl = document.getElementById("camp-actions");
-  if (foodEl) foodEl.textContent = state.food;
+  if (foodEl) foodEl.textContent = Math.floor(state.food);
   if (wearEl) wearEl.textContent = state.wear;
   if (moraleEl) moraleEl.textContent = state.morale;
   if (crewEl) crewEl.textContent = state.crew;
