@@ -36,6 +36,7 @@ Use this file to log bugs, blockers, and known gaps during work sessions. Each i
 
 ### 43. Duplicate stat headings in status bar
 - Opened: 2026-06-08
+- Resolved: 2026-06-08 (v49)
 - Labels: bug, ui
 - Summary: Wear, food, and other stat headings are rendered twice in the top status bar, so labels appear duplicated instead of once per stat.
 - Evidence: Live feedback on desktop.
@@ -118,6 +119,12 @@ Use this file to log bugs, blockers, and known gaps during work sessions. Each i
 - Status: Resolved in v41/v43.
 
 ## Resolved
+
+### 43. Duplicate stat headings in status bar
+- Opened: 2026-06-08
+- Resolved: 2026-06-08 (v49)
+- Labels: bug, ui
+- Fix: Replaced `innerHTML` with `textContent` + `className` on stat-value spans in `renderStatusBar()`. Template labels remain as the sole label source.
 
 ### 30. Trade panel shows duplicate buttons
 - Opened: 2026-06-07

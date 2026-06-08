@@ -2206,9 +2206,12 @@ function renderStatusBar(state) {
   if (crewState === "tired") crewCls += " crew-tired";
   else if (crewState === "exhausted") crewCls += " crew-exhausted";
   else if (crewState === "rested") crewCls += " crew-rested";
-  crewEl.innerHTML = `<span class="stat-label">Crew </span><span class="${crewCls}">${state.crew}</span>`;
-  foodEl.innerHTML = `<span class="stat-label">Food </span><span class="stat-value${state.food <= 5 ? " food-low" : ""}">${state.food}</span>`;
-  wearEl.innerHTML = `<span class="stat-label">Wear </span><span class="stat-value${state.wear >= 4 ? " wear-high" : ""}">${state.wear}</span>`;
+  crewEl.textContent = String(state.crew);
+  crewEl.className = crewCls;
+  foodEl.textContent = String(state.food);
+  foodEl.className = "stat-value" + (state.food <= 5 ? " food-low" : "");
+  wearEl.textContent = String(state.wear);
+  wearEl.className = "stat-value" + (state.wear >= 4 ? " wear-high" : "");
   if (!window.__METIS_PENDING_RESULT__) window.__METIS_PENDING_RESULT__ = null;
   renderTravelLinesView(state, window._metisGame, window.__METIS_PENDING_RESULT__);
 }

@@ -2,6 +2,20 @@
 
 All notable changes are documented here. Format loosely follows Keep a Changelog.
 
+## [v49] - 2026-06-08
+
+### Fixed — Settlement button transparency (secondary/utility actions unreadable)
+- `.settlement-action-btn.secondary-action` used `background: var(--clr-bg)` which was too transparent over the settlement overlay.
+- `.settlement-action-btn.utility-action` used `background: rgba(255,255,255,0.45)` — nearly invisible.
+- Fix: secondary now uses opaque `#d4c9b4` with darker hover `#c4b9a4`; utility uses `rgba(210,200,180,0.92)` with solid hover.
+- Applied to both `src/template.html` and `dist/index.html`.
+
+### Fixed — Duplicate stat headings in status bar (#43)
+- `renderStatusBar()` in `src/ui/renderer.js` was injecting `<span class="stat-label">` via `innerHTML` for Crew, Food, and Wear — but the HTML template already contains hardcoded `<span class="stat-label">` for each.
+- Result: every stat label appeared twice (e.g., "Food Food 30").
+- Fix: replaced `innerHTML` with `textContent` + `className` on the existing `stat-value` spans, leaving the template labels untouched.
+- Built `dist/app.js` confirms zero `stat-label` re-injection.
+
 ## [v48] - 2026-06-08
 ### Changed — Settlement UI clarity and button hierarchy
 - Explicit action labels/subtitles: `Rest at Settlement`, `Repair Cart`, `Treat Crew`, `Reinforce Crew`, `Ask Around`, etc.
