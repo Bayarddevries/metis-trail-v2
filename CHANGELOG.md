@@ -4,6 +4,11 @@ All notable changes are documented here. Format loosely follows Keep a Changelog
 
 ## [v64] — 2026-06-08
 
+### Documentation — Weather system planning prompt
+- Created `docs/weather-system-plan-prompt.md` — comprehensive design brief for next agent
+- Defines 3-tier scope (minimal → full → comprehensive), balance requirements, mechanical integration plan
+- Includes complete engine API reference, architecture constraints, file change list, verification plan
+
 ### Added — Atmospheric travel narrative
 
 - Replaced debug travel text ("Day advances. -1 Food. Crew: rested -> tired.") with immersive atmospheric fragments
