@@ -917,8 +917,16 @@
   .camp-action-btn:disabled { opacity: 0.5; cursor: not-allowed; }
   .camp-action-label { font-size: 13px; font-weight: 700; }
   .camp-action-cost { font-size: 11px; color: #6b5d4a; margin-top: 2px; }
+  .camp-action-desc { font-size: 11px; color: #7a6d5a; margin-top: 2px; line-height: 1.3; font-style: italic; }
   .camp-group { font-size: 11px; text-transform: uppercase; letter-spacing: 0.4px; margin-top: 10px; margin-bottom: 3px; font-family: var(--font-heading); color: #6b5d4a; }
   .camp-result { margin-top: 12px; padding: 10px; background: rgba(255,255,255,0.65); border: 1px solid rgba(0,0,0,0.08); border-radius: 6px; font-size: 13px; line-height: 1.5; }
+  .camp-roll-display { display:flex; align-items:center; justify-content:center; gap:10px; padding:10px; margin-top:10px; background:rgba(255,255,255,0.65); border:2px solid var(--clr-ink); border-radius:8px; font-family:var(--font-heading); }
+  .camp-roll-display .die { width:36px; height:36px; border-radius:5px; background:var(--clr-bg); border:2px solid var(--clr-ink); display:flex; align-items:center; justify-content:center; font-size:18px; font-weight:700; color:var(--clr-ink); box-shadow:0 2px 0 rgba(0,0,0,0.25); }
+  .camp-roll-display .die.settled { animation: dice-settle 0.45s ease-out both; }
+  .camp-roll-display .die.pass { border-color:#2e7d32; color:#2e7d32; box-shadow:0 0 8px 2px rgba(46,125,50,0.3), 0 2px 0 rgba(0,0,0,0.25); }
+  .camp-roll-display .die.fail { border-color:#8b2500; color:#8b2500; box-shadow:0 0 8px 2px rgba(139,37,0,0.3), 0 2px 0 rgba(0,0,0,0.25); }
+  .camp-roll-display .roll-label { font-size:11px; color:var(--clr-ink); letter-spacing:0.05em; }
+  .camp-roll-display .roll-total { font-size:12px; color:var(--clr-ink); font-weight:700; }
   .camp-close-row { display: flex; justify-content: flex-end; margin-top: 10px; }
 
   @media (max-width: 768px) {
@@ -1130,6 +1138,7 @@
         <span class="camp-pill">Crew: <span id="camp-crew">rested</span></span>
       </div>
       <div class="camp-actions" id="camp-actions"></div>
+      <div class="camp-roll-display" id="camp-roll-display" style="display:none;"></div>
       <div class="camp-result" id="camp-result" style="display:none;"></div>
       <div class="camp-close-row">
         <button class="ctrl-btn" id="camp-continue">Continue West</button>
@@ -1149,7 +1158,10 @@
     </div>
   </div>
 </div>
-  <script type="module" src="app.js?v=70"></script>
+  <script type="module" src="app.js?v=71"></script>
+<script>window.__METIS_ASSETS__={
+  "assets": []
+};</script>
 <script>window.__METIS_ASSETS__={
   "assets": []
 };</script>

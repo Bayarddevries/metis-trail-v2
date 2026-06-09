@@ -515,18 +515,21 @@ export function createGame(seed = null) {
       const action = String(type || '').toLowerCase();
       const costItems = [];
       const effects = [];
+      let roll = null;
+      let rollTotal = null;
       if (action === 'rest') {
         if (S.food < 1) return { error: 'Not enough food to rest.' };
         S.food -= 1;
         costItems.push({ name: 'Food', count: -1 });
-        const roll = d() + crewMod(S);
-        if (roll >= 15) {
+        roll = d();
+        rollTotal = roll + crewMod(S);
+        if (rollTotal >= 15) {
           S.crew = 'rested';
           S.morale = Math.max(0, Math.min(100, S.morale + 20));
           S.wear = Math.max(0, S.wear - 1);
           S.travelDaysWithoutRest = 0;
           effects.push('Wonderful rest.', 'Crew rested', 'Morale +20', 'Wear -1');
-        } else if (roll >= 8) {
+        } else if (rollTotal >= 8) {
           S.crew = 'rested';
           S.morale = Math.max(0, Math.min(100, S.morale + 15));
           S.wear = Math.max(0, S.wear - 1);
@@ -539,14 +542,15 @@ export function createGame(seed = null) {
           effects.push('Rough night.', 'Morale +5', 'Crew tired');
         }
       } else if (action === 'forage') {
-        const roll = d() + crewMod(S);
-        const baseGain = Math.floor(Math.random() * 6) + (roll >= 12 ? 6 : roll >= 8 ? 4 : 1);
+        roll = d();
+        rollTotal = roll + crewMod(S);
+        const baseGain = Math.floor(Math.random() * 6) + (rollTotal >= 12 ? 6 : rollTotal >= 8 ? 4 : 1);
         S.food += baseGain;
-        if (roll >= 12) {
+        if (rollTotal >= 12) {
           effects.push(`Excellent foraging. +${baseGain} Food`);
-        } else if (roll >= 8) {
+        } else if (rollTotal >= 8) {
           effects.push(`Foraged +${baseGain} Food`);
-        } else if (roll >= 5) {
+        } else if (rollTotal >= 5) {
           effects.push(`Lean haul. +${baseGain} Food`);
         } else {
           effects.push('Found little today.');
@@ -557,12 +561,13 @@ export function createGame(seed = null) {
         ammo.count -= 1;
         costItems.push({ name: 'Ammunition Belt', count: -1 });
         advance();
-        const roll = d() + crewMod(S);
-        if (roll >= 10) {
+        roll = d();
+        rollTotal = roll + crewMod(S);
+        if (rollTotal >= 10) {
           const gained = Math.floor(Math.random() * 9) + 6;
           S.food += gained;
-          effects.push(`+${gained} Food`);
-        } else if (roll <= 5) {
+          effects.push(`Clean kill. +${gained} Food`);
+        } else if (rollTotal <= 5) {
           effects.push('Shot went wide. No food gained.');
         } else {
           effects.push('Close. Food scarce today.');
@@ -578,8 +583,9 @@ export function createGame(seed = null) {
         effects.push(`Wear -${repaired}`);
       } else if (action === 'scout') {
         advance();
-        const roll = d() + crewMod(S);
-        if (roll >= 12) {
+        roll = d();
+        rollTotal = roll + crewMod(S);
+        if (rollTotal >= 12) {
           const n = NODES[S.node + 1];
           const terrain = (n && n.terrain) || 'plains';
           effects.push(`Scout succeeded. Next leg is ${terrain.replace(/_/g, ' ')}.`);
@@ -605,7 +611,7 @@ export function createGame(seed = null) {
       }
 
       if (effects.length === 0 && costItems.length === 0) effects.push('Nothing changes.');
-      return { day: S.day, effects, costItems };
+      return { day: S.day, effects, costItems, roll, rollTotal };
     },
 
     craftRecipe(recipeId) {

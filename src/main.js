@@ -731,8 +731,18 @@ function showSettlement(game) {
   const primaryActions = [];
   const secondaryActions = [];
   (available.actions || []).forEach((action) => {
-    if (['craft'].includes(action)) secondaryActions.push(action);
-    else primaryActions.push(action);
+    if (['craft'].includes(action)) {
+      // Only add craft to secondary if there are usable recipes
+      if (action === 'craft') {
+        const recipes = game.getAvailableRecipes();
+        if (recipes.length > 0) secondaryActions.push(action);
+        // If no recipes, craft is silently skipped (no empty toggle)
+      } else {
+        secondaryActions.push(action);
+      }
+    } else {
+      primaryActions.push(action);
+    }
   });
 
   // Render primary actions (always visible)
@@ -1105,6 +1115,142 @@ function showCrew(game) {
   document.getElementById('crew-overlay')?.classList.add('active');
 }
 
+const CAMP_FLAVOR = {
+  rest: {
+    high: [
+      'The crew sleeps deeply under a sky full of stars. Morning comes with fresh energy and quiet purpose.',
+      'A perfect night by the fire. The oxen rest well, the crew wakes restored — tomorrow feels full of promise.',
+      'The camp is peaceful, the fire burns steady, and sleep comes easy. You wake before dawn, rested and ready.',
+    ],
+    mid: [
+      'The night is adequate. Sleep comes in fits, but the crew wakes functional if not truly refreshed.',
+      'A serviceable rest. The ground is hard but the fire holds. Morning finds the crew ready to move on.',
+      'You sleep light and wake stiff, but the crew is rested enough. The trail waits.',
+    ],
+    low: [
+      'A rough night. The fire dies and the cold creeps in. The crew wakes tired, and the day ahead feels long.',
+      'Sleep is fitful and short. The crew rises grumbling, and morale suffers for it.',
+      'The camp offers little comfort. The crew wakes cold and irritable, and the morning is slow to start.',
+    ],
+  },
+  forage: {
+    high: [
+      'Berry bushes heavy with saskatoon fruit, and a patch of wild turnips beside a creek. The land provides generously.',
+      'You find a meadow thick with edible roots and early berries. The foraging is excellent — the crew eats well tonight.',
+      'A stroke of luck: a patch of wild onions, gooseberries, and a patch of camas root. The foraging bucket is full.',
+    ],
+    mid: [
+      'A modest haul — some wild onions, a few berries, and some edible greens. Enough to supplement the rations.',
+      'You forage enough to keep the pot boiling. Not a feast, but not a famine either.',
+      'The land yields enough to keep the crew fed. Unspectacular but welcome.',
+    ],
+    low: [
+      'The prairie offers little today. A few bitter roots and not much else. The foraging was lean.',
+      'You find almost nothing edible. The land is stingy, and the crew goes to bed hungry.',
+      'A wasted afternoon. The forage returns nearly empty-handed, and the rations remain thin.',
+    ],
+  },
+  hunt: {
+    high: [
+      'A young bull, separated from the herd. The shot is clean and the butchering efficient. The crew feasts tonight.',
+      'A prairie grouse covey flushes at your feet. The hunt is quick and the meat is tender. A good day.',
+      'A deer at the creek crossing. One shot, one kill. The crew will eat well for days.',
+    ],
+    low: [
+      'The shot goes wide. The game scatters and you return to camp empty-handed.',
+      'You track a deer for hours but never get a clean shot. The ammunition is wasted.',
+      'No game today. The prairie is empty and the hunt returns nothing.',
+    ],
+    mid: [
+      'You take a shot but the hit is poor. Some food, but not a clean kill. The crew makes do.',
+      'A close call — you wound it but it runs. You track it down eventually, but the meat is less than hoped.',
+    ],
+  },
+  scout: {
+    high: [
+      'The scout returns with detailed news: the next stretch is clear, with good water and firm ground. You map the way forward with confidence.',
+      'A successful reconnaissance. The scout finds the best path and marks it. Tomorrow\'s travel will be smoother.',
+      'The scout spots a shortcut through a coulée that saves half a day. The trail ahead looks favorable.',
+    ],
+    low: [
+      'The scout returns with nothing useful. The trail ahead remains a mystery.',
+      'The scouting party finds no clear path. You will have to feel your way forward tomorrow.',
+      'The scout returns empty-handed. No shortcuts, no intelligence — just more trail.',
+    ],
+    mid: [
+      'The scout brings back some useful information. Not a breakthrough, but enough to plan tomorrow\'s leg.',
+    ],
+  },
+  repair: {
+    high: [
+      'The repair is sound. The shaganappi binds tight and the cart rolls smoother by morning. Good work.',
+      'A clean repair job. The cartwright would be proud. The wear comes off and the cart feels solid again.',
+    ],
+    low: [
+      'The repair is rough but it holds. The shaganappi is well-spent, even if the work is ugly.',
+      'The fix is imperfect. Some wear comes off, but the cart still groans. It will do until the next settlement.',
+    ],
+    mid: [
+      'A decent repair. The cart is sounder than before, and the shaganappi was well-used.',
+    ],
+  },
+  dance: {
+    high: [
+      'The fiddle starts and the crew dances until the fire burns low. Laughter echoes across the prairie. Tomorrow feels lighter.',
+      'A night of song and dance. The old tunes from Red River ring out, and for a moment the trail feels like home.',
+      'The dancing is spirited and the stories are long. The crew goes to bed smiling.',
+    ],
+    low: [
+      'A quiet night. A few songs, some half-hearted dancing. The mood lifts, but only a little.',
+      'The crew is too tired for much revelry. A few tunes around the fire, then early sleep.',
+    ],
+    mid: [
+      'Some dancing, some songs. The crew enjoys themselves well enough. Morale improves.',
+      'A decent evening by the fire. Not the best night, but the spirits are lifted.',
+    ],
+  },
+  deeprest: {
+    high: [
+      'Two days of proper rest. The crew emerges refreshed, the oxen are strong, and the cart feels lighter. The trail ahead looks better.',
+      'A full deep rest. Hot food, long sleep, and time to mend what is broken. The crew is ready for whatever comes.',
+    ],
+    low: [
+      'Two days lost to rest. The crew needed it, but the trail does not wait. Still, you leave camp stronger than you arrived.',
+      'The deep rest costs time and food, but the crew needed it. Tomorrow you push forward with renewed strength.',
+    ],
+    mid: [
+      'The rest does its work. Two days of recovery, and the crew is noticeably improved.',
+    ],
+  },
+};
+
+function getCampFlavorText(type, rollTotal, effects) {
+  const pool = CAMP_FLAVOR[type];
+  if (!pool) return (effects || []).join('\n');
+  let tier;
+  if (type === 'rest') {
+    tier = rollTotal >= 15 ? 'high' : rollTotal >= 8 ? 'mid' : 'low';
+  } else if (type === 'forage') {
+    tier = rollTotal >= 12 ? 'high' : rollTotal >= 8 ? 'mid' : 'low';
+  } else if (type === 'hunt') {
+    tier = rollTotal >= 10 ? 'high' : rollTotal >= 6 ? 'mid' : 'low';
+  } else if (type === 'scout') {
+    tier = rollTotal >= 12 ? 'high' : rollTotal >= 8 ? 'mid' : 'low';
+  } else if (type === 'repair') {
+    tier = rollTotal >= 9 ? 'high' : rollTotal >= 5 ? 'mid' : 'low';
+  } else if (type === 'dance') {
+    tier = rollTotal >= 10 ? 'high' : rollTotal >= 6 ? 'mid' : 'low';
+  } else if (type === 'deeprest') {
+    tier = rollTotal >= 10 ? 'high' : rollTotal >= 5 ? 'mid' : 'low';
+  } else {
+    tier = 'mid';
+  }
+  const options = pool[tier] || pool.mid || [];
+  if (!options.length) return (effects || []).join('\n');
+  const flavor = options[Math.floor(Math.random() * options.length)];
+  return flavor + '\n' + (effects || []).join('\n');
+}
+
 function showCamp(game) {
   const state = game.getState();
   if (state.over || state.pendingEvent || state.pendingSettlement) return;
@@ -1124,13 +1270,13 @@ function showCamp(game) {
   if (resultEl) { resultEl.style.display = 'none'; resultEl.textContent = ''; }
 
   const actions = [
-    { type: 'rest', label: 'Rest', cost: '1 food' },
-    { type: 'forage', label: 'Forage', cost: '1 day' },
-    { type: 'hunt', label: 'Hunt', cost: '1 ammo · 1 day' },
-    { type: 'repair', label: 'Repair', cost: '1 shaganappi' },
-    { type: 'scout', label: 'Scout', cost: '1 day' },
-    { type: 'dance', label: 'Dance', cost: 'free' },
-    { type: 'deeprest', label: 'Deep Rest', cost: '2 food · 2 days' },
+    { type: 'rest', label: 'Rest', cost: '1 food', desc: 'Sleep and recover. Crew may improve.' },
+    { type: 'forage', label: 'Forage', cost: '1 day', desc: 'Search for edible plants and roots.' },
+    { type: 'hunt', label: 'Hunt', cost: '1 ammo · 1 day', desc: 'Stalk game for fresh meat.' },
+    { type: 'repair', label: 'Repair', cost: '1 shaganappi', desc: 'Fix the cart. Reduces wear.' },
+    { type: 'scout', label: 'Scout', cost: '1 day', desc: 'Reconnoiter the trail ahead.' },
+    { type: 'dance', label: 'Dance', cost: 'free', desc: 'Song and dance. Boosts morale.' },
+    { type: 'deeprest', label: 'Deep Rest', cost: '2 food · 2 days', desc: 'Two days of full recovery.' },
   ];
 
   if (actionsEl) {
@@ -1158,10 +1304,11 @@ function showCamp(game) {
       list.forEach((a) => {
         const btn = document.createElement('button');
         btn.className = 'camp-action-btn';
-        btn.innerHTML = `<div class="camp-action-label">${a.label}</div><div class="camp-action-cost">${a.cost}</div>`;
+        btn.innerHTML = `<div class="camp-action-label">${a.label}</div><div class="camp-action-desc">${a.desc}</div><div class="camp-action-cost">${a.cost}</div>`;
         btn.addEventListener('click', () => {
           const result = game.campAction(a.type);
           const errEl = document.getElementById('camp-result');
+          const rollEl = document.getElementById('camp-roll-display');
           if (!result) {
             if (errEl) { errEl.style.display = 'block'; errEl.textContent = 'No result.'; }
             return;
@@ -1176,13 +1323,47 @@ function showCamp(game) {
           if (moraleEl) moraleEl.textContent = after.morale;
           if (crewEl) crewEl.textContent = after.crew;
           if (subEl) subEl.textContent = `Day ${after.day} — ${after.season}`;
-          if (errEl) {
-            errEl.style.display = 'block';
-            errEl.textContent = (result?.effects || []).join('\n');
-          }
-          const continueEl = document.getElementById('camp-continue');
-          if (continueEl) continueEl.style.display = 'inline-block';
           actionsEl.style.display = 'none';
+
+          // Show dice roll if this action used one
+          if (result.roll !== null && rollEl) {
+            const isSuccess = result.rollTotal >= 10; // generic threshold
+            const flavorText = getCampFlavorText(a.type, result.rollTotal, result.effects);
+            rollEl.style.display = 'flex';
+            rollEl.innerHTML = `
+              <div class="roll-label">Roll</div>
+              <div class="die small font-spectral spin" id="camp-die">${result.roll}</div>
+              <div class="roll-total">${result.rollTotal} ${isSuccess ? '✓' : '✗'}</div>
+            `;
+            // Animate the die
+            const dieEl = document.getElementById('camp-die');
+            let ticks = 0;
+            const maxTicks = 6 + Math.floor(Math.random() * 4);
+            const spinId = setInterval(() => {
+              dieEl.textContent = String(Math.floor(Math.random() * 20) + 1);
+              ticks++;
+              if (ticks >= maxTicks) {
+                clearInterval(spinId);
+                dieEl.textContent = String(result.roll);
+                dieEl.className = 'die small font-spectral settled ' + (isSuccess ? 'pass' : 'fail');
+                // Show result text after settle
+                if (errEl) {
+                  errEl.style.display = 'block';
+                  errEl.innerHTML = flavorText;
+                }
+                const continueEl = document.getElementById('camp-continue');
+                if (continueEl) continueEl.style.display = 'inline-block';
+              }
+            }, 60);
+          } else {
+            // No dice — show result immediately
+            if (errEl) {
+              errEl.style.display = 'block';
+              errEl.textContent = (result?.effects || []).join('\n');
+            }
+            const continueEl = document.getElementById('camp-continue');
+            if (continueEl) continueEl.style.display = 'inline-block';
+          }
         });
         actionsEl.appendChild(btn);
         btn.setAttribute('data-camp-type', a.type);
