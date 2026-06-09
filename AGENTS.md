@@ -30,6 +30,39 @@ This file is the contract for any agent or contributor working on `metis-trail-v
 - Write/update `HANDOFF.md` with current state, verified working features, and known issues.
 - Commit and push all changes — do not leave uncommitted work.
 
+## Commit message conventions
+
+All commits must use the following format:
+
+```
+<type>(<scope>): <concise description>
+```
+
+Types — use exactly one:
+- `feat:` — new feature or content (events, items, nodes, UI panels)
+- `fix:` — bug fix (engine logic, UI rendering, broken behavior)
+- `docs:` — documentation only (AGENTS.md, HANDOFF.md, ISSUES.md, CHANGELOG.md, comments)
+- `chore:` — tooling, build, dependencies, formatting, no game logic changes
+- `balance:` — win rate, difficulty, economy tuning (constants, event tuning, probabilities)
+
+Scope — optional but encouraged for clarity:
+- `engine`, `events`, `items`, `nodes`, `sources`, `ui`, `renderer`, `persistence`, `firebase`, `map`, `build`
+
+Rules:
+- Imperative mood: "add feature" not "added feature" or "adds feature"
+- No period at end of subject line
+- Keep subject under 72 characters
+- One logical change per commit — do not bundle unrelated fixes
+
+Examples:
+```
+feat(events): add cart_fortress defensive circle event
+fix(engine): Medicine Pouch now consumed by cholera event
+docs(handoff): add v70 women/children session summary
+chore(build): bump version to v78
+balance(constants): DAILY_FOOD 1.2 → 1.35 for win rate normalization
+```
+
 ## Known Pitfalls
 - **Map initialization timing**: `initMap()` must be called during `bootstrap()`, not deferred to user interaction. If the intro overlay is dismissed (e.g., saved game), the map must already be ready. Always init the map in bootstrap; the intro overlay sits on top.
 - **CDN dependencies**: Do not rely on CDN-hosted assets (unpkg.com, etc.) — the Tailscale network may not reach them. Bundle all dependencies locally.

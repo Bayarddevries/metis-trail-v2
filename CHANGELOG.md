@@ -2,17 +2,26 @@
 
 All notable changes are documented here. Format loosely follows Keep a Changelog.
 
-## [v70] — 2026-06-09
+## [v71] — 2026-06-10
 
-### Docs — Cultural + Writing Review Copy Edits
-Applied recommendations from `docs/cultural-review.md` and `docs/writing-review.md`:
+### Fix — Engine API Restoration
+Restored missing public API methods on engine return object that were accidentally removed in v70b:
+- getNodes, getCurrentNode, getNextNode, totalWeight, getCrew, getPendingEvent, getAvailableActions, isOver, hasWon, getScore, getPreDepartureItems, setPreDepartureCount, confirmPreDeparture, getScoreData
 
-**Source fixes:**
+### Docs — Commit Conventions & Engine Documentation
+- Added conventional commit message format to AGENTS.md (feat:, fix:, docs:, chore:, balance: types with scope examples)
+- Added JSDoc comments to all 29 public engine methods
+
+### Debug — Conditional Debug Panel
+- Wired `mountDebugUI(game)` call into bootstrap
+- Debug panel now only mounts when URL has `?debug=1`
+
+### Source Fixes
 - Fix LACOMBE_BEAR author attribution (Brehaut → Lacombe)
 - Add context note for 'half-breed' period term in FONSECA_SUPPLY_CACHE source
 - Fix source quote mismatches (plains_wind→LACOMBE_WIND, rain→FONSECA_RAIN)
 
-**Event text rewrites (12 events):**
+### Event Text Rewrites (12 events):
 - plains_wind: remove 'green sea' + sententious closing
 - plains_buffalo_hunt_camp: remove 'world opens below', 'air is thick', 'earth trembles'
 - plains_night_camp: remove 'moonlight spills', 'grass to silver', 'trail feels like home'
@@ -22,11 +31,23 @@ Applied recommendations from `docs/cultural-review.md` and `docs/writing-review.
 - river_mosquito_camp: fix tense switch, remove 'man and beast alike'
 - upland_bison_herd: remove 'sea of brown backs', 'earth trembling'
 
-**Ending rewrites (4 endings, high tier):**
+### Ending Rewrites (4 endings, high tier):
 - victory: remove 'The West will remember your name'
 - starvation: remove 'The Carlton Trail gives nothing for free'
 - abandoned: rewrite anaphora, remove mechanical 'morale' language
 - winter: remove 'falls soft and silent', 'seeps into' anaphora; also remove 'no outrunning the season' from humble tier
+
+## [v70] — 2026-06-09
+
+### Docs — Women, Children & Family Presence on the Trail
+- 4 new sources: CALHOON_PEMM, CALHOON_CART_FORT, IPAC_RAFT, SMALLPOX_1870, SIMPSON_BRIGADE
+- 4 new events: plains_cart_fortress, plains_smallpox_trail, river_valley_cart_raft, plains_pemmican_process (camp action)
+- New camp action: Process Pemmican (3 food → 5-13+ food + morale, 3 tiers)
+- Updated settlement descriptions: Fort Garry (families), St. Norbert (flower beadwork), Batoche (Ottawa promises)
+- Travel fragment: dog alongside cart
+
+### Files Modified
+src/data/sources/index.js, src/data/events.js, src/engine.js, src/main.js, src/data/nodes.js
 
 **Travel fragments:**
 - plains/rested: rewrite all 4 — remove 'green sea', add trail-specific detail

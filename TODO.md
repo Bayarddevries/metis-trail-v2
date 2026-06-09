@@ -13,8 +13,8 @@ Legend: `pending` | `in_progress` | `blocked` | `done`
 - [x] Fix build script version drift (single-pass regex, no double-increment)
 - [x] Remove dead CDN download() from build script
 - [x] Add leaflet to package.json (was missing, broke CI)
-- [ ] Standardize conventional commit messages across all contributors
-- [ ] Add minimal doc comments to each exported function in `src/systems/engine.js`
+- [x] Standardize conventional commit messages across all contributors
+- [x] Add minimal doc comments to each exported function in `src/systems/engine.js`
 
 ## Phase 2 — Core Systems & Debugging
 - [x] Expand `src/systems/events.js`/event data with primary-sourced events for each terrain
@@ -31,7 +31,7 @@ Legend: `pending` | `in_progress` | `blocked` | `done`
 - [x] Crafting system — 3 recipes (Finished Hides, Travois Kit, Gunpowder Pack)
 - [x] Item system wiring — all 12 items integrated into repair/rest/heal/events
 - [x] itemBonus/consumesItem/requiresItem event choice fields
-- [ ] Implement `mountDebugUI` conditionally with `?debug=1`
+- [x] Implement `mountDebugUI` conditionally with `?debug=1`
 - [ ] Add minimal unit tests for calendar and PRNG
 - [ ] Add save/load validation and migration-ready schema version
 

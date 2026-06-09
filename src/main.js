@@ -2,6 +2,7 @@ import { createGame } from './systems/engine.js';
 import { mount, find } from './ui/shell.js';
 import { renderStatusBar, renderNarrative, initMap, updateMap, renderTravelLinesView } from './ui/renderer.js';
 import { saveGame, loadGame, clearSave } from './ui/persistence.js';
+import { mountDebugUI } from './ui/debug.js';
 import { NODES } from './data/nodes.js';
 import { ENDINGS } from './data/endings.js';
 import { CONSTANTS } from './core/constants.js';
@@ -42,6 +43,9 @@ export function bootstrap(seed = null) {
 
   // Always init the map so it's ready behind the intro overlay
   initMap();
+
+  // Mount debug panel when ?debug=1
+  mountDebugUI(game);
 
   // Pre-fill name input from localStorage
   const nameInput = find('#intro-name-input');

@@ -2676,6 +2676,42 @@ function clearSave() {
 }
 __name(clearSave, "clearSave");
 
+// src/ui/debug.js
+function mountDebugUI(game) {
+  const url = new URL(location.href);
+  if (!url.searchParams.has("debug")) return;
+  const panel = document.createElement("div");
+  panel.style.position = "fixed";
+  panel.style.bottom = "0";
+  panel.style.right = "0";
+  panel.style.width = "360px";
+  panel.style.maxHeight = "50vh";
+  panel.style.background = "#1e1e1e";
+  panel.style.color = "#e8dcc8";
+  panel.style.fontFamily = "ui-monospace, monospace";
+  panel.style.fontSize = "12px";
+  panel.style.overflow = "auto";
+  panel.style.borderTop = "2px solid #8B2500";
+  panel.style.padding = "8px";
+  panel.style.zIndex = "9999";
+  const stateEl = document.createElement("pre");
+  stateEl.id = "debug-state";
+  const btn = document.createElement("button");
+  btn.textContent = "\u2715";
+  btn.onclick = () => panel.remove();
+  panel.append(btn, stateEl);
+  document.body.appendChild(panel);
+  setInterval(() => {
+    try {
+      const s = game.getState();
+      stateEl.textContent = JSON.stringify(s, null, 2);
+    } catch (e) {
+      stateEl.textContent = "no state";
+    }
+  }, 500);
+}
+__name(mountDebugUI, "mountDebugUI");
+
 // src/data/endings.js
 var ENDINGS = {
   victory: {
@@ -18038,6 +18074,7 @@ function bootstrap(seed = null) {
   document.getElementById("intro-overlay")?.classList.add("active");
   document.getElementById("predeparture-overlay")?.classList.remove("active");
   initMap();
+  mountDebugUI(game);
   const nameInput = find("#intro-name-input");
   if (nameInput) {
     const savedName = localStorage.getItem("metisPlayerName");
