@@ -56,7 +56,8 @@ export async function build() {
   const templatePath = path.join(cwd, 'src', 'template.html');
   const indexPath = path.join(outDir, 'index.html');
   let templateHtml = (await fs.readFile(templatePath, 'utf8')) || '';
-  let indexHtml = (await fs.readFile(indexPath, 'utf8')) || '';
+  // Use src template as source of truth for dist
+  let indexHtml = templateHtml;
 
   const bumpVersion = (html) => {
     const versionMatch = html.match(/app\.js\?v=(\d+)/);

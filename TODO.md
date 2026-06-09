@@ -51,6 +51,12 @@ Legend: `pending` | `in_progress` | `blocked` | `done`
 - [x] Location/node markers on map (#26)
 - [ ] Basic icons (#10)
 
+### Audit P0 — Period-Accurate Sharp-Corner Aesthetic (2026-06-09 audit)
+- [x] #50 — Strip all `border-radius` and `box-shadow` for sharp corners
+- [x] #51 — Desaturate map tiles (`grayscale(1) contrast(1.1) brightness(0.9)`) and hide OSM attribution
+- [x] #52 — Add paper texture with ruled lines and ledger margin to narrative panel
+- [x] #55 — Add mobile breakpoints (768px, 420px, landscape) and 44px minimum touch targets
+
 ### Phase 9 — Leaderboard
 - [x] Firebase leaderboard (#12) — v69
 - [x] Player name input

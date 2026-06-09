@@ -32,8 +32,13 @@ export function applyTheme(root) {
   root.style.setProperty('--clr-tooltip-border', 'rgba(232,220,200,0.3)');
   root.style.setProperty('--clr-map-frame-shadow', 'rgba(26,20,16,0.12)');
 
-  // Narrative
+  // Narrative paper texture
   root.style.setProperty('--clr-narrative-text', '#3a3025');
+  root.style.setProperty('--clr-ruled-line', 'rgba(26,20,16,0.08)');
+  root.style.setProperty('--clr-ledger-border', 'rgba(26,20,16,0.15)');
+  root.style.setProperty('--clr-ledger-margin', '#8C6A2A');
+  // Subtle paper noise texture as base64 SVG
+  root.style.setProperty('--clr-paper-texture', "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E\")");
 
   // Event overlay
   root.style.setProperty('--clr-event-border', '#7a5a32');

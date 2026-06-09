@@ -2,6 +2,24 @@
 
 All notable changes are documented here. Format loosely follows Keep a Changelog.
 
+## [v73] — 2026-06-10
+
+### Audit P0 — Period-Accurate Sharp-Corner Aesthetic (per 2026-06-09 design audit)
+- **#50**: Stripped all `border-radius` and `box-shadow` — every corner is now sharp (0px/none) for period-accurate ledger aesthetic
+- **#51**: Desaturated map tiles to grayscale (`filter: grayscale(1) contrast(1.1) brightness(0.9)`) and hid OSM attribution (`.leaflet-control-attribution { display: none }`)
+- **#52**: Added paper texture to narrative panel — subtle noise background, repeating ruled lines matching line-height, 4px left ledger margin in accent color
+- **#55**: Added mobile breakpoints at 420px (small phones) and landscape orientation (max-height: 500px); ensured 44px minimum touch targets on all interactive elements (buttons, inputs, selects, dice, camp actions, pre-departure controls)
+
+### Build Fix — Template Version Drift
+- Fixed `scripts/build.mjs` to use `src/template.html` as source of truth for `dist/index.html` (was preserving stale dist content)
+
+### Touch Target Hardening
+- `.pd-minus`, `.pd-plus`: 32→44px
+- `.die`: 40/42→44px
+- `.choice-btn`, `.camp-action-btn`, `.intro-name-input`, `.lb-sort-select`, `.ctrl-btn`: explicit `min-height: 44px`
+
+Files modified: `src/template.html`, `src/ui/theme.js`, `scripts/build.mjs`, `dist/index.html`, `dist/app.js`
+
 ## [v72] — 2026-06-10
 
 ### Sprint 1a-i — Theme System Refactor
