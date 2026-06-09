@@ -741,6 +741,28 @@ export function createGame(seed = null) {
       S.usedWeight = totalWeight(cart);
       return cart.map((i) => ({ name: i.name, count: i.count, wt: i.wt }));
     },
+    getScoreData() {
+      const tradeGoods = cart.filter((i) => i.type === 'trade' && i.count > 0);
+      return {
+        score: S.score,
+        day: S.day,
+        wear: S.wear,
+        food: S.food,
+        crew: S.crew,
+        morale: S.morale,
+        won: S.won,
+        endReason: S.endReason || 'unknown',
+        nodes: S.node,
+        tradesMade: S.tradesMade,
+        camps: S.camps,
+        eventsResolved: S.eventsResolved,
+        weather: S.weather,
+        cartItems: cart.reduce((s, i) => s + i.count, 0),
+        tradeGoods: tradeGoods.reduce((s, i) => s + i.count, 0),
+        distance: S.node,
+        seed: S.seed,
+      };
+    },
   };
 }
 

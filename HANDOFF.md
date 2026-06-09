@@ -1,13 +1,23 @@
 # HANDOFF — Metis Trail V2
 
 **Last updated:** 2026-06-09 by OWL
-**Version:** v67 (dist), template synced for next build
+**Version:** v69 (dist), template synced for next build
 **Server:** http://100.108.183.33:5173/ (python3 -m http.server in dist/)
 **Branch:** main, clean tree, pushed to origin
 
 ---
 
 ## Session Summary (2026-06-09)
+
+### v69 — Firebase leaderboard / highscore system (#12)
+- Player name input in intro overlay (persists via localStorage)
+- Firebase Firestore `scores` collection — open-write, no auth
+- Every game auto-saves full telemetry (17 fields: score, day, wear, food, crew, morale, won, endReason, nodes, tradesMade, camps, eventsResolved, weather, cartItems, tradeGoods, distance, seed)
+- Leaderboard overlay after end-game: Hall of Fame (top 10) + My Scores (personal history)
+- My Scores sortable by: score, day, wear, food (asc), tradesMade, nodes, eventsResolved, morale
+- Local fallback for offline: scores saved to localStorage, synced on next load
+- Engine: added `game.getScoreData()` public method
+- Files: `src/firebase.js` (new), `src/systems/engine.js`, `src/main.js`, `src/template.html`, `package.json`
 
 ### v67 — Camp dice rolls + flavor text; More actions fix
 - Added dice roll animation to camp actions (rest, forage, hunt, scout)
@@ -144,12 +154,10 @@ curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:5173/
 - **(local #32)** — Overlay sequence: pre-departure shows before intro (was local ISSUES.md #32, may overlap with original fix in bootstrap)
 
 ### Enhancements (prioritized)
-- **#15** — Pre-departure cart packing (exists in code, blocked by overlay sequence)
-- **#13** — Weather system
-- **#12** — Highscore/leaderboard
 - **#10** — Basic icons
 
 ### Resolved (2026-06-09)
+- **#12 — Highscore/leaderboard** — v69. Firebase Firestore leaderboard with Hall of Fame (top 10) and My Scores (personal history with 8 sort options). Player name collected at game start. Local fallback for offline.
 - **#13 — Weather system** — v65. Added 5-state weather system (clear/overcast/rain/storm/snow) with season-aware Markov chain. Weather modifies food consumption, wear accumulation, morale drift, event chance, and camp recovery. 4 new weather events, 6 new source entries, weather indicator in status bar, 64 weather-specific travel fragments. Sim: 29% win rate.
 
 ### Resolved (2026-06-08)

@@ -5,6 +5,10 @@ import { saveGame, loadGame, clearSave } from './ui/persistence.js';
 import { NODES } from './data/nodes.js';
 import { ENDINGS } from './data/endings.js';
 import { CONSTANTS } from './core/constants.js';
+import { saveScore, getTopScores, getMyScores, syncLocalScores } from './firebase.js';
+
+// Sync any locally-saved scores on page load
+syncLocalScores();
 
 export function bootstrap(seed = null) {
   const game = createGame(seed);
@@ -39,11 +43,23 @@ export function bootstrap(seed = null) {
   // Always init the map so it's ready behind the intro overlay
   initMap();
 
+  // Pre-fill name input from localStorage
+  const nameInput = find('#intro-name-input');
+  if (nameInput) {
+    const savedName = localStorage.getItem('metisPlayerName');
+    if (savedName) nameInput.value = savedName;
+  }
+
   // Event delegation on #game-root survives DOM rebuilds from render()
   const gameRoot = find('#game-root');
   if (gameRoot) {
     gameRoot.addEventListener('click', (e) => {
       if (e.target.closest('#intro-start')) {
+        // Save player name
+        const nameVal = nameInput?.value?.trim() || '';
+        if (nameVal) {
+          localStorage.setItem('metisPlayerName', nameVal);
+        }
         const introOverlay = find('#intro-overlay');
         if (introOverlay) {
           introOverlay.classList.remove('active');
@@ -1460,6 +1476,122 @@ function showEnd(game) {
 
   statsEl.innerHTML = scoreHtml;
   document.getElementById('end-overlay')?.classList.add('active');
+
+  // Auto-save score to Firebase
+  const playerName = localStorage.getItem('metisPlayerName') || '';
+  const scoreData = game.getScoreData();
+  saveScore(scoreData, playerName).then((result) => {
+    if (result.local) {
+      console.log('[Metis] Score saved locally (Firestore unavailable)');
+    } else {
+      console.log('[Metis] Score saved to Firestore:', result.id);
+    }
+  });
+
+  // Show leaderboard after a short delay so end screen renders first
+  setTimeout(() => {
+    showLeaderboard();
+  }, 300);
+}
+
+// ── Leaderboard ─────────────────────────────────────────────────────
+
+let cachedTopScores = null;
+let cachedMyScores = null;
+
+function showLeaderboard() {
+  document.getElementById('end-overlay')?.classList.remove('active');
+  document.getElementById('leaderboard-overlay')?.classList.add('active');
+  loadHallOfFame();
+  loadMyScores();
+}
+
+function loadHallOfFame() {
+  const container = document.getElementById('lb-hall-of-fame');
+  if (!container) return;
+  container.innerHTML = '<div class="lb-loading">Loading...</div>';
+
+  getTopScores().then((scores) => {
+    cachedTopScores = scores;
+    if (!scores) {
+      container.innerHTML = '<div class="lb-error">Leaderboard unavailable — playing offline</div>';
+      return;
+    }
+    if (scores.length === 0) {
+      container.innerHTML = '<div class="lb-empty">No scores yet. Be the first!</div>';
+      return;
+    }
+    container.innerHTML = '<div class="lb-list">' + scores.map((s, i) => renderLbEntry(s, i + 1)).join('') + '</div>';
+  });
+}
+
+function loadMyScores() {
+  const container = document.getElementById('lb-my-list');
+  if (!container) return;
+  container.innerHTML = '<div class="lb-loading">Loading...</div>';
+
+  const name = localStorage.getItem('metisPlayerName') || '';
+  if (!name) {
+    container.innerHTML = '<div class="lb-empty">Set your name in the intro to track personal scores.</div>';
+    return;
+  }
+
+  getMyScores(name).then((scores) => {
+    cachedMyScores = scores;
+    if (!scores) {
+      document.getElementById('lb-my-list').innerHTML = '<div class="lb-error">Unable to load personal scores — playing offline</div>';
+      return;
+    }
+    if (scores.length === 0) {
+      document.getElementById('lb-my-list').innerHTML = '<div class="lb-empty">No personal scores yet. Play a game!</div>';
+      return;
+    }
+    renderMyScoresSorted();
+  });
+}
+
+function renderMyScoresSorted() {
+  const container = document.getElementById('lb-my-list');
+  if (!container || !cachedMyScores) return;
+  const sortKey = document.getElementById('lb-sort-select')?.value || 'score';
+  const sorted = sortScores(cachedMyScores, sortKey);
+  container.innerHTML = '<div class="lb-list">' + sorted.map((s, i) => renderLbEntry(s, i + 1)).join('') + '</div>';
+}
+
+function sortScores(scores, key) {
+  const copy = [...scores];
+  switch (key) {
+    case 'score': return copy.sort((a, b) => (b.score || 0) - (a.score || 0));
+    case 'day': return copy.sort((a, b) => (b.day || 0) - (a.day || 0));
+    case 'wear': return copy.sort((a, b) => (b.wear || 0) - (a.wear || 0));
+    case 'food-asc': return copy.sort((a, b) => (a.food || 0) - (b.food || 0));
+    case 'tradesMade': return copy.sort((a, b) => (b.tradesMade || 0) - (a.tradesMade || 0));
+    case 'nodes': return copy.sort((a, b) => (b.nodes || 0) - (a.nodes || 0));
+    case 'eventsResolved': return copy.sort((a, b) => (b.eventsResolved || 0) - (a.eventsResolved || 0));
+    case 'morale': return copy.sort((a, b) => (b.morale || 0) - (a.morale || 0));
+    default: return copy;
+  }
+}
+
+function renderLbEntry(s, rank) {
+  const rankClass = rank === 1 ? 'gold' : rank === 2 ? 'silver' : rank === 3 ? 'bronze' : '';
+  const icon = s.won ? '🏆' : '💀';
+  const dateStr = s.date?.toDate ? s.date.toDate().toLocaleDateString('en-CA', { month: 'short', day: 'numeric' }) : '';
+  const metaLabel = s.won ? `${s.day || 0}d` : (s.endReason || '').replace(/_/g, ' ');
+  return `
+    <div class="lb-entry">
+      <span class="lb-rank ${rankClass}">#${rank}</span>
+      <span class="lb-icon">${icon}</span>
+      <span class="lb-name">${escapeHtml(s.name || 'Traveller')}</span>
+      <span class="lb-score">${s.score || 0}</span>
+      <span class="lb-meta">${dateStr} · ${metaLabel}</span>
+    </div>`;
+}
+
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
 }
 
 function actionLabel(a) {
@@ -1478,3 +1610,27 @@ function actionSubtitle(a) {
 
 // Expose render globally for event listener callbacks
 window.__METIS_RENDER__ = render;
+
+// ── Leaderboard event listeners ─────────────────────────────────────
+
+document.addEventListener('click', (e) => {
+  // Tab switching
+  const tabBtn = e.target.closest('.lb-tab');
+  if (tabBtn) {
+    document.querySelectorAll('.lb-tab').forEach((t) => t.classList.remove('active'));
+    tabBtn.classList.add('active');
+    const tab = tabBtn.dataset.tab;
+    document.getElementById('lb-hall-of-fame').style.display = tab === 'hall-of-fame' ? 'block' : 'none';
+    document.getElementById('lb-my-scores').style.display = tab === 'my-scores' ? 'block' : 'none';
+  }
+  // Close button
+  if (e.target.closest('#leaderboard-close')) {
+    document.getElementById('leaderboard-overlay')?.classList.remove('active');
+  }
+});
+
+document.addEventListener('change', (e) => {
+  if (e.target.id === 'lb-sort-select') {
+    renderMyScoresSorted();
+  }
+});

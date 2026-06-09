@@ -45,10 +45,15 @@ Legend: `pending` | `in_progress` | `blocked` | `done`
 - [x] Conditional endings — multiple ending paths (v36, 6 ending types)
 - [ ] Pre-departure cart packing — let players choose starting loadout
 
-## Phase 4 — UI/UX Polish
-- [x] Mobile top bar clipped in portrait (GitHub issue #27) — CSS fix applied, status bar wraps on mobile
-- [ ] Add location/node markers on map (GitHub issue #26)
-- [ ] Basic icons (GitHub issue #10)
+### Phase 4 — UI/UX Polish
+- [x] Mobile bar, button hierarchy, camp grouping, settlement polish done
+- [x] Location/node markers on map (#26)
+- [ ] Basic icons (#10)
+
+### Phase 9 — Leaderboard
+- [x] Firebase leaderboard (#12) — v69
+- [x] Player name input
+- [x] My Scores with 8 sort options
 - [x] Lane A interface enhancements: aged palette, button hierarchy, camp grouping, status urgency, travel narrative dedupe, close-buttons touch hardening
 - [x] `docs/interface-enhancement-report.html` — interface audit with prioritized improvement options
 - [x] Touch-target hardening: `.action-primary/.action-secondary/.action-ghost`, min 44px viewport height target

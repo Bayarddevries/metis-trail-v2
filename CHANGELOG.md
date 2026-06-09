@@ -2,6 +2,31 @@
 
 All notable changes are documented here. Format loosely follows Keep a Changelog.
 
+## [v69] — 2026-06-09
+
+### Added — Firebase leaderboard / highscore system (#12)
+
+**Player name:** Text input added to intro overlay. Pre-filled from `localStorage`. Persists across sessions. Defaults to "Traveller" if blank.
+
+**Firebase Firestore:**
+- Firestore collection `scores` — open-write, no auth required
+- Every game auto-saves a score document with full telemetry: score, day, wear, food, crew, morale, won, endReason, nodes, tradesMade, camps, eventsResolved, weather, cartItems, tradeGoods, distance, seed, date
+- Local fallback: if Firestore unreachable, scores saved to `localStorage` and synced on next page load
+
+**Leaderboard overlay (shown after end-game):**
+- Two tabs: "Hall of Fame" (top 10 all-time by score) and "My Scores" (last 20 personal runs)
+- My Scores tab has a sort dropdown with 8 options: Highest Score, Longest Journey, Most Battered, Leanest Run, Best Trader, Furthest Traveled, Most Eventful, Happiest Crew
+- Client-side sorting on already-fetched data — no extra Firestore queries
+- Each entry shows: rank, win/loss icon, name, score, date, meta (days or end reason)
+- Gold/silver/bronze rank styling for top 3
+
+**Engine changes:**
+- Added `game.getScoreData()` — returns all 17 fields for the score document
+
+**New files:** `src/firebase.js` (Firebase init, saveScore, getTopScores, getMyScores, syncLocalScores)
+**Modified:** `src/systems/engine.js` (+getScoreData), `src/main.js` (name input, leaderboard UI, event listeners), `src/template.html` (name input + leaderboard overlay HTML/CSS), `package.json` (firebase dep)
+**Sim impact:** None — pure post-game display feature
+
 ## [v66] — 2026-06-09
 
 ### Added — Item-giving events for unobtainable items

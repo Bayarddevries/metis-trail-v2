@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Metis Trail V2 — Interface Enhancement Report</title>
+<style>
+  :root {
+    --bg: #2a2520;
+    --bg-card: #352f29;
+    --bg-panel: #3d3630;
+    --ink: #E8DCC4;
+    --ink-muted: #b0a08a;
+    --accent: #c99a3b;
+    --accent-dim: #8C6A2A;
+    --green: #6d9b5a;
+    --red: #c25b56;
+    --amber: #d4a035;
+    --border: #5a4e40;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: 'Georgia', 'EB Garamond', 'Times New Roman', serif;
+    color: var(--ink);
+    background: var(--bg);
+    margin: 0;
+    padding: 28px 20px;
+    line-height: 1.65;
+    font-size: 15px;
+  }
+  .wrap { max-width: 900px; margin: 0 auto; }
+  .header { border-bottom: 2px solid var(--accent-dim); padding-bottom: 12px; margin-bottom: 28px; }
+  h1 { font-size: 30px; margin: 0 0 4px; letter-spacing: -0.3px; }
+  .subtitle { color: var(--ink-muted); font-style: italic; font-size: 14px; }
+  h2 { font-size: 19px; margin: 34px 0 10px; color: var(--accent); letter-spacing: 0.02em; }
+  h3 { font-size: 15px; margin: 22px 0 8px; color: var(--ink); font-style: italic; }
+  p { margin: 10px 0; }
+  ul { padding-left: 22px; margin: 10px 0; }
+  li { margin: 7px 0; }
+  .badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 4px;
+    border: 1px solid var(--accent-dim);
+    color: var(--accent);
+    font-weight: 700;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 10px;
+    background: rgba(140,106,42,0.1);
+  }
+  .badge.done { color: var(--green); border-color: var(--green); background: rgba(109,155,90,0.1); }
+  .badge.wip { color: var(--amber); border-color: var(--amber); background: rgba(212,160,53,0.1); }
+  .badge.next { color: var(--ink-muted); border-color: var(--border); background: transparent; }
+  .card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px;
+    margin: 14px 0;
+  }
+  .card.dark {
+    background: var(--bg-panel);
+    border-color: rgba(90,78,64,0.5);
+  }
+  .btn-demo {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 16px;
+    border-radius: 5px;
+    font-weight: 700;
+    font-size: 13px;
+    font-family: inherit;
+    letter-spacing: 0.02em;
+    cursor: default;
+    margin: 3px;
+  }
+  .btn-demo.primary { background: #2D4A3E; color: #FAF3E7; border: 2px solid #2D4A3E; }
+  .btn-demo.secondary { background: transparent; color: #2D4A3E; border: 2px solid #2D4A3E; }
+  .btn-demo.ghost { background: rgba(45,74,62,0.15); color: #2D4A3E; border: 2px solid transparent; }
+  .btn-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; align-items: center; }
+  .cost-hint {
+    display: block;
+    font-size: 11px;
+    color: var(--ink-muted);
+    margin-top: 4px;
+    font-style: normal;
+    letter-spacing: 0.02em;
+  }
+  .mock-card {
+    background: rgba(0,0,0,0.25);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 6px;
+    padding: 12px;
+    margin: 8px 0;
+  }
+  .label {
+    display: block;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.35em;
+    color: #8a7b68;
+    margin-bottom: 8px;
+    font-weight: 700;
+  }
+  .grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin: 12px 0;
+  }
+  .grid-3 {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 12px;
+    margin: 12px 0;
+  }
+  .option-box {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px;
+  }
+  .option-box h4 { margin: 0 0 6px; font-size: 14px; color: var(--accent); }
+  .option-box p { margin: 0; font-size: 13px; color: var(--ink-muted); }
+  code {
+    background: rgba(0,0,0,0.3);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: 'SF Mono','Fira Code', monospace;
+    font-size: 12px;
+    color: #d4b896;
+    border: 1px solid rgba(255,255,255,0.06);
+  }
+  a { color: var(--accent); }
+  .muted { color: var(--ink-muted); }
+  .divider { border: none; border-top: 1px solid var(--border); margin: 28px 0; }
+  .callout {
+    background: rgba(201,154,59,0.08);
+    border-left: 3px solid var(--accent);
+    padding: 12px 14px;
+    margin: 14px 0;
+    border-radius: 0 6px 6px 0;
+  }
+  ul.check { list-style: none; padding: 0; }
+  ul.check li::before { content: "✓ "; color: var(--green); font-weight: bold; margin-right: 6px; }
+  ol.steps { padding-left: 0; list-style: none; counter-reset: step; }
+  ol.steps > li { counter-increment: step; padding-left: 30px; position: relative; margin: 8px 0; }
+  ol.steps > li::before {
+    content: counter(step);
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 20px;
+    height: 20px;
+    background: var(--accent-dim);
+    color: #fff;
+    border-radius: 50%;
+    text-align: center;
+    line-height: 20px;
+    font-size: 11px;
+    font-weight: 700;
+  }
+  @media (max-width: 720px) {
+    .grid-2, .grid-3 { grid-template-columns: 1fr; }
+    body { padding: 16px 14px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="header">
+    <h1>Interface Enhancement Report</h1>
+    <div class="subtitle">Metis Trail V2 — focused UI/UX audit, current state, and improvement options</div>
+  </div>
+
+  <p><strong>Live URL:</strong> <a href="https://bayarddevries.github.io/metis-trail-v2/" target="_blank">https://bayarddevries.github.io/metis-trail-v2/</a></p>
+  <p><strong>Tracking:</strong> GitHub issues #31–35 cover pruning, balance, crafting, verbs, and density.</p>
+
+  <h2>Current State</h2>
+  <p>Latest interface pass is deployed. Button hierarchy, camp overlay grouping, status urgency states, event cost display, and a darker aged palette are live. Focus has shifted from "does it work" to "is it clean and clear."</p>
+
+  <h2>Already Implemented</h2>
+
+  <h3>1. Primary / Secondary / Ghost button hierarchy</h3>
+  <div class="badge done">Completed</div>
+  <div class="card">
+    <div class="btn-row">
+      <div class="btn-demo primary">Travel West</div>
+      <div class="btn-demo secondary">Make Camp</div>
+      <div class="btn-demo ghost">Cart</div>
+      <div class="btn-demo ghost">Crew</div>
+    </div>
+    <p class="muted">Travel is dominant. Camp is strong but secondary. Cart and Crew recede so they don't compete for attention on mobile.</p>
+  </div>
+
+  <h3>2. Camp overlay grouped by purpose</h3>
+  <div class="badge done">Completed</div>
+  <div class="card dark">
+    <div class="mock-card">
+      <span class="label">Recovery</span>
+      <div class="btn-row">
+        <div class="btn-demo secondary">Rest Up<span class="cost-hint">1 food · 0 days</span></div>
+        <div class="btn-demo secondary">Deep Rest<span class="cost-hint">2 food · 2 days</span></div>
+      </div>
+    </div>
+    <div class="mock-card">
+      <span class="label">Trail Work</span>
+      <div class="btn-row">
+        <div class="btn-demo secondary">Forage<span class="cost-hint">1 day</span></div>
+        <div class="btn-demo secondary">Hunt<span class="cost-hint">1 Ammo · 1 day</span></div>
+        <div class="btn-demo secondary">Scout Ahead<span class="cost-hint">1 day</span></div>
+      </div>
+    </div>
+    <div class="mock-card">
+      <span class="label">Upkeep</span>
+      <div class="btn-row">
+        <div class="btn-demo secondary">Repair Cart<span class="cost-hint">1 Shaganappi</span></div>
+        <div class="btn-demo secondary">Dance / Fiddle<span class="cost-hint">0 days</span></div>
+      </div>
+    </div>
+    <p class="muted">Actions are grouped by intent, not chronology. Group headers act as scan targets so players find options faster.</p>
+  </div>
+
+  <h3>3. Event choice cost and risk hints</h3>
+  <div class="badge done">Completed</div>
+  <div class="card">
+    <div class="mock-card">
+      <div class="btn-demo secondary" style="width:100%;justify-content:flex-start;text-align:left;">Risk the crossing now<span class="cost-hint">DC 15 · +2 wear · -4 food</span></div>
+    </div>
+    <div class="mock-card">
+      <div class="btn-demo secondary" style="width:100%;justify-content:flex-start;text-align:left;">Wait for calmer water<span class="cost-hint">+1 day</span></div>
+    </div>
+    <p class="muted">Hints appear automatically when meaningful. No extra click needed.</p>
+  </div>
+
+  <h3>4. Status urgency tuning</h3>
+  <div class="badge done">Completed</div>
+  <div class="card">
+    <ul class="check">
+      <li>Food warning at ≤5 instead of ≤4</li>
+      <li>Wear warning at ≥4</li>
+      <li>Crew states: rested / tired / exhausted with distinct color states</li>
+      <li>Resource values bolder for quick scanning</li>
+    </ul>
+  </div>
+
+  <h3>5. Travel narrative dedupe</h3>
+  <div class="badge done">Completed</div>
+  <div class="card">
+    <p>Removed redundant second descriptor from advance log. Travel log is now tighter and faster to read.</p>
+  </div>
+
+  <h3>6. Darker aged palette</h3>
+  <div class="badge done">Completed</div>
+  <div class="card dark">
+    <div class="grid-3">
+      <div>
+        <span class="label">Background</span>
+        <div style="background:#CFC1A4;height:34px;border-radius:4px;border:1px solid rgba(0,0,0,0.15);"></div>
+        <code style="display:block;margin-top:6px;">#CFC1A4</code>
+      </div>
+      <div>
+        <span class="label">Accent</span>
+        <div style="background:#8C6A2A;height:34px;border-radius:4px;border:1px solid rgba(0,0,0,0.2);"></div>
+        <code style="display:block;margin-top:6px;">#8C6A2A</code>
+      </div>
+      <div>
+        <span class="label">Status Bar</span>
+        <div style="background:#1a2922;height:34px;border-radius:4px;border:1px solid rgba(255,255,255,0.08);"></div>
+        <code style="display:block;margin-top:6px;">#1a2922</code>
+      </div>
+    </div>
+    <p class="muted">Map background aged to #BFB195, overlays darkened, narrative pane separated from map via translucent card treatment.</p>
+  </div>
+
+  <hr class="divider">
+
+  <h2>Improvement Options</h2>
+  <p>These represent the biggest remaining clarity gains, ordered by impact-to-effort ratio.</p>
+
+  <h3>Option 1 — Harden mobile touch targets</h3>
+  <div class="badge next">High impact · Low risk</div>
+  <div class="card">
+    <ul>
+      <li>Camp action buttons already 44px+ height</li>
+      <li>Secondary actions and close/dismiss targets should be audited and brought to ≥44px touch height</li>
+      <li>Overlay dismissal should have a clear, large tap target</li>
+      <li>No-visual-change rule: if a button already works, don't retouch it</li>
+    </ul>
+    <p><strong>Risk:</strong> Minor — only affects padding/height of smaller auxiliary controls.</p>
+  </div>
+
+  <h3>Option 2 — Add concise status bar context</h3>
+  <div class="badge next">High impact · Medium risk</div>
+  <div class="card">
+    <p>Status bar shows numbers, not states. Add tiny interpretive labels so a glance tells the story:</p>
+    <ul>
+      <li>Food icon + numeric value + "low" label when ≤5</li>
+      <li>Wear icon with "rough" / "firm" / "broken" labels</li>
+      <li>Crew morale pill with rested / tired / exhausted state</li>
+      <li>Day counter with micro progress indicator</li>
+    </ul>
+    <p class="muted">Keep labels to 1–2 words; occupy no more than 10% extra bar height.</p>
+  </div>
+
+  <h3>Option 3 — Event result micro-summary</h3>
+  <div class="badge next">Medium impact · Low risk</div>
+  <div class="card">
+    <p>After an event resolves, the result text often buries the actual delta. Add a one-line outcome summary:</p>
+    <div class="mock-card">
+      <code>+2 food · -1 wear · crew gained "tired" · 1 day passes</code>
+    </div>
+    <p>Players can verify their understanding in under 2 seconds. No extra clicks.</p>
+  </div>
+
+  <h3>Option 4 — Location and route clarity</h3>
+  <div class="badge next">Medium impact · Medium risk</div>
+  <div class="card">
+    <ul>
+      <li>Show "Next: [name]" in larger type on travel overlay</li>
+      <li>Add distance indicator when 2+ nodes ahead become relevant</li>
+      <li>Make current node name persistent in the map header even after travel</li>
+      <li>Consider a minimal route breadcrumb: 2–3 prior nodes + current + next</li>
+    </ul>
+    <p class="muted">Avoid map clutter — max 4 breadcrumb nodes, collapsed to "…" when longer.</p>
+  </div>
+
+  <h3>Option 5 — Overlay action rubric consistency</h3>
+  <div class="badge next">Medium impact · Low risk</div>
+  <div class="card">
+    <p>Right now, camp buttons show costs, event buttons show costs, but settlement/crafting buttons may not. Standardize the rubric:</p>
+    <ul>
+      <li>Every clickable outcome shows cost/risk hints when relevant</li>
+      <li>Hover/focus reveals extra context on desktop</li>
+      <li>Same content for mobile tap and desktop hover</li>
+    </ul>
+  </div>
+
+  <h3>Option 6 — Typography and readability pass</h3>
+  <div class="badge next">Medium impact · Low risk</div>
+  <div class="card">
+    <ul>
+      <li>Set a single line-height rule for body text: 1.6–1.7 for mobile paragraphs</li>
+      <li>Raise overlay headline font size to at least 16px</li>
+      <li>Ensure overlay body text never drops below 13px</li>
+      <li>Use semi-bold for numeric values; regular for labels</li>
+      <li>Limit overlay text blocks to ~180 characters before truncating with "read more"</li>
+    </ul>
+  </div>
+
+  <h3>Option 7 — Encampment feedback and narrative variety</h3>
+  <div class="badge next">Low effort polish</div>
+  <div class="card">
+    <ul>
+      <li>Add 3–4 short scene blurbs that rotate when resting ("The fire crackles…")</li>
+      <li>Show dice roll result visually ("You rolled 17 vs DC 15 — refreshing rest!")</li>
+      <li>Track "last camp action" so replaying Rest shows a different flavor line</li>
+    </ul>
+    <p class="muted">Data-light — no schema changes needed. Adds texture with minimal code.</p>
+  </div>
+
+  <h3>Option 8 — Accessibility and contrast lift</h3>
+  <div class="badge next">Medium impact · Low risk</div>
+  <div class="card">
+    <ul>
+      <li>Verify overlay text against background passes WCAG AA on mobile</li>
+      <li>Add focus-visible outlines for keyboard navigation</li>
+      <li>Ensure color is never the sole indicator of state (add icon/text for food/wear warnings)</li>
+      <li>Test with system font zoom at 150%</li>
+    </ul>
+  </div>
+
+  <hr class="divider">
+
+  <h2>Priority Recommendation</h2>
+  <div class="callout">
+    <p><strong>Recommended sequence:</strong></p>
+    <ol class="steps">
+      <li>Mobile touch-target audit (Option 1) — closes the closest real usability gap.</li>
+      <li>Status bar context labels (Option 2) — highest clarity payoff per pixel.</li>
+      <li>Standardize cost/risk rubric (Option 5) — ties existing work together.</li>
+      <li>Typography pass (Option 6) — quick win on readability.</li>
+      <li>Event result summary (Option 3) — reduces post-event confusion.</li>
+      <li>Accessibility contrast &amp; focus-visible (Option 8) — finish the polish.</li>
+    </ol>
+  </div>
+
+  <h2>Decision Matrix</h2>
+  <div class="card dark">
+    <div class="grid-3">
+      <div class="option-box">
+        <h4>Fast wins</h4>
+        <p>Options 1, 5, 6, 7. Deploy in any order; low risk, player-noticeable.</p>
+      </div>
+      <div class="option-box">
+        <h4>Structural clarity</h4>
+        <p>Options 2, 3, 4. Require small UI additions; higher payoff on repeat play.</p>
+      </div>
+      <div class="option-box">
+        <h4>Quality floor</h4>
+        <p>Option 8. One-time contrast/focus pass; fixes edge cases and inclusive play.</p>
+      </div>
+    </div>
+  </div>
+
+  <h2>Verification Protocol</h2>
+  <div class="card">
+    <ul>
+      <li>Every visual change must be browser-verified before being marked complete.</li>
+      <li>Use a real mobile device or emulated mobile viewport for touch-target checks.</li>
+      <li>If a change does not appear, treat it as a build/deploy issue — not a blind retry loop.</li>
+      <li>Document verdicts in CHANGELOG.md and HANDOFF.md after each verified pass.</li>
+    </ul>
+  </div>
+
+  <p style="margin-top:36px;" class="muted">Report generated locally. Path: <code>docs/interface-enhancement-report.html</code></p>
+</div>
+</body>
+</html>

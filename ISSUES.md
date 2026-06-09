@@ -13,6 +13,11 @@ Use this file to log bugs, blockers, and known gaps during work sessions. Each i
 - Workaround: Verify via source inspection and local server checks instead of automated clicks.
 - Impact: Cannot complete browser QA steps reliably. Manual device testing still works.
 
+### 12. Highscore/leaderboard
+- Opened: 2026-06-07
+- Resolved: 2026-06-09 (v69)
+- Fix: Firebase Firestore leaderboard with Hall of Fame (top 10) and My Scores (personal history with 8 sort options). Player name collected at game start. Local fallback for offline.
+
 ---
 
 ## Resolved
