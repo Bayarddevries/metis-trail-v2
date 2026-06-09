@@ -4,6 +4,7 @@ import { renderStatusBar, renderNarrative, initMap, updateMap, renderTravelLines
 import { saveGame, loadGame, clearSave } from './ui/persistence.js';
 import { NODES } from './data/nodes.js';
 import { ENDINGS } from './data/endings.js';
+import { CONSTANTS } from './core/constants.js';
 
 export function bootstrap(seed = null) {
   const game = createGame(seed);
@@ -149,22 +150,124 @@ function travelOneDay() {
 
   if (state.pendingEvent) return null;
 
-  const msgs = [];
-  msgs.push('Day advances.');
-  msgs.push(`-1 Food.`);
-  if (state.crew !== prev.crew) msgs.push(`Crew: ${prev.crew} -> ${state.crew}`);
-  if (state.wear > prev.wear) msgs.push(`${state.wear - prev.wear} Wear added.`);
-  if (state.morale < prev.morale) msgs.push(`Morale: ${prev.morale} -> ${state.morale}`);
-  if (state.node > prev.node) {
-    msgs.push(`Arrived at: ${game.getCurrentNode().name}`);
-  } else if (state.node === prev.node && state.over) {
-    msgs.push('Journey ends here.');
-  } else if (state.node === prev.node) {
-    msgs.push('Still on the trail.');
-  }
-  const msg = msgs.join(' ');
+  const msg = buildTravelNarrative(prev, state, game);
   publishResult(msg);
   return result;
+}
+
+const TRAVEL_FRAGMENTS = {
+  plains: {
+    rested: [
+      'The prairie stretches flat and endless. The ox leans into the traces, steady as the sunrise.',
+      'A warm wind pushes at your back. The grass ripples like a green sea beneath the sky.',
+      'The cart rolls smooth over open ground. Hawks circle high above, riding thermals.',
+      'Miles of unbroken prairie. The ox knows the rhythm — step, pull, breathe, repeat.',
+    ],
+    tired: [
+      'The ox slows. Each rut in the trail costs more energy than the last.',
+      'The crew is quiet. The prairie offers no shade, no shelter, only distance.',
+      'Dust rises with every step. The oxen\'s breath comes harder now.',
+      'The sun beats down. The crew trudges forward, eyes on the horizon.',
+    ],
+    exhausted: [
+      'The ox stumbles. The crew pushes from behind, hands on the cart bed, driving forward.',
+      'Every mile is a fight. The oxen strain, the cart groans, the crew is spent.',
+      'The prairie offers no mercy. The exhausted crew leans into the work, step by step.',
+      'The cart barely moves. The oxen are done, but the trail does not care.',
+    ],
+  },
+  river_valley: {
+    rested: [
+      'The river valley opens below — green banks, cool water, the sound of current over stone.',
+      'Cottonwoods line the river. The air is cooler here, and the oxen drink deep.',
+      'The trail follows the river bend. Birdsong rises from the willows.',
+      'Water and shade. The crew rests in the valley while the oxen graze.',
+    ],
+    tired: [
+      'The river trail is muddy. The cart wheels sink and the oxen pull harder.',
+      'The bank is steep. The crew guides the cart down carefully, one slow foot at a time.',
+      'The river crossing looms. The current is strong and the oxen are already weary.',
+      'Mud and river stones. The tired crew picks their way along the bank.',
+    ],
+    exhausted: [
+      'The river crossing is brutal. The oxen struggle in the current, the crew wades waist-deep.',
+      'The cart tilts on the river stones. The exhausted crew pushes from the water.',
+      'The ford takes everything. The oxen are spent, the crew is soaked, but the cart makes it across.',
+      'The river does not wait. The exhausted crew drives through, one step at a time.',
+    ],
+  },
+  wooded: {
+    rested: [
+      'The trail winds through poplar and spruce. Shade dapples the cart path.',
+      'The woods are alive with birdsong. The oxen walk easy beneath the canopy.',
+      'A cool breeze moves through the trees. The cart passes under green arches.',
+      'The wooded corridor is peaceful. Pine needles soften the trail.',
+    ],
+    tired: [
+      'The trail narrows between the trees. Branches scrape the canvas cover.',
+      'Roots and ruts. The tired crew navigates the rough ground carefully.',
+      'The woods close in. The oxen pick their way through the undergrowth.',
+      'A fallen tree blocks the path. The tired crew cuts a way around.',
+    ],
+    exhausted: [
+      'The cart catches on a stump. The exhausted crew frees it with brute force.',
+      'The trail through the woods is punishing. Every root, every branch, every rut.',
+      'The oxen can barely pull. The exhausted crew pushes from behind in the dark woods.',
+      'The woods offer no rest. The exhausted crew drives forward through the trees.',
+    ],
+  },
+  uplands: {
+    rested: [
+      'The ridge offers a view for miles. The prairie falls away on all sides.',
+      'The wind on the ridge is fresh. The oxen walk strong on the high ground.',
+      'The uplands stretch wide. The cart rolls easy on the firm, dry ground.',
+      'From the ridge, the trail ahead is visible for days. The crew feels the distance shrink.',
+    ],
+    tired: [
+      'The climb is steep. The oxen strain uphill, the crew pushes from behind.',
+      'The wind cuts across the ridge. The tired crew huddles against the cart.',
+      'The uplands are exposed. No shelter, no shade, just wind and distance.',
+      'The trail climbs. The tired oxen take each step slowly, deliberately.',
+    ],
+    exhausted: [
+      'The ridge is merciless. The exhausted crew drags the cart over the crest.',
+      'The wind knocks them back. The oxen are done, but the ridge demands more.',
+      'The high ground offers no mercy. The exhausted crew pushes through the wind.',
+      'The cart barely crests the hill. The crew collapses on the far side.',
+    ],
+  },
+};
+
+function buildTravelNarrative(prev, state, game) {
+  const node = game.getCurrentNode();
+  const terrain = node?.terrain || 'plains';
+  const crew = state.crew;
+
+  // Arrival at new node
+  if (state.node > prev.node) {
+    const next = game.getNextNode();
+    const arrival = next
+      ? `You arrive at ${node.name}. Ahead: ${next.name}.`
+      : `You arrive at ${node.name}.`;
+    return arrival;
+  }
+
+  // Journey ends
+  if (state.node === prev.node && state.over) {
+    return 'The journey ends here.';
+  }
+
+  // Pick atmospheric fragment
+  const terrainFragments = TRAVEL_FRAGMENTS[terrain] || TRAVEL_FRAGMENTS.plains;
+  const crewFragments = terrainFragments[crew] || terrainFragments.rested;
+  const fragment = crewFragments[Math.floor(Math.random() * crewFragments.length)];
+
+  // Append mechanical summary only for significant changes
+  const mech = [];
+  if (state.wear > prev.wear) mech.push('Cart wear increases.');
+  if (state.crew !== prev.crew) mech.push(`Crew is ${state.crew}.`);
+
+  return mech.length > 0 ? `${fragment} ${mech.join(' ')}` : fragment;
 }
 
 function publishCampResult() {
@@ -727,7 +830,7 @@ function showCart(game) {
       return `
     <div class="cart-row" style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:6px 0;border-bottom:1px solid rgba(0,0,0,0.08);">
       <span style="flex:1;"><span style="font-weight:600;">${i.icon || ''} ${i.name} ×${i.count} (${i.wt * i.count} kg)</span>${hint ? `<div style="font-size:0.75em;color:#6b5c4a;">${hint}</div>` : ''}${desc}</span>
-      ${canUnload ? `<button class="ctrl-btn unload-btn" data-item="${i.name}" style="padding:2px 10px;font-size:0.85em;">Unload −${i.wt} kg</button>` : ''}
+      ${canUnload ? `<button class="ctrl-btn unload-btn" data-item="${i.name}" style="padding:2px 10px;font-size:0.85em;">Unload ${i.name} (−${i.wt} kg)</button>` : ''}
     </div>`;
     })
     .join('');

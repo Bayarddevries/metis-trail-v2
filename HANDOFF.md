@@ -1,13 +1,18 @@
 # HANDOFF — Metis Trail V2
 
 **Last updated:** 2026-06-08 by OWL
-**Version:** v63 (dist), template synced for next build
+**Version:** v64 (dist), template synced for next build
 **Server:** http://100.108.183.33:5173/ (python3 -m http.server in dist/)
 **Branch:** main, clean tree, pushed to origin
 
 ---
 
 ## Session Summary (2026-06-08)
+
+### v64 — Atmospheric travel narrative + unload button labels
+- Replaced debug travel text with 48 atmospheric fragments (4 terrains × 3 crew states)
+- Unload buttons now show item name: "Unload Pemmican Rations (−2.5 kg)"
+- Files: `src/main.js`
 
 ### v63 — Win rate normalization balance pass
 - DAILY_FOOD: 1.2 → 1.35, starting food: 30 → 27
@@ -159,8 +164,8 @@ curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:5173/
 ### Phase 8 — Win Rate Normalization
 - [x] Win rate normalized: 57.5% → 35% (target 25-40%) — v63
 - [x] consumesItem bug fixed — Medicine Pouch now consumed by cholera event
-- [ ] Cart unload buttons show item name
-- [ ] Replace travel debug narrative with atmospheric fragments
+- [x] Cart unload buttons show item name — v64
+- [x] Atmospheric travel narrative replaces debug text — v64
 - [ ] Basic icons / map markers (Issue #10, #26)
 
 ---

@@ -2,7 +2,21 @@
 
 All notable changes are documented here. Format loosely follows Keep a Changelog.
 
-## [v63] — 2026-06-08
+## [v64] — 2026-06-08
+
+### Added — Atmospheric travel narrative
+
+- Replaced debug travel text ("Day advances. -1 Food. Crew: rested -> tired.") with immersive atmospheric fragments
+- 48 unique fragments across 4 terrains × 3 crew states (plains, river_valley, wooded, uplands × rested/tired/exhausted)
+- Fragments selected randomly based on current terrain and crew state
+- Mechanical changes (wear, crew) appended only when significant
+- Arrival text now shows current node + next node name
+
+### Fixed — Cart unload buttons show item name
+
+- Unload button text: "Unload −X kg" → "Unload [Item Name] (−X kg)"
+
+Files: `src/main.js`.
 
 ### Balance — Win rate normalization pass
 
