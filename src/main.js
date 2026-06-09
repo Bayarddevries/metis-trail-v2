@@ -3,6 +3,7 @@ import { mount, find } from './ui/shell.js';
 import { renderStatusBar, renderNarrative, initMap, updateMap, renderTravelLinesView } from './ui/renderer.js';
 import { saveGame, loadGame, clearSave } from './ui/persistence.js';
 import { mountDebugUI } from './ui/debug.js';
+import { applyTheme } from './ui/theme.js';
 import { NODES } from './data/nodes.js';
 import { ENDINGS } from './data/endings.js';
 import { CONSTANTS } from './core/constants.js';
@@ -33,6 +34,9 @@ export function bootstrap(seed = null) {
     console.error('Metis bootstrap aborted: #game-root is missing.');
     return;
   }
+
+  // Apply theme CSS custom properties
+  applyTheme(rootEl);
 
   const state = game.getState();
 

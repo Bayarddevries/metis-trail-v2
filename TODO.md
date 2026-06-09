@@ -15,6 +15,7 @@ Legend: `pending` | `in_progress` | `blocked` | `done`
 - [x] Add leaflet to package.json (was missing, broke CI)
 - [x] Standardize conventional commit messages across all contributors
 - [x] Add minimal doc comments to each exported function in `src/systems/engine.js`
+- [x] Sprint 1a-i: Extract hardcoded colors from template.html to src/ui/theme.js, apply via applyTheme() at bootstrap; fonts: Playfair Display (headings) + Crimson Text (body)
 
 ## Phase 2 — Core Systems & Debugging
 - [x] Expand `src/systems/events.js`/event data with primary-sourced events for each terrain

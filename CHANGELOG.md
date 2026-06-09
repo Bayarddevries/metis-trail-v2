@@ -2,6 +2,19 @@
 
 All notable changes are documented here. Format loosely follows Keep a Changelog.
 
+## [v72] — 2026-06-10
+
+### Sprint 1a-i — Theme System Refactor
+- Extracted all hardcoded color values from `src/template.html` `<style>` block to `src/ui/theme.js`
+- Created `applyTheme(root)` function that sets all CSS custom properties on the root element at bootstrap
+- Replaced all hardcoded colors in `src/template.html` with `var()` references
+- Updated fonts: Playfair Display (headings) + Crimson Text (body) via CSS custom properties
+- Added import and call to `applyTheme()` in `src/main.js` bootstrap
+- Cleaned up duplicate `__METIS_ASSETS__` scripts in both `src/template.html` and `dist/index.html`
+- Verified build passes and visual output matches pre-refactor state
+
+Files modified: `src/ui/theme.js`, `src/template.html`, `src/main.js`, `dist/index.html`
+
 ## [v71] — 2026-06-10
 
 ### Fix — Engine API Restoration
