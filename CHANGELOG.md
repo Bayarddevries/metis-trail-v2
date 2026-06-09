@@ -2,6 +2,76 @@
 
 All notable changes are documented here. Format loosely follows Keep a Changelog.
 
+## [v70] — 2026-06-09
+
+### Docs — Cultural + Writing Review Copy Edits
+Applied recommendations from `docs/cultural-review.md` and `docs/writing-review.md`:
+
+**Source fixes:**
+- Fix LACOMBE_BEAR author attribution (Brehaut → Lacombe)
+- Add context note for 'half-breed' period term in FONSECA_SUPPLY_CACHE source
+- Fix source quote mismatches (plains_wind→LACOMBE_WIND, rain→FONSECA_RAIN)
+
+**Event text rewrites (12 events):**
+- plains_wind: remove 'green sea' + sententious closing
+- plains_buffalo_hunt_camp: remove 'world opens below', 'air is thick', 'earth trembles'
+- plains_night_camp: remove 'moonlight spills', 'grass to silver', 'trail feels like home'
+- plains_hail: remove narrator voice, shorten
+- upland_storm_shelter: differentiate 'green sky' from plains_hail
+- river_cholera_camp: remove anachronistic 'waterborne bacteria'
+- river_mosquito_camp: fix tense switch, remove 'man and beast alike'
+- upland_bison_herd: remove 'sea of brown backs', 'earth trembling'
+
+**Ending rewrites (4 endings, high tier):**
+- victory: remove 'The West will remember your name'
+- starvation: remove 'The Carlton Trail gives nothing for free'
+- abandoned: rewrite anaphora, remove mechanical 'morale' language
+- winter: remove 'falls soft and silent', 'seeps into' anaphora; also remove 'no outrunning the season' from humble tier
+
+**Travel fragments:**
+- plains/rested: rewrite all 4 — remove 'green sea', add trail-specific detail
+
+**Camp flavor:**
+- forage low: remove 'The land is stingy' personification
+- scout low: remove repetitive 'nothing useful'
+- dance high: remove 'Laughter echoes', 'Tomorrow feels lighter', 'trail feels like home'
+- dance mid: remove 'Morale improves'
+
+**Intro/UI:**
+- Rewrite flavor text: shorter, carter's voice, remove 'food doesn't grow on the prairie'
+- Add 'On sources' paragraph explaining period-offensive terminology + context notes
+- Add `.src-context` CSS for inline source context notes
+- Source context rendering in showEvent() and showEnd()
+
+## [v70] — 2026-06-09
+
+### Added — Women, children, and family presence on the trail
+New events, sources, and content reflecting the reality of Métis family cart trains:
+
+**New sources (4):**
+- CALHOON_PEMM — Victoria Callihoo oral history of women's pemmican labor
+- CALHOON_CART_FORT — Cart defensive circle, women/children secured inside
+- IPAC_RAFT — Women and children converting carts to river rafts
+- SMALLPOX_1870 — 1870 epidemic family accounts (Bruneau, Godin, Chatelain)
+- SIMPSON_BRIGADE — Family cart trains: dogs, women, children on the trail
+
+**New events (4):**
+- plains_cart_fortress — Brigade forms defensive circle, women/children inside
+- plains_smallpox_trail — Disease event with family stakes (1870 epidemic)
+- river_valley_cart_raft — Women/children help convert cart to river raft
+- plains_pemmican_process (camp action) — Process raw meat into pemmican (3 food in, 5-13+ food out)
+
+**New camp action:**
+- Process Pemmican — Available in Trail work group. Requires 3 food, yields variable pemmican + morale
+
+**Travel fragments:**
+- plains/rested #4: dog trots alongside the cart (from SIMPSON_BRIGADE source)
+
+**Settlement descriptions updated:**
+- Fort Garry: "Families load their carts for the long trail west"
+- St. Norbert: "The women here are known for their flower beadwork"
+- St. Laurent (Batoche foreshadowing): "Ottawa's surveyors have been making promises they don't keep"
+
 ## [v69] — 2026-06-09
 
 ### Added — Firebase leaderboard / highscore system (#12)

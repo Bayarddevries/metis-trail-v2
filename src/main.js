@@ -177,7 +177,7 @@ const TRAVEL_FRAGMENTS = {
       'Flat prairie, no trees, no hills. Just the ox and the cart and the sky.',
       'Wind at your back. Good day for miles.',
       'The ox knows the rhythm. Step, pull, breathe. Step, pull, breathe.',
-      'Ruts deep enough to guide the wheels. Someone came through here yesterday.',
+      'Ruts deep enough to guide the wheels. A dog trots alongside the cart, tongue out in the heat.',
     ],
     tired: [
       'The ox slows. Each rut in the trail costs more energy than the last.',
@@ -1189,6 +1189,20 @@ const CAMP_FLAVOR = {
       'A close call — you wound it but it runs. You track it down eventually, but the meat is less than hoped.',
     ],
   },
+  pemmican_process: {
+    high: [
+      'The women work fast — slicing the lean meat into thin sheets, setting them on drying racks over the fire. By evening the flails are pounding, the kettles are rendering tallow, and the pemmican bags are being stitched shut with sinew. The crew will eat well for weeks.',
+      'A full day of processing. The women move through the steps like a dance — slice, dry, pound, render, pack. The smell of boiling fat and dried meat fills the camp. Tomorrow the pemmican bags rest heavy in the cart.'
+    ],
+    mid: [
+      'The work is steady but the yield is modest. Some meat dried well, some did not. The tallow is rendered but the bags are only half full. Enough to keep the crew fed.',
+      'A few hours of slicing and drying. The sun is hot and the work is slow, but the pemmican takes shape. The women Knead and pack while the crew tends the fire.'
+    ],
+    low: [
+      'The meat is lean and the drying is slow. A wasted afternoon — the forage returns nearly empty-handed, and the rations remain thin.',
+      'The work drags. The heat spoils more than it preserves. The women do what they can, but the yield is poor.'
+    ],
+  },
   scout: {
     high: [
       'The scout returns with detailed news: the next stretch is clear, with good water and firm ground. You map the way forward with confidence.',
@@ -1263,6 +1277,8 @@ function getCampFlavorText(type, rollTotal, effects) {
     tier = rollTotal >= 9 ? 'high' : rollTotal >= 5 ? 'mid' : 'low';
   } else if (type === 'dance') {
     tier = rollTotal >= 10 ? 'high' : rollTotal >= 6 ? 'mid' : 'low';
+  } else if (type === 'pemmican_process') {
+    tier = rollTotal >= 12 ? 'high' : rollTotal >= 7 ? 'mid' : 'low';
   } else if (type === 'deeprest') {
     tier = rollTotal >= 10 ? 'high' : rollTotal >= 5 ? 'mid' : 'low';
   } else {
@@ -1296,6 +1312,7 @@ function showCamp(game) {
     { type: 'rest', label: 'Rest', cost: '1 food', desc: 'Sleep and recover. Crew may improve.' },
     { type: 'forage', label: 'Forage', cost: '1 day', desc: 'Search for edible plants and roots.' },
     { type: 'hunt', label: 'Hunt', cost: '1 ammo · 1 day', desc: 'Stalk game for fresh meat.' },
+    { type: 'pemmican_process', label: 'Process Pemmican', cost: '3 food', desc: 'Slice, dry, and render tallow. Women\'s work.' },
     { type: 'repair', label: 'Repair', cost: '1 shaganappi', desc: 'Fix the cart. Reduces wear.' },
     { type: 'scout', label: 'Scout', cost: '1 day', desc: 'Reconnoiter the trail ahead.' },
     { type: 'dance', label: 'Dance', cost: 'free', desc: 'Song and dance. Boosts morale.' },
@@ -1308,7 +1325,7 @@ function showCamp(game) {
     actionsEl.style.visibility = 'visible';
     const groups = [
       { label: 'Recovery', types: new Set(['rest', 'deeprest']) },
-      { label: 'Trail work', types: new Set(['forage', 'hunt', 'scout']) },
+      { label: 'Trail work', types: new Set(['forage', 'hunt', 'scout', 'pemmican_process']) },
       { label: 'Upkeep', types: new Set(['repair', 'dance']) },
     ];
     const groupMap = new Map();

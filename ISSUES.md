@@ -97,14 +97,15 @@ Use this file to log bugs, blockers, and known gaps during work sessions. Each i
 
 ---
 
-## External (docs completed 2026-06-09)
+## External (docs completed 2026-06-09, implementation in progress)
 
 ### 25. Cultural/peer review
-- Status: Review doc complete
+- Status: Review doc complete, partial implementation done
 - Deliverable: [docs/cultural-review.md](docs/cultural-review.md)
-- Summary: Structured review of Métis representation, source use, Indigenous (Cree) representation, colonial framing, gender gaps, and historical accuracy of mechanics. 9 priority recommendations (2 high, 5 medium, 2 low). Key findings: "half-breed" source quote needs contextualization, LACOMBE_BEAR source misattributed, no women characters in narrative, Cree representation relies on helper/elder tropes.
+- Implemented in v70: Women/children presence (4 new events, 4 new sources, camp action, settlement descriptions, Batoche foreshadowing, dog reference)
+- Remaining: Secondary source reformatting (Wikipedia-style quotes)
 
 ### 6. AI writing trend review
-- Status: Review doc complete
+- Status: Review doc complete, implementation done
 - Deliverable: [docs/writing-review.md](docs/writing-review.md)
-- Summary: Flagged AI writing patterns across all narrative content. Key issues: sententious closing lines ("the prairie gives nothing"), generic sensory descriptions ("the earth trembles"), anaphora overuse, emotional telling. 16 specific rewrite recommendations (8 high, 5 medium, 3 low). Includes 8 general anti-AI writing rules for future content.
+- Implemented in v70: All 16 rewrite recommendations applied (12 events, 4 endings, travel fragments, camp flavor, intro text, source context UI)

@@ -596,6 +596,26 @@ export function createGame(seed = null) {
         const bonus = S.crew === 'rested' ? 12 : S.crew === 'tired' ? 8 : 5;
         S.morale = Math.max(0, Math.min(100, S.morale + bonus));
         effects.push(`Morale +${bonus}`);
+      } else if (action === 'pemmican_process') {
+        if (S.food < 3) return { error: 'Need at least 3 Food to process pemmican.' };
+        S.food -= 3;
+        costItems.push({ name: 'Food', count: -3 });
+        roll = d();
+        rollTotal = roll + crewMod(S);
+        // Women's pemmican labor: slicing, drying, pounding, rendering tallow
+        if (rollTotal >= 12) {
+          const gained = Math.floor(Math.random() * 8) + 10;
+          S.food += gained;
+          S.morale = Math.max(0, Math.min(100, S.morale + 10));
+          effects.push(`The women work fast — slicing, pounding, rendering tallow. +${gained} Pemmican`, 'Morale +10');
+        } else if (rollTotal >= 7) {
+          const gained = Math.floor(Math.random() * 5) + 5;
+          S.food += gained;
+          effects.push(`Lean processing. +${gained} Pemmican`);
+        } else {
+          effects.push('The work is slow and the yield is poor. +2 Pemmican');
+          S.food += 2;
+        }
       } else if (action === 'deeprest') {
         if (S.food < 2) return { error: 'Need 2 Food for a deep rest.' };
         S.food -= 2;

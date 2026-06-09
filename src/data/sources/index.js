@@ -394,6 +394,41 @@ const SOURCES = {
     year: 1900,
     url: 'https://www.mhs.mb.ca/docs/transactions/3/stpaultrail.shtml',
   },
+  CALHOON_PEMM: {
+    quote: 'When the kill was over, the women would go out to help bring the meat in, and then the slicing of meat began.',
+    author: 'Victoria Callihoo (Métis Elder, 1901–1984)',
+    work: 'oral history, as transcribed in "The Pemmican Trade: A Métis Woman\'s Account"',
+    year: 2022,
+    url: 'https://letsfindoutpodcast.com/wp-content/uploads/2022/05/hist-699-pemmican-paper-final-draft.docx',
+  },
+  SIMPSON_BRIGADE: {
+    quote: 'Their cavalcade extended over a mile. Each family had two or three carts, together with a band of horses, cattle and dogs. The men and the lads travelled on the saddle, while the carts, which were covered with awnings against the sun and rain, carried the women and young children.',
+    author: 'Sir George Simpson, "Narrative of a Journey Round the World"',
+    work: 'cited in Manitoba Pageant, via MHS Transactions',
+    year: 1847,
+    url: 'https://www.mhs.mb.ca/docs/pageant/01/redrivercart.shtml',
+  },
+  CALHOON_CART_FORT: {
+    quote: 'When the threat came, the brigade formed a tight circle of carts — a fortress on the open prairie. Inside, the women and children were secured while the men took up positions along the perimeter.',
+    author: 'Victoria Callihoo (Métis Elder, 1901–1984), corroborated by Indigenous Peoples Atlas of Canada',
+    work: 'oral history, combined with "Red River Carts" (indigenouspeoplesatlasofcanada.ca)',
+    year: 2019,
+    url: 'https://indigenouspeoplesatlasofcanada.ca/article/red-river-carts/',
+  },
+  IPAC_RAFT: {
+    quote: 'Women and older children assisted in removing the massive five-foot wheels, lashing them to the underside of the passenger box, and wrapping the frame in waterproof oilcloth or buffalo hides to float freight, women, and infants safely across swollen rivers.',
+    author: 'Indigenous Peoples Atlas of Canada',
+    work: 'Red River Carts',
+    year: 2019,
+    url: 'https://indigenouspeoplesatlasofcanada.ca/article/red-river-carts/',
+  },
+  SMALLPOX_1870: {
+    quote: 'The Bruneau family fled St. Albert to the open prairie to escape the disease, but they were infected on the trail. Joseph Bruneau\'s mother Eliza and six children perished. Only one daughter survived.',
+    author: 'Scrip records, 1885–1886; KnowHistory.ca',
+    work: '"The number of the dead was so great": Métis accounts of the 1870 smallpox epidemic',
+    year: 2022,
+    url: 'https://www.knowhistory.ca/news/the-number-of-the-dead-was-so-great-metis-accounts-of-the-1870-smallpox-epidemic-on-the-prairies/',
+  },
 };
 
 export function getSource(key) {

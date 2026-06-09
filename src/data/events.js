@@ -223,6 +223,26 @@ export const EVENT_POOLS = {
         { text: 'Take canvas and shaganappi too', dc: null, always: 'You strip what you can carry. The tarp is rotted but the shaganappi bindings are still supple.', give: [{ name: 'Shaganappi', amt: 2 }], morale: 3 },
       ],
     },
+    {
+      id: 'plains_cart_fortress',
+      text: 'A howl on the ridge line. Then another. The dogs go quiet first — then the oxen lift their heads. Something is wrong. Raiders, wolves, or a stampede — you cannot tell from here. The call goes out and the brigade moves as one, nudging the carts into a tight circle on the open prairie. Inside the ring, women and children huddle behind the cart beds, out of the wind and out of sight. You take your position on the perimeter with what you have.',
+      classification: 'Survival',
+      source: getSource('CALHOON_CART_FORT'),
+      choices: [
+        { text: 'Hold the line', dc: 12, ok: 'Whatever it was, it passes. The circle holds. The women and children are safe. The brigade breaks camp and moves on.', bad: 'The strain of holding takes its toll. Exhaustion sets in.', wear: 1, crew: 'tired', morale: -6 },
+        { text: 'Scatter and flee', dc: null, always: 'You break the circle and run. The carts are left behind — you salvage what you can, but supplies are lost to the plains.', food: -4, wear: 2, morale: -10, crew: 'exhausted' },
+      ],
+    },
+    {
+      id: 'plains_smallpox_trail',
+      text: 'A sickness is moving through the camps. You heard it at the last settlement — travellers feverish, covered in pustules, dying on the open prairie. The Bruneau family lost a mother and six children out here. Now one of your crew is burning with fever, and the medicine pouch will not help against this.',
+      classification: 'Disease',
+      source: getSource('SMALLPOX_1870'),
+      choices: [
+        { text: 'Make camp and pray', dc: null, always: 'You stop and wait. Two days lost. The fever breaks — barely. The crew member survives, but will not be strong for days.', crew: 'tired', morale: -15, time: 2 },
+        { text: 'Press on — reach the next post', dc: 14, ok: 'The crew finds a reserve of strength. You make it to the next settlement with the sick in the cart.', bad: 'The sick grow worse on the rough trail. The cart jolts them with every rut.', morale: -20, crew: 'exhausted', wear: 1 },
+      ],
+    },
   ],
   river_valley: [
     {
@@ -388,6 +408,15 @@ export const EVENT_POOLS = {
       choices: [
         { text: 'Take the canvas tarp', dc: 8, ok: 'The tarp is heavy but waterproof. Shelter, cart cover, or raft material — it will serve.', bad: 'The oilcloth is torn but the canvas beneath is sound.', give: [{ name: 'Canvas Tarp', amt: 1 }], morale: 5 },
         { text: 'Leave it — too heavy for the cart', dc: null, always: 'You mark the cairn and move on. The cache will keep for the next traveller.', morale: 1 },
+      ],
+    },
+    {
+      id: 'river_valley_cart_raft',
+      text: 'The river is swollen from three days of rain upstream — brown, churning, impassable as a ford. But the brigade has done this before. Women and older children help dismantle the five-foot wheels, lashing them dish-up beneath the cart box. Buffalo hides are soaked and stretched over the frame. In an hour, the cart floats. The oxen will swim. The freight, the women, and the children ride the raft across while you guide the line from the bow.',
+      source: getSource('IPAC_RAFT'),
+      choices: [
+        { text: 'Help with the raft', dc: 11, ok: 'The improvised ferry holds. You reach the far bank soaked but whole.', bad: 'A hide splits mid-river. Cargo gets wet and one food sack is lost.', food: -2, morale: -4 },
+        { text: 'Wait for the water to drop', dc: null, always: 'You camp on the high bank for two days. The river drops by morning.', time: 2 },
       ],
     },
   ],

@@ -7,7 +7,7 @@ export const NODES = [
     type: 'hbc',
     terrain: 'river_valley',
     dist: 0,
-    desc: 'The Red River Settlement. HBC headquarters. The palisade walls rise from the mud — your journey begins here, where the Assiniboine meets the Red.',
+    desc: 'The Red River Settlement. HBC headquarters. The palisade walls rise from the mud — your journey begins here, where the Assiniboine meets the Red. Families load their carts for the long trail west.',
     source: {
       quote: "Fort Garry... the centre of the Hudson's Bay Company's operations in the Red River Settlement.",
       author: 'R. G. McConnell',
@@ -41,7 +41,7 @@ export const NODES = [
     type: 'metis',
     terrain: 'river_valley',
     dist: 1,
-    desc: 'A Métis parish straddling the ox-cart trail. Smoke rises from the churchyard. Family welcomes you with bannock and Saskatoon preserve.',
+    desc: 'A Métis parish straddling the ox-cart trail. Smoke rises from the churchyard. Families welcome you with bannock and Saskatoon preserve. The women here are known for their flower beadwork.',
     source: {
       quote: 'St. Norbert was the home of many Métis families who made their living from the buffalo hunt and the freight trade.',
       author: 'MMF Research',
@@ -155,7 +155,7 @@ export const NODES = [
     type: 'metis',
     terrain: 'river_valley',
     dist: 2,
-    desc: 'Spiritual centre of the Saskatchewan Métis. The church bell rings across the river valley. Full ceremony, full communion.',
+    desc: 'Spiritual centre of the Saskatchewan Métis. The church bell rings across the river valley. The river-lot farms are prosperous, but Ottawa\'s surveyors have been making promises they don\'t keep.',
     source: {
       quote: 'Batoche... the centre of the Métis community on the South Saskatchewan.',
       author: 'Lionel Goudreau',

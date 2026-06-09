@@ -105,7 +105,7 @@ var NODES = [
     type: "hbc",
     terrain: "river_valley",
     dist: 0,
-    desc: "The Red River Settlement. HBC headquarters. The palisade walls rise from the mud \u2014 your journey begins here, where the Assiniboine meets the Red.",
+    desc: "The Red River Settlement. HBC headquarters. The palisade walls rise from the mud \u2014 your journey begins here, where the Assiniboine meets the Red. Families load their carts for the long trail west.",
     source: {
       quote: "Fort Garry... the centre of the Hudson's Bay Company's operations in the Red River Settlement.",
       author: "R. G. McConnell",
@@ -139,7 +139,7 @@ var NODES = [
     type: "metis",
     terrain: "river_valley",
     dist: 1,
-    desc: "A M\xE9tis parish straddling the ox-cart trail. Smoke rises from the churchyard. Family welcomes you with bannock and Saskatoon preserve.",
+    desc: "A M\xE9tis parish straddling the ox-cart trail. Smoke rises from the churchyard. Families welcome you with bannock and Saskatoon preserve. The women here are known for their flower beadwork.",
     source: {
       quote: "St. Norbert was the home of many M\xE9tis families who made their living from the buffalo hunt and the freight trade.",
       author: "MMF Research",
@@ -253,7 +253,7 @@ var NODES = [
     type: "metis",
     terrain: "river_valley",
     dist: 2,
-    desc: "Spiritual centre of the Saskatchewan M\xE9tis. The church bell rings across the river valley. Full ceremony, full communion.",
+    desc: "Spiritual centre of the Saskatchewan M\xE9tis. The church bell rings across the river valley. The river-lot farms are prosperous, but Ottawa's surveyors have been making promises they don't keep.",
     source: {
       quote: "Batoche... the centre of the M\xE9tis community on the South Saskatchewan.",
       author: "Lionel Goudreau",
@@ -889,6 +889,41 @@ var SOURCES = {
     work: "On the St. Paul Trail in the Sixties",
     year: 1900,
     url: "https://www.mhs.mb.ca/docs/transactions/3/stpaultrail.shtml"
+  },
+  CALHOON_PEMM: {
+    quote: "When the kill was over, the women would go out to help bring the meat in, and then the slicing of meat began.",
+    author: "Victoria Callihoo (M\xE9tis Elder, 1901\u20131984)",
+    work: `oral history, as transcribed in "The Pemmican Trade: A M\xE9tis Woman's Account"`,
+    year: 2022,
+    url: "https://letsfindoutpodcast.com/wp-content/uploads/2022/05/hist-699-pemmican-paper-final-draft.docx"
+  },
+  SIMPSON_BRIGADE: {
+    quote: "Their cavalcade extended over a mile. Each family had two or three carts, together with a band of horses, cattle and dogs. The men and the lads travelled on the saddle, while the carts, which were covered with awnings against the sun and rain, carried the women and young children.",
+    author: 'Sir George Simpson, "Narrative of a Journey Round the World"',
+    work: "cited in Manitoba Pageant, via MHS Transactions",
+    year: 1847,
+    url: "https://www.mhs.mb.ca/docs/pageant/01/redrivercart.shtml"
+  },
+  CALHOON_CART_FORT: {
+    quote: "When the threat came, the brigade formed a tight circle of carts \u2014 a fortress on the open prairie. Inside, the women and children were secured while the men took up positions along the perimeter.",
+    author: "Victoria Callihoo (M\xE9tis Elder, 1901\u20131984), corroborated by Indigenous Peoples Atlas of Canada",
+    work: 'oral history, combined with "Red River Carts" (indigenouspeoplesatlasofcanada.ca)',
+    year: 2019,
+    url: "https://indigenouspeoplesatlasofcanada.ca/article/red-river-carts/"
+  },
+  IPAC_RAFT: {
+    quote: "Women and older children assisted in removing the massive five-foot wheels, lashing them to the underside of the passenger box, and wrapping the frame in waterproof oilcloth or buffalo hides to float freight, women, and infants safely across swollen rivers.",
+    author: "Indigenous Peoples Atlas of Canada",
+    work: "Red River Carts",
+    year: 2019,
+    url: "https://indigenouspeoplesatlasofcanada.ca/article/red-river-carts/"
+  },
+  SMALLPOX_1870: {
+    quote: "The Bruneau family fled St. Albert to the open prairie to escape the disease, but they were infected on the trail. Joseph Bruneau's mother Eliza and six children perished. Only one daughter survived.",
+    author: "Scrip records, 1885\u20131886; KnowHistory.ca",
+    work: '"The number of the dead was so great": M\xE9tis accounts of the 1870 smallpox epidemic',
+    year: 2022,
+    url: "https://www.knowhistory.ca/news/the-number-of-the-dead-was-so-great-metis-accounts-of-the-1870-smallpox-epidemic-on-the-prairies/"
   }
 };
 function getSource(key) {
@@ -1118,6 +1153,26 @@ var EVENT_POOLS = {
         { text: "Salvage the spare axle", dc: 9, ok: "The axle comes free with some effort. Heavy, but a godsend when yours finally gives.", bad: "The wood is sound but the fittings are rusted. It will do in a pinch.", give: [{ name: "Spare Axle", amt: 1 }], morale: 5 },
         { text: "Take canvas and shaganappi too", dc: null, always: "You strip what you can carry. The tarp is rotted but the shaganappi bindings are still supple.", give: [{ name: "Shaganappi", amt: 2 }], morale: 3 }
       ]
+    },
+    {
+      id: "plains_cart_fortress",
+      text: "A howl on the ridge line. Then another. The dogs go quiet first \u2014 then the oxen lift their heads. Something is wrong. Raiders, wolves, or a stampede \u2014 you cannot tell from here. The call goes out and the brigade moves as one, nudging the carts into a tight circle on the open prairie. Inside the ring, women and children huddle behind the cart beds, out of the wind and out of sight. You take your position on the perimeter with what you have.",
+      classification: "Survival",
+      source: getSource("CALHOON_CART_FORT"),
+      choices: [
+        { text: "Hold the line", dc: 12, ok: "Whatever it was, it passes. The circle holds. The women and children are safe. The brigade breaks camp and moves on.", bad: "The strain of holding takes its toll. Exhaustion sets in.", wear: 1, crew: "tired", morale: -6 },
+        { text: "Scatter and flee", dc: null, always: "You break the circle and run. The carts are left behind \u2014 you salvage what you can, but supplies are lost to the plains.", food: -4, wear: 2, morale: -10, crew: "exhausted" }
+      ]
+    },
+    {
+      id: "plains_smallpox_trail",
+      text: "A sickness is moving through the camps. You heard it at the last settlement \u2014 travellers feverish, covered in pustules, dying on the open prairie. The Bruneau family lost a mother and six children out here. Now one of your crew is burning with fever, and the medicine pouch will not help against this.",
+      classification: "Disease",
+      source: getSource("SMALLPOX_1870"),
+      choices: [
+        { text: "Make camp and pray", dc: null, always: "You stop and wait. Two days lost. The fever breaks \u2014 barely. The crew member survives, but will not be strong for days.", crew: "tired", morale: -15, time: 2 },
+        { text: "Press on \u2014 reach the next post", dc: 14, ok: "The crew finds a reserve of strength. You make it to the next settlement with the sick in the cart.", bad: "The sick grow worse on the rough trail. The cart jolts them with every rut.", morale: -20, crew: "exhausted", wear: 1 }
+      ]
     }
   ],
   river_valley: [
@@ -1284,6 +1339,15 @@ var EVENT_POOLS = {
       choices: [
         { text: "Take the canvas tarp", dc: 8, ok: "The tarp is heavy but waterproof. Shelter, cart cover, or raft material \u2014 it will serve.", bad: "The oilcloth is torn but the canvas beneath is sound.", give: [{ name: "Canvas Tarp", amt: 1 }], morale: 5 },
         { text: "Leave it \u2014 too heavy for the cart", dc: null, always: "You mark the cairn and move on. The cache will keep for the next traveller.", morale: 1 }
+      ]
+    },
+    {
+      id: "river_valley_cart_raft",
+      text: "The river is swollen from three days of rain upstream \u2014 brown, churning, impassable as a ford. But the brigade has done this before. Women and older children help dismantle the five-foot wheels, lashing them dish-up beneath the cart box. Buffalo hides are soaked and stretched over the frame. In an hour, the cart floats. The oxen will swim. The freight, the women, and the children ride the raft across while you guide the line from the bow.",
+      source: getSource("IPAC_RAFT"),
+      choices: [
+        { text: "Help with the raft", dc: 11, ok: "The improvised ferry holds. You reach the far bank soaked but whole.", bad: "A hide splits mid-river. Cargo gets wet and one food sack is lost.", food: -2, morale: -4 },
+        { text: "Wait for the water to drop", dc: null, always: "You camp on the high bank for two days. The river drops by morning.", time: 2 }
       ]
     }
   ],
@@ -2146,6 +2210,25 @@ function createGame(seed = null) {
         const bonus = S2.crew === "rested" ? 12 : S2.crew === "tired" ? 8 : 5;
         S2.morale = Math.max(0, Math.min(100, S2.morale + bonus));
         effects.push(`Morale +${bonus}`);
+      } else if (action === "pemmican_process") {
+        if (S2.food < 3) return { error: "Need at least 3 Food to process pemmican." };
+        S2.food -= 3;
+        costItems.push({ name: "Food", count: -3 });
+        roll = d();
+        rollTotal = roll + crewMod(S2);
+        if (rollTotal >= 12) {
+          const gained = Math.floor(Math.random() * 8) + 10;
+          S2.food += gained;
+          S2.morale = Math.max(0, Math.min(100, S2.morale + 10));
+          effects.push(`The women work fast \u2014 slicing, pounding, rendering tallow. +${gained} Pemmican`, "Morale +10");
+        } else if (rollTotal >= 7) {
+          const gained = Math.floor(Math.random() * 5) + 5;
+          S2.food += gained;
+          effects.push(`Lean processing. +${gained} Pemmican`);
+        } else {
+          effects.push("The work is slow and the yield is poor. +2 Pemmican");
+          S2.food += 2;
+        }
       } else if (action === "deeprest") {
         if (S2.food < 2) return { error: "Need 2 Food for a deep rest." };
         S2.food -= 2;
@@ -18063,7 +18146,7 @@ var TRAVEL_FRAGMENTS = {
       "Flat prairie, no trees, no hills. Just the ox and the cart and the sky.",
       "Wind at your back. Good day for miles.",
       "The ox knows the rhythm. Step, pull, breathe. Step, pull, breathe.",
-      "Ruts deep enough to guide the wheels. Someone came through here yesterday."
+      "Ruts deep enough to guide the wheels. A dog trots alongside the cart, tongue out in the heat."
     ],
     tired: [
       "The ox slows. Each rut in the trail costs more energy than the last.",
@@ -18961,6 +19044,20 @@ var CAMP_FLAVOR = {
       "A close call \u2014 you wound it but it runs. You track it down eventually, but the meat is less than hoped."
     ]
   },
+  pemmican_process: {
+    high: [
+      "The women work fast \u2014 slicing the lean meat into thin sheets, setting them on drying racks over the fire. By evening the flails are pounding, the kettles are rendering tallow, and the pemmican bags are being stitched shut with sinew. The crew will eat well for weeks.",
+      "A full day of processing. The women move through the steps like a dance \u2014 slice, dry, pound, render, pack. The smell of boiling fat and dried meat fills the camp. Tomorrow the pemmican bags rest heavy in the cart."
+    ],
+    mid: [
+      "The work is steady but the yield is modest. Some meat dried well, some did not. The tallow is rendered but the bags are only half full. Enough to keep the crew fed.",
+      "A few hours of slicing and drying. The sun is hot and the work is slow, but the pemmican takes shape. The women Knead and pack while the crew tends the fire."
+    ],
+    low: [
+      "The meat is lean and the drying is slow. A wasted afternoon \u2014 the forage returns nearly empty-handed, and the rations remain thin.",
+      "The work drags. The heat spoils more than it preserves. The women do what they can, but the yield is poor."
+    ]
+  },
   scout: {
     high: [
       "The scout returns with detailed news: the next stretch is clear, with good water and firm ground. You map the way forward with confidence.",
@@ -19034,6 +19131,8 @@ function getCampFlavorText(type, rollTotal, effects) {
     tier = rollTotal >= 9 ? "high" : rollTotal >= 5 ? "mid" : "low";
   } else if (type === "dance") {
     tier = rollTotal >= 10 ? "high" : rollTotal >= 6 ? "mid" : "low";
+  } else if (type === "pemmican_process") {
+    tier = rollTotal >= 12 ? "high" : rollTotal >= 7 ? "mid" : "low";
   } else if (type === "deeprest") {
     tier = rollTotal >= 10 ? "high" : rollTotal >= 5 ? "mid" : "low";
   } else {
@@ -19068,6 +19167,7 @@ function showCamp(game) {
     { type: "rest", label: "Rest", cost: "1 food", desc: "Sleep and recover. Crew may improve." },
     { type: "forage", label: "Forage", cost: "1 day", desc: "Search for edible plants and roots." },
     { type: "hunt", label: "Hunt", cost: "1 ammo \xB7 1 day", desc: "Stalk game for fresh meat." },
+    { type: "pemmican_process", label: "Process Pemmican", cost: "3 food", desc: "Slice, dry, and render tallow. Women's work." },
     { type: "repair", label: "Repair", cost: "1 shaganappi", desc: "Fix the cart. Reduces wear." },
     { type: "scout", label: "Scout", cost: "1 day", desc: "Reconnoiter the trail ahead." },
     { type: "dance", label: "Dance", cost: "free", desc: "Song and dance. Boosts morale." },
@@ -19079,7 +19179,7 @@ function showCamp(game) {
     actionsEl.style.visibility = "visible";
     const groups = [
       { label: "Recovery", types: /* @__PURE__ */ new Set(["rest", "deeprest"]) },
-      { label: "Trail work", types: /* @__PURE__ */ new Set(["forage", "hunt", "scout"]) },
+      { label: "Trail work", types: /* @__PURE__ */ new Set(["forage", "hunt", "scout", "pemmican_process"]) },
       { label: "Upkeep", types: /* @__PURE__ */ new Set(["repair", "dance"]) }
     ];
     const groupMap = /* @__PURE__ */ new Map();
