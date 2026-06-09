@@ -408,7 +408,7 @@ Based on findings, these should guide future text additions:
 
 1. **No anaphora** (no "The X… The Y… The Z…" sentence openings)
 2. **No fortune cookie closings** (no "the [place] [verbs] [abstract noun]")
-3. **No generic sensory** (no "the air is thick," "the wind cuts," "the earth trembles")
+3. **limit generic sensory** (no "the air is thick," "the wind cuts," "the earth trembles")
 4. **Max 2 sentences of same length in a row**
 5. **End on detail, not wisdom**
 6. **Use carter's voice** — short, specific, material-cost-aware (the pre-departure briefing is the model)
