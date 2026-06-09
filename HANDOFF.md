@@ -272,3 +272,65 @@ metis-trail-v2-repo/
 ├── CHANGELOG.md             # Version history
 └── HANDOFF.md               # This file
 ```
+
+---
+
+## Next Session Handoff — Cultural Review + Writing Critique
+
+**Priority:** External review tasks (no code changes to game engine).
+
+Two GitHub issues to tackle:
+
+### Issue #25 — Cultural Review
+A full cultural review of the project's story elements, narrative text, and representation. Not a code task — a reading/critique task.
+
+**What to do:**
+1. Read all narrative text in the game: event text, travel fragments, endings, source quotes, settlement descriptions, intro/tutorial text
+2. Key files to review:
+   - `src/data/events.js` — all event text and choices
+   - `src/data/sources/index.js` — all source quotes
+   - `src/data/endings.js` — ending narratives
+   - `src/main.js` — travel narrative fragments (TRAVEL_FRAGMENTS), camp flavor text (CAMP_FLAVOR), intro overlay text, settlement UI text
+   - `src/template.html` — intro overlay HTML text
+3. Focus areas:
+   - Authentic representation of Métis culture, history, and voice
+   - Whether source quotes are used appropriately and attributed correctly
+   - Whether event narratives respect the historical context (fur trade, Red River cart, Carlton Trail, 1878)
+   - Any content that could be stereotypical, reductive, or historically inaccurate
+   - Whether the game mechanics (cart packing, trading, weather) reflect real historical constraints
+4. Write findings as a structured report at `docs/cultural-review.md`
+5. Include specific quotes/text that need revision, with suggested alternatives
+6. Flag any content that should be removed or restructured
+
+**Approach:** Read-only review. Do NOT modify game files. This is research and documentation.
+
+### Issue #6 — AI Writing Review
+Review all game content for AI writing patterns and improve where needed.
+
+**What to do:**
+1. Same files as above — read all narrative content
+2. Look for telltale AI writing patterns:
+   - Overly smooth/polished prose that lacks voice
+   - Generic sensory descriptions ("the air is thick", "the wind cuts through")
+   - Repetitive sentence structures
+   - Lack of specific historical detail
+   - Emotional telling rather than showing
+   - Overuse of certain adjectives (piercing, relentless, brutal, merciless)
+3. Write findings at `docs/writing-review.md`
+4. For each flagged passage, provide a specific rewrite that adds voice, historical specificity, or roughness
+5. Prioritize: event text > endings > travel fragments > camp flavor > UI text
+
+**Approach:** Read + write. DO create the review doc. Do NOT modify game files yet — that's a separate implementation task.
+
+### Order of Operations
+1. Do Issue #25 first (cultural review) — it's the higher-stakes review and may flag content that affects the writing review
+2. Then do Issue #6 (writing review) — incorporate cultural review findings
+3. Both docs go in `docs/`, committed and pushed
+4. Update ISSUES.md with links to the review docs
+5. Update GitHub issues #25 and #6 with summary comments linking to the docs
+
+### Constraints
+- No engine changes, no gameplay changes — this is pure review
+- Keep the review constructive — flag problems AND suggest fixes
+- Cite specific line numbers or event IDs when flagging issues
+- Respect the existing style — the goal is to improve within the game's voice, not replace it
