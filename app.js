@@ -11,7 +11,26 @@ var CONSTANTS = Object.freeze({
   EVENT_CHANCE: 0.45,
   DAYS_PER_WEEK: 7,
   CREW_MOD: { rested: 1, tired: 0, exhausted: -2 },
-  WEAR_MOD: { 0: 0, 1: 0, 2: 0, 3: -1, 4: -3, 5: -5 }
+  WEAR_MOD: { 0: 0, 1: 0, 2: 0, 3: -1, 4: -3, 5: -5 },
+  WEATHER_STATES: ["clear", "overcast", "rain", "storm", "snow"],
+  SEASON_BASE_WEATHER: {
+    summer: { clear: 45, overcast: 25, rain: 20, storm: 10, snow: 0 },
+    autumn: { clear: 30, overcast: 30, rain: 20, storm: 10, snow: 10 },
+    "early winter": { clear: 15, overcast: 20, rain: 15, storm: 10, snow: 40 }
+  },
+  WEATHER_TRANSITION: {
+    clear: { clear: 55, overcast: 30, rain: 10, storm: 5, snow: 0 },
+    overcast: { clear: 20, overcast: 40, rain: 25, storm: 10, snow: 5 },
+    rain: { clear: 10, overcast: 25, rain: 40, storm: 20, snow: 5 },
+    storm: { clear: 5, overcast: 20, rain: 35, storm: 30, snow: 10 },
+    snow: { clear: 0, overcast: 10, rain: 15, storm: 5, snow: 70 }
+  },
+  WEATHER_WEAR_MULT: { clear: 1, overcast: 1, rain: 1.25, storm: 1.5, snow: 1.4 },
+  WEATHER_FOOD_MOD: { clear: 0, overcast: 0, rain: 0.3, storm: 0.5, snow: 0.5 },
+  WEATHER_MORALE_MOD: { clear: 0, overcast: -1, rain: -2, storm: -4, snow: -3 },
+  WEATHER_EVENT_MOD: { clear: 0, overcast: 0, rain: 0.1, storm: 0.15, snow: 0.1 },
+  WEATHER_CAMP_MORALE: { clear: 15, overcast: 15, rain: 10, storm: 5, snow: 5 },
+  WEATHER_LABELS: { clear: "\u2600 Clear", overcast: "\u2601 Overcast", rain: "\u{1F327} Rain", storm: "\u26C8 Storm", snow: "\u2744 Snow" }
 });
 function crewMod(state) {
   return CONSTANTS.CREW_MOD[state.crew] ?? 0;
@@ -786,6 +805,48 @@ var SOURCES = {
     work: "The M\xE9tis: Memorable Events and Memorable People",
     year: 2005,
     url: "https://github.com/Bayarddevries/metis-research-wiki"
+  },
+  LACOMBE_STORM: {
+    quote: "The thunder rolled across the prairie like cannon fire. Lightning split the sky to the west, and the oxen bellowed in terror.",
+    author: "Father Albert Lacombe",
+    work: "Missionary Journals",
+    year: 1878,
+    url: "https://github.com/Bayarddevries/metis-research-wiki"
+  },
+  FONSECA_RAIN: {
+    quote: "Three days of rain turned the trail to the consistency of axle grease. The carts sank to the hubs and the oxen could scarcely move them.",
+    author: "William G. Fonseca",
+    work: "On the St. Paul Trail in the Sixties",
+    year: 1900,
+    url: "https://www.mhs.mb.ca/docs/transactions/3/stpaultrail.shtml"
+  },
+  SCHULTZ_SNOW: {
+    quote: "The first storm of the season caught us on the open prairie. By morning, the cart ruts were filled with snow and the trail was gone.",
+    author: "John C. Schultz",
+    work: "The Old Crow Wing Trail",
+    year: 1894,
+    url: "https://www.mhs.mb.ca/docs/transactions/1/oldcrowwingtrail.shtml"
+  },
+  LACOMBE_WIND: {
+    quote: "A hot wind blew from the south for three days, carrying the smell of sun-baked grass and dust that stung the eyes.",
+    author: "Father Albert Lacombe",
+    work: "Missionary Journals",
+    year: 1878,
+    url: "https://github.com/Bayarddevries/metis-research-wiki"
+  },
+  BREHAUT_WET_AXE: {
+    quote: "Wet weather swelled the wooden axles, making the wheels bind. A cart that rolled freely in dry weather could become nearly immovable after a rain.",
+    author: "Harry Baker Brehaut",
+    work: "The Red River Cart and Trails",
+    year: 1972,
+    url: "https://www.mhs.mb.ca/docs/transactions/3/redrivercart.shtml"
+  },
+  FONSECA_OVERCAST: {
+    quote: "A grey sky hung low over the prairie for days. The air was heavy and still, and the oxen moved as if they could sense a storm coming.",
+    author: "William G. Fonseca",
+    work: "On the St. Paul Trail in the Sixties",
+    year: 1900,
+    url: "https://www.mhs.mb.ca/docs/transactions/3/stpaultrail.shtml"
   }
 };
 function getSource(key) {
@@ -975,6 +1036,26 @@ var EVENT_POOLS = {
         { text: "Tell the camp overseer and help search", dc: 9, ok: "The goods are returned. The thief is ordered to pay in labour.", addsRep: { key: "metis", delta: 1 } },
         { text: "Write it off and tighten watch", dc: null, always: "Pragmatic. The trail teaches scarcity.", alwaysWear: 0, morale: -2 }
       ]
+    },
+    {
+      id: "plains_thunderstorm",
+      text: "The sky turns green-black to the west. Thunder rolls across the open prairie like cannon fire. Lightning stitches the clouds to the earth, and the oxen bellow in terror. There is no shelter on the plains \u2014 only the cart and the storm.",
+      classification: "Weather",
+      source: getSource("LACOMBE_STORM"),
+      choices: [
+        { text: "Hobble the oxen and huddle under the cart", dc: null, always: "The storm passes in twenty minutes. Everyone is soaked but alive.", morale: -4 },
+        { text: "Push for the nearest coulee", dc: 11, ok: "Lower ground offers shelter from the wind and lightning.", bad: "A lightning-struck tree falls nearby.", wear: 1, morale: -6 }
+      ]
+    },
+    {
+      id: "plains_windstorm",
+      text: "A wind comes out of the north that never stops. It pushes at the cart from the side, threatening to tip it with every gust. The canvas tarp flaps and strains at its ties. The oxen lean against the wind and refuse to move forward.",
+      classification: "Weather",
+      source: getSource("LACOMBE_WIND"),
+      choices: [
+        { text: "Lower the cart bed and wait it out", dc: null, always: "You crouch behind the cart and wait. The wind lasts hours. When it passes, the prairie is scarred with dust devils.", time: 1 },
+        { text: "Strap down the load and push into the wind", dc: 10, ok: "The oxen groan but move forward.", bad: "A gust catches the canvas. Supplies scatter.", food: -3, wear: 1 }
+      ]
     }
   ],
   river_valley: [
@@ -1121,6 +1202,16 @@ var EVENT_POOLS = {
       choices: [
         { text: "Trade food for the ammunition belt", dc: 9, ok: "He accepts your offer. The belt is sound \u2014 enough shot for several hunts or defence.", bad: "He wants more than you can spare. The deal falls through.", give: [{ name: "Ammunition Belt", amt: 1 }], food: -3, morale: 3 },
         { text: "Ask where he found it", dc: null, always: 'He gestures vaguely upstream. "The trail provides." You press on.', morale: 2 }
+      ]
+    },
+    {
+      id: "river_valley_flash_flood",
+      text: "Three days of rain upstream. The river is brown and rising, debris spinning in the current. The ford you crossed yesterday is gone \u2014 today the water is waist-deep and growing. The trail along the bank has become a river itself.",
+      classification: "Weather",
+      source: getSource("FONSECA_RAIN"),
+      choices: [
+        { text: "Wait for the water to drop", dc: null, always: "You camp on high ground. By morning the river has dropped enough to cross.", time: 1 },
+        { text: "Push through while you can", dc: 13, ok: "The oxen find footing. The cart tilts but holds.", bad: "A submerged log catches the axle.", wear: 2, food: -2 }
       ]
     }
   ],
@@ -1297,6 +1388,16 @@ var EVENT_POOLS = {
         { text: "Push through without extra fire", dc: 9, ok: "Grit and determination. The crew complains but holds together.", bad: "Fingers go numb. One crew member cannot feel their feet by morning.", crew: "tired", morale: -10 },
         { text: "Make camp and wait for the thaw", dc: null, always: "You wait for the sun to warm the ground. A lost day, but the crew is intact.", time: 1 }
       ]
+    },
+    {
+      id: "upland_early_snow",
+      text: "The first storm of the season catches you on the open uplands. By morning, the cart ruts are filled with snow and the trail is gone. The temperature plunges. The oxen breathe white plumes into the still air.",
+      classification: "Weather",
+      source: getSource("SCHULTZ_SNOW"),
+      choices: [
+        { text: "Make camp and wait for the thaw", dc: null, always: "You wait for the sun to melt the snow. A lost day, but the crew is intact.", time: 1, morale: -2 },
+        { text: "Push through \u2014 follow the ridge", dc: 11, ok: "The going is brutal but you keep moving.", bad: "The snow deepens. Progress is measured in yards.", crew: "tired", morale: -8 }
+      ]
     }
   ],
   river: [
@@ -1397,6 +1498,29 @@ function createGame(seed = null) {
     return d20(rand);
   }
   __name(d, "d");
+  function pickWeighted(weights) {
+    const total = Object.values(weights).reduce((s, w) => s + w, 0);
+    let r = rand() * total;
+    for (const [key, w] of Object.entries(weights)) {
+      r -= w;
+      if (r <= 0) return key;
+    }
+    return Object.keys(weights)[0];
+  }
+  __name(pickWeighted, "pickWeighted");
+  function initWeather() {
+    return pickWeighted(CONSTANTS.SEASON_BASE_WEATHER[seasonFor(CONSTANTS.START_MONTH)]);
+  }
+  __name(initWeather, "initWeather");
+  function advanceWeather() {
+    const seasonWeights = CONSTANTS.SEASON_BASE_WEATHER[seasonFor(S.month)];
+    let next = pickWeighted(CONSTANTS.WEATHER_TRANSITION[S.weather]);
+    if (seasonWeights[next] === 0) {
+      next = "overcast";
+    }
+    S.weather = next;
+  }
+  __name(advanceWeather, "advanceWeather");
   const cart = startingCart();
   const S = {
     seed,
@@ -1426,7 +1550,8 @@ function createGame(seed = null) {
     usedWeight: 0,
     credit: { hbc: 0, metis: 0, nwmp: 0, mission: 0 },
     perishable: {},
-    preDeparture: false
+    preDeparture: false,
+    weather: initWeather()
   };
   function checkGameOver() {
     if (S.over) return;
@@ -1561,6 +1686,11 @@ function createGame(seed = null) {
     return pickEventForTerrain(NODES[S.node]?.terrain || "plains", rand);
   }
   __name(pickEvent, "pickEvent");
+  function pickEventWithChance(chance) {
+    if (rand() > chance) return null;
+    return pickEventForTerrain(NODES[S.node]?.terrain || "plains", rand);
+  }
+  __name(pickEventWithChance, "pickEventWithChance");
   function calcScore() {
     if (!S.won) return 0;
     const tradeUnits = cart.filter((i) => i.type === "trade" && i.count > 0).reduce((s, i) => s + i.count, 0);
@@ -1583,19 +1713,23 @@ function createGame(seed = null) {
   function travelOneDay2() {
     if (S.over || S.pendingSettlement) return stepLog;
     const nextDist = NODES[S.node + 1]?.dist || 1;
-    S.food = Math.max(0, Math.round((S.food - CONSTANTS.DAILY_FOOD) * 10) / 10);
+    advanceWeather();
+    const weatherFood = CONSTANTS.WEATHER_FOOD_MOD[S.weather] || 0;
+    S.food = Math.max(0, Math.round((S.food - CONSTANTS.DAILY_FOOD - weatherFood) * 10) / 10);
     S.segmentDay++;
     S.travelDaysWithoutRest++;
     advance();
     const wearChance = { plains: 0.1, river_valley: 0.15, wooded: 0.2 };
-    if (rand() < (wearChance[NODES[S.node].terrain] || 0.2)) S.wear++;
+    const weatherWearMult = CONSTANTS.WEATHER_WEAR_MULT[S.weather] || 1;
+    if (rand() < (wearChance[NODES[S.node].terrain] || 0.2) * weatherWearMult) S.wear++;
     if (S.wear >= 4 && rand() < 0.35) {
       S.pendingEvent = getSquealEvent();
       return stepLog;
     }
     if (S.travelDaysWithoutRest >= 5 && S.crew !== "exhausted") S.crew = "exhausted";
     else if (S.travelDaysWithoutRest >= 3 && S.crew === "rested") S.crew = "tired";
-    S.morale = Math.max(0, Math.min(100, S.morale - 2));
+    const weatherMorale = CONSTANTS.WEATHER_MORALE_MOD[S.weather] || 0;
+    S.morale = Math.max(0, Math.min(100, S.morale - 2 + weatherMorale));
     if (S.day % CONSTANTS.DAYS_PER_WEEK === 0 && !S.pendingSettlement) {
       S.crew = "rested";
       S.wear = Math.max(0, S.wear - 1);
@@ -1630,7 +1764,8 @@ function createGame(seed = null) {
       if (n.type !== "river" && S.node > 1) S.pendingSettlement = n;
       return stepLog;
     }
-    const ev = pickEvent();
+    const weatherEventMod = CONSTANTS.WEATHER_EVENT_MOD[S.weather] || 0;
+    const ev = pickEventWithChance(CONSTANTS.EVENT_CHANCE + weatherEventMod);
     if (ev) {
       S.pendingEvent = ev;
       return stepLog;
@@ -1668,7 +1803,8 @@ function createGame(seed = null) {
     S.travelDaysWithoutRest = 0;
     if (S.crew === "exhausted") S.crew = "tired";
     else if (S.crew === "tired") S.crew = "rested";
-    S.morale = Math.min(100, S.morale + 15);
+    const campMorale = CONSTANTS.WEATHER_CAMP_MORALE[S.weather] ?? 15;
+    S.morale = Math.min(100, S.morale + campMorale);
     advance();
     checkGameOver();
   }
@@ -1740,7 +1876,8 @@ function createGame(seed = null) {
         pendingSettlement: S.pendingSettlement,
         usedWeight: totalWeight(cart),
         capacity: S.capacity,
-        preDeparture: S.preDeparture
+        preDeparture: S.preDeparture,
+        weather: S.weather
       };
     },
     getCart() {
@@ -2302,6 +2439,12 @@ function renderStatusBar(state) {
   foodEl.className = "stat-value" + (state.food <= 5 ? " food-low" : "");
   wearEl.textContent = String(state.wear);
   wearEl.className = "stat-value" + (state.wear >= 4 ? " wear-high" : "");
+  const weatherEl = document.getElementById("s-weather");
+  if (weatherEl) {
+    const w = state.weather || "clear";
+    weatherEl.textContent = CONSTANTS.WEATHER_LABELS[w] || "\u2600 Clear";
+    weatherEl.className = "stat-value weather-" + w;
+  }
   if (!window.__METIS_PENDING_RESULT__) window.__METIS_PENDING_RESULT__ = null;
   renderTravelLinesView(state, window._metisGame, window.__METIS_PENDING_RESULT__);
 }
@@ -2535,7 +2678,32 @@ var TRAVEL_FRAGMENTS = {
       "Every mile is a fight. The oxen strain, the cart groans, the crew is spent.",
       "The prairie offers no mercy. The exhausted crew leans into the work, step by step.",
       "The cart barely moves. The oxen are done, but the trail does not care."
-    ]
+    ],
+    weather: {
+      rain: [
+        "Rain drums on the canvas tarp. The ox leans into the traces, steady despite the water streaming from its back.",
+        "The prairie smells of wet earth and sage. Puddles form in the cart ruts, and the oxen splash through them.",
+        "Grey sheets of rain sweep across the plains. The crew pulls their coats tight and keeps moving.",
+        "The cart wheels sink soft into the damp ground. Each step costs more than the last, but the rain will pass."
+      ],
+      storm: [
+        "Thunder cracks overhead. The oxen flinch at every flash, but the traces hold and the cart rolls on.",
+        "Lightning stitches the horizon. The crew shields their eyes and drives forward into the teeth of the storm.",
+        "The wind hits like a wall. The canvas tarp strains at its ties, and the cart groans against the gusts.",
+        "Hailstones bounce off the cart bed. The oxen bellow but press on \u2014 there is no shelter on the open prairie."
+      ],
+      snow: [
+        "Snow falls soft and silent, blanketing the prairie white. The oxen's breath rises in plumes.",
+        "The cart ruts fill with snow. The trail ahead is a white void \u2014 the oxen pick their way carefully.",
+        "A bitter wind drives snow into every gap in clothing. The crew huddles close to the cart for warmth.",
+        "The prairie is a white wasteland. Snowflakes sting the eyes, but the oxen know the way."
+      ],
+      overcast: [
+        "A grey sky hangs low over the prairie. The air is thick and still, and the trail stretches ahead under flat light.",
+        "No sun, no shadow \u2014 just the endless grey prairie under a featureless sky. The oxen walk as if they sense weather coming.",
+        "The overcast dulls the colors of the prairie. Everything is grey-green and muted, and the air smells of waiting."
+      ]
+    }
   },
   river_valley: {
     rested: [
@@ -2555,7 +2723,31 @@ var TRAVEL_FRAGMENTS = {
       "The cart tilts on the river stones. The exhausted crew pushes from the water.",
       "The ford takes everything. The oxen are spent, the crew is soaked, but the cart makes it across.",
       "The river does not wait. The exhausted crew drives through, one step at a time."
-    ]
+    ],
+    weather: {
+      rain: [
+        "Rain swells the river. Brown water laps at the trail bank, and the ford ahead looks mean.",
+        "The river valley is shrouded in drizzle. The oxen's hooves squelch in the muddy bank trail.",
+        "Three days of rain have turned the valley trail into a stream. The cart wheels spin in the muck.",
+        "Rain drips from every leaf and branch. The river runs high and brown beside the trail."
+      ],
+      storm: [
+        "Thunder echoes off the valley walls. Lightning flashes above the river, and the oxen pull at the traces.",
+        "Storm water pours down the valley sides. The trail becomes a stream, and the cart wheels slide.",
+        "The river roars in the storm. Crossing today would be suicide \u2014 the crew watches from the bank.",
+        "Wind howls through the valley. The canvas cover snaps like a whip, and the cart creaks with every gust."
+      ],
+      snow: [
+        "Snow dusts the riverbanks white. The water runs black through the icy banks, steam rising where warm meets cold.",
+        "The valley holds the cold. Snow falls between the trees, and the river's edge crunches underfoot.",
+        "A hard frost grips the valley. The oxen's breath freezes on their muzzles, and the cart wheels ring on the frozen ground."
+      ],
+      overcast: [
+        "The valley is grey and still under a flat sky. The river murmurs below, indifferent to the weather.",
+        "Mist hangs in the river valley. The far bank is a shadow, and the oxen walk with uncertain steps.",
+        "Overcast and close. The valley walls seem to press in, and the air smells of wet stone and cold water."
+      ]
+    }
   },
   wooded: {
     rested: [
@@ -2575,7 +2767,30 @@ var TRAVEL_FRAGMENTS = {
       "The trail through the woods is punishing. Every root, every branch, every rut.",
       "The oxen can barely pull. The exhausted crew pushes from behind in the dark woods.",
       "The woods offer no rest. The exhausted crew drives forward through the trees."
-    ]
+    ],
+    weather: {
+      rain: [
+        "Rain finds every gap in the canopy. The trail underfoot turns to red mud between the roots.",
+        "The woods drip and splash. Water runs down every trunk, and the cart steams in the damp air.",
+        "Rain drums on the leaves above. The crew is dry enough beneath the canopy, but the trail is treacherous.",
+        "The forest floor is sodden. The oxen slog through puddles, and the cart wheels cut deep ruts in the mud."
+      ],
+      storm: [
+        "Thunder shakes the treetops. A branch cracks overhead \u2014 the oxen flinch but the crew presses on.",
+        "Lightning splits a dead tree at the trail's edge. The crew steers clear of the burning stump.",
+        "The wind tears at the canopy. Branches and leaves rain down, and the cart pushes through the debris.",
+        "Rain and wind together. The woods glow with each lightning flash, and the oxen pick their way through the dark."
+      ],
+      snow: [
+        "Snow sifts through the bare branches. The woods are quiet \u2014 too quiet \u2014 and the cart leaves the only tracks.",
+        "The trees hold the snow. Every branch is white, and the trail is a tunnel of grey and silver.",
+        "Cold seeps through the woods. The oxen's breath fogs the air, and the cart's metal parts burn to touch."
+      ],
+      overcast: [
+        "Grey light filters through the trees. The woods are dim and close, and every sound seems muffled.",
+        "The forest is still under a flat sky. No birds sing \u2014 only the creak of the cart and the oxen's steady tread."
+      ]
+    }
   },
   uplands: {
     rested: [
@@ -2595,13 +2810,35 @@ var TRAVEL_FRAGMENTS = {
       "The wind knocks them back. The oxen are done, but the ridge demands more.",
       "The high ground offers no mercy. The exhausted crew pushes through the wind.",
       "The cart barely crests the hill. The crew collapses on the far side."
-    ]
+    ],
+    weather: {
+      rain: [
+        "Rain on the ridge is cold and sharp. The oxen slip on the wet grass, and the crew braces the cart from behind.",
+        "The uplands are a grey wash of rain and mist. The trail ahead vanishes into the low clouds.",
+        "Water streams down the ridge. The cart wheels slide on the sodden turf, and the oxen fight for footing."
+      ],
+      storm: [
+        "Lightning finds the ridge. The crew drops low and waits \u2014 the cart is the highest point for miles.",
+        "Thunder cracks so close the air tastes of metal. The oxen refuse to move until the worst passes.",
+        "The storm hits the ridge like a hammer. Wind, rain, and hail \u2014 the crew huddles behind the cart and waits."
+      ],
+      snow: [
+        "Snow on the ridge is blinding. The white ground and white sky merge, and the oxen walk by memory.",
+        "The wind drives snow horizontally across the uplands. The crew can barely see the trail ahead.",
+        "A crust of ice over snow. The oxen break through with every step, and the cart lurches on the frozen ground."
+      ],
+      overcast: [
+        "The ridge is grey and featureless under a flat sky. No sun, no shadow \u2014 just the endless upland.",
+        "Low clouds sit on the uplands like a blanket. The trail ahead disappears into the mist."
+      ]
+    }
   }
 };
 function buildTravelNarrative(prev, state, game) {
   const node = game.getCurrentNode();
   const terrain = node?.terrain || "plains";
   const crew = state.crew;
+  const weather = state.weather || "clear";
   if (state.node > prev.node) {
     const next = game.getNextNode();
     const arrival = next ? `You arrive at ${node.name}. Ahead: ${next.name}.` : `You arrive at ${node.name}.`;
@@ -2611,8 +2848,14 @@ function buildTravelNarrative(prev, state, game) {
     return "The journey ends here.";
   }
   const terrainFragments = TRAVEL_FRAGMENTS[terrain] || TRAVEL_FRAGMENTS.plains;
-  const crewFragments = terrainFragments[crew] || terrainFragments.rested;
-  const fragment = crewFragments[Math.floor(Math.random() * crewFragments.length)];
+  let fragment;
+  if (weather !== "clear" && terrainFragments.weather && terrainFragments.weather[weather]) {
+    const weatherPool = terrainFragments.weather[weather];
+    fragment = weatherPool[Math.floor(Math.random() * weatherPool.length)];
+  } else {
+    const crewFragments = terrainFragments[crew] || terrainFragments.rested;
+    fragment = crewFragments[Math.floor(Math.random() * crewFragments.length)];
+  }
   const mech = [];
   if (state.wear > prev.wear) mech.push("Cart wear increases.");
   if (state.crew !== prev.crew) mech.push(`Crew is ${state.crew}.`);
