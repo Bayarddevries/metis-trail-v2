@@ -174,10 +174,10 @@ function travelOneDay() {
 const TRAVEL_FRAGMENTS = {
   plains: {
     rested: [
-      'The prairie stretches flat and endless. The ox leans into the traces, steady as the sunrise.',
-      'A warm wind pushes at your back. The grass ripples like a green sea beneath the sky.',
-      'The cart rolls smooth over open ground. Hawks circle high above, riding thermals.',
-      'Miles of unbroken prairie. The ox knows the rhythm — step, pull, breathe, repeat.',
+      'Flat prairie, no trees, no hills. Just the ox and the cart and the sky.',
+      'Wind at your back. Good day for miles.',
+      'The ox knows the rhythm. Step, pull, breathe. Step, pull, breathe.',
+      'Ruts deep enough to guide the wheels. Someone came through here yesterday.',
     ],
     tired: [
       'The ox slows. Each rut in the trail costs more energy than the last.',
@@ -563,7 +563,7 @@ function showEvent(game) {
       const work = ev.source.work || '';
       const year = ev.source.year || '';
       const attrib = [author, work, year].filter(Boolean).join(', ');
-      sourceEl.innerHTML = `<span class="src-quote">"${quote}"</span>` + (attrib ? `<span class="src-attrib">— ${attrib}</span>` : '');
+      sourceEl.innerHTML = `<span class="src-quote">"${quote}"</span>` + (attrib ? `<span class="src-attrib">— ${attrib}</span>` : '') + (ev.source.context ? `<span class="src-context">${ev.source.context}</span>` : '');
       sourceEl.style.display = 'block';
     } else {
       sourceEl.style.display = 'none';
@@ -1169,8 +1169,8 @@ const CAMP_FLAVOR = {
     ],
     low: [
       'The prairie offers little today. A few bitter roots and not much else. The foraging was lean.',
-      'You find almost nothing edible. The land is stingy, and the crew goes to bed hungry.',
-      'A wasted afternoon. The forage returns nearly empty-handed, and the rations remain thin.',
+      'You find almost nothing edible. A handful of bitter roots. The crew goes to bed hungry.',
+      'A wasted afternoon. The forage comes back nearly empty-handed, and the rations remain thin.',
     ],
   },
   hunt: {
@@ -1196,7 +1196,7 @@ const CAMP_FLAVOR = {
       'The scout spots a shortcut through a coulée that saves half a day. The trail ahead looks favorable.',
     ],
     low: [
-      'The scout returns with nothing useful. The trail ahead remains a mystery.',
+      'The scout comes back with nothing. The trail ahead remains a mystery.',
       'The scouting party finds no clear path. You will have to feel your way forward tomorrow.',
       'The scout returns empty-handed. No shortcuts, no intelligence — just more trail.',
     ],
@@ -1219,8 +1219,8 @@ const CAMP_FLAVOR = {
   },
   dance: {
     high: [
-      'The fiddle starts and the crew dances until the fire burns low. Laughter echoes across the prairie. Tomorrow feels lighter.',
-      'A night of song and dance. The old tunes from Red River ring out, and for a moment the trail feels like home.',
+      'The fiddle starts and the crew dances until the fire burns low. Someone\'s boots throw sparks. A Red River jig, then a reel. Nobody talks about tomorrow.',
+      'A night of song and dance. The old tunes from Red River ring out across the dark.',
       'The dancing is spirited and the stories are long. The crew goes to bed smiling.',
     ],
     low: [
@@ -1228,7 +1228,7 @@ const CAMP_FLAVOR = {
       'The crew is too tired for much revelry. A few tunes around the fire, then early sleep.',
     ],
     mid: [
-      'Some dancing, some songs. The crew enjoys themselves well enough. Morale improves.',
+      'A few songs. Some half-hearted dancing. Nobody\'s heart\'s in it, but the fire\'s warm and the night passes.',
       'A decent evening by the fire. Not the best night, but the spirits are lifted.',
     ],
   },
@@ -1433,7 +1433,7 @@ function showEnd(game) {
       const work = quoteData.work || '';
       const year = quoteData.year || '';
       const attrib = [author, work, year].filter(Boolean).join(', ');
-      sourceEl.innerHTML = `<span class="src-quote">"${quoteData.quote}"</span>` + (attrib ? `<span class="src-attrib">— ${attrib}</span>` : '');
+      sourceEl.innerHTML = `<span class="src-quote">"${quoteData.quote}"</span>` + (attrib ? `<span class="src-attrib">— ${attrib}</span>` : '') + (quoteData.context ? `<span class="src-context">${quoteData.context}</span>` : '');
       sourceEl.style.display = 'block';
     } else {
       sourceEl.style.display = 'none';

@@ -648,10 +648,9 @@ var SOURCES = {
   },
   LACOMBE_BEAR: {
     quote: "The bears along the Carlton were a constant threat to unprotected provisions. A cinnamon bear rooting through the bread sack at dawn was a sight that needed no introduction.",
-    author: "Harry Baker Brehaut",
-    work: "The Red River Cart and Trails",
-    year: 1972,
-    url: "https://www.mhs.mb.ca/docs/transactions/3/redrivercart.shtml"
+    author: "Father Albert Lacombe",
+    work: "Missionary Journals",
+    year: 1878
   },
   MACLEOD_NWMP: {
     quote: "The mounted police established posts along the trail to enforce Ottawa's regulations. Duty was collected in cash or goods, and every cart was subject to inspection.",
@@ -790,7 +789,8 @@ var SOURCES = {
     author: "William G. Fonseca",
     work: "On the St. Paul Trail in the Sixties",
     year: 1900,
-    url: "https://www.mhs.mb.ca/docs/transactions/3/stpaultrail.shtml"
+    url: "https://www.mhs.mb.ca/docs/transactions/3/stpaultrail.shtml",
+    context: '"Half-breed" is period terminology Fonseca used to describe M\xE9tis people. The term is offensive today but appears here in its original historical context.'
   },
   BREHAUT_AMMO: {
     quote: "Ammunition was precious on the trail. Traders carried spare shot and ball, and a traveller who found a cache of either considered themselves fortunate beyond measure.",
@@ -918,8 +918,8 @@ var EVENT_POOLS = {
     },
     {
       id: "plains_wind",
-      text: "A hot wind pushes at your back, carrying the smell of sun-baked grass and distant smoke. The prairie grass ripples in long waves like a green sea, and the oxen lean into their traces with new energy. Your cart groans but the wheels turn faster \u2014 the wind is a gift, but the prairie gives nothing without a price.",
-      source: getSource("LACOMBE_JOURNALS"),
+      text: "A hot wind at your back. The grass goes flat in waves and the oxen lean in, pulling harder than they did at dawn. Cart lurches forward \u2014 a free mile, maybe two. But the wind's been pushing smoke all morning and smoke means fire somewhere west.",
+      source: getSource("LACOMBE_WIND"),
       choices: [
         { text: "Run with it", dc: 10, ok: "You make excellent time.", bad: "A hidden rut jolts the cart. Repairs are needed after crossing.", wear: 1, time: -1 },
         { text: "Hunker down", dc: null, always: "You wrap the load and keep moving. No rain comes.", alwaysWear: 0 }
@@ -936,7 +936,7 @@ var EVENT_POOLS = {
     },
     {
       id: "plains_night_camp",
-      text: "Moonlight spills across the prairie, turning the grass to silver. Somewhere nearby a fiddle begins a Red River jig, the notes carrying clean and sharp through the still air. Voices rise in song \u2014 French and Michif, old tunes from the Red River settlements. The crew listens, and for a moment the trail feels like home.",
+      text: "Moon on the grass. A fiddle starts up somewhere down the line \u2014 a Red River jig, sharp enough to cut. French and Michif voices carry across the dark. One of the crew starts humming along.",
       source: getSource("FONSECA_DANCE"),
       choices: [
         { text: "Dance until your boots throw dust", dc: 10, ok: "Laughter drowns out the dark.", bad: "You strain a shoulder and sleep poorly.", morale: 12, addsRep: { key: "metis", delta: 1 } },
@@ -970,7 +970,7 @@ var EVENT_POOLS = {
     },
     {
       id: "plains_buffalo_hunt_camp",
-      text: "You crest a rise and the world opens below \u2014 a massive buffalo hunt camp spreads across the valley, hundreds of carts in a great circle. The air is thick with dust and the sound of running horses. Four hundred mounted huntsmen await the signal, and the earth trembles beneath the hooves of the herd beyond.",
+      text: "Cart crests the rise and you pull the ox up short. Below: a hundred carts in a circle, horses everywhere, dust so thick you can taste it. Four hundred hunters sitting quiet, waiting for the sign. Beyond them the herd \u2014 you feel the hooves through the ground before you hear them.",
       source: getSource("GOULET_HUNT"),
       choices: [
         { text: "Join the hunt", dc: 12, ok: "The hunt captain nods. You take a share of the meat.", bad: "You are slow to position. You earn only a strip.", food: 8, addsRep: { key: "metis", delta: 2 }, itemBonus: { name: "Ammunition Belt", dcBonus: 3 } },
@@ -1043,7 +1043,7 @@ var EVENT_POOLS = {
     },
     {
       id: "plains_hail",
-      text: "The sky turns green and the air goes still \u2014 then the hail comes. Stones the size of walnuts hammer the canvas cover and bounce off the cart bed. The oxen bellow and strain at their traces. There is no shelter on the open prairie, only the cart and whatever you can do to protect it.",
+      text: "Green sky. Dead still. Then the hail \u2014 walnut stones hammering the canvas, bouncing off the cart bed. The oxen bellow and pull sideways. On the open prairie the cart is all you've got.",
       source: getSource("LACOMBE_HAIL"),
       choices: [
         { text: "Cover the canvas and ride it out", dc: 10, ok: "The wagon top holds. The oxen are skittish but unhurt.", bad: "Canvas tears and two rounds of cheese are spoiled.", food: -2, morale: -4, itemBonus: { name: "Canvas Tarp", dcBonus: 4 } },
@@ -1124,7 +1124,7 @@ var EVENT_POOLS = {
     {
       id: "river_valley_sudden_rain",
       text: "The heavy cloud bursts without warning. The trail turns to a slurry and the cart sinks to the naves \u2014 the wheels disappearing into mud that grabs and holds. Sudden storms of rain turned the valley trail into a bog that could trap a loaded cart for hours.",
-      source: getSource("LACOMBE_HAIL"),
+      source: getSource("FONSECA_RAIN"),
       choices: [
         { text: "Unhitch and pole the cart through", dc: 12, ok: "The oxen respond; you keep moving, soaked.", bad: "A wheel hub sinks axle-deep.", wear: 1, morale: -4, itemBonus: { name: "Rope (50ft)", dcBonus: 3 } },
         { text: "Wait it out on dry ground", dc: null, always: "Two hours of rain. The mud thickens.", time: 1 }
@@ -1185,7 +1185,7 @@ var EVENT_POOLS = {
     },
     {
       id: "river_cholera_camp",
-      text: "A member of your crew wakes shaking and cold \u2014 by midday they cannot stand. The river water was contaminated, a waterborne bacteria that thrived in the stagnant water of common camping grounds. The trail has seen this before, and it is never gentle.",
+      text: "One of your crew wakes shaking. By noon they can't stand. The river water \u2014 you knew better, but the casks were low. The trail's seen this before. It doesn't get easier.",
       source: getSource("HBC_DISEASE"),
       choices: [
         { text: "Use the medicine pouch and rest the day", dc: 14, ok: "The crisis passes. One day lost, but the crew recovers.", bad: "The fever breaks but the crew is weak for days.", crew: "tired", morale: -8, consumesItem: "Medicine Pouch" },
@@ -1194,7 +1194,7 @@ var EVENT_POOLS = {
     },
     {
       id: "river_mosquito_camp",
-      text: "The mosquitoes rise in clouds from the riverbank \u2014 a living fog that descends on man and beast alike. The oxen stampede; the cooking fire smoulders and dies. Amidst a cloud of mosquitoes, sand flies, and all prairie annoyances, including mud, the cart trains made their way westward.",
+      text: "Mosquitoes rise from the riverbank in a cloud \u2014 you breathe them, they're in your eyes. The oxen stampede. The fire dies under the smoke. Sand flies after. Mud everywhere. The carts keep moving west because stopping is worse.",
       source: getSource("FONSECA_MOSQUITOES"),
       choices: [
         { text: "Move camp to high ground before dark", dc: 9, ok: "The move is miserable but the night is quieter.", bad: "A wheel is twisted in the dark.", wear: 1 },
@@ -1423,7 +1423,7 @@ var EVENT_POOLS = {
     },
     {
       id: "upland_bison_herd",
-      text: "The trail vanishes beneath a sea of brown backs. A buffalo herd \u2014 thousands strong \u2014 blocks the path ahead, the earth trembling beneath their hooves. The oxen low and pull at their traces, eyes rolling white. You cannot go around; the herd stretches to the horizon on both sides.",
+      text: "The trail's gone. Buffalo everywhere \u2014 thousands, maybe ten thousand, brown humps to the horizon on both sides. The ground shakes. Your ox won't go forward, eyes white, pulling sideways.",
       source: getSource("GOULET_HUNT"),
       choices: [
         { text: "Wait for the herd to pass", dc: null, always: "You make camp and wait. The herd takes half a day to pass. The ground is churned to dust.", time: 1 },
@@ -1433,7 +1433,7 @@ var EVENT_POOLS = {
     },
     {
       id: "upland_storm_shelter",
-      text: "The sky turns green and the air goes still \u2014 then the hail comes. Stones the size of walnuts hammer the canvas cover. Lightning finds the highest point, and the ridge offers no shelter. The oxen bellow and strain against their traces.",
+      text: "Green sky. Then the hail starts \u2014 stones hammering the canvas. Lightning hits the ridge above. No up there, no cover here. The oxen bellow and sit down.",
       source: getSource("LACOMBE_HAIL"),
       choices: [
         { text: "Hobble the oxen and wait it out", dc: null, always: "You huddle under the cart. The storm passes in twenty minutes. Everyone is soaked but alive.", morale: -4 },
@@ -2599,7 +2599,7 @@ var ENDINGS = {
     id: "victory",
     title: "Fort Edmonton at Last!",
     narrative: {
-      high: "You crest the final ridge and the palisade walls of Fort Edmonton rise from the riverbank below. Your cart has held. Your crew stands strong behind you. The trade goods in your load \u2014 furs, hides, crafted wares \u2014 will fetch fair prices at the post. You made the Carlton Trail in good order, and the West will remember your name.",
+      high: "The palisade walls at Edmonton. Your cart made it \u2014 axle held, wheels still on. The crew's behind you, hollow-eyed but standing. You've still got furs in the cart. They'll fetch something.",
       humble: "You reach Fort Edmonton with nothing left to give but your word. The cart groans as you roll through the gate \u2014 held together by rope and stubbornness. The crew is hollow-eyed but standing. You have no trade goods to sell, no extra food to spare. But you arrived. Against the prairie, the weather, and every broken trail between Garry and Edmonton, you arrived."
     },
     quote: getSource("FORT_EDMONTON"),
@@ -2620,7 +2620,7 @@ var ENDINGS = {
     id: "starvation",
     title: "Gone to Hunger",
     narrative: {
-      high: "The food ran out on the open prairie. No amount of foraging could stretch the rations far enough. The crew weakened day by day until the oxen could no longer pull the loaded cart. You were forced to camp and wait for rescue that might never come. The Carlton Trail gives nothing for free.",
+      high: "Food's gone. Three days of foraging turned up nothing but bitter roots. The oxen can't pull anymore. You make camp and wait. The nearest post is days away on foot, and you're not walking.",
       humble: "You count the last of the pemmican and divide it into portions too small to matter. Three days later, there is nothing. The crew sits by the cart, too weak to walk. The prairie stretches in every direction, indifferent to your hunger. The trail has claimed another party."
     },
     quote: getSource("PEMMICAN_FAMINE"),
@@ -2640,8 +2640,8 @@ var ENDINGS = {
     id: "winter",
     title: "Caught by Winter",
     narrative: {
-      high: "The first snow falls soft and silent, covering the trail ahead. You know what it means \u2014 the Carlton Trail will soon disappear under deep snow, impassable until spring. Edmonton is still days away. The cold seeps into the cart, into the crew, into the oxen. This is as far as you go.",
-      humble: "October winds carry the first frost, and the sky turns the color of old iron. Winter is coming, and you are still on the open prairie between posts. The trail ahead will soon be buried. There is no outrunning the season. You make camp for the last time, knowing the journey ends here."
+      high: "First snow. Soft enough, but you know what it means. The trail will be gone by morning \u2014 snow-filled ruts, white ground, no way to follow the track. Edmonton's still four days west. The cold goes right through the cart boards. You're done.",
+      humble: "October winds carry the first frost, and the sky turns the color of old iron. Winter is coming, and you are still on the open prairie between posts. The trail ahead will soon be buried. You make camp for the last time, knowing the journey ends here."
     },
     quote: getSource("WINTER_TRAIL"),
     tip: "Tip: Speed matters. Every day on the trail brings winter closer. Don't linger too long at settlements \u2014 rest and repair quickly, then move. The trail from Fort Garry to Fort Edmonton takes roughly 35-50 days. Leave early and keep moving."
@@ -2650,7 +2650,7 @@ var ENDINGS = {
     id: "abandoned",
     title: "The Crew Has Had Enough",
     narrative: {
-      high: "The crew stops at the next rise and refuses to go further. Too many broken wheels, too many nights without food, too many miles of empty prairie. The morale that held them together has finally broken. You cannot force them. The trail before you remains unrolled, but the will to follow it is gone.",
+      high: "The crew stops at the rise. Won't go further. Three broken wheels in two weeks. Six nights without enough food. One of them sits down in the grass and stares. The others follow. You can't force them. The trail goes on. They don't.",
       humble: "One morning, the crew simply will not rise. They sit by the dead fire and stare at the horizon. No amount of encouragement can move them. The journey has ground them down to nothing. You are alone on the Carlton Trail with a cart full of goods and no one willing to pull it."
     },
     quote: getSource("MORALE"),
@@ -18060,10 +18060,10 @@ __name(travelOneDay, "travelOneDay");
 var TRAVEL_FRAGMENTS = {
   plains: {
     rested: [
-      "The prairie stretches flat and endless. The ox leans into the traces, steady as the sunrise.",
-      "A warm wind pushes at your back. The grass ripples like a green sea beneath the sky.",
-      "The cart rolls smooth over open ground. Hawks circle high above, riding thermals.",
-      "Miles of unbroken prairie. The ox knows the rhythm \u2014 step, pull, breathe, repeat."
+      "Flat prairie, no trees, no hills. Just the ox and the cart and the sky.",
+      "Wind at your back. Good day for miles.",
+      "The ox knows the rhythm. Step, pull, breathe. Step, pull, breathe.",
+      "Ruts deep enough to guide the wheels. Someone came through here yesterday."
     ],
     tired: [
       "The ox slows. Each rut in the trail costs more energy than the last.",
@@ -18397,7 +18397,7 @@ function showEvent(game) {
       const work = ev.source.work || "";
       const year = ev.source.year || "";
       const attrib = [author, work, year].filter(Boolean).join(", ");
-      sourceEl.innerHTML = `<span class="src-quote">"${quote}"</span>` + (attrib ? `<span class="src-attrib">\u2014 ${attrib}</span>` : "");
+      sourceEl.innerHTML = `<span class="src-quote">"${quote}"</span>` + (attrib ? `<span class="src-attrib">\u2014 ${attrib}</span>` : "") + (ev.source.context ? `<span class="src-context">${ev.source.context}</span>` : "");
       sourceEl.style.display = "block";
     } else {
       sourceEl.style.display = "none";
@@ -18941,8 +18941,8 @@ var CAMP_FLAVOR = {
     ],
     low: [
       "The prairie offers little today. A few bitter roots and not much else. The foraging was lean.",
-      "You find almost nothing edible. The land is stingy, and the crew goes to bed hungry.",
-      "A wasted afternoon. The forage returns nearly empty-handed, and the rations remain thin."
+      "You find almost nothing edible. A handful of bitter roots. The crew goes to bed hungry.",
+      "A wasted afternoon. The forage comes back nearly empty-handed, and the rations remain thin."
     ]
   },
   hunt: {
@@ -18968,7 +18968,7 @@ var CAMP_FLAVOR = {
       "The scout spots a shortcut through a coul\xE9e that saves half a day. The trail ahead looks favorable."
     ],
     low: [
-      "The scout returns with nothing useful. The trail ahead remains a mystery.",
+      "The scout comes back with nothing. The trail ahead remains a mystery.",
       "The scouting party finds no clear path. You will have to feel your way forward tomorrow.",
       "The scout returns empty-handed. No shortcuts, no intelligence \u2014 just more trail."
     ],
@@ -18991,8 +18991,8 @@ var CAMP_FLAVOR = {
   },
   dance: {
     high: [
-      "The fiddle starts and the crew dances until the fire burns low. Laughter echoes across the prairie. Tomorrow feels lighter.",
-      "A night of song and dance. The old tunes from Red River ring out, and for a moment the trail feels like home.",
+      "The fiddle starts and the crew dances until the fire burns low. Someone's boots throw sparks. A Red River jig, then a reel. Nobody talks about tomorrow.",
+      "A night of song and dance. The old tunes from Red River ring out across the dark.",
       "The dancing is spirited and the stories are long. The crew goes to bed smiling."
     ],
     low: [
@@ -19000,7 +19000,7 @@ var CAMP_FLAVOR = {
       "The crew is too tired for much revelry. A few tunes around the fire, then early sleep."
     ],
     mid: [
-      "Some dancing, some songs. The crew enjoys themselves well enough. Morale improves.",
+      "A few songs. Some half-hearted dancing. Nobody's heart's in it, but the fire's warm and the night passes.",
       "A decent evening by the fire. Not the best night, but the spirits are lifted."
     ]
   },
@@ -19195,7 +19195,7 @@ function showEnd(game) {
       const work = quoteData.work || "";
       const year = quoteData.year || "";
       const attrib = [author, work, year].filter(Boolean).join(", ");
-      sourceEl.innerHTML = `<span class="src-quote">"${quoteData.quote}"</span>` + (attrib ? `<span class="src-attrib">\u2014 ${attrib}</span>` : "");
+      sourceEl.innerHTML = `<span class="src-quote">"${quoteData.quote}"</span>` + (attrib ? `<span class="src-attrib">\u2014 ${attrib}</span>` : "") + (quoteData.context ? `<span class="src-context">${quoteData.context}</span>` : "");
       sourceEl.style.display = "block";
     } else {
       sourceEl.style.display = "none";

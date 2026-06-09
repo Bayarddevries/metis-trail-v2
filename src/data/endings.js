@@ -5,7 +5,7 @@ export const ENDINGS = {
     id: 'victory',
     title: 'Fort Edmonton at Last!',
     narrative: {
-      high: "You crest the final ridge and the palisade walls of Fort Edmonton rise from the riverbank below. Your cart has held. Your crew stands strong behind you. The trade goods in your load — furs, hides, crafted wares — will fetch fair prices at the post. You made the Carlton Trail in good order, and the West will remember your name.",
+      high: "The palisade walls at Edmonton. Your cart made it — axle held, wheels still on. The crew's behind you, hollow-eyed but standing. You've still got furs in the cart. They'll fetch something.",
       humble: "You reach Fort Edmonton with nothing left to give but your word. The cart groans as you roll through the gate — held together by rope and stubbornness. The crew is hollow-eyed but standing. You have no trade goods to sell, no extra food to spare. But you arrived. Against the prairie, the weather, and every broken trail between Garry and Edmonton, you arrived.",
     },
     quote: getSource('FORT_EDMONTON'),
@@ -28,7 +28,7 @@ export const ENDINGS = {
     id: 'starvation',
     title: 'Gone to Hunger',
     narrative: {
-      high: "The food ran out on the open prairie. No amount of foraging could stretch the rations far enough. The crew weakened day by day until the oxen could no longer pull the loaded cart. You were forced to camp and wait for rescue that might never come. The Carlton Trail gives nothing for free.",
+      high: "Food's gone. Three days of foraging turned up nothing but bitter roots. The oxen can't pull anymore. You make camp and wait. The nearest post is days away on foot, and you're not walking.",
       humble: "You count the last of the pemmican and divide it into portions too small to matter. Three days later, there is nothing. The crew sits by the cart, too weak to walk. The prairie stretches in every direction, indifferent to your hunger. The trail has claimed another party.",
     },
     quote: getSource('PEMMICAN_FAMINE'),
@@ -50,8 +50,8 @@ export const ENDINGS = {
     id: 'winter',
     title: 'Caught by Winter',
     narrative: {
-      high: "The first snow falls soft and silent, covering the trail ahead. You know what it means — the Carlton Trail will soon disappear under deep snow, impassable until spring. Edmonton is still days away. The cold seeps into the cart, into the crew, into the oxen. This is as far as you go.",
-      humble: "October winds carry the first frost, and the sky turns the color of old iron. Winter is coming, and you are still on the open prairie between posts. The trail ahead will soon be buried. There is no outrunning the season. You make camp for the last time, knowing the journey ends here.",
+      high: "First snow. Soft enough, but you know what it means. The trail will be gone by morning — snow-filled ruts, white ground, no way to follow the track. Edmonton's still four days west. The cold goes right through the cart boards. You're done.",
+      humble: "October winds carry the first frost, and the sky turns the color of old iron. Winter is coming, and you are still on the open prairie between posts. The trail ahead will soon be buried. You make camp for the last time, knowing the journey ends here.",
     },
     quote: getSource('WINTER_TRAIL'),
     tip: "Tip: Speed matters. Every day on the trail brings winter closer. Don't linger too long at settlements — rest and repair quickly, then move. The trail from Fort Garry to Fort Edmonton takes roughly 35-50 days. Leave early and keep moving.",
@@ -61,7 +61,7 @@ export const ENDINGS = {
     id: 'abandoned',
     title: 'The Crew Has Had Enough',
     narrative: {
-      high: "The crew stops at the next rise and refuses to go further. Too many broken wheels, too many nights without food, too many miles of empty prairie. The morale that held them together has finally broken. You cannot force them. The trail before you remains unrolled, but the will to follow it is gone.",
+      high: "The crew stops at the rise. Won't go further. Three broken wheels in two weeks. Six nights without enough food. One of them sits down in the grass and stares. The others follow. You can't force them. The trail goes on. They don't.",
       humble: "One morning, the crew simply will not rise. They sit by the dead fire and stare at the horizon. No amount of encouragement can move them. The journey has ground them down to nothing. You are alone on the Carlton Trail with a cart full of goods and no one willing to pull it.",
     },
     quote: getSource('MORALE'),

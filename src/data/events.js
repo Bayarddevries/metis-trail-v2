@@ -22,8 +22,8 @@ export const EVENT_POOLS = {
     },
     {
       id: 'plains_wind',
-      text: 'A hot wind pushes at your back, carrying the smell of sun-baked grass and distant smoke. The prairie grass ripples in long waves like a green sea, and the oxen lean into their traces with new energy. Your cart groans but the wheels turn faster — the wind is a gift, but the prairie gives nothing without a price.',
-      source: getSource('LACOMBE_JOURNALS'),
+      text: 'A hot wind at your back. The grass goes flat in waves and the oxen lean in, pulling harder than they did at dawn. Cart lurches forward — a free mile, maybe two. But the wind\'s been pushing smoke all morning and smoke means fire somewhere west.',
+      source: getSource('LACOMBE_WIND'),
       choices: [
         { text: 'Run with it', dc: 10, ok: 'You make excellent time.', bad: 'A hidden rut jolts the cart. Repairs are needed after crossing.', wear: 1, time: -1 },
         { text: 'Hunker down', dc: null, always: 'You wrap the load and keep moving. No rain comes.', alwaysWear: 0 }
@@ -40,7 +40,7 @@ export const EVENT_POOLS = {
     },
     {
       id: 'plains_night_camp',
-      text: 'Moonlight spills across the prairie, turning the grass to silver. Somewhere nearby a fiddle begins a Red River jig, the notes carrying clean and sharp through the still air. Voices rise in song — French and Michif, old tunes from the Red River settlements. The crew listens, and for a moment the trail feels like home.',
+      text: 'Moon on the grass. A fiddle starts up somewhere down the line — a Red River jig, sharp enough to cut. French and Michif voices carry across the dark. One of the crew starts humming along.',
       source: getSource('FONSECA_DANCE'),
       choices: [
         { text: 'Dance until your boots throw dust', dc: 10, ok: 'Laughter drowns out the dark.', bad: 'You strain a shoulder and sleep poorly.', morale: 12, addsRep: { key: 'metis', delta: 1 } },
@@ -74,7 +74,7 @@ export const EVENT_POOLS = {
     },
     {
       id: 'plains_buffalo_hunt_camp',
-      text: 'You crest a rise and the world opens below — a massive buffalo hunt camp spreads across the valley, hundreds of carts in a great circle. The air is thick with dust and the sound of running horses. Four hundred mounted huntsmen await the signal, and the earth trembles beneath the hooves of the herd beyond.',
+      text: 'Cart crests the rise and you pull the ox up short. Below: a hundred carts in a circle, horses everywhere, dust so thick you can taste it. Four hundred hunters sitting quiet, waiting for the sign. Beyond them the herd — you feel the hooves through the ground before you hear them.',
       source: getSource('GOULET_HUNT'),
       choices: [
         { text: 'Join the hunt', dc: 12, ok: 'The hunt captain nods. You take a share of the meat.', bad: 'You are slow to position. You earn only a strip.', food: 8, addsRep: { key: 'metis', delta: 2 }, itemBonus: { name: 'Ammunition Belt', dcBonus: 3 } },
@@ -147,7 +147,7 @@ export const EVENT_POOLS = {
     },
     {
       id: 'plains_hail',
-      text: 'The sky turns green and the air goes still — then the hail comes. Stones the size of walnuts hammer the canvas cover and bounce off the cart bed. The oxen bellow and strain at their traces. There is no shelter on the open prairie, only the cart and whatever you can do to protect it.',
+      text: 'Green sky. Dead still. Then the hail — walnut stones hammering the canvas, bouncing off the cart bed. The oxen bellow and pull sideways. On the open prairie the cart is all you\'ve got.',
       source: getSource('LACOMBE_HAIL'),
       choices: [
         { text: 'Cover the canvas and ride it out', dc: 10, ok: 'The wagon top holds. The oxen are skittish but unhurt.', bad: 'Canvas tears and two rounds of cheese are spoiled.', food: -2, morale: -4, itemBonus: { name: 'Canvas Tarp', dcBonus: 4 } },
@@ -228,7 +228,7 @@ export const EVENT_POOLS = {
     {
       id: 'river_valley_sudden_rain',
       text: 'The heavy cloud bursts without warning. The trail turns to a slurry and the cart sinks to the naves — the wheels disappearing into mud that grabs and holds. Sudden storms of rain turned the valley trail into a bog that could trap a loaded cart for hours.',
-      source: getSource('LACOMBE_HAIL'),
+      source: getSource('FONSECA_RAIN'),
       choices: [
         { text: 'Unhitch and pole the cart through', dc: 12, ok: 'The oxen respond; you keep moving, soaked.', bad: 'A wheel hub sinks axle-deep.', wear: 1, morale: -4, itemBonus: { name: 'Rope (50ft)', dcBonus: 3 } },
         { text: 'Wait it out on dry ground', dc: null, always: 'Two hours of rain. The mud thickens.', time: 1 }
@@ -289,7 +289,7 @@ export const EVENT_POOLS = {
     },
     {
       id: 'river_cholera_camp',
-      text: 'A member of your crew wakes shaking and cold — by midday they cannot stand. The river water was contaminated, a waterborne bacteria that thrived in the stagnant water of common camping grounds. The trail has seen this before, and it is never gentle.',
+      text: 'One of your crew wakes shaking. By noon they can\'t stand. The river water — you knew better, but the casks were low. The trail\'s seen this before. It doesn\'t get easier.',
       source: getSource('HBC_DISEASE'),
       choices: [
         { text: 'Use the medicine pouch and rest the day', dc: 14, ok: 'The crisis passes. One day lost, but the crew recovers.', bad: 'The fever breaks but the crew is weak for days.', crew: 'tired', morale: -8, consumesItem: 'Medicine Pouch' },
@@ -298,7 +298,7 @@ export const EVENT_POOLS = {
     },
     {
       id: 'river_mosquito_camp',
-      text: 'The mosquitoes rise in clouds from the riverbank — a living fog that descends on man and beast alike. The oxen stampede; the cooking fire smoulders and dies. Amidst a cloud of mosquitoes, sand flies, and all prairie annoyances, including mud, the cart trains made their way westward.',
+      text: 'Mosquitoes rise from the riverbank in a cloud — you breathe them, they\'re in your eyes. The oxen stampede. The fire dies under the smoke. Sand flies after. Mud everywhere. The carts keep moving west because stopping is worse.',
       source: getSource('FONSECA_MOSQUITOES'),
       choices: [
         { text: 'Move camp to high ground before dark', dc: 9, ok: 'The move is miserable but the night is quieter.', bad: 'A wheel is twisted in the dark.', wear: 1 },
@@ -527,7 +527,7 @@ export const EVENT_POOLS = {
     },
     {
       id: 'upland_bison_herd',
-      text: 'The trail vanishes beneath a sea of brown backs. A buffalo herd — thousands strong — blocks the path ahead, the earth trembling beneath their hooves. The oxen low and pull at their traces, eyes rolling white. You cannot go around; the herd stretches to the horizon on both sides.',
+      text: 'The trail\'s gone. Buffalo everywhere — thousands, maybe ten thousand, brown humps to the horizon on both sides. The ground shakes. Your ox won\'t go forward, eyes white, pulling sideways.',
       source: getSource('GOULET_HUNT'),
       choices: [
         { text: 'Wait for the herd to pass', dc: null, always: 'You make camp and wait. The herd takes half a day to pass. The ground is churned to dust.', time: 1 },
@@ -537,7 +537,7 @@ export const EVENT_POOLS = {
     },
     {
       id: 'upland_storm_shelter',
-      text: 'The sky turns green and the air goes still — then the hail comes. Stones the size of walnuts hammer the canvas cover. Lightning finds the highest point, and the ridge offers no shelter. The oxen bellow and strain against their traces.',
+      text: 'Green sky. Then the hail starts — stones hammering the canvas. Lightning hits the ridge above. No up there, no cover here. The oxen bellow and sit down.',
       source: getSource('LACOMBE_HAIL'),
       choices: [
         { text: 'Hobble the oxen and wait it out', dc: null, always: 'You huddle under the cart. The storm passes in twenty minutes. Everyone is soaked but alive.', morale: -4 },

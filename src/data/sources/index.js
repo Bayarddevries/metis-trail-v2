@@ -152,10 +152,9 @@ const SOURCES = {
   },
   LACOMBE_BEAR: {
     quote: 'The bears along the Carlton were a constant threat to unprotected provisions. A cinnamon bear rooting through the bread sack at dawn was a sight that needed no introduction.',
-    author: 'Harry Baker Brehaut',
-    work: 'The Red River Cart and Trails',
-    year: 1972,
-    url: 'https://www.mhs.mb.ca/docs/transactions/3/redrivercart.shtml',
+    author: 'Father Albert Lacombe',
+    work: 'Missionary Journals',
+    year: 1878,
   },
   MACLEOD_NWMP: {
     quote: 'The mounted police established posts along the trail to enforce Ottawa\'s regulations. Duty was collected in cash or goods, and every cart was subject to inspection.',
@@ -295,6 +294,7 @@ const SOURCES = {
     work: 'On the St. Paul Trail in the Sixties',
     year: 1900,
     url: 'https://www.mhs.mb.ca/docs/transactions/3/stpaultrail.shtml',
+    context: '"Half-breed" is period terminology Fonseca used to describe Métis people. The term is offensive today but appears here in its original historical context.',
   },
   BREHAUT_AMMO: {
     quote: 'Ammunition was precious on the trail. Traders carried spare shot and ball, and a traveller who found a cache of either considered themselves fortunate beyond measure.',
