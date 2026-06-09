@@ -94,3 +94,17 @@ Use this file to log bugs, blockers, and known gaps during work sessions. Each i
 - Opened: 2026-06-08
 - Resolved: 2026-06-08 (v49)
 - Fix: Replaced `innerHTML` with `textContent` + `className` on stat-value spans in `renderStatusBar()`.
+
+---
+
+## External (docs completed 2026-06-09)
+
+### 25. Cultural/peer review
+- Status: Review doc complete
+- Deliverable: [docs/cultural-review.md](docs/cultural-review.md)
+- Summary: Structured review of Métis representation, source use, Indigenous (Cree) representation, colonial framing, gender gaps, and historical accuracy of mechanics. 9 priority recommendations (2 high, 5 medium, 2 low). Key findings: "half-breed" source quote needs contextualization, LACOMBE_BEAR source misattributed, no women characters in narrative, Cree representation relies on helper/elder tropes.
+
+### 6. AI writing trend review
+- Status: Review doc complete
+- Deliverable: [docs/writing-review.md](docs/writing-review.md)
+- Summary: Flagged AI writing patterns across all narrative content. Key issues: sententious closing lines ("the prairie gives nothing"), generic sensory descriptions ("the earth trembles"), anaphora overuse, emotional telling. 16 specific rewrite recommendations (8 high, 5 medium, 3 low). Includes 8 general anti-AI writing rules for future content.
