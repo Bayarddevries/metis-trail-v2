@@ -1,18 +1,26 @@
 # HANDOFF — Metis Trail V2
 
-**Last updated:** 2026-06-09 by OWL
-**Version:** v70 (dist at v78 after build)
+**Last updated:** 2026-06-10 by OWL
+**Version:** v71 (dist at v79 after build)
 **Server:** http://100.108.183.33:5173/ (python3 -m http.server in dist/)
 **Branch:** main, clean tree, pushed to origin
 
 ---
 
-## Session Summary (2026-06-09)
+## Session Summary (2026-06-10)
+
+### v71 — Engine API Restoration + Documentation + Debug Panel
+- **Fix:** Restored 14 missing public API methods on engine return object (accidentally removed in v70b):
+  `getNodes`, `getCurrentNode`, `getNextNode`, `totalWeight`, `getCrew`, `getPendingEvent`, `getAvailableActions`, `isOver`, `hasWon`, `getScore`, `getPreDepartureItems`, `setPreDepartureCount`, `confirmPreDeparture`, `getScoreData`
+- **Docs:** Added conventional commit message format to AGENTS.md (feat:/fix:/docs:/chore:/balance: types with scope examples)
+- **Docs:** Added JSDoc comments to all 29 public engine methods
+- **Debug:** Wired `mountDebugUI(game)` call into bootstrap; debug panel now only mounts when URL has `?debug=1`
+- Files: `src/systems/engine.js`, `src/main.js`, `src/ui/debug.js`, `AGENTS.md`, `TODO.md`, `CHANGELOG.md`
 
 ### v70 — Women, children, and family presence on the trail (#25)
 - 4 new sources: CALHOON_PEMM, CALHOON_CART_FORT, IPAC_RAFT, SMALLPOX_1870, SIMPSON_BRIGADE
 - 4 new events: plains_cart_fortress, plains_smallpox_trail, river_valley_cart_raft, plains_pemmican_process (camp action)
-- New camp action: Process Pemmican (3 food → 5-13+ food + morale)
+- New camp action: Process Pemmican (3 food → 5-13+ food + morale, 3 tiers)
 - Updated settlement descriptions: Fort Garry (families), St. Norbert (flower beadwork), Batoche (Ottawa promises)
 - Travel fragment: dog alongside cart
 - Based on research from Victoria Callihoo oral history, Indigenous Peoples Atlas of Canada, Simpson's "Narrative" (via Manitoba Pageant), KnowHistory.ca scrip records
@@ -166,9 +174,19 @@ curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:5173/
 ### Bugs
 - **#32** — Balance pass on unforgiving events (medicine pouch) — p2
 - **(local #32)** — Overlay sequence: pre-departure shows before intro (was local ISSUES.md #32, may overlap with original fix in bootstrap)
+- **#46** — Save/load validation and schema version
 
 ### Enhancements (prioritized)
 - **#10** — Basic icons
+- **#42** — Reformat secondary sources to period voices
+- **#43** — Add second half of Carlton Trail nodes
+- **#44** — Pre-departure cart packing overlay (blocked by overlay sequence)
+- **#45** — Unit tests for calendar and PRNG
+
+### Resolved (2026-06-10)
+- **#47** — mountDebugUI behind ?debug=1 — v71
+- **#48** — Standardize conventional commit messages — v71 (AGENTS.md)
+- **#49** — Add doc comments to exported engine.js functions — v71
 
 ### Resolved (2026-06-09)
 - **#12 — Highscore/leaderboard** — v69. Firebase Firestore leaderboard with Hall of Fame (top 10) and My Scores (personal history with 8 sort options). Player name collected at game start. Local fallback for offline.
@@ -289,19 +307,40 @@ metis-trail-v2-repo/
 
 ---
 
-## Next Session Handoff — Icons + Remaining Review Items
+## Next Session Handoff — Source Reformatting + Trail Expansion
 
-**Priority:** Visual polish + remaining cultural review gaps.
+**Priority:** Cultural review remaining items + content expansion.
 
-### Icons needed for events
-- 4 new events need icons: cart_fortress (🛡️), smallpox_trail (☠️), cart_raft (🛶), pemmican_process (🥩)
-- ~16 existing events also lack icons (see full list in session notes)
-- Art is being developed by another agent — integrate when ready
+### Source reformatting (#42)
+- 3 source entries need rewrite: MMF_COMMUNITIES, CARLTON_TRAIL, NWMP_HISTORY
+- Currently read as Wikipedia summaries; need period voices or clear "historical notes" format
+- No engine changes — text only
 
-### Remaining from cultural review (#25)
-- Secondary source reformatting: MMF_COMMUNITIES, CARLTON_TRAIL, NWMP_HISTORY read as Wikipedia rather than period voices
-- Consider replacing with actual period excerpts or reformatting as "historical notes" vs "source quotes"
+### Trail nodes expansion (#43)
+- Second half of Carlton Trail nodes not yet implemented
+- Needs: node definitions (lat/lon, type, terrain), events for western terrain types, testing full route
+
+### Pre-departure cart packing (#44)
+- Player configures starting cart loadout before journey
+- Blocked by overlay sequence bug (pre-departure shows before intro)
+- Engine API already exists: `getPreDepartureItems()`, `setPreDepartureCount()`, `confirmPreDeparture()`
+
+### Unit tests (#45)
+- Test calendar.js date advancement, season changes
+- Test seed.js PRNG reproducibility
+- Run via bun test or esbuild test harness
+
+### Save/load validation (#46)
+- Add schema version to save files
+- Validate on load, reject/migrate corrupted saves
+- File: `src/ui/persistence.js`
+
+### Icons (#10)
+- 4 new events need icons: cart_fortress, smallpox_trail, cart_raft, pemmican_process
+- ~16 existing events also lack icons
+- Art being developed by another agent — integrate when ready
 
 ### Constraints
-- No engine changes needed for icons — just add icon references to event data and CSS
 - Source reformatting is text-only, no mechanic changes
+- Trail expansion requires new node definitions and event data
+- Debug panel works behind `?debug=1`
