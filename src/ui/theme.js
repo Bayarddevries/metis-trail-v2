@@ -72,6 +72,10 @@ export function applyTheme(root) {
   root.style.setProperty('--clr-camp-pill-bg', 'rgba(255,255,255,0.65)');
   root.style.setProperty('--clr-camp-pill-border', 'rgba(0,0,0,0.08)');
   root.style.setProperty('--clr-camp-btn-hover', '#e3d6bc');
+  // Campfire evening background — warm glow + ember noise
+  root.style.setProperty('--clr-campfire-glow', 'radial-gradient(ellipse at 50% 100%, rgba(210,120,40,0.35) 0%, rgba(180,90,30,0.22) 35%, transparent 70%)');
+  root.style.setProperty('--clr-campfire-embers', "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 300 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='campNoise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.025' numOctaves='5' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23campNoise)' opacity='0.08'/%3E%3C/svg%3E\")");
+  root.style.setProperty('--clr-campfire-flicker', 'radial-gradient(circle at 45% 75%, rgba(255,180,80,0.15) 0%, transparent 40%), radial-gradient(circle at 55% 65%, rgba(255,140,60,0.12) 0%, transparent 35%), radial-gradient(circle at 60% 80%, rgba(255,100,40,0.1) 0%, transparent 30%)');
 
   // Dice / outcome colors
   root.style.setProperty('--clr-success-glow', 'rgba(46,125,50,0.3)');

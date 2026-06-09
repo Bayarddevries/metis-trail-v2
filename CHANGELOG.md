@@ -2,6 +2,22 @@
 
 All notable changes are documented here. Format loosely follows Keep a Changelog.
 
+## [v75] — 2026-06-10
+
+### Camp Overlay — Evening Campfire Aesthetic (Issue #64)
+- Added campfire evening background to camp overlay via CSS custom properties in `src/ui/theme.js`:
+  - `--clr-campfire-glow`: radial gradient from bottom center simulating firelight glow upward
+  - `--clr-campfire-embers`: SVG fractal noise texture (base64 data URI) for subtle ember particle field
+  - `--clr-campfire-flicker`: three radial gradients simulating warm firelight flicker at varying positions
+- Updated `#camp-overlay .overlay-card` in `src/template.html` to layer campfire backgrounds with `background-blend-mode: overlay`
+- Added darkening gradient `::before` pseudo-element on overlay card for text readability over firelight
+- All camp overlay content elements (header, status pills, action buttons, groups, results, dice display) now use `position: relative; z-index: 1` to sit above the background layers
+- Enhanced hover state for camp action buttons: border changes to ink color on hover for sharper period-accurate feedback
+- Added transition on camp action buttons for smooth background/border color changes
+- Build pipeline uses inline SVG data URIs (same as paper texture) — no external asset files needed
+
+Files modified: `src/ui/theme.js`, `src/template.html`, `dist/index.html`, `dist/app.js`
+
 ## [v74] — 2026-06-10
 
 ### Phase 2 — Core Systems & Debugging: Testing & Persistence

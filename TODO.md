@@ -121,6 +121,7 @@ Legend: `pending` | `in_progress` | `blocked` | `done`
 - [x] Fix camp freeze when loopback founder flow is fed back via restart loop
 - [x] Wire Camp button to `showCamp()` and continue/close handlers
 - [x] Camp bug #34 closed — action panel now rebuilds on every open
+- [x] Evening campfire background on camp overlay (#64) — warm glow, ember noise, flicker layers
 - [ ] Add camp activity failures/flavor branching based on crew state (future)
 - [ ] Expand scoring to reward well-timed camps (Phase 3)
 
