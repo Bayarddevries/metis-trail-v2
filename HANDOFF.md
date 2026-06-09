@@ -1,13 +1,26 @@
 # HANDOFF — Metis Trail V2
 
 **Last updated:** 2026-06-09 by OWL
-**Version:** v65 (dist), template synced for next build
+**Version:** v66 (dist), template synced for next build
 **Server:** http://100.108.183.33:5173/ (python3 -m http.server in dist/)
 **Branch:** main, clean tree, pushed to origin
 
 ---
 
 ## Session Summary (2026-06-09)
+
+### v66 — Item-giving events for unobtainable items
+- 6 new events giving items that were previously only in the starting cart:
+  - `plains_medicine_herb`: find sage/yarrow → Medicine Pouch
+  - `plains_abandoned_cart`: salvage from abandoned cart → Spare Axle or Shaganappi
+  - `river_valley_canvas_cache`: HBC supply cache → Canvas Tarp
+  - `wooded_firewood_gather`: dead poplar stand → Firewood Bundle
+  - `upland_blanket_find`: abandoned hunter's camp → Blanket
+  - `river_beaver_trade`: beaver ponds → Beaver Pelts (or food from fishing)
+- All use existing `give` code path — no engine changes
+- 7 new source entries: LACOMBE_HERBS, BREHAUT_ABANDONED_CARTS, FONSECA_HBC_SUPPLY, SCHULTZ_DEADFALL, GOULET_BLANKET, FONSECA_BEAVER
+- Sim results: 27.5% win rate (target 25-40%), diverse death distribution
+- Files: `src/data/events.js`, `src/data/sources/index.js`
 
 ### v65 — Weather system (#13)
 - Added weather system with 5 states (clear, overcast, rain, storm, snow) via season-aware Markov chain

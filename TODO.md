@@ -42,7 +42,7 @@ Legend: `pending` | `in_progress` | `blocked` | `done`
 - [ ] Add scout/guide hire moral choices with history anchoring
 - [ ] Polish end-game scoring and local leaderboard
 - [x] Weather system — seasonal effects on travel and events (v65)
-- [ ] Conditional endings — multiple ending paths
+- [x] Conditional endings — multiple ending paths (v36, 6 ending types)
 - [ ] Pre-departure cart packing — let players choose starting loadout
 
 ## Phase 4 — UI/UX Polish

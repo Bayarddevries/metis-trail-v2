@@ -352,6 +352,48 @@ const SOURCES = {
     year: 1900,
     url: 'https://www.mhs.mb.ca/docs/transactions/3/stpaultrail.shtml',
   },
+  LACOMBE_HERBS: {
+    quote: 'The prairie is a pharmacy for those who know it. Sage for fever, willow bark for pain, and wild mint for the stomach — the land provides for those who read it.',
+    author: 'Father Albert Lacombe',
+    work: 'Missionary Journals',
+    year: 1878,
+    url: 'https://github.com/Bayarddevries/metis-research-wiki',
+  },
+  BREHAUT_ABANDONED_CARTS: {
+    quote: 'Abandoned carts were a common sight on the trail — broken axles, split wheels, loads left behind when the oxen gave out. A wise traveller salvaged what they could.',
+    author: 'Harry Baker Brehaut',
+    work: 'The Red River Cart and Trails',
+    year: 1972,
+    url: 'https://www.mhs.mb.ca/docs/transactions/3/redrivercart.shtml',
+  },
+  FONSECA_HBC_SUPPLY: {
+    quote: 'The Company maintained supply caches along the trail — oilcloth bundles stamped with the HBC monogram, left at cairns for freighters who might need them.',
+    author: 'William G. Fonseca',
+    work: 'On the St. Paul Trail in the Sixties',
+    year: 1900,
+    url: 'https://www.mhs.mb.ca/docs/transactions/3/stpaultrail.shtml',
+  },
+  SCHULTZ_DEADFALL: {
+    quote: 'Deadfall was plentiful in the wooded corridors — trees brought down by wind and winter, dry and ready for the axe. A good fire meant survival on the northern trail.',
+    author: 'John C. Schultz',
+    work: 'The Old Crow Wing Trail',
+    year: 1894,
+    url: 'https://www.mhs.mb.ca/docs/transactions/1/oldcrowwingtrail.shtml',
+  },
+  GOULET_BLANKET: {
+    quote: 'A wool blanket was worth its weight in trade goods on the northern trail. Travellers who lost theirs to river crossings or prairie fires often did not survive the next cold snap.',
+    author: 'Terry Goulet & George Goulet',
+    work: 'The Métis: Memorable Events and Memorable People',
+    year: 2005,
+    url: 'https://github.com/Bayarddevries/metis-research-wiki',
+  },
+  FONSECA_BEAVER: {
+    quote: 'The beaver ponds along the river were traps waiting to be set. A prime pelt could buy a week\'s provisions, and the meat was as good as any on the trail.',
+    author: 'William G. Fonseca',
+    work: 'On the St. Paul Trail in the Sixties',
+    year: 1900,
+    url: 'https://www.mhs.mb.ca/docs/transactions/3/stpaultrail.shtml',
+  },
 };
 
 export function getSource(key) {

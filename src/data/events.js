@@ -203,6 +203,26 @@ export const EVENT_POOLS = {
         { text: 'Strap down the load and push into the wind', dc: 10, ok: 'The oxen groan but move forward.', bad: 'A gust catches the canvas. Supplies scatter.', food: -3, wear: 1 },
       ],
     },
+    {
+      id: 'plains_medicine_herb',
+      text: 'A patch of wild sage and yarrow grows in a sheltered coulée — plants your mother taught you to recognize. The prairie pharmacy is open to those who know how to read it. Enough here to restock your supplies, if you know the preparation.',
+      classification: 'Supply Find',
+      source: getSource('LACOMBE_HERBS'),
+      choices: [
+        { text: 'Gather the herbs and prepare a remedy', dc: 8, ok: 'You crush the yarrow for wounds and dry the sage for fever. A medicine pouch, restocked.', bad: 'The preparation is imperfect but usable.', give: [{ name: 'Medicine Pouch', amt: 1 }], morale: 6 },
+        { text: 'Take only what you need for now', dc: null, always: 'You gather a small bundle. Enough for one use, not a full restock.', give: [{ name: 'Medicine Pouch', amt: 1 }], morale: 3 },
+      ],
+    },
+    {
+      id: 'plains_abandoned_cart',
+      text: 'An abandoned Red River cart sits at the edge of a coulée, its canvas rotted and one wheel missing. But the axle is sound — good hardwood, still greased. Someone left in a hurry and left usable parts behind. The trail provides for those who scavenge.',
+      classification: 'Supply Find',
+      source: getSource('BREHAUT_ABANDONED_CARTS'),
+      choices: [
+        { text: 'Salvage the spare axle', dc: 9, ok: 'The axle comes free with some effort. Heavy, but a godsend when yours finally gives.', bad: 'The wood is sound but the fittings are rusted. It will do in a pinch.', give: [{ name: 'Spare Axle', amt: 1 }], morale: 5 },
+        { text: 'Take canvas and shaganappi too', dc: null, always: 'You strip what you can carry. The tarp is rotted but the shaganappi bindings are still supple.', give: [{ name: 'Shaganappi', amt: 2 }], morale: 3 },
+      ],
+    },
   ],
   river_valley: [
     {
@@ -360,6 +380,16 @@ export const EVENT_POOLS = {
         { text: 'Push through while you can', dc: 13, ok: 'The oxen find footing. The cart tilts but holds.', bad: 'A submerged log catches the axle.', wear: 2, food: -2 },
       ],
     },
+    {
+      id: 'river_valley_canvas_cache',
+      text: 'Beneath a cairn of river stones, you find an oilcloth bundle stamped with the HBC monogram. A supply cache from a Company freighter — inside, a folded canvas tarp, still sound, wrapped tight against the weather. The Company\'s loss is your gain.',
+      classification: 'Supply Find',
+      source: getSource('FONSECA_HBC_SUPPLY'),
+      choices: [
+        { text: 'Take the canvas tarp', dc: 8, ok: 'The tarp is heavy but waterproof. Shelter, cart cover, or raft material — it will serve.', bad: 'The oilcloth is torn but the canvas beneath is sound.', give: [{ name: 'Canvas Tarp', amt: 1 }], morale: 5 },
+        { text: 'Leave it — too heavy for the cart', dc: null, always: 'You mark the cairn and move on. The cache will keep for the next traveller.', morale: 1 },
+      ],
+    },
   ],
   wooded: [
     {
@@ -455,7 +485,17 @@ export const EVENT_POOLS = {
         { text: 'Take the rope', dc: null, always: 'You coil it and add it to the cart. Useful for crossings, repairs, or crafting.', give: [{ name: 'Rope (50ft)', amt: 1 }], morale: 3 },
         { text: 'Leave it — someone may return for it', dc: null, always: 'You press on. The rope is not yours to take.', morale: 1 },
       ]
-    }
+    },
+    {
+      id: 'wooded_firewood_gather',
+      text: 'A stand of dead poplar, brought down by winter wind and now seasoned dry. The wood splits clean and burns hot — exactly what you need for the cold nights ahead. The wooded corridors of the Carlton Trail were the last reliable source of fuel before the open prairie.',
+      classification: 'Supply Find',
+      source: getSource('SCHULTZ_DEADFALL'),
+      choices: [
+        { text: 'Gather firewood', dc: 8, ok: 'You split and bundle the dry wood. A full bundle — enough for several nights of warmth.', bad: 'The wood is sound but heavier than expected. You take what you can carry.', give: [{ name: 'Firewood Bundle', amt: 1 }], morale: 5 },
+        { text: 'Mark the spot for the return journey', dc: null, always: 'You notch a tree and remember the spot. The wood will keep.', morale: 2 },
+      ],
+    },
   ],
   uplands: [
     {
@@ -545,6 +585,16 @@ export const EVENT_POOLS = {
         { text: 'Push through — follow the ridge', dc: 11, ok: 'The going is brutal but you keep moving.', bad: 'The snow deepens. Progress is measured in yards.', crew: 'tired', morale: -8 },
       ],
     },
+    {
+      id: 'upland_blanket_find',
+      text: 'A hunter\'s camp, abandoned in haste — a fire pit still warm, a wool blanket cached beneath a tarp. Whoever left was in a hurry, and they are not coming back. The blanket is sound, if trail-worn. On the northern trail, wool is worth its weight in trade goods.',
+      classification: 'Supply Find',
+      source: getSource('GOULET_BLANKET'),
+      choices: [
+        { text: 'Take the blanket', dc: null, always: 'You fold it and add it to the cart. Warmth for cold nights ahead.', give: [{ name: 'Blanket', amt: 1 }], morale: 4 },
+        { text: 'Leave it — not yours to take', dc: null, always: 'You press on. The blanket is not yours.', morale: 1 },
+      ],
+    },
   ],
   river: [
     {
@@ -612,16 +662,26 @@ export const EVENT_POOLS = {
       ]
     },
     {
-      id: 'river_cart_raft_crossing',
-      text: 'The crossing here is too deep to ford. You eye the spare hides in the cart — enough to build a raft, if you know how. The river is wide and the current steady. On the far bank, the trail continues west.',
-      source: getSource('FONSECA_RAFT'),
-      choices: [
-        { text: 'Build a cart-raft with 2 Bison Hides', dc: 12, ok: 'The improvised ferry floats. The crew swims the line across.', bad: 'One hide splits mid-river. Cargo gets wet.', morale: -6, requiresItem: { name: 'Bison Hide', count: 2 } },
-        { text: 'Ford the cart carefully', dc: 13, ok: 'The ox swims straight and true; the bed stays high.', bad: 'The current turns the cart. Wet freight and one damaged wheel.', wear: 2, food: -2 }
-      ]
-    }
-  ]
-};
+    id: 'river_cart_raft_crossing',
+    text: 'The crossing here is too deep to ford. You eye the spare hides in the cart — enough to build a raft, if you know how. The river is wide and the current steady. On the far bank, the trail continues west.',
+    source: getSource('FONSECA_RAF'),
+    choices: [
+      { text: 'Build a cart-raft with 2 Bison Hides', dc: 12, ok: 'The improvised ferry floats. The crew swims the line across.', bad: 'One hide splits mid-river. Cargo gets wet.', morale: -6, requiresItem: { name: 'Bison Hide', count: 2 } },
+      { text: 'Ford the cart carefully', dc: 13, ok: 'The ox swims straight and true; the bed stays high.', bad: 'The current turns the cart. Wet freight and one damaged wheel.', wear: 2, food: -2 },
+    ],
+    },
+    {
+    id: 'river_beaver_trade',
+    text: 'The river bends through a series of still ponds where beaver dams hold the water high. Freshly cut saplings show the work of a large colony. The pelts would be prime this time of year, and the meat would stretch your food supplies. If you have ammunition to spare.',
+    classification: 'Supply Find',
+    source: getSource('FONSECA_BEAVER'),
+    choices: [
+      { text: 'Set traps and hunt beaver', dc: 10, ok: 'The traps hold. You harvest two prime pelts and smoke the meat over the fire.', bad: 'The beavers are wary. You get one pelt and little meat.', give: [{ name: 'Beaver Pelts', amt: 2 }], morale: 6 },
+      { text: 'Fish instead — lower risk', dc: 8, ok: 'The river yields enough fish to stretch your rations by a day.', bad: 'The fish are not biting. A wasted afternoon.', food: 3, morale: 2 },
+    ],
+    },
+    ],
+    };
 
 export function getEventsForTerrain(terrain) {
   return EVENT_POOLS[terrain] || EVENT_POOLS.plains;

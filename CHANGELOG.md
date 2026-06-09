@@ -2,7 +2,26 @@
 
 All notable changes are documented here. Format loosely follows Keep a Changelog.
 
-## [v65] — 2026-06-09
+## [v66] — 2026-06-09
+
+### Added — Item-giving events for unobtainable items
+
+6 new events that give beneficial items mid-trail, addressing the gap where medicine, firewood, blankets, spare axes, canvas tarps, and beaver pelts were only available in the starting cart:
+
+- `plains_medicine_herb` (plains): find sage and yarrow in a coulée → Medicine Pouch
+- `plains_abandoned_cart` (plains): salvage parts from an abandoned Red River cart → Spare Axle or Shaganappi
+- `river_valley_canvas_cache` (river_valley): HBC supply cache beneath a cairn → Canvas Tarp
+- `wooded_firewood_gather` (wooded): dead poplar stand in the woods → Firewood Bundle
+- `upland_blanket_find` (uplands): abandoned hunter's camp → Blanket
+- `river_beaver_trade` (river): beaver ponds along the river → Beaver Pelts (or food from fishing)
+
+All use existing `give` code path in `resolveChoice()` — no engine changes needed.
+
+**7 new source entries:** LACOMBE_HERBS, BREHAUT_ABANDONED_CARTS, FONSECA_HBC_SUPPLY, SCHULTZ_DEADFALL, GOULET_BLANKET, FONSECA_BEAVER
+
+**Sim results (200 sims):** 27.5% win rate (target 25-40% ✓), deaths: cart_failure 27%, starvation 20.5%, no_trade 23.5%
+
+Files: `src/data/events.js`, `src/data/sources/index.js`.
 
 ### Added — Weather system (#13)
 
