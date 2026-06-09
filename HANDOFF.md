@@ -1,13 +1,21 @@
 # HANDOFF — Metis Trail V2
 
 **Last updated:** 2026-06-09 by OWL
-**Version:** v66 (dist), template synced for next build
+**Version:** v67 (dist), template synced for next build
 **Server:** http://100.108.183.33:5173/ (python3 -m http.server in dist/)
 **Branch:** main, clean tree, pushed to origin
 
 ---
 
 ## Session Summary (2026-06-09)
+
+### v67 — Camp dice rolls + flavor text; More actions fix
+- Added dice roll animation to camp actions (rest, forage, hunt, scout)
+- Added rich flavor text for all 7 camp actions (3 tiers: high/mid/low, 3 variants each = 63 flavor texts)
+- Camp action buttons now show descriptions (e.g. 'Sleep and recover. Crew may improve.')
+- Fixed 'More actions' toggle to only show when craft has usable recipes (#39)
+- campAction() now returns roll + rollTotal for UI animation
+- Files: `src/systems/engine.js`, `src/main.js`, `src/template.html`
 
 ### v66 — Item-giving events for unobtainable items
 - 6 new events giving items that were previously only in the starting cart:

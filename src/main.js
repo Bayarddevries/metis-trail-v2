@@ -762,6 +762,13 @@ function showSettlement(game) {
     toggleBtn.addEventListener('click', () => {
       const isExpanded = secondaryEl.classList.toggle('expanded');
       toggleBtn.textContent = isExpanded ? 'Less ▲' : 'More actions ▶';
+      // Scroll the overlay card so expanded content is visible
+      if (isExpanded) {
+        const card = document.querySelector('#settlement-overlay .overlay-card');
+        if (card) {
+          secondaryEl.scrollIntoView({behavior: 'smooth', block: 'end'});
+        }
+      }
     });
 
     secondaryActions.forEach((action) => {

@@ -17,12 +17,15 @@ Use this file to log bugs, blockers, and known gaps during work sessions. Each i
 
 ## Resolved
 
-### 13. Weather system
-- Opened: 2026-06-07
-- Resolved: 2026-06-09 (v65)
-- Fix: 5-state weather system (clear/overcast/rain/storm/snow) with season-aware Markov chain. Modifies food, wear, morale, events, camp recovery. 4 new events, 6 new sources, status bar indicator. Sim: 29% win rate.
+### 38. Camp events need dice rolls and more flavor text
+- Opened: 2026-06-08
+- Resolved: 2026-06-09 (v67)
+- Fix: Added dice roll animation to camp actions (rest, forage, hunt, scout). Added rich flavor text for all 7 camp actions with 3 outcome tiers. Action buttons now show descriptions.
 
-### 29. Pass/fail should appear after dice settle
+### 39. More actions toggle empty
+- Opened: 2026-06-09
+- Resolved: 2026-06-09 (v67)
+- Fix: 'More actions' toggle now only shows when craft has usable recipes. No more empty toggle.
 - Opened: 2026-06-08
 - Resolved: 2026-06-08 (v50, v51)
 - Fix: Removed pass/fail pill from renderDicePill(). Outcome reveals after dice-settle animation completes (animationend event).
