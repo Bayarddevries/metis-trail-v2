@@ -8,6 +8,25 @@ export const CONSTANTS = Object.freeze({
   DAYS_PER_WEEK: 7,
   CREW_MOD: { rested: 1, tired: 0, exhausted: -2 },
   WEAR_MOD: { 0: 0, 1: 0, 2: 0, 3: -1, 4: -3, 5: -5 },
+  WEATHER_STATES: ['clear', 'overcast', 'rain', 'storm', 'snow'],
+  SEASON_BASE_WEATHER: {
+    summer: { clear: 45, overcast: 25, rain: 20, storm: 10, snow: 0 },
+    autumn: { clear: 30, overcast: 30, rain: 20, storm: 10, snow: 10 },
+    'early winter': { clear: 15, overcast: 20, rain: 15, storm: 10, snow: 40 },
+  },
+  WEATHER_TRANSITION: {
+    clear: { clear: 55, overcast: 30, rain: 10, storm: 5, snow: 0 },
+    overcast: { clear: 20, overcast: 40, rain: 25, storm: 10, snow: 5 },
+    rain: { clear: 10, overcast: 25, rain: 40, storm: 20, snow: 5 },
+    storm: { clear: 5, overcast: 20, rain: 35, storm: 30, snow: 10 },
+    snow: { clear: 0, overcast: 10, rain: 15, storm: 5, snow: 70 },
+  },
+  WEATHER_WEAR_MULT: { clear: 1, overcast: 1, rain: 1.25, storm: 1.5, snow: 1.4 },
+  WEATHER_FOOD_MOD: { clear: 0, overcast: 0, rain: 0.3, storm: 0.5, snow: 0.5 },
+  WEATHER_MORALE_MOD: { clear: 0, overcast: -1, rain: -2, storm: -4, snow: -3 },
+  WEATHER_EVENT_MOD: { clear: 0, overcast: 0, rain: 0.10, storm: 0.15, snow: 0.10 },
+  WEATHER_CAMP_MORALE: { clear: 15, overcast: 15, rain: 10, storm: 5, snow: 5 },
+  WEATHER_LABELS: { clear: '☀ Clear', overcast: '☁ Overcast', rain: '🌧 Rain', storm: '⛈ Storm', snow: '❄ Snow' },
 });
 
 export function crewMod(state) {

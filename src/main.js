@@ -175,6 +175,31 @@ const TRAVEL_FRAGMENTS = {
       'The prairie offers no mercy. The exhausted crew leans into the work, step by step.',
       'The cart barely moves. The oxen are done, but the trail does not care.',
     ],
+    weather: {
+      rain: [
+        'Rain drums on the canvas tarp. The ox leans into the traces, steady despite the water streaming from its back.',
+        'The prairie smells of wet earth and sage. Puddles form in the cart ruts, and the oxen splash through them.',
+        'Grey sheets of rain sweep across the plains. The crew pulls their coats tight and keeps moving.',
+        'The cart wheels sink soft into the damp ground. Each step costs more than the last, but the rain will pass.',
+      ],
+      storm: [
+        'Thunder cracks overhead. The oxen flinch at every flash, but the traces hold and the cart rolls on.',
+        'Lightning stitches the horizon. The crew shields their eyes and drives forward into the teeth of the storm.',
+        'The wind hits like a wall. The canvas tarp strains at its ties, and the cart groans against the gusts.',
+        'Hailstones bounce off the cart bed. The oxen bellow but press on — there is no shelter on the open prairie.',
+      ],
+      snow: [
+        'Snow falls soft and silent, blanketing the prairie white. The oxen\'s breath rises in plumes.',
+        'The cart ruts fill with snow. The trail ahead is a white void — the oxen pick their way carefully.',
+        'A bitter wind drives snow into every gap in clothing. The crew huddles close to the cart for warmth.',
+        'The prairie is a white wasteland. Snowflakes sting the eyes, but the oxen know the way.',
+      ],
+      overcast: [
+        'A grey sky hangs low over the prairie. The air is thick and still, and the trail stretches ahead under flat light.',
+        'No sun, no shadow — just the endless grey prairie under a featureless sky. The oxen walk as if they sense weather coming.',
+        'The overcast dulls the colors of the prairie. Everything is grey-green and muted, and the air smells of waiting.',
+      ],
+    },
   },
   river_valley: {
     rested: [
@@ -195,6 +220,30 @@ const TRAVEL_FRAGMENTS = {
       'The ford takes everything. The oxen are spent, the crew is soaked, but the cart makes it across.',
       'The river does not wait. The exhausted crew drives through, one step at a time.',
     ],
+    weather: {
+      rain: [
+        'Rain swells the river. Brown water laps at the trail bank, and the ford ahead looks mean.',
+        'The river valley is shrouded in drizzle. The oxen\'s hooves squelch in the muddy bank trail.',
+        'Three days of rain have turned the valley trail into a stream. The cart wheels spin in the muck.',
+        'Rain drips from every leaf and branch. The river runs high and brown beside the trail.',
+      ],
+      storm: [
+        'Thunder echoes off the valley walls. Lightning flashes above the river, and the oxen pull at the traces.',
+        'Storm water pours down the valley sides. The trail becomes a stream, and the cart wheels slide.',
+        'The river roars in the storm. Crossing today would be suicide — the crew watches from the bank.',
+        'Wind howls through the valley. The canvas cover snaps like a whip, and the cart creaks with every gust.',
+      ],
+      snow: [
+        'Snow dusts the riverbanks white. The water runs black through the icy banks, steam rising where warm meets cold.',
+        'The valley holds the cold. Snow falls between the trees, and the river\'s edge crunches underfoot.',
+        'A hard frost grips the valley. The oxen\'s breath freezes on their muzzles, and the cart wheels ring on the frozen ground.',
+      ],
+      overcast: [
+        'The valley is grey and still under a flat sky. The river murmurs below, indifferent to the weather.',
+        'Mist hangs in the river valley. The far bank is a shadow, and the oxen walk with uncertain steps.',
+        'Overcast and close. The valley walls seem to press in, and the air smells of wet stone and cold water.',
+      ],
+    },
   },
   wooded: {
     rested: [
@@ -215,6 +264,29 @@ const TRAVEL_FRAGMENTS = {
       'The oxen can barely pull. The exhausted crew pushes from behind in the dark woods.',
       'The woods offer no rest. The exhausted crew drives forward through the trees.',
     ],
+    weather: {
+      rain: [
+        'Rain finds every gap in the canopy. The trail underfoot turns to red mud between the roots.',
+        'The woods drip and splash. Water runs down every trunk, and the cart steams in the damp air.',
+        'Rain drums on the leaves above. The crew is dry enough beneath the canopy, but the trail is treacherous.',
+        'The forest floor is sodden. The oxen slog through puddles, and the cart wheels cut deep ruts in the mud.',
+      ],
+      storm: [
+        'Thunder shakes the treetops. A branch cracks overhead — the oxen flinch but the crew presses on.',
+        'Lightning splits a dead tree at the trail\'s edge. The crew steers clear of the burning stump.',
+        'The wind tears at the canopy. Branches and leaves rain down, and the cart pushes through the debris.',
+        'Rain and wind together. The woods glow with each lightning flash, and the oxen pick their way through the dark.',
+      ],
+      snow: [
+        'Snow sifts through the bare branches. The woods are quiet — too quiet — and the cart leaves the only tracks.',
+        'The trees hold the snow. Every branch is white, and the trail is a tunnel of grey and silver.',
+        'Cold seeps through the woods. The oxen\'s breath fogs the air, and the cart\'s metal parts burn to touch.',
+      ],
+      overcast: [
+        'Grey light filters through the trees. The woods are dim and close, and every sound seems muffled.',
+        'The forest is still under a flat sky. No birds sing — only the creak of the cart and the oxen\'s steady tread.',
+      ],
+    },
   },
   uplands: {
     rested: [
@@ -235,6 +307,27 @@ const TRAVEL_FRAGMENTS = {
       'The high ground offers no mercy. The exhausted crew pushes through the wind.',
       'The cart barely crests the hill. The crew collapses on the far side.',
     ],
+    weather: {
+      rain: [
+        'Rain on the ridge is cold and sharp. The oxen slip on the wet grass, and the crew braces the cart from behind.',
+        'The uplands are a grey wash of rain and mist. The trail ahead vanishes into the low clouds.',
+        'Water streams down the ridge. The cart wheels slide on the sodden turf, and the oxen fight for footing.',
+      ],
+      storm: [
+        'Lightning finds the ridge. The crew drops low and waits — the cart is the highest point for miles.',
+        'Thunder cracks so close the air tastes of metal. The oxen refuse to move until the worst passes.',
+        'The storm hits the ridge like a hammer. Wind, rain, and hail — the crew huddles behind the cart and waits.',
+      ],
+      snow: [
+        'Snow on the ridge is blinding. The white ground and white sky merge, and the oxen walk by memory.',
+        'The wind drives snow horizontally across the uplands. The crew can barely see the trail ahead.',
+        'A crust of ice over snow. The oxen break through with every step, and the cart lurches on the frozen ground.',
+      ],
+      overcast: [
+        'The ridge is grey and featureless under a flat sky. No sun, no shadow — just the endless upland.',
+        'Low clouds sit on the uplands like a blanket. The trail ahead disappears into the mist.',
+      ],
+    },
   },
 };
 
@@ -242,6 +335,7 @@ function buildTravelNarrative(prev, state, game) {
   const node = game.getCurrentNode();
   const terrain = node?.terrain || 'plains';
   const crew = state.crew;
+  const weather = state.weather || 'clear';
 
   // Arrival at new node
   if (state.node > prev.node) {
@@ -257,10 +351,16 @@ function buildTravelNarrative(prev, state, game) {
     return 'The journey ends here.';
   }
 
-  // Pick atmospheric fragment
+  // Pick atmospheric fragment — weather variants take priority over crew state
   const terrainFragments = TRAVEL_FRAGMENTS[terrain] || TRAVEL_FRAGMENTS.plains;
-  const crewFragments = terrainFragments[crew] || terrainFragments.rested;
-  const fragment = crewFragments[Math.floor(Math.random() * crewFragments.length)];
+  let fragment;
+  if (weather !== 'clear' && terrainFragments.weather && terrainFragments.weather[weather]) {
+    const weatherPool = terrainFragments.weather[weather];
+    fragment = weatherPool[Math.floor(Math.random() * weatherPool.length)];
+  } else {
+    const crewFragments = terrainFragments[crew] || terrainFragments.rested;
+    fragment = crewFragments[Math.floor(Math.random() * crewFragments.length)];
+  }
 
   // Append mechanical summary only for significant changes
   const mech = [];

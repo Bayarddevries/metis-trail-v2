@@ -310,6 +310,48 @@ const SOURCES = {
     year: 2005,
     url: 'https://github.com/Bayarddevries/metis-research-wiki',
   },
+  LACOMBE_STORM: {
+    quote: 'The thunder rolled across the prairie like cannon fire. Lightning split the sky to the west, and the oxen bellowed in terror.',
+    author: 'Father Albert Lacombe',
+    work: 'Missionary Journals',
+    year: 1878,
+    url: 'https://github.com/Bayarddevries/metis-research-wiki',
+  },
+  FONSECA_RAIN: {
+    quote: 'Three days of rain turned the trail to the consistency of axle grease. The carts sank to the hubs and the oxen could scarcely move them.',
+    author: 'William G. Fonseca',
+    work: 'On the St. Paul Trail in the Sixties',
+    year: 1900,
+    url: 'https://www.mhs.mb.ca/docs/transactions/3/stpaultrail.shtml',
+  },
+  SCHULTZ_SNOW: {
+    quote: 'The first storm of the season caught us on the open prairie. By morning, the cart ruts were filled with snow and the trail was gone.',
+    author: 'John C. Schultz',
+    work: 'The Old Crow Wing Trail',
+    year: 1894,
+    url: 'https://www.mhs.mb.ca/docs/transactions/1/oldcrowwingtrail.shtml',
+  },
+  LACOMBE_WIND: {
+    quote: 'A hot wind blew from the south for three days, carrying the smell of sun-baked grass and dust that stung the eyes.',
+    author: 'Father Albert Lacombe',
+    work: 'Missionary Journals',
+    year: 1878,
+    url: 'https://github.com/Bayarddevries/metis-research-wiki',
+  },
+  BREHAUT_WET_AXE: {
+    quote: 'Wet weather swelled the wooden axles, making the wheels bind. A cart that rolled freely in dry weather could become nearly immovable after a rain.',
+    author: 'Harry Baker Brehaut',
+    work: 'The Red River Cart and Trails',
+    year: 1972,
+    url: 'https://www.mhs.mb.ca/docs/transactions/3/redrivercart.shtml',
+  },
+  FONSECA_OVERCAST: {
+    quote: 'A grey sky hung low over the prairie for days. The air was heavy and still, and the oxen moved as if they could sense a storm coming.',
+    author: 'William G. Fonseca',
+    work: 'On the St. Paul Trail in the Sixties',
+    year: 1900,
+    url: 'https://www.mhs.mb.ca/docs/transactions/3/stpaultrail.shtml',
+  },
 };
 
 export function getSource(key) {

@@ -17,6 +17,31 @@ export function createGame(seed = null) {
     return d20(rand);
   }
 
+  // ── Weather helpers ──────────────────────────────────────────────
+  function pickWeighted(weights) {
+    const total = Object.values(weights).reduce((s, w) => s + w, 0);
+    let r = rand() * total;
+    for (const [key, w] of Object.entries(weights)) {
+      r -= w;
+      if (r <= 0) return key;
+    }
+    return Object.keys(weights)[0];
+  }
+
+  function initWeather() {
+    return pickWeighted(CONSTANTS.SEASON_BASE_WEATHER[seasonFor(CONSTANTS.START_MONTH)]);
+  }
+
+  function advanceWeather() {
+    const seasonWeights = CONSTANTS.SEASON_BASE_WEATHER[seasonFor(S.month)];
+    let next = pickWeighted(CONSTANTS.WEATHER_TRANSITION[S.weather]);
+    // Block impossible weather for current season (e.g., snow in summer)
+    if (seasonWeights[next] === 0) {
+      next = 'overcast';
+    }
+    S.weather = next;
+  }
+
   const cart = startingCart();
 
   const S = {
@@ -48,6 +73,7 @@ export function createGame(seed = null) {
     credit: { hbc: 0, metis: 0, nwmp: 0, mission: 0 },
     perishable: {},
     preDeparture: false,
+    weather: initWeather(),
   };
 
   function checkGameOver() {
@@ -189,6 +215,11 @@ export function createGame(seed = null) {
     return pickEventForTerrain(NODES[S.node]?.terrain || 'plains', rand);
   }
 
+  function pickEventWithChance(chance) {
+    if (rand() > chance) return null;
+    return pickEventForTerrain(NODES[S.node]?.terrain || 'plains', rand);
+  }
+
   function calcScore() {
     if (!S.won) return 0;
     const tradeUnits = cart.filter((i) => i.type === 'trade' && i.count > 0).reduce((s, i) => s + i.count, 0);
@@ -213,13 +244,19 @@ export function createGame(seed = null) {
   function travelOneDay() {
     if (S.over || S.pendingSettlement) return stepLog;
     const nextDist = NODES[S.node + 1]?.dist || 1;
-    S.food = Math.max(0, Math.round((S.food - CONSTANTS.DAILY_FOOD) * 10) / 10);
+
+    // Advance weather at start of day
+    advanceWeather();
+
+    const weatherFood = CONSTANTS.WEATHER_FOOD_MOD[S.weather] || 0;
+    S.food = Math.max(0, Math.round((S.food - CONSTANTS.DAILY_FOOD - weatherFood) * 10) / 10);
     S.segmentDay++;
     S.travelDaysWithoutRest++;
     advance();
 
     const wearChance = { plains: 0.10, river_valley: 0.15, wooded: 0.20 };
-    if (rand() < (wearChance[NODES[S.node].terrain] || 0.2)) S.wear++;
+    const weatherWearMult = CONSTANTS.WEATHER_WEAR_MULT[S.weather] || 1;
+    if (rand() < (wearChance[NODES[S.node].terrain] || 0.2) * weatherWearMult) S.wear++;
 
     // Squeal event: at high wear, the axle's scream draws attention
     if (S.wear >= 4 && rand() < 0.35) {
@@ -230,7 +267,8 @@ export function createGame(seed = null) {
     if (S.travelDaysWithoutRest >= 5 && S.crew !== 'exhausted') S.crew = 'exhausted';
     else if (S.travelDaysWithoutRest >= 3 && S.crew === 'rested') S.crew = 'tired';
 
-    S.morale = Math.max(0, Math.min(100, S.morale - 2));
+    const weatherMorale = CONSTANTS.WEATHER_MORALE_MOD[S.weather] || 0;
+    S.morale = Math.max(0, Math.min(100, S.morale - 2 + weatherMorale));
 
     if (S.day % CONSTANTS.DAYS_PER_WEEK === 0 && !S.pendingSettlement) {
       S.crew = 'rested';
@@ -269,7 +307,8 @@ export function createGame(seed = null) {
       return stepLog;
     }
 
-    const ev = pickEvent();
+    const weatherEventMod = CONSTANTS.WEATHER_EVENT_MOD[S.weather] || 0;
+    const ev = pickEventWithChance(CONSTANTS.EVENT_CHANCE + weatherEventMod);
     if (ev) {
       S.pendingEvent = ev;
       return stepLog;
@@ -307,7 +346,8 @@ export function createGame(seed = null) {
     S.travelDaysWithoutRest = 0;
     if (S.crew === 'exhausted') S.crew = 'tired';
     else if (S.crew === 'tired') S.crew = 'rested';
-    S.morale = Math.min(100, S.morale + 15);
+    const campMorale = CONSTANTS.WEATHER_CAMP_MORALE[S.weather] ?? 15;
+    S.morale = Math.min(100, S.morale + campMorale);
     advance();
     checkGameOver();
   }
@@ -382,6 +422,7 @@ export function createGame(seed = null) {
           usedWeight: totalWeight(cart),
           capacity: S.capacity,
           preDeparture: S.preDeparture,
+          weather: S.weather,
         };
       },
     getCart() {

@@ -1,13 +1,24 @@
 # HANDOFF — Metis Trail V2
 
-**Last updated:** 2026-06-08 by OWL
-**Version:** v64 (dist), template synced for next build
+**Last updated:** 2026-06-09 by OWL
+**Version:** v65 (dist), template synced for next build
 **Server:** http://100.108.183.33:5173/ (python3 -m http.server in dist/)
 **Branch:** main, clean tree, pushed to origin
 
 ---
 
-## Session Summary (2026-06-08)
+## Session Summary (2026-06-09)
+
+### v65 — Weather system (#13)
+- Added weather system with 5 states (clear, overcast, rain, storm, snow) via season-aware Markov chain
+- Weather modifiers: food consumption, wear accumulation, morale drift, event chance, camp recovery
+- 4 new weather events: plains_thunderstorm, plains_windstorm, river_valley_flash_flood, upland_early_snow
+- 6 new source entries: LACOMBE_STORM, FONSECA_RAIN, SCHULTZ_SNOW, LACOMBE_WIND, BREHAUT_WET_AXE, FONSECA_OVERCAST
+- Weather indicator in status bar with emoji + color coding
+- 64 new weather-specific travel narrative fragments (4 per state × 4 terrains)
+- Weather fragments take priority over crew-state fragments during non-clear weather
+- Sim results: 29% win rate (target 25-40%), diverse death distribution
+- Files: `src/core/constants.js`, `src/systems/engine.js`, `src/data/events.js`, `src/data/sources/index.js`, `src/main.js`, `src/ui/renderer.js`, `src/template.html`, `dist/index.html`
 
 ### v64 — Atmospheric travel narrative + unload button labels
 - Replaced debug travel text with 48 atmospheric fragments (4 terrains × 3 crew states)
@@ -116,6 +127,9 @@ curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:5173/
 - **#13** — Weather system
 - **#12** — Highscore/leaderboard
 - **#10** — Basic icons
+
+### Resolved (2026-06-09)
+- **#13 — Weather system** — v65. Added 5-state weather system (clear/overcast/rain/storm/snow) with season-aware Markov chain. Weather modifies food consumption, wear accumulation, morale drift, event chance, and camp recovery. 4 new weather events, 6 new source entries, weather indicator in status bar, 64 weather-specific travel fragments. Sim: 29% win rate.
 
 ### Resolved (2026-06-08)
 - ** crafting inputs closed-system gap** — v62. Added 4 item-giving events so players can acquire Shaganappi, Bison Hide, Rope, Ammunition Belt mid-trail. Crafting is now a renewable system.

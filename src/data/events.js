@@ -182,7 +182,27 @@ export const EVENT_POOLS = {
         { text: 'Tell the camp overseer and help search', dc: 9, ok: 'The goods are returned. The thief is ordered to pay in labour.', addsRep: { key: 'metis', delta: 1 } },
         { text: 'Write it off and tighten watch', dc: null, always: 'Pragmatic. The trail teaches scarcity.', alwaysWear: 0, morale: -2 }
       ]
-    }
+    },
+    {
+      id: 'plains_thunderstorm',
+      text: 'The sky turns green-black to the west. Thunder rolls across the open prairie like cannon fire. Lightning stitches the clouds to the earth, and the oxen bellow in terror. There is no shelter on the plains — only the cart and the storm.',
+      classification: 'Weather',
+      source: getSource('LACOMBE_STORM'),
+      choices: [
+        { text: 'Hobble the oxen and huddle under the cart', dc: null, always: 'The storm passes in twenty minutes. Everyone is soaked but alive.', morale: -4 },
+        { text: 'Push for the nearest coulee', dc: 11, ok: 'Lower ground offers shelter from the wind and lightning.', bad: 'A lightning-struck tree falls nearby.', wear: 1, morale: -6 },
+      ],
+    },
+    {
+      id: 'plains_windstorm',
+      text: 'A wind comes out of the north that never stops. It pushes at the cart from the side, threatening to tip it with every gust. The canvas tarp flaps and strains at its ties. The oxen lean against the wind and refuse to move forward.',
+      classification: 'Weather',
+      source: getSource('LACOMBE_WIND'),
+      choices: [
+        { text: 'Lower the cart bed and wait it out', dc: null, always: 'You crouch behind the cart and wait. The wind lasts hours. When it passes, the prairie is scarred with dust devils.', time: 1 },
+        { text: 'Strap down the load and push into the wind', dc: 10, ok: 'The oxen groan but move forward.', bad: 'A gust catches the canvas. Supplies scatter.', food: -3, wear: 1 },
+      ],
+    },
   ],
   river_valley: [
     {
@@ -329,7 +349,17 @@ export const EVENT_POOLS = {
         { text: 'Trade food for the ammunition belt', dc: 9, ok: 'He accepts your offer. The belt is sound — enough shot for several hunts or defence.', bad: 'He wants more than you can spare. The deal falls through.', give: [{ name: 'Ammunition Belt', amt: 1 }], food: -3, morale: 3 },
         { text: 'Ask where he found it', dc: null, always: 'He gestures vaguely upstream. "The trail provides." You press on.', morale: 2 },
       ]
-    }
+    },
+    {
+      id: 'river_valley_flash_flood',
+      text: 'Three days of rain upstream. The river is brown and rising, debris spinning in the current. The ford you crossed yesterday is gone — today the water is waist-deep and growing. The trail along the bank has become a river itself.',
+      classification: 'Weather',
+      source: getSource('FONSECA_RAIN'),
+      choices: [
+        { text: 'Wait for the water to drop', dc: null, always: 'You camp on high ground. By morning the river has dropped enough to cross.', time: 1 },
+        { text: 'Push through while you can', dc: 13, ok: 'The oxen find footing. The cart tilts but holds.', bad: 'A submerged log catches the axle.', wear: 2, food: -2 },
+      ],
+    },
   ],
   wooded: [
     {
@@ -504,7 +534,17 @@ export const EVENT_POOLS = {
         { text: 'Push through without extra fire', dc: 9, ok: 'Grit and determination. The crew complains but holds together.', bad: 'Fingers go numb. One crew member cannot feel their feet by morning.', crew: 'tired', morale: -10 },
         { text: 'Make camp and wait for the thaw', dc: null, always: 'You wait for the sun to warm the ground. A lost day, but the crew is intact.', time: 1 }
       ]
-    }
+    },
+    {
+      id: 'upland_early_snow',
+      text: 'The first storm of the season catches you on the open uplands. By morning, the cart ruts are filled with snow and the trail is gone. The temperature plunges. The oxen breathe white plumes into the still air.',
+      classification: 'Weather',
+      source: getSource('SCHULTZ_SNOW'),
+      choices: [
+        { text: 'Make camp and wait for the thaw', dc: null, always: 'You wait for the sun to melt the snow. A lost day, but the crew is intact.', time: 1, morale: -2 },
+        { text: 'Push through — follow the ridge', dc: 11, ok: 'The going is brutal but you keep moving.', bad: 'The snow deepens. Progress is measured in yards.', crew: 'tired', morale: -8 },
+      ],
+    },
   ],
   river: [
     {

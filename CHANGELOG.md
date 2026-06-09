@@ -2,6 +2,51 @@
 
 All notable changes are documented here. Format loosely follows Keep a Changelog.
 
+## [v65] — 2026-06-09
+
+### Added — Weather system (#13)
+
+**Tier 1: Weather as modifier layer on existing mechanics.**
+
+**5 weather states:** clear, overcast, rain, storm, snow — determined by season-aware Markov chain seeded from game state.
+
+**Mechanical effects:**
+- Clear: no changes (baseline)
+- Overcast: -1 morale/day
+- Rain: +25% wear chance, +0.3 food/day, -2 morale/day, +10% event chance, camp morale +10 (was +15)
+- Storm: +50% wear chance, +0.5 food/day, -4 morale/day, +15% event chance, camp morale +5 (was +15)
+- Snow: +40% wear chance, +0.5 food/day, -3 morale/day, +10% event chance, camp morale +5 (was +15)
+
+**4 new weather events:**
+- `plains_thunderstorm` (plains pool): green-black sky, lightning on open prairie
+- `plains_windstorm` (plains pool): relentless north wind threatens to tip the cart
+- `river_valley_flash_flood` (river_valley pool): three days of rain, river rising fast
+- `upland_early_snow` (uplands pool): first storm of season, trail disappears under snow
+
+**6 new source entries:** LACOMBE_STORM, FONSECA_RAIN, SCHULTZ_SNOW, LACOMBE_WIND, BREHAUT_WET_AXE, FONSECA_OVERCAST
+
+**UI changes:**
+- Weather indicator in status bar between Season and Segment progress
+- Emoji + label display: ☀ Clear / ☁ Overcast / 🌧 Rain / ⛈ Storm / ❄ Snow
+- Color-coded by state (gold/green/slate blue/dark red/pale blue-grey)
+- Weather-specific travel narrative fragments (4 per weather state per terrain = 64 new fragments)
+- Weather fragments take priority over crew-state fragments during non-clear weather
+
+**Engine changes:**
+- `advanceWeather()` called at start of `travelOneDay()` — Markov chain transition with season gating
+- Weather modifiers applied to food consumption, wear accumulation, morale drift, event chance
+- `makeCamp()` morale recovery varies by weather (15/15/10/5/5)
+- `getState()` now returns `weather` field
+- `pickEventWithChance(chance)` added for weather-modified event probability
+
+**Sim results (200 sims):**
+- Win rate: 29% (target 25-40% ✓)
+- Deaths: cart_failure 28%, starvation 18.5%, no_trade 24%, timeout 3%
+- Avg days survived: 41.67
+- Weather contributes to ~10-15% of all deaths as intended
+
+Files: `src/core/constants.js`, `src/systems/engine.js`, `src/data/events.js`, `src/data/sources/index.js`, `src/main.js`, `src/ui/renderer.js`, `src/template.html`, `dist/index.html`.
+
 ## [v64] — 2026-06-08
 
 ### Documentation — Weather system planning prompt

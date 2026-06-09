@@ -1,6 +1,7 @@
 import { NODES } from '../data/nodes.js';
 import { applyTheme } from './theme.js';
 import cartMarkerUrl from '../../art/cart_marker.png';
+import { CONSTANTS } from '../core/constants.js';
 
 const MONTH_NAMES = ['', 'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
@@ -213,6 +214,13 @@ export function renderStatusBar(state) {
   foodEl.className = 'stat-value' + (state.food <= 5 ? ' food-low' : '');
   wearEl.textContent = String(state.wear);
   wearEl.className = 'stat-value' + (state.wear >= 4 ? ' wear-high' : '');
+
+  const weatherEl = document.getElementById('s-weather');
+  if (weatherEl) {
+    const w = state.weather || 'clear';
+    weatherEl.textContent = CONSTANTS.WEATHER_LABELS[w] || '☀ Clear';
+    weatherEl.className = 'stat-value weather-' + w;
+  }
 
   if (!window.__METIS_PENDING_RESULT__) window.__METIS_PENDING_RESULT__ = null;
   renderTravelLinesView(state, window._metisGame, window.__METIS_PENDING_RESULT__);

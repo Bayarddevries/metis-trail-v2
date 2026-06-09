@@ -17,6 +17,11 @@ Use this file to log bugs, blockers, and known gaps during work sessions. Each i
 
 ## Resolved
 
+### 13. Weather system
+- Opened: 2026-06-07
+- Resolved: 2026-06-09 (v65)
+- Fix: 5-state weather system (clear/overcast/rain/storm/snow) with season-aware Markov chain. Modifies food, wear, morale, events, camp recovery. 4 new events, 6 new sources, status bar indicator. Sim: 29% win rate.
+
 ### 29. Pass/fail should appear after dice settle
 - Opened: 2026-06-08
 - Resolved: 2026-06-08 (v50, v51)

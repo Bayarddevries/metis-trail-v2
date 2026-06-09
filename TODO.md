@@ -41,7 +41,7 @@ Legend: `pending` | `in_progress` | `blocked` | `done`
 - [ ] Add second half of Carlton Trail nodes with citations
 - [ ] Add scout/guide hire moral choices with history anchoring
 - [ ] Polish end-game scoring and local leaderboard
-- [ ] Weather system — seasonal effects on travel and events
+- [x] Weather system — seasonal effects on travel and events (v65)
 - [ ] Conditional endings — multiple ending paths
 - [ ] Pre-departure cart packing — let players choose starting loadout
 
