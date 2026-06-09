@@ -100,12 +100,48 @@ Use this file to log bugs, blockers, and known gaps during work sessions. Each i
 ## External (docs completed 2026-06-09, implementation in progress)
 
 ### 25. Cultural/peer review
-- Status: Review doc complete, partial implementation done
+- Status: Review doc complete, implementation in progress
 - Deliverable: [docs/cultural-review.md](docs/cultural-review.md)
 - Implemented in v70: Women/children presence (4 new events, 4 new sources, camp action, settlement descriptions, Batoche foreshadowing, dog reference)
-- Remaining: Secondary source reformatting (Wikipedia-style quotes)
+- Remaining: Secondary source reformatting → tracked as GitHub #42
 
 ### 6. AI writing trend review
 - Status: Review doc complete, implementation done
 - Deliverable: [docs/writing-review.md](docs/writing-review.md)
 - Implemented in v70: All 16 rewrite recommendations applied (12 events, 4 endings, travel fragments, camp flavor, intro text, source context UI)
+
+---
+
+## Tracked on GitHub (open)
+
+### #42 — Reformat secondary sources to period voices
+- Labels: enhancement
+- MMF_COMMUNITIES, CARLTON_TRAIL, NWMP_HISTORY read as Wikipedia; replace with period excerpts or reformat as historical notes
+
+### #43 — Add second half of Carlton Trail nodes
+- Labels: enhancement
+- Western portion of trail not yet implemented
+
+### #44 — Pre-departure cart packing overlay
+- Labels: enhancement
+- Player configures starting cart before journey; blocked by overlay sequence bug
+
+### #45 — Unit tests for calendar and PRNG
+- Labels: enhancement
+- Test date advancement, season changes, PRNG reproducibility
+
+### #46 — Save/load validation and schema version
+- Labels: bug
+- Add schema version to saves, validate on load, reject/migrate corrupted saves
+
+### #47 — mountDebugUI behind ?debug=1
+- Labels: enhancement
+- Debug panel should only mount with URL flag
+
+### #48 — Standardize conventional commit messages
+- Labels: documentation
+- Establish commit message conventions in AGENTS.md
+
+### #49 — Add doc comments to exported engine.js functions
+- Labels: documentation
+- JSDoc/JS comments on all public engine methods for handoff reliability
