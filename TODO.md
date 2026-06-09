@@ -33,8 +33,8 @@ Legend: `pending` | `in_progress` | `blocked` | `done`
 - [x] Item system wiring — all 12 items integrated into repair/rest/heal/events
 - [x] itemBonus/consumesItem/requiresItem event choice fields
 - [x] Implement `mountDebugUI` conditionally with `?debug=1`
-- [ ] Add minimal unit tests for calendar and PRNG
-- [ ] Add save/load validation and migration-ready schema version
+- [x] Add minimal unit tests for calendar and PRNG
+- [x] Add save/load validation and migration-ready schema version
 
 ## Phase 3 — Content & Mechanics Expansion
 - [x] Wire all 12 inventory items into game systems (repair, rest, heal, events)

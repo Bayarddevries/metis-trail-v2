@@ -2,6 +2,26 @@
 
 All notable changes are documented here. Format loosely follows Keep a Changelog.
 
+## [v74] — 2026-06-10
+
+### Phase 2 — Core Systems & Debugging: Testing & Persistence
+- **#45**: Added unit tests for calendar (`tests/calendar-prng.test.js`) — 12 tests covering leap years, month lengths, seasons, date advancement
+- **#45**: Added unit tests for PRNG (`tests/calendar-prng.test.js`) — 13 tests covering deterministic seeding, distribution, d20 rolls
+- **#46**: Added save/load validation with schema versioning in `src/ui/persistence.js`
+  - Schema version tracking (current: v1)
+  - Legacy save migration support (auto-detects saves without schemaVersion)
+  - Full state validation on load (type checks, range checks, required fields)
+  - Migration framework for future schema changes
+  - Pre-save validation prevents corrupting localStorage
+  - 22 tests in `tests/persistence.test.js` covering round-trips, validation, migration, legacy support
+- Mock localStorage for Node.js test environment
+
+### Build — Test Suite
+- All 47 unit tests pass (25 calendar/PRNG + 22 persistence)
+- Build continues to pass with new persistence module
+
+Files modified: `src/ui/persistence.js`, `tests/calendar-prng.test.js`, `tests/persistence.test.js`
+
 ## [v73] — 2026-06-10
 
 ### Audit P0 — Period-Accurate Sharp-Corner Aesthetic (per 2026-06-09 design audit)
