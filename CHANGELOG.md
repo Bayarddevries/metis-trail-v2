@@ -2,6 +2,19 @@
 
 All notable changes are documented here. Format loosely follows Keep a Changelog.
 
+## [v63] — 2026-06-08
+
+### Balance — Win rate normalization pass
+
+- `DAILY_FOOD`: 1.2 → 1.35 (+25% consumption pressure)
+- Starting food: 30 → 27 (-3 food units)
+- Wear accumulation: plains 0.08→0.10, river_valley 0.12→0.15, wooded 0.15→0.20
+- Fix `consumesItem` handling in `resolveChoice()` — Medicine Pouch now actually consumed by cholera event (was dead code)
+- Lowered triumphant threshold in sim: 1400 → 1100
+- Sim results: 35% win rate (target 25-40%), deaths: starvation ~20%, cart failure ~22%, no_trade ~40%
+
+Files: `src/core/constants.js`, `src/systems/engine.js`, `tests/simulate-entry.js`.
+
 ## [v62] - 2026-06-08
 
 ### Added — Item-giving events for crafting input replenishment

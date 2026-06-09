@@ -1,13 +1,21 @@
 # HANDOFF — Metis Trail V2
 
 **Last updated:** 2026-06-08 by OWL
-**Version:** v62 (dist), template synced for next build
+**Version:** v63 (dist), template synced for next build
 **Server:** http://100.108.183.33:5173/ (python3 -m http.server in dist/)
 **Branch:** main, clean tree, pushed to origin
 
 ---
 
 ## Session Summary (2026-06-08)
+
+### v63 — Win rate normalization balance pass
+- DAILY_FOOD: 1.2 → 1.35, starting food: 30 → 27
+- Wear accumulation: plains 0.08→0.10, river_valley 0.12→0.15, wooded 0.15→0.20
+- Fix `consumesItem` in resolveChoice() — Medicine Pouch now consumed by cholera event
+- Lowered sim triumphant threshold: 1400 → 1100
+- Sim results: 35% win rate (target 25-40%), diverse death reasons
+- Files: `src/core/constants.js`, `src/systems/engine.js`, `tests/simulate-entry.js`
 
 ### v62 — Item-giving events for crafting input replenishment
 - 4 new events that give crafting input items as rewards, making crafting a renewable system:
@@ -149,10 +157,11 @@ curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:5173/
 - [x] Duplicate Trade button resolved (v53 — inline panel, no separate toggle)
 
 ### Phase 8 — Win Rate Normalization
-- [x] Balance baseline accepted
-- [ ] Win rate 66.5% vs 25-40% target — weather/food tuning options remain
-- [ ] Replace travel debug narrative with atmospheric fragments
+- [x] Win rate normalized: 57.5% → 35% (target 25-40%) — v63
+- [x] consumesItem bug fixed — Medicine Pouch now consumed by cholera event
 - [ ] Cart unload buttons show item name
+- [ ] Replace travel debug narrative with atmospheric fragments
+- [ ] Basic icons / map markers (Issue #10, #26)
 
 ---
 

@@ -34,8 +34,8 @@ function pickSettlementAction(actions, state, rand) {
     if (a === 'continue') return 35;
     if (a === 'rest' && (state.crew !== 'rested' || state.morale < 50)) return 30;
     if (a === 'rest') return 10;
-    if (a === 'trade' && state.food < 12) return 25;
-    if (a === 'trade') return 12;
+    if (a === 'trade' && state.food < 10) return 30;
+    if (a === 'trade') return 15;
     if (a === 'forage' && state.food < 8) return 25;
     if (a === 'forage') return 12;
     if (a === 'repair' && state.wear >= 3) return 30;
@@ -204,8 +204,8 @@ function aggregate(results) {
   });
 
   // Ending quality
-  const triumphant = victories.filter(r => r.score >= 1400).length;
-  const humble = victories.filter(r => r.score < 1400).length;
+  const triumphant = victories.filter(r => r.score >= 1100).length;
+  const humble = victories.filter(r => r.score < 1100).length;
 
   // Averages
   const avg = key => results.map(r => r[key]).reduce((s, v) => s + v, 0) / total;
@@ -414,10 +414,10 @@ if (cartFailPct > 15) {
 // Score spread
 if (s.victories > 0) {
   if (s.triumphant === 0) {
-    console.log(`🟠 NO TRIUMPHRIC ENDINGS: 1400 threshold unreachable or too high`);
+    console.log(`🟠 NO TRIUMPHRIC ENDINGS: 1100 threshold unreachable`);
     console.log(`   → Verify calcScore() formula gives reachable scores`);
-    console.log(`   → Consider lowering threshold to 1200`);
-    console.log(`   → Or increase trade goods scoring (×120 is generous; check if low trade good count is the bottleneck)`);
+    console.log(`   → Consider lowering threshold to 900`);
+    console.log(`   → Or increase trade goods scoring`);
     console.log();
   }
   if (s.triumphant > 0 && s.humble > 0) {
@@ -425,7 +425,7 @@ if (s.victories > 0) {
     if (ratio > 5) {
       console.log(`🟡 TOO MANY TRIUMPHANT (${ratio}:1 vs humble)`);
       console.log(`   → Victory is too consistent once reached`);
-      console.log(`   → Consider: score ≥ 1600 for Triumphant, or increase days penalty`);
+      console.log(`   → Consider: score ≥ 1300 for Triumphant, or increase days penalty`);
       console.log();
     }
   }

@@ -27,7 +27,7 @@ export function createGame(seed = null) {
     date: { month: CONSTANTS.START_MONTH, day: CONSTANTS.START_DAY },
     season: seasonFor(CONSTANTS.START_MONTH),
     crew: 'rested',
-    food: 30,
+    food: 27,
     wear: 0,
     morale: 70,
     node: 0,
@@ -154,6 +154,13 @@ export function createGame(seed = null) {
         }
       });
     }
+    if (ch.consumesItem) {
+      const idx = cart.findIndex((i) => i.name === ch.consumesItem);
+      if (idx !== -1 && cart[idx].count > 0) {
+        cart[idx].count--;
+        result.effects.push(`-1 ${ch.consumesItem}`);
+      }
+    }
     if (ch.extraProgress) {
       S.segmentDay += ch.extraProgress;
       result.effects.push(`+${ch.extraProgress} progress`);
@@ -211,7 +218,7 @@ export function createGame(seed = null) {
     S.travelDaysWithoutRest++;
     advance();
 
-    const wearChance = { plains: 0.08, river_valley: 0.12, wooded: 0.15 };
+    const wearChance = { plains: 0.10, river_valley: 0.15, wooded: 0.20 };
     if (rand() < (wearChance[NODES[S.node].terrain] || 0.2)) S.wear++;
 
     // Squeal event: at high wear, the axle's scream draws attention
@@ -339,7 +346,7 @@ export function createGame(seed = null) {
       }
     }
     if (action === 'craft') {
-      const recipes = game.getAvailableRecipes();
+      const recipes = this.getAvailableRecipes();
       if (recipes.length === 0) return { error: 'No recipes available' };
       // Note: The actual crafting is done via the UI buttons which call game.craftRecipe()
       // This just advances time for the crafting activity

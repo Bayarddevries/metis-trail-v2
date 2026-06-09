@@ -3,7 +3,7 @@ export const CONSTANTS = Object.freeze({
   START_MONTH: 6,
   START_DAY: 15,
   MAX_WEAR: 5,
-  DAILY_FOOD: 1.2,
+  DAILY_FOOD: 1.35,
   EVENT_CHANCE: 0.45,
   DAYS_PER_WEEK: 7,
   CREW_MOD: { rested: 1, tired: 0, exhausted: -2 },
