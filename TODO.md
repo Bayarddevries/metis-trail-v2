@@ -110,11 +110,30 @@ Legend: `pending` | `in_progress` | `blocked` | `done`
 
 ## Phase 8 — Win Rate Normalization & Polish (CURRENT)
 - [x] Post-balance baseline accepted: 300-run realistic-choice sim results shipped as current balance
+- [x] Dice clarity: DC → "Need X+" directional hint on events and camp (#41, #58)
+- [x] Camp dice fix: per-action DCs, reset on reopen, show threshold (#41)
+- [x] End-screen leaderboard: no auto-popup, "View Hall of Fame" button (#70)
+- [x] Party name + profanity filter (#40)
+- [x] Status bar grouping: Journey + Cart clusters with brass separator (#56)
+- [x] Weather text: emoji → period descriptors (#57)
+- [x] Die restyle: wooden block with grain texture (#53)
+- [x] Ink-stamp: success/fail CSS variants (#54)
+- [x] MB currency symbol: 💎 MB → ₥ (mill sign)
 - [ ] Win rate 66.5% post-balance, still above 25-40% target but accepted by user
 - [ ] Options remain: weather system, higher food consumption, more aggressive event penalties, time pressure
 - [ ] Cart unload buttons show item name for clarity
-- [ ] Replace travel debug narrative with atmospheric fragments
 - [ ] Basic icons / map markers (Issue #10, #26)
+- [ ] Haptics module (#59)
+- [ ] Web Audio ambient engine (#60)
+
+## Phase 9 — Unauthored Events & Historical Gaps (IDENTIFIED, NOT STARTED)
+- [ ] Many events still lack primary source citations — audit all 55 events for source coverage gaps
+- [ ] No events for: smallpox/epidemic, encounter with HBC officers, buffalo hunt scenes, river ferry crossings
+- [ ] Women and children presence needs expansion beyond current 4 events (cultural review #25 follow-up)
+- [ ] French-language dialogue options missing (Métis were bilingual — period quotes in French would add authenticity)
+- [ ] No "gossip trail" mechanic — intelligence from other travellers at settlements is underused
+- [ ] Seasonal events too uniform — early June should feel different from late October
+- [ ] Events referencing / interaction with the land / game trailing off in the west — need more prairie-specific events
 
 ## Phase 0 — Camp Overhaul (IMPLEMENTED)
 - [x] Add `campAction()` engine method with 7 activities (rest/forage/hunt/repair/scout/dance/deeprest)
