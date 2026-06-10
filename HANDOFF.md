@@ -2,72 +2,79 @@
 
 - Last updated: 2026-06-10
 - Branch: main
-- Latest commit: 362f7e4
+- Latest commit: 5662be0
 - Remote: origin https://github.com/Bayarddevries/metis-trail-v2.git
-- Working tree: clean
+- Working tree: clean (DESIGN.md uncommitted)
 
 ## Verified state
 
-- https://bayarddevries.github.io/metis-trail-v2/ is serving the latest deployed build.
-- Confirmed live asset version: `app.js?v=106`.
-- Local built source version in `src/template.html`: `app.js?v=106`.
-- GitHub Actions Pages deploy is working.
-- Local test server: `http://100.108.183.33:8081/index.html`
+- https://bayarddevries.github.io/metis-trail-v2/ serving latest build
+- Local test server: http://100.108.183.33:8081/index.html
+- Build command: `bun scripts/build.mjs`
+- Audio module DELETED (was causing console errors)
 
-## Commits in this session
+## DESIGN DOCUMENT
 
-- `362f7e4` — feat(ui): dice clarity, camp fix, party name, status bar, weather text, die restyle, ink-stamp, end-screen lb
+**READ `DESIGN.md` BEFORE DOING ANY WORK.** It contains the complete redesign plan.
+All future work should follow that document. Update it as decisions are made.
 
-## What changed in v83
+## What was done today
 
-### Dice Clarity & Camp Fix
-- DC display changed from "DC 12" to "Need 12+" everywhere (event choices, camp dice, outcome text)
-- Camp dice uses per-action DC thresholds from engine instead of hardcoded 10
-- Camp dice shows "Need X+ ✓/✗" instead of raw total
-- Camp roll display resets on each camp open (was persisting)
-- Event choice buttons requiring items are disabled when player lacks the item
+### v83 — Dice clarity, camp fix, party name, UI polish
+- DC display: "DC 12" → "Need 12+" everywhere
+- Camp dice: per-action DC thresholds, reset on reopen
+- End-screen: no auto-popup, "View Hall of Fame" button
+- Party name + profanity filter
+- Status bar: Journey + Cart clusters
+- Weather: emoji → text
+- Die: wooden block CSS
+- Ink-stamp: success/fail CSS
+- MB symbol: 💎 → ₥
 
-### End Screen / Leaderboard (#70)
-- Removed auto-popup of leaderboard after game over
-- Added "🏆 View Hall of Fame" button to end-screen overlay
+### v84 — Haptics, audio, sources, icons
+- Haptics module created and wired
+- Audio module created (then DELETED — too fragile)
+- Secondary sources rewritten as period voices
+- SVG icons created (then reverted to emoji — SVG too small)
 
-### Party Name (#40)
-- Intro text: "What is your party's name, traveller?" / "Enter party name..."
-- Profanity filter: common slurs → asterisks; no-letter names → "Traveller"
-- Leaderboard messages reference "party name"
+### v85 — Bug fixes
+- Audio removed entirely
+- Cart overlay: always shows unload buttons, detailed descriptions
+- Category hints: more informative ("1 food/day keeps the crew alive...")
+- Lined paper: simplified CSS
+- Hunt/repair fix: use game.getCart() instead of state.cart (was undefined)
 
-### UI Polish
-- #53: Die restyled as wooden block with grain texture
-- #54: .event-stamp.success (green) and .event-stamp.fail (fail, opposite tilt) CSS
-- #56: Status bar grouped into Journey + Cart clusters with brass separator
-- #57: Weather display changed from emoji to period text ("Clear" not "☀ Clear")
-- MB status bar symbol: "💎 0 MB" → "0 ₥" (mill sign)
+## Known bugs (from GitHub issues)
 
-## Known issues
+- #71 — Final score shows decimal points
+- #72 — End-game buttons different sizes
+- #73 — Hall of Fame doesn't load
+- Hunt/repair "missing items" — FIXED in v85 (state.cart was undefined)
 
-- `gh-pages` branch is in inconsistent state from earlier manual deploy attempts and should not be used.
-- `Bun` is the local build tool (`bun scripts/build.mjs`); npm is broken in this environment.
-- Playwright browser launch is broken here due to a headless Chrome/DBus issue; use local manual verification for UI.
-- `gh` auth token expired — cannot auto-close GitHub issues. Re-auth with `gh auth login`.
+## Next work (from DESIGN.md Sprint 1)
 
-## Next recommended work
+1. Fix #71, #72, #73
+2. Build starting shop screen
+3. Build narrative journal
+4. Unify visual style
 
-### Sprint A — Audio & Haptics (2 issues, ~130 lines)
-- #59 — Haptics module (35 lines + 10 wiring)
-- #60 — Web Audio ambient engine (90 lines + 15 wiring)
-- Both are self-contained new files, no engine changes needed
+## Files modified recently
 
-### Sprint B — Content Expansion (new work, no issues yet)
-- Phase 9 items from TODO: unauthored events, historical gaps, French dialogue, gossip trail
-- Add second half of Carlton Trail nodes (#43)
-- Reformat secondary sources to period voices (#42)
+- `src/main.js` — main game logic, UI handlers
+- `src/template.html` — HTML structure, CSS
+- `src/ui/haptics.js` — haptic feedback (keep)
+- `src/ui/audio.js` — DELETED
+- `src/ui/icons.js` — emoji icons (keep)
+- `src/ui/renderer.js` — status bar, map rendering
+- `src/data/sources/index.js` — rewritten period voices
+- `src/data/items.js` — icon fields removed
+- `DESIGN.md` — NEW, comprehensive redesign plan
 
-### Sprint C — Balance & Difficulty (design-needed)
-- Win rate normalization (currently 66.5%, target 25-40%)
-- Weather effects in travel engine (#61)
-- Recommended action highlight in settlements (#62)
+## Conventions
 
-### Backlog
-- #10 — Basic icons for items
-- #6 — AI writing trend review (doc complete, partial implementation)
-- #25 — Cultural review (doc complete, partial implementation)
+- Build: `bun scripts/build.mjs`
+- Commit: conventional commits (feat/fix/chore/docs/balance)
+- Do NOT edit `dist/` files directly
+- Sync `src/template.html` version with `dist/index.html` after each build
+- Update DESIGN.md as work progresses
+- Update HANDOFF.md with each session
