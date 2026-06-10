@@ -257,25 +257,165 @@ Wear +1
 - [x] Fix #73 HoF load
 - [x] Fix lined paper CSS
 
-### Sprint 2: Core Redesign — PARTIAL
+### Sprint 2: Core Redesign ✅ COMPLETE
 - [x] Build starting shop screen
 - [x] Build narrative journal (basic — travel logging only)
 - [x] Unify cart overlay
-- [ ] Redesign camp action cards + critical failures
-- [ ] Add event/camp/settlement journal logging
+- [x] Redesign camp action cards + critical failures
+- [x] Add event/camp/settlement journal logging
+- [x] Hunt gives trade goods (pelts/hides) not food
 
-### Sprint 3: Settlements & Economy — TODO
-- [ ] Rework 4 settlement types with distinct actions
-- [ ] Add hunting-for-trade-goods events
-- [ ] Implement price variation by location
-- [ ] Build endgame scoring screen
+### Sprint 3: Settlements & Economy
+**Goal:** 4 distinct settlement types with unique actions, hunting events, price variation, endgame scoring.
 
-### Sprint 4: Visual Unification — TODO
-- [ ] Apply gritty color palette everywhere
-- [ ] Unify all overlay styles
-- [ ] Redesign status bar
-- [ ] Map styling (sepia, no modern markers)
-- [ ] Polish all buttons, borders, spacing
+#### 3.1 Settlement Overlay Redesign (`src/main.js`, `src/template.html`)
+- [ ] Replace generic settlement overlay with type-specific overlays
+- [ ] Each settlement type shows unique action set with period-appropriate labels
+- [ ] Action cards show cost (₥/food/items), risk, flavor text — same card pattern as camp
+- [ ] Settlement header: name, type badge, distance from Fort Garry, description
+- [ ] Continue West button always visible (dismisses pendingSettlement)
+
+#### 3.2 HBC Fort Actions (`src/systems/engine.js`, `src/data/nodes.js`)
+- [ ] **Trade Goods → ₥**: Primary function, best rates for pelts/hides
+- [ ] **Buy Supplies**: Full shop inventory (pemmican, axle, shaganappi, tools, tarp, firewood, rope, ammo, medicine, blankets)
+- [ ] **Rest**: 1 food → crew rested +15 morale (costs 1 day implicitly via travel loop)
+- [ ] **Get Trail Intel**: 1 ₥ → reveals next 2 node events/gossip (sets gossip in engine)
+- [ ] Price multiplier: 1.0x (base rates)
+
+#### 3.3 Métis Camp Actions
+- [ ] **Trade Gossip**: Free, reveals 1 gossip entry (more personal/relational)
+- [ ] **Recruit Crew**: 2 ₥ + 1 food → +1 crew member (max 6)
+- [ ] **Dance (Morale)**: 1 food → morale +10, no day advance
+- [ ] **Share Food**: Give 2+ food → morale +5 per food, builds relationship
+- [ ] **Craft Finished Hides**: 3 raw hides + 1 shaganappi → 1 finished_hide (worth 2× ₥)
+- [ ] Price multiplier: 0.9x for buying, 1.1x for selling trade goods
+
+#### 3.4 NWMP Post Actions
+- [ ] **Pay Fines**: If `state.fines > 0`, pay ₥ to clear
+- [ ] **Get Permits**: 2 ₥ → `state.hasPermit = true` (required for certain river crossings)
+- [ ] **Report for Duty**: 1 day → ₥ reward (scales with distance traveled), morale -5
+- [ ] **Buy Ammo**: 1.5 ₥ per Ammunition Belt (cheaper than HBC)
+- [ ] **Rest**: 1 food → crew rested (no morale bonus)
+- [ ] Price multiplier: 1.2x for supplies, 0.8x for ammo
+
+#### 3.5 Mission Actions
+- [ ] **Heal Crew**: 1 medicine pouch OR 2 ₥ → all injury/illness cleared, morale +10
+- [ ] **Rest**: Free → crew rested, morale +15 (blessing)
+- [ ] **Get Blessing**: 1 food → morale +10, next event DC -1
+- [ ] **Trade**: Limited — only buys pemmican (0.5 ₥ each), sells blankets (1.5 ₥)
+- [ ] Price multiplier: 0.8x for buying, 1.5x for selling (charity rates)
+
+#### 3.6 Settlement Data (`src/data/nodes.js`)
+- [ ] Add `settlementType` to each node: 'hbc' | 'metis' | 'nwmp' | 'mission'
+- [ ] Add `settlementName`, `settlementDescription` per node
+- [ ] Add `priceMultiplier` object per settlement: `{buy: 1.0, sell: 1.0, categories: {...}}`
+- [ ] Define which settlements exist at which nodes (Carlton Trail: Fort Garry=HBC, St. François Xavier=Métis, Fort Ellice=HBC, Fort Pelly=HBC, Fort Carlton=HBC/NWMP, Fort Battleford=NWMP, Fort Edmonton=HBC)
+
+#### 3.7 Hunting Events (`src/data/events.js`)
+- [ ] Create terrain-specific hunt events triggered by `campAction('hunt')`
+- [ ] **Plains (Bison)**: 60% success, DC 12. Success → 1-2 Bison Hide (1.25 ₥ each). Fail: lose 1 ammo. Crit fail: +morale -2
+- [ ] **River Valley (Beaver)**: 50% success, DC 14. Success → 1 Beaver Pelt (3.0 ₥). Fail: lose 1 ammo. Crit fail: +morale -2
+- [ ] **Uplands (Elk)**: 45% success, DC 15. Success → 1 Elk Hide (2.5 ₥). Fail: lose 1 ammo. Crit fail: +morale -2
+- [ ] **Wooded (Deer)**: 55% success, DC 13. Success → 1 Deer Hide (1.8 ₥). Fail: lose 1 ammo. Crit fail: +morale -2
+- [ ] Events use `getSource()` for historical quotes
+- [ ] Critical failure (roll 1) flagged in journal with ⚠
+
+#### 3.8 Price Variation by Location
+- [ ] Base prices in `src/data/items.js` (shop prices)
+- [ ] Settlement multiplier applied in `getTradeEstimate()` / `tradeItem()`
+- [ ] Category multipliers: food ×1.0, repair ×1.0, medical ×1.0, tools ×1.0, shelter ×1.0, trade_goods ×varies
+- [ ] Trail position modifier: further west = higher buy prices (scarcity), lower sell prices (market saturation)
+- [ ] Formula: `finalPrice = basePrice * settlementMultiplier * categoryMultiplier * (1 + distanceFactor * 0.15)`
+
+#### 3.9 Endgame Scoring Screen (`src/main.js`, `src/template.html`)
+- [ ] Triggered on reaching Fort Edmonton node
+- [ ] Shows: Base (500), ₥ Value ×80, Food Bonus (×12 per unit, max 300), Crew Condition (Rested +30, Tired +10, Exhausted 0), Days Penalty (−8/day), Wear Penalty (−40 per wear)
+- [ ] Tier display: <500 "Barely Survived", 500-1200 "Solid Profit", 1200+ "Legendary Haul"
+- [ ] Narrative ending text per tier with source quote
+- [ ] "View Hall of Fame" button (no auto-popup)
+- [ ] Party name submitted with score
+
+#### 3.10 Engine API Additions (`src/systems/engine.js`)
+- [ ] `getSettlementActions(settlementType)` → returns action list with metadata
+- [ ] `settlementAction(type, params)` → handles all settlement actions, returns result
+- [ ] `getTradeEstimate(itemId, quantity, settlementType)` → buy/sell price preview
+- [ ] `getEndgameScore()` → returns breakdown object
+- [ ] `getSettlementData(nodeId)` → returns settlement config for current node
+
+### Sprint 4: Visual Unification
+**Goal:** Apply gritty period-accurate aesthetic everywhere, unify all overlay styles.
+
+#### 4.1 Color Palette Application (`src/ui/theme.js`, `src/template.html`)
+- [ ] Define CSS custom properties in `:root` (migrated from template.html inline styles)
+- [ ] Dark bg #1a1208 → body, status bar, overlays
+- [ ] Panel bg #2a1f10 → all overlay backgrounds
+- [ ] Journal bg #f5e6c8 → #journal only
+- [ ] Ink dark #3a2f1f → text on cream
+- [ ] Ink light #c4b69a → text on dark
+- [ ] Accent brass #8b6914 → borders, headers, highlights
+- [ ] Success #4a7a3a → success states
+- [ ] Danger #8b2500 → failure/warning states
+- [ ] Apply via `applyTheme()` at bootstrap (already exists, extend it)
+
+#### 4.2 Overlay Style Unification (`src/template.html`)
+- [ ] All overlays: #camp-overlay, #settlement-overlay, #shop-overlay, #cart-overlay, #event-overlay, #ending-overlay, #predeparture-overlay
+- [ ] Shared base class `.overlay-panel` with:
+  - background: var(--clr-panel-bg)
+  - border: 2px solid var(--clr-accent)
+  - NO border-radius, NO box-shadow
+  - padding: 16px
+  - max-width: 90vw, max-height: 85vh
+  - overflow: auto
+- [ ] Header: brass border-bottom, heading font, uppercase, letter-spacing
+- [ ] Close button: top-right, 44×44px touch target, brass border on hover
+- [ ] Button hierarchy: `.action-primary` (brass bg, dark ink), `.action-secondary` (transparent, brass border), `.action-ghost` (text only, brass on hover)
+- [ ] All buttons: min-height 44px, flat, NO rounded corners
+
+#### 4.3 Status Bar Redesign (`src/ui/renderer.js`, `src/template.html`)
+- [ ] Two clusters: Journey (Day, Date, Segment, Weather, Morale) | Cart (Weight, Capacity, ₥, Food)
+- [ ] Brass vertical separator between clusters
+- [ ] Compact: 32px height, 12px font
+- [ ] Color-coded values: food-low red, wear-high amber, morale tiers
+- [ ] Segment progress: "Fort Garry → White Horse Plains (12 km)"
+
+#### 4.4 Map Styling (`src/ui/renderer.js`, `src/template.html`)
+- [ ] Full sepia: grayscale(1) contrast(1.1) brightness(0.9) on tile pane
+- [ ] Trail: dotted line #8b6914, 2px, via L.polyline
+- [ ] Settlements: simple circles, brass stroke, type-colored fill (HBC=red, Métis=blue, NWMP=green, Mission=gold)
+- [ ] Cart marker: custom SVG icon (cart silhouette), brass stroke
+- [ ] NO modern markers, NO highway signs, NO attribution control
+- [ ] Node tooltips: uppercase, heading font, brass bg, dark ink
+
+#### 4.5 Button & Component Polish (`src/template.html`)
+- [ ] Primary: background #8b6914, color #1a1208, border none, hover: brightness 1.1
+- [ ] Secondary: background transparent, color #8b6914, border 1px solid #8b6914, hover: bg #8b6914, color #1a1208
+- [ ] Ghost: background transparent, color #c4b69a, border none, hover: color #8b6914
+- [ ] Disabled: opacity 0.4, cursor not-allowed
+- [ ] Focus visible: brass outline 2px, offset 2px
+- [ ] Touch targets: min 44×44px (already in .action-* classes)
+
+#### 4.6 Journal Polish
+- [ ] Entry header: brass left border 3px, uppercase heading font
+- [ ] Collapsed: only header visible, chevron indicator (▼/▶)
+- [ ] Expanded: text, dice, mechanical all visible
+- [ ] Dice line: brass color, small heading font, pass=green, fail=red
+- [ ] Mechanical: muted ink, small, italic
+
+#### 4.7 Dice & Ink-Stamp Consistency
+- [ ] Wooden die block: 48×48px, grain texture, brass pips
+- [ ] Roll animation: settle over 1.2s, slight rotation variance
+- [ ] Result stamp: "✓ SUCCESS" / "✗ FAILURE" in ink-stamp style (rotated slightly, brass ink)
+- [ ] Critical fail: red danger color, ⚠ icon, "CRITICAL FAILURE" stamp
+
+### Sprint 5: Content & Historical Depth (Future)
+- [ ] Audit all 55 events for source coverage gaps
+- [ ] Add missing events: smallpox/epidemic, HBC officer encounters, buffalo hunt scenes, river ferry crossings
+- [ ] Expand women/children presence (currently 4 events)
+- [ ] French-language dialogue options
+- [ ] Gossip trail mechanic at settlements
+- [ ] Seasonal event variation (June vs October)
+- [ ] Prairie-specific events for western trail
+- [ ] Second half of Carlton Trail nodes with citations
 
 ---
 
