@@ -36,7 +36,7 @@ Legend: `pending` | `in_progress` | `blocked` | `done`
 - [x] Add minimal unit tests for calendar and PRNG
 - [x] Add save/load validation and migration-ready schema version
 
-## Phase 3 — Content & Mechanics Expansion
+### Phase 3 — Content & Mechanics Expansion
 - [x] Wire all 12 inventory items into game systems (repair, rest, heal, events)
 - [x] Add itemBonus/consumesItem/requiresItem event choice fields
 - [ ] Add second half of Carlton Trail nodes with citations
@@ -44,7 +44,7 @@ Legend: `pending` | `in_progress` | `blocked` | `done`
 - [ ] Polish end-game scoring and local leaderboard
 - [x] Weather system — seasonal effects on travel and events (v65)
 - [x] Conditional endings — multiple ending paths (v36, 6 ending types)
-- [ ] Pre-departure cart packing — let players choose starting loadout
+- [x] Pre-departure cart packing — let players choose starting loadout
 
 ### Phase 4 — UI/UX Polish
 - [x] Mobile bar, button hierarchy, camp grouping, settlement polish done

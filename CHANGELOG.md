@@ -2,6 +2,23 @@
 
 All notable changes are documented here. Format loosely follows Keep a Changelog.
 
+## [v80] — 2026-06-10
+
+### Pre-Departure Cart Packing Overlay (Issue #44)
+- Enabled pre-departure cart configuration by setting `preDeparture: true` in initial game state
+- Full UI already existed in `template.html` (overlay, briefing, category legend, weight display, item list with +/- controls)
+- `showPreDeparture(game)` in `src/main.js` fully implemented:
+  - Fetches items via `game.getPreDepartureItems()` (14 items with weight, category, max count)
+  - Real-time weight calculation with color-coded status (over/at-capacity/under 100kg limit)
+  - Per-item +/- buttons to adjust quantities (bounded by max starting count)
+  - "Auto-Pack (Balanced)" preset loads ~92.5kg optimized loadout
+  - "Confirm Loadout" enabled only when weight ≤ 100kg
+  - Calls `game.setPreDepartureCount()` on changes, `game.confirmPreDeparture()` to finalize
+- Flow: Intro → click "Begin Journey" → pre-departure overlay → configure cart → confirm → start game
+- Category legend explains 5 categories: Food (survival), Repair/Parts (cart wear), Trade Goods (win condition), Shelter/Fuel (cold nights), Medical/Ammo (event prep)
+
+Files modified: `src/systems/engine.js` (preDeparture: true), `dist/app.js`
+
 ## [v79] — 2026-06-10
 
 ### Camp UI Overhaul — Polishing the Camp Experience
