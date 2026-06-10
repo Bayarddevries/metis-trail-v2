@@ -1975,6 +1975,18 @@ function createGame(seed = null) {
     checkGameOver();
   }
   __name(makeCamp, "makeCamp");
+  function pushOn2() {
+    if (S2.pendingSettlement || S2.over) return;
+    S2.food = Math.max(0, Math.round((S2.food - 1.5) * 10) / 10);
+    S2.wear = Math.min(S2.wear + 1, 99);
+    S2.morale = Math.max(0, S2.morale - 5);
+    S2.travelDaysWithoutRest++;
+    if (S2.travelDaysWithoutRest >= 5 && S2.crew !== "exhausted") S2.crew = "exhausted";
+    else if (S2.travelDaysWithoutRest >= 3 && S2.crew === "rested") S2.crew = "tired";
+    advance();
+    checkGameOver();
+  }
+  __name(pushOn2, "pushOn");
   function settlementAction(action) {
     if (!S2.pendingSettlement) return [];
     S2.pendingSettlement = null;
@@ -2020,6 +2032,7 @@ function createGame(seed = null) {
   return {
     travelOneDay: travelOneDay2,
     makeCamp,
+    pushOn: pushOn2,
     chooseEventChoice,
     settlementAction,
     getState() {
@@ -2043,7 +2056,9 @@ function createGame(seed = null) {
         usedWeight: totalWeight(cart),
         capacity: S2.capacity,
         preDeparture: S2.preDeparture,
-        weather: S2.weather
+        weather: S2.weather,
+        currentTerrain: NODES[S2.node]?.terrain || "plains",
+        travelDaysWithoutRest: S2.travelDaysWithoutRest
       };
     },
     getCart() {
@@ -18245,16 +18260,7 @@ function travelOneDay() {
 }
 __name(travelOneDay, "travelOneDay");
 function pushOn(game) {
-  const state = game.getState();
-  state.food = Math.max(0, Math.round((state.food - 1.5) * 10) / 10);
-  state.wear = Math.min(state.wear + 1, 99);
-  state.morale = Math.max(0, state.morale - 5);
-  state.travelDaysWithoutRest++;
-  if (state.travelDaysWithoutRest >= 5 && state.crew !== "exhausted") state.crew = "exhausted";
-  else if (state.travelDaysWithoutRest >= 3 && state.crew === "rested") state.crew = "tired";
-  const msg = "You push on into the evening. The crew grumbles. No fire tonight \u2014 only cold miles.";
-  publishResult(msg);
-  window.__METIS_RENDER__();
+  game.pushOn();
 }
 __name(pushOn, "pushOn");
 function render() {
