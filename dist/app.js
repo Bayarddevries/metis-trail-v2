@@ -1883,10 +1883,9 @@ function createGame(seed = null) {
     }
     if (action === "rest") {
       S2.crew = "rested";
-      S2.food += 2;
+      S2.food = Math.max(0, S2.food - 1);
       S2.travelDaysWithoutRest = 0;
-      S2.morale = Math.min(100, S2.morale + 25);
-      advance();
+      S2.morale = Math.min(100, S2.morale + 15);
     }
     if (action === "repair") {
       const shag = cart.find((i) => i.name === "Shaganappi");

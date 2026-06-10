@@ -389,10 +389,9 @@ export function createGame(seed = null) {
     }
     if (action === 'rest') {
       S.crew = 'rested';
-      S.food += 2;
+      S.food = Math.max(0, S.food - 1); // Costs 1 food to rest
       S.travelDaysWithoutRest = 0;
-      S.morale = Math.min(100, S.morale + 25);
-      advance();
+      S.morale = Math.min(100, S.morale + 15);
     }
     // Legacy repair/heal (free, no MB cost) — kept for backward compat
     if (action === 'repair') {
