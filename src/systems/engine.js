@@ -592,13 +592,21 @@ export function createGame(seed = null) {
       const effects = [];
       let roll = null;
       let rollTotal = null;
+      let critical = false;
+
       if (action === 'rest') {
         if (S.food < 1) return { error: 'Not enough food to rest.' };
         S.food -= 1;
         costItems.push({ name: 'Food', count: -1 });
         roll = d();
         rollTotal = roll + crewMod(S);
-        if (rollTotal >= 15) {
+        if (roll === 1) {
+          critical = true;
+          S.crew = 'tired';
+          S.morale = Math.max(0, S.morale - 3);
+          S.travelDaysWithoutRest = 0;
+          effects.push('Critical failure: the camp is a disaster — cold, sleepless, demoralizing.', 'Morale -3', 'Crew tired');
+        } else if (rollTotal >= 15) {
           S.crew = 'rested';
           S.morale = Math.max(0, Math.min(100, S.morale + 20));
           S.wear = Math.max(0, S.wear - 1);
@@ -619,6 +627,11 @@ export function createGame(seed = null) {
       } else if (action === 'forage') {
         roll = d();
         rollTotal = roll + crewMod(S);
+        if (roll === 1) {
+          critical = true;
+          advance(); // lose an extra day
+          effects.push('Critical failure: wasted the whole day. Found nothing.', '+1 day lost');
+        }
         const baseGain = Math.floor(Math.random() * 6) + (rollTotal >= 12 ? 6 : rollTotal >= 8 ? 4 : 1);
         S.food += baseGain;
         if (rollTotal >= 12) {
@@ -638,29 +651,60 @@ export function createGame(seed = null) {
         advance();
         roll = d();
         rollTotal = roll + crewMod(S);
-        if (rollTotal >= 10) {
-          const gained = Math.floor(Math.random() * 9) + 6;
-          S.food += gained;
-          effects.push(`Clean kill. +${gained} Food`);
-        } else if (rollTotal <= 5) {
-          effects.push('Shot went wide. No food gained.');
+        if (roll === 1) {
+          critical = true;
+          S.morale = Math.max(0, S.morale - 2);
+          effects.push('Critical failure: shot went wide, startled the game, lost ammo.', 'Morale -2');
+        } else if (rollTotal >= 10) {
+          // Success: add trade goods (pelts/hides) based on terrain
+          const terrain = NODES[S.node]?.terrain || 'plains';
+          let prey;
+          if (terrain === 'river_valley') {
+            prey = { name: 'Beaver Pelt', icon: '🦫', mbValue: 3.0 };
+          } else if (terrain === 'uplands') {
+            prey = { name: 'Elk Hide', icon: '🫎', mbValue: 2.5 };
+          } else if (terrain === 'wooded') {
+            prey = { name: 'Deer Hide', icon: '🦌', mbValue: 1.8 };
+          } else {
+            prey = { name: 'Bison Hide', icon: '🐃', mbValue: 1.25 };
+          }
+          const existing = cart.find((c) => c.name === prey.name);
+          if (existing) {
+            existing.count++;
+          } else {
+            cart.push({ name: prey.name, icon: prey.icon, type: 'trade', category: 'furs', wt: 4, count: 1, mbValue: prey.mbValue, desc: `Hunted on the ${terrain.replace(/_/g, ' ')}.` });
+          }
+          recalcMB();
+          effects.push(`Clean kill. +1 ${prey.name} (trade good)`);
         } else {
-          effects.push('Close. Food scarce today.');
+          effects.push('Shot went wide. No pelts gained.');
         }
       } else if (action === 'repair') {
         const shag = cart.find((i) => i.name === 'Shaganappi');
         if (!shag || shag.count < 1) return { error: 'Need 1 Shaganappi to repair.' };
         shag.count -= 1;
         costItems.push({ name: 'Shaganappi', count: -1 });
-        const hasAxle = cart.some((i) => i.name === 'Spare Axle');
-        const repaired = hasAxle ? 3 : 2;
-        S.wear = Math.max(0, S.wear - repaired);
-        effects.push(`Wear -${repaired}`);
+        roll = d();
+        rollTotal = roll + crewMod(S);
+        if (roll === 1) {
+          critical = true;
+          S.wear = Math.min(CONSTANTS.MAX_WEAR, S.wear + 1);
+          effects.push('Critical failure: shaganappi wasted, repair botched. Cart worse off.', 'Wear +1');
+        } else {
+          const hasAxle = cart.some((i) => i.name === 'Spare Axle');
+          const repaired = hasAxle ? 3 : 2;
+          S.wear = Math.max(0, S.wear - repaired);
+          effects.push(`Wear -${repaired}`);
+        }
       } else if (action === 'scout') {
         advance();
         roll = d();
         rollTotal = roll + crewMod(S);
-        if (rollTotal >= 12) {
+        if (roll === 1) {
+          critical = true;
+          S.flags['scout_blind'] = true;
+          effects.push('Critical failure: scout got turned around. Next event will have no warning.');
+        } else if (rollTotal >= 12) {
           const n = NODES[S.node + 1];
           const terrain = (n && n.terrain) || 'plains';
           effects.push(`Scout succeeded. Next leg is ${terrain.replace(/_/g, ' ')}.`);
@@ -668,16 +712,23 @@ export function createGame(seed = null) {
           effects.push('Scout returned with nothing clear to report.');
         }
       } else if (action === 'dance') {
-        const bonus = S.crew === 'rested' ? 12 : S.crew === 'tired' ? 8 : 5;
-        S.morale = Math.max(0, Math.min(100, S.morale + bonus));
-        effects.push(`Morale +${bonus}`);
+        roll = d();
+        rollTotal = roll + crewMod(S);
+        if (roll === 1) {
+          critical = true;
+          S.morale = Math.max(0, S.morale - 3);
+          effects.push('Critical failure: the evening fell flat. Old arguments resurfaced.', 'Morale -3');
+        } else {
+          const bonus = S.crew === 'rested' ? 12 : S.crew === 'tired' ? 8 : 5;
+          S.morale = Math.max(0, Math.min(100, S.morale + bonus));
+          effects.push(`Morale +${bonus}`);
+        }
       } else if (action === 'pemmican_process') {
         if (S.food < 3) return { error: 'Need at least 3 Food to process pemmican.' };
         S.food -= 3;
         costItems.push({ name: 'Food', count: -3 });
         roll = d();
         rollTotal = roll + crewMod(S);
-        // Women's pemmican labor: slicing, drying, pounding, rendering tallow
         if (rollTotal >= 12) {
           const gained = Math.floor(Math.random() * 8) + 10;
           S.food += gained;
@@ -706,7 +757,7 @@ export function createGame(seed = null) {
       }
 
       if (effects.length === 0 && costItems.length === 0) effects.push('Nothing changes.');
-      return { day: S.day, effects, costItems, roll, rollTotal };
+      return { day: S.day, effects, costItems, roll, rollTotal, critical };
     },
 
     craftRecipe(recipeId) {
