@@ -94,7 +94,7 @@ export function bootstrap(seed = null) {
         // If pre-departure is enabled, show it now
         const currentState = game.getState();
         if (currentState.preDeparture) {
-          showPreDeparture(game);
+          showShop(game);
         } else {
           window.__METIS_RENDER__();
         }
@@ -462,8 +462,7 @@ function render() {
     return;
   }
   if (state.preDeparture) {
-    showPreDeparture(game);
-    return;
+    showShop(game);
   }
   if (state.pendingEvent) {
     showEvent(game);
@@ -1162,101 +1161,98 @@ function getCategoryHint(category) {
   return map[category] || '';
 }
 
-function showPreDeparture(game) {
-  const items = game.getPreDepartureItems();
+function showShop(game) {
   const state = game.getState();
   const listEl = document.getElementById('predeparture-list');
   const weightEl = document.getElementById('predeparture-weight');
   const currentEl = document.getElementById('pd-weight-current');
   const statusEl = document.getElementById('pd-weight-status');
   const confirmBtn = document.getElementById('pd-confirm');
-  const autoBtn = document.getElementById('pd-auto');
+  const balanceEl = document.getElementById('shop-balance');
 
-  if (!listEl || !weightEl || !currentEl || !statusEl || !confirmBtn) return;
+  if (!listEl || !weightEl || !currentEl || !statusEl || !confirmBtn || !balanceEl) return;
 
-  // Auto-pack preset (balanced loadout ~95 kg, ~10 MB)
-  const autoPack = {
-    'Pemmican Rations': 8,
-    'Spare Axle': 1,
-    'Shaganappi': 3,
-    'Tool Kit': 1,
-    'Bison Hide': 3,
-    'Canvas Tarp': 1,
-    'Firewood Bundle': 1,
-    'Rope (50ft)': 1,
-    'Ammunition Belt': 1,
-    'Medicine Pouch': 1,
-    'Blanket': 1,
-    'Beaver Pelts': 2,
-  };
+  // Starting ₥ from trade goods in cart
+  let balance = game.getCart().reduce((sum, i) => sum + (i.mbValue || 0) * i.count, 0);
+  const startingBalance = balance;
+
+  // Shop items: name, description, price, category, weight
+  const shopItems = [
+    { name: 'Pemmican Rations', desc: 'Dried meat and fat. 1 food/day keeps the crew alive.', price: 2.5, category: 'provisions', wt: 2.5, count: 5 },
+    { name: 'Spare Axle', desc: 'Hard maple. Heavy but essential for a Red River cart.', price: 3.0, category: 'parts', wt: 15, count: 1 },
+    { name: 'Shaganappi', desc: 'Rawhide strips. Binding, lashing, and cart repair.', price: 1.5, category: 'repair', wt: 3, count: 3 },
+    { name: 'Tool Kit', desc: 'Axe, auger, drawknife. Required for major repairs.', price: 2.5, category: 'parts', wt: 8, count: 1 },
+    { name: 'Canvas Tarp', desc: 'Waterproof. Shelter and cart-raft conversion.', price: 2.0, category: 'shelter', wt: 4, count: 1 },
+    { name: 'Firewood Bundle', desc: 'Dried poplar. Required for cold nights.', price: 1.0, category: 'fuel', wt: 6, count: 2 },
+    { name: 'Rope (50ft)', desc: 'Hemp. Crossings, repairs, binding.', price: 1.5, category: 'parts', wt: 3, count: 1 },
+    { name: 'Ammunition Belt', desc: 'Shot and ball. For hunting and defence.', price: 2.0, category: 'hunting', wt: 2, count: 1 },
+    { name: 'Medicine Pouch', desc: 'Herbal remedies and bandages.', price: 3.0, category: 'medical', wt: 1.5, count: 1 },
+    { name: 'Blanket', desc: 'Wool. Winter survival.', price: 2.0, category: 'shelter', wt: 3, count: 2 },
+  ];
+
+  // Track purchased counts
+  const purchased = {};
+  shopItems.forEach(item => { purchased[item.name] = 0; });
 
   function recalc() {
-    let total = 0;
-    items.forEach(item => {
-      total += item.wt * item.currentCount;
+    let totalWeight = 0;
+    let totalFood = 0;
+    shopItems.forEach(item => {
+      totalWeight += item.wt * purchased[item.name];
+      if (item.category === 'provisions') totalFood += purchased[item.name] * 5; // 5 rations per purchase
     });
-    currentEl.textContent = total.toFixed(1);
-    const diff = total - state.capacity;
+    // Add trade goods weight
+    const cart = game.getCart();
+    cart.forEach(i => { totalWeight += i.wt * i.count; });
+
+    currentEl.textContent = totalWeight.toFixed(1);
+    balanceEl.textContent = balance.toFixed(1);
+
+    const capacity = state.capacity;
     weightEl.classList.remove('over', 'at-capacity', 'under');
     statusEl.classList.remove('over', 'at-capacity', 'under');
-    if (diff > 0) {
+
+    if (totalWeight > capacity) {
       weightEl.classList.add('over');
       statusEl.classList.add('over');
-      statusEl.textContent = `${diff.toFixed(1)} kg over`;
+      statusEl.textContent = `${(totalWeight - capacity).toFixed(1)} kg over`;
       confirmBtn.disabled = true;
-    } else if (diff === 0) {
-      weightEl.classList.add('at-capacity');
-      statusEl.classList.add('at-capacity');
-      statusEl.textContent = 'At capacity';
-      confirmBtn.disabled = false;
     } else {
       weightEl.classList.add('under');
       statusEl.classList.add('under');
-      statusEl.textContent = `${Math.abs(diff).toFixed(1)} kg spare`;
-      confirmBtn.disabled = false;
+      statusEl.textContent = `${(capacity - totalWeight).toFixed(1)} kg spare`;
+      confirmBtn.disabled = totalFood < 10; // Need at least 10 food
     }
   }
 
   function renderList() {
-    listEl.innerHTML = items.map(item => {
-      const hint = item.category ? getCategoryHint(item.category) : '';
-      const itemWeight = (item.wt * item.currentCount).toFixed(1);
+    listEl.innerHTML = shopItems.map(item => {
+      const hint = getCategoryHint(item.category);
+      const canBuy = balance >= item.price;
+      const itemWeight = (item.wt * item.count).toFixed(1);
       return `
     <div class="pd-row" data-item="${item.name}">
       <div class="pd-item-info">
         <span class="pd-icon">${getItemIcon(item.name)}</span>
         <span class="pd-name">${item.name}</span>
         <span class="pd-category-hint">${hint}</span>
+        <div style="font-size:0.75em;color:#5a4a3a;margin-top:2px;">${item.desc}</div>
       </div>
       <div class="pd-controls">
-        <button class="pd-minus" data-item="${item.name}" ${item.currentCount <= 0 ? 'disabled' : ''}>−</button>
-        <span class="pd-count">${item.currentCount}</span>
-        <button class="pd-plus" data-item="${item.name}" ${item.currentCount >= item.maxCount ? 'disabled' : ''}>+</button>
+        <span class="pd-count">${purchased[item.name] > 0 ? `×${purchased[item.name]}` : '—'}</span>
+        <button class="pd-buy" data-item="${item.name}" ${canBuy ? '' : 'disabled'}>Buy (${item.price} ₥)</button>
         <span class="pd-weight">${itemWeight} kg</span>
       </div>
     </div>`;
     }).join('');
 
-    // Bind +/- buttons
-    listEl.querySelectorAll('.pd-minus').forEach(btn => {
+    listEl.querySelectorAll('.pd-buy').forEach(btn => {
       btn.addEventListener('click', () => {
         const name = btn.dataset.item;
-        const item = items.find(i => i.name === name);
-        if (item && item.currentCount > 0) {
-          item.currentCount--;
-          game.setPreDepartureCount(name, item.currentCount);
-          recalc();
-          renderList();
-        }
-      });
-    });
-    listEl.querySelectorAll('.pd-plus').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const name = btn.dataset.item;
-        const item = items.find(i => i.name === name);
-        if (item && item.currentCount < item.maxCount) {
-          item.currentCount++;
-          game.setPreDepartureCount(name, item.currentCount);
+        const item = shopItems.find(i => i.name === name);
+        if (item && balance >= item.price) {
+          balance -= item.price;
+          purchased[item.name]++;
           recalc();
           renderList();
         }
@@ -1265,24 +1261,25 @@ function showPreDeparture(game) {
   }
 
   confirmBtn.onclick = () => {
-    game.confirmPreDeparture();
+    // Add purchased items to cart and game state
+    shopItems.forEach(item => {
+      if (purchased[item.name] > 0) {
+        for (let i = 0; i < purchased[item.name]; i++) {
+          if (item.category === 'provisions') {
+            // Food goes directly to game state
+            game.addFood(item.count); // item.count = 5 rations per pack
+          } else {
+            game.buyItem(item.name, item.wt, item.category);
+          }
+        }
+      }
+    });
+    // Clear trade goods (they were converted to ₥)
+    game.clearTradeGoods();
     document.getElementById('predeparture-overlay')?.classList.remove('active');
     window.__METIS_RENDER__();
   };
 
-  autoBtn.onclick = () => {
-    Object.entries(autoPack).forEach(([name, count]) => {
-      const item = items.find(i => i.name === name);
-      if (item) {
-        item.currentCount = count;
-        game.setPreDepartureCount(name, count);
-      }
-    });
-    recalc();
-    renderList();
-  };
-
-  // Initial render
   recalc();
   renderList();
   document.getElementById('predeparture-overlay')?.classList.add('active');

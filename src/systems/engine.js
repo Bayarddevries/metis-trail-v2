@@ -862,6 +862,27 @@ export function createGame(seed = null) {
         seed: S.seed,
       };
     },
+    buyItem(name, wt, category) {
+      const existing = cart.find(i => i.name === name);
+      if (existing) {
+        existing.count++;
+      } else {
+        cart.push({ name, wt, count: 1, category, type: category === 'provisions' ? 'food' : 'item', mbValue: 0 });
+      }
+      recalcMB();
+    },
+    addFood(amount) {
+      S.food += amount;
+    },
+    clearTradeGoods() {
+      // Remove all trade goods (they were converted to ₥ at the shop)
+      for (let i = cart.length - 1; i >= 0; i--) {
+        if (cart[i].type === 'trade' || cart[i].category === 'furs') {
+          cart.splice(i, 1);
+        }
+      }
+      recalcMB();
+    },
   };
 }
 

@@ -142,7 +142,12 @@ const ITEMS = [
 ];
 
 export function startingCart() {
-  return JSON.parse(JSON.stringify(ITEMS));
+  // New game: start with trade goods only (no supplies)
+  // Player buys everything at the Fort Garry shop
+  return [
+    { name: 'Bison Hide', wt: 6, count: 4, type: 'trade', category: 'furs', mbValue: 1.25, perishable: false, desc: 'Folded. Trade value: ~1.25 ₥ each at any post.' },
+    { name: 'Beaver Pelts', wt: 4, count: 3, type: 'trade', category: 'furs', mbValue: 3.0, perishable: false, desc: 'Prime bundle. The foundation of the northern trade. ~3 ₥ each.' },
+  ];
 }
 
 export function totalWeight(cart) {

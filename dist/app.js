@@ -341,150 +341,11 @@ var NODES = [
 ];
 
 // src/data/items.js
-var ITEMS = [
-  {
-    name: "Pemmican Rations",
-    wt: 2.5,
-    count: 7,
-    type: "food",
-    category: "provisions",
-    mbValue: 0.4,
-    perishable: true,
-    desc: "Dried meat and fat. The staple of the prairie. Never truly spoils.",
-    source: {
-      quote: "Pemmican... composed of pounded dried meat, melted fat, and berries.",
-      author: "Ernest C. N. Acheson",
-      work: "The Buffalo and the Prairie",
-      year: 1910,
-      url: "https://archive.org/stream/toredriverbeyond00marb/toredriverbeyond00marb_djvu.txt"
-    }
-  },
-  {
-    name: "Spare Axle",
-    wt: 15,
-    count: 1,
-    type: "repair",
-    category: "parts",
-    mbValue: 1.2,
-    perishable: false,
-    desc: "Hard maple. Heavy but essential for a Red River cart."
-  },
-  {
-    name: "Shaganappi",
-    wt: 3,
-    count: 3,
-    type: "repair",
-    category: "repair",
-    mbValue: 0.6,
-    perishable: false,
-    desc: "Rawhide strips. Binding, lashing, and cart repair.",
-    source: {
-      quote: "Shaganappi... raw-hide thongs, much used by the half-breeds for binding their cart-wheels.",
-      author: "R. G. McConnell",
-      work: "The North-West of Canada",
-      year: 1885,
-      url: "https://archive.org/stream/toredriverbeyond00marb/toredriverbeyond00marb_djvu.txt"
-    }
-  },
-  {
-    name: "Tool Kit",
-    wt: 8,
-    count: 1,
-    type: "tool",
-    category: "parts",
-    mbValue: 1.8,
-    perishable: false,
-    desc: "Axe, auger, drawknife. Required for major repairs."
-  },
-  {
-    name: "Bison Hide",
-    wt: 6,
-    count: 4,
-    type: "trade",
-    category: "furs",
-    mbValue: 1.25,
-    perishable: false,
-    desc: "Folded. Trade value: ~1.25 MB each at any post."
-  },
-  {
-    name: "Canvas Tarp",
-    wt: 4,
-    count: 2,
-    type: "shelter",
-    category: "shelter",
-    mbValue: 1,
-    perishable: false,
-    desc: "Waterproof. Shelter and cart-raft conversion."
-  },
-  {
-    name: "Firewood Bundle",
-    wt: 6,
-    count: 1,
-    type: "fuel",
-    category: "fuel",
-    mbValue: 0.2,
-    perishable: false,
-    desc: "Dried poplar. Required for cold nights."
-  },
-  {
-    name: "Rope (50ft)",
-    wt: 3,
-    count: 1,
-    type: "tool",
-    category: "parts",
-    mbValue: 0.5,
-    perishable: false,
-    desc: "Hemp. Crossings, repairs, binding."
-  },
-  {
-    name: "Ammunition Belt",
-    wt: 2,
-    count: 1,
-    type: "ammo",
-    category: "hunting",
-    mbValue: 0.9,
-    perishable: false,
-    desc: "Shot and ball. For hunting and defence."
-  },
-  {
-    name: "Medicine Pouch",
-    wt: 1.5,
-    count: 1,
-    type: "medical",
-    category: "medical",
-    mbValue: 1.8,
-    perishable: true,
-    desc: "Herbal remedies and bandages."
-  },
-  {
-    name: "Blanket",
-    wt: 3,
-    count: 2,
-    type: "shelter",
-    category: "shelter",
-    mbValue: 2.2,
-    perishable: false,
-    desc: "Wool. Winter survival."
-  },
-  {
-    name: "Beaver Pelts",
-    wt: 4,
-    count: 3,
-    type: "trade",
-    category: "furs",
-    mbValue: 3,
-    perishable: false,
-    desc: "Prime bundle. The foundation of the northern trade. ~3 MB each.",
-    source: {
-      quote: "Beaver... the very foundation of the northern trade.",
-      author: "HBC Archives",
-      work: "Fort Edmonton Post Journal, 1878",
-      url: "https://archive.org/stream/P000279/P000279_djvu.txt"
-    }
-  }
-];
 function startingCart() {
-  return JSON.parse(JSON.stringify(ITEMS));
+  return [
+    { name: "Bison Hide", wt: 6, count: 4, type: "trade", category: "furs", mbValue: 1.25, perishable: false, desc: "Folded. Trade value: ~1.25 \u20A5 each at any post." },
+    { name: "Beaver Pelts", wt: 4, count: 3, type: "trade", category: "furs", mbValue: 3, perishable: false, desc: "Prime bundle. The foundation of the northern trade. ~3 \u20A5 each." }
+  ];
 }
 __name(startingCart, "startingCart");
 function totalWeight(cart) {
@@ -2475,6 +2336,26 @@ function createGame(seed = null) {
         distance: S2.node,
         seed: S2.seed
       };
+    },
+    buyItem(name3, wt, category) {
+      const existing = cart.find((i) => i.name === name3);
+      if (existing) {
+        existing.count++;
+      } else {
+        cart.push({ name: name3, wt, count: 1, category, type: category === "provisions" ? "food" : "item", mbValue: 0 });
+      }
+      recalcMB();
+    },
+    addFood(amount) {
+      S2.food += amount;
+    },
+    clearTradeGoods() {
+      for (let i = cart.length - 1; i >= 0; i--) {
+        if (cart[i].type === "trade" || cart[i].category === "furs") {
+          cart.splice(i, 1);
+        }
+      }
+      recalcMB();
     }
   };
 }
@@ -18556,7 +18437,7 @@ function bootstrap(seed = null) {
         }
         const currentState = game.getState();
         if (currentState.preDeparture) {
-          showPreDeparture(game);
+          showShop(game);
         } else {
           window.__METIS_RENDER__();
         }
@@ -18666,8 +18547,7 @@ function render() {
     return;
   }
   if (state.preDeparture) {
-    showPreDeparture(game);
-    return;
+    showShop(game);
   }
   if (state.pendingEvent) {
     showEvent(game);
@@ -19284,95 +19164,89 @@ function getCategoryHint(category) {
   return map2[category] || "";
 }
 __name(getCategoryHint, "getCategoryHint");
-function showPreDeparture(game) {
-  const items = game.getPreDepartureItems();
+function showShop(game) {
   const state = game.getState();
   const listEl = document.getElementById("predeparture-list");
   const weightEl = document.getElementById("predeparture-weight");
   const currentEl = document.getElementById("pd-weight-current");
   const statusEl = document.getElementById("pd-weight-status");
   const confirmBtn = document.getElementById("pd-confirm");
-  const autoBtn = document.getElementById("pd-auto");
-  if (!listEl || !weightEl || !currentEl || !statusEl || !confirmBtn) return;
-  const autoPack = {
-    "Pemmican Rations": 8,
-    "Spare Axle": 1,
-    "Shaganappi": 3,
-    "Tool Kit": 1,
-    "Bison Hide": 3,
-    "Canvas Tarp": 1,
-    "Firewood Bundle": 1,
-    "Rope (50ft)": 1,
-    "Ammunition Belt": 1,
-    "Medicine Pouch": 1,
-    "Blanket": 1,
-    "Beaver Pelts": 2
-  };
+  const balanceEl = document.getElementById("shop-balance");
+  if (!listEl || !weightEl || !currentEl || !statusEl || !confirmBtn || !balanceEl) return;
+  let balance = game.getCart().reduce((sum, i) => sum + (i.mbValue || 0) * i.count, 0);
+  const startingBalance = balance;
+  const shopItems = [
+    { name: "Pemmican Rations", desc: "Dried meat and fat. 1 food/day keeps the crew alive.", price: 2.5, category: "provisions", wt: 2.5, count: 5 },
+    { name: "Spare Axle", desc: "Hard maple. Heavy but essential for a Red River cart.", price: 3, category: "parts", wt: 15, count: 1 },
+    { name: "Shaganappi", desc: "Rawhide strips. Binding, lashing, and cart repair.", price: 1.5, category: "repair", wt: 3, count: 3 },
+    { name: "Tool Kit", desc: "Axe, auger, drawknife. Required for major repairs.", price: 2.5, category: "parts", wt: 8, count: 1 },
+    { name: "Canvas Tarp", desc: "Waterproof. Shelter and cart-raft conversion.", price: 2, category: "shelter", wt: 4, count: 1 },
+    { name: "Firewood Bundle", desc: "Dried poplar. Required for cold nights.", price: 1, category: "fuel", wt: 6, count: 2 },
+    { name: "Rope (50ft)", desc: "Hemp. Crossings, repairs, binding.", price: 1.5, category: "parts", wt: 3, count: 1 },
+    { name: "Ammunition Belt", desc: "Shot and ball. For hunting and defence.", price: 2, category: "hunting", wt: 2, count: 1 },
+    { name: "Medicine Pouch", desc: "Herbal remedies and bandages.", price: 3, category: "medical", wt: 1.5, count: 1 },
+    { name: "Blanket", desc: "Wool. Winter survival.", price: 2, category: "shelter", wt: 3, count: 2 }
+  ];
+  const purchased = {};
+  shopItems.forEach((item) => {
+    purchased[item.name] = 0;
+  });
   function recalc() {
-    let total = 0;
-    items.forEach((item) => {
-      total += item.wt * item.currentCount;
+    let totalWeight2 = 0;
+    let totalFood = 0;
+    shopItems.forEach((item) => {
+      totalWeight2 += item.wt * purchased[item.name];
+      if (item.category === "provisions") totalFood += purchased[item.name] * 5;
     });
-    currentEl.textContent = total.toFixed(1);
-    const diff = total - state.capacity;
+    const cart = game.getCart();
+    cart.forEach((i) => {
+      totalWeight2 += i.wt * i.count;
+    });
+    currentEl.textContent = totalWeight2.toFixed(1);
+    balanceEl.textContent = balance.toFixed(1);
+    const capacity = state.capacity;
     weightEl.classList.remove("over", "at-capacity", "under");
     statusEl.classList.remove("over", "at-capacity", "under");
-    if (diff > 0) {
+    if (totalWeight2 > capacity) {
       weightEl.classList.add("over");
       statusEl.classList.add("over");
-      statusEl.textContent = `${diff.toFixed(1)} kg over`;
+      statusEl.textContent = `${(totalWeight2 - capacity).toFixed(1)} kg over`;
       confirmBtn.disabled = true;
-    } else if (diff === 0) {
-      weightEl.classList.add("at-capacity");
-      statusEl.classList.add("at-capacity");
-      statusEl.textContent = "At capacity";
-      confirmBtn.disabled = false;
     } else {
       weightEl.classList.add("under");
       statusEl.classList.add("under");
-      statusEl.textContent = `${Math.abs(diff).toFixed(1)} kg spare`;
-      confirmBtn.disabled = false;
+      statusEl.textContent = `${(capacity - totalWeight2).toFixed(1)} kg spare`;
+      confirmBtn.disabled = totalFood < 10;
     }
   }
   __name(recalc, "recalc");
   function renderList() {
-    listEl.innerHTML = items.map((item) => {
-      const hint = item.category ? getCategoryHint(item.category) : "";
-      const itemWeight = (item.wt * item.currentCount).toFixed(1);
+    listEl.innerHTML = shopItems.map((item) => {
+      const hint = getCategoryHint(item.category);
+      const canBuy = balance >= item.price;
+      const itemWeight = (item.wt * item.count).toFixed(1);
       return `
     <div class="pd-row" data-item="${item.name}">
       <div class="pd-item-info">
         <span class="pd-icon">${getItemIcon(item.name)}</span>
         <span class="pd-name">${item.name}</span>
         <span class="pd-category-hint">${hint}</span>
+        <div style="font-size:0.75em;color:#5a4a3a;margin-top:2px;">${item.desc}</div>
       </div>
       <div class="pd-controls">
-        <button class="pd-minus" data-item="${item.name}" ${item.currentCount <= 0 ? "disabled" : ""}>\u2212</button>
-        <span class="pd-count">${item.currentCount}</span>
-        <button class="pd-plus" data-item="${item.name}" ${item.currentCount >= item.maxCount ? "disabled" : ""}>+</button>
+        <span class="pd-count">${purchased[item.name] > 0 ? `\xD7${purchased[item.name]}` : "\u2014"}</span>
+        <button class="pd-buy" data-item="${item.name}" ${canBuy ? "" : "disabled"}>Buy (${item.price} \u20A5)</button>
         <span class="pd-weight">${itemWeight} kg</span>
       </div>
     </div>`;
     }).join("");
-    listEl.querySelectorAll(".pd-minus").forEach((btn) => {
+    listEl.querySelectorAll(".pd-buy").forEach((btn) => {
       btn.addEventListener("click", () => {
         const name3 = btn.dataset.item;
-        const item = items.find((i) => i.name === name3);
-        if (item && item.currentCount > 0) {
-          item.currentCount--;
-          game.setPreDepartureCount(name3, item.currentCount);
-          recalc();
-          renderList();
-        }
-      });
-    });
-    listEl.querySelectorAll(".pd-plus").forEach((btn) => {
-      btn.addEventListener("click", () => {
-        const name3 = btn.dataset.item;
-        const item = items.find((i) => i.name === name3);
-        if (item && item.currentCount < item.maxCount) {
-          item.currentCount++;
-          game.setPreDepartureCount(name3, item.currentCount);
+        const item = shopItems.find((i) => i.name === name3);
+        if (item && balance >= item.price) {
+          balance -= item.price;
+          purchased[item.name]++;
           recalc();
           renderList();
         }
@@ -19381,26 +19255,26 @@ function showPreDeparture(game) {
   }
   __name(renderList, "renderList");
   confirmBtn.onclick = () => {
-    game.confirmPreDeparture();
-    document.getElementById("predeparture-overlay")?.classList.remove("active");
-    window.__METIS_RENDER__();
-  };
-  autoBtn.onclick = () => {
-    Object.entries(autoPack).forEach(([name3, count]) => {
-      const item = items.find((i) => i.name === name3);
-      if (item) {
-        item.currentCount = count;
-        game.setPreDepartureCount(name3, count);
+    shopItems.forEach((item) => {
+      if (purchased[item.name] > 0) {
+        for (let i = 0; i < purchased[item.name]; i++) {
+          if (item.category === "provisions") {
+            game.addFood(item.count);
+          } else {
+            game.buyItem(item.name, item.wt, item.category);
+          }
+        }
       }
     });
-    recalc();
-    renderList();
+    game.clearTradeGoods();
+    document.getElementById("predeparture-overlay")?.classList.remove("active");
+    window.__METIS_RENDER__();
   };
   recalc();
   renderList();
   document.getElementById("predeparture-overlay")?.classList.add("active");
 }
-__name(showPreDeparture, "showPreDeparture");
+__name(showShop, "showShop");
 function showCrew(game) {
   const c = game.getCrew();
   const el = document.getElementById("crew-status");

@@ -1366,32 +1366,24 @@
   </div>
 
   <div class="overlay" id="predeparture-overlay">
-    <div class="overlay-card" style="max-width: 520px;">
-      <h2>Pack Your Cart</h2>
-      <p class="predeparture-subtitle">Fort Garry Outfitters — 100 kg capacity</p>
-      
+    <div class="overlay-card" style="max-width: 560px;">
+      <h2>Fort Garry Outfitters</h2>
+      <p class="predeparture-subtitle">Buy supplies before the trail. You have <span id="shop-balance" style="font-weight:700;color:var(--clr-accent);">14</span> ₥ to spend.</p>
+
       <div class="predeparture-briefing">
         <p><strong>Outfitter's Brief:</strong> "Five hundred and sixty-seven miles to Fort Edmonton. You've got until November before the snow buries the Carlton Trail. Your Red River cart carries 100 kg max — every kilogram counts."</p>
         <p class="briefing-hint"><em>Choose wisely. Overloaded carts break axles. Underloaded carts starve.</em></p>
-        <div class="category-legend">
-          <span class="cat-item"><span class="cat-icon">🥩</span> <strong>Food</strong> — 1 food/day. Run out, you die.</span>
-          <span class="cat-item"><span class="cat-icon">🛠️</span> <strong>Repair/Parts</strong> — Axles, shaganappi, tools. Cart wear accumulates daily; no parts = stranded.</span>
-          <span class="cat-item"><span class="cat-icon">🦬</span> <strong>Trade Goods</strong> — Hides, pelts. Your payday at Edmonton. Need ≥1 to win.</span>
-          <span class="cat-item"><span class="cat-icon">⛺</span> <strong>Shelter/Fuel</strong> — Tarp, blankets, firewood. Cold nights kill unprepared crews.</span>
-          <span class="cat-item"><span class="cat-icon">🫙</span> <strong>Medical/Ammo</strong> — Medicine, shot. Events punish the unprepared.</span>
-        </div>
       </div>
-      
+
       <div id="predeparture-weight" class="predeparture-weight">
-        <span id="pd-weight-current">128</span> / 100 kg 
-        <span id="pd-weight-status" class="over">28 kg over</span>
+        <span id="pd-weight-current">0</span> / 100 kg
+        <span id="pd-weight-status" class="under">100 kg spare</span>
       </div>
-      
-      <div id="predeparture-list"></div>
-      
+
+      <div id="predeparture-list" style="max-height: 350px; overflow-y: auto;"></div>
+
       <div class="predeparture-actions">
-        <button id="pd-confirm" class="ctrl-btn" disabled>Confirm Loadout</button>
-        <button id="pd-auto" class="ctrl-btn" style="background:var(--clr-muted)">Auto-Pack (Balanced)</button>
+        <button id="pd-confirm" class="ctrl-btn" disabled>Confirm Outfit</button>
       </div>
     </div>
   </div>
@@ -1461,7 +1453,13 @@
     </div>
   </div>
 </div>
-  <script type="module" src="app.js?v=110"></script>
+  <script type="module" src="app.js?v=112"></script>
+<script>window.__METIS_ASSETS__={
+  "assets": []
+};</script>
+<script>window.__METIS_ASSETS__={
+  "assets": []
+};</script>
 <script>window.__METIS_ASSETS__={
   "assets": []
 };</script>
