@@ -2,6 +2,24 @@
 
 All notable changes are documented here. Format loosely follows Keep a Changelog.
 
+## [v77] — 2026-06-10
+
+### Camp Action Context Filtering (Issue #65)
+- Added context-aware availability filtering to camp actions in `showCamp()` (`src/main.js`):
+  - **Rest** — requires 1+ food
+  - **Forage** — available in river_valley/wooded (not plains)
+  - **Hunt** — requires Ammunition Belt + open terrain (plains/river_valley, not wooded)
+  - **Process Pemmican** — requires 3+ food
+  - **Repair** — requires cart wear > 0 + Shaganappi
+  - **Scout** — requires next node exists (not at final destination)
+  - **Dance** — always available
+  - **Deep Rest** — requires 2+ food
+- Disabled actions shown with `.disabled` class (muted colors, not-allowed cursor) + tooltip (`title` attribute) explaining why unavailable
+- CSS updated in `src/template.html` for `.camp-action-btn:disabled` and `.camp-action-btn.disabled` with period-appropriate muted styling
+- Availability recalculates each time camp overlay opens (state-dependent)
+
+Files modified: `src/main.js`, `src/template.html`, `dist/index.html`, `dist/app.js`
+
 ## [v76] — 2026-06-10
 
 ### Camp Overlay — Travel Loop Integration & Push On (Issue #66)
