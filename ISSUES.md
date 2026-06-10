@@ -154,3 +154,12 @@ Use this file to log bugs, blockers, and known gaps during work sessions. Each i
 ### #71 — End-game scores show decimal points
 - Labels: bug
 - Final score and some end-game scores display with decimal points instead of whole numbers
+
+### #72 — End-game buttons are different sizes
+- Labels: bug
+- "Play Again" and "View Hall of Fame" buttons on the end-game screen are visually mismatched in size
+
+### #73 — Hall of Fame does not load
+- Labels: bug, needs-investigation
+- Opening Hall of Fame results in a blank/failed view
+- Likely cause: Firebase-dependent path not resolving in the current hosted/local environment; needs verification on the live Pages build
