@@ -236,6 +236,31 @@ export function renderStatusBar(state) {
 
 export function renderNarrative(lines) {
   const el = document.getElementById('narrative');
+  if (!el) return;
   el.innerHTML = lines.map((t) => `<div class="scene-text">${t}</div>`).join('');
   el.scrollTop = el.scrollHeight;
+}
+
+export function journalLog(entry) {
+  const journal = document.getElementById('journal');
+  if (!journal) return;
+
+  const day = entry.day || 0;
+  const date = entry.date || '';
+  const title = entry.title || `Day ${day}`;
+  const text = entry.text || '';
+  const dice = entry.dice || null;
+  const mech = entry.mech || '';
+  const collapsed = entry.collapsed ? 'collapsed' : '';
+
+  const html = `
+    <div class="journal-entry ${collapsed}" data-day="${day}">
+      <div class="journal-header">${title}${date ? ' — ' + date : ''}</div>
+      <div class="journal-text">${text}</div>
+      ${dice ? `<div class="journal-dice ${dice.success ? 'pass' : 'fail'}">${dice.text}</div>` : ''}
+      ${mech ? `<div class="journal-mechanical">${mech}</div>` : ''}
+    </div>`;
+
+  journal.insertAdjacentHTML('beforeend', html);
+  journal.scrollTop = journal.scrollHeight;
 }

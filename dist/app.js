@@ -2698,10 +2698,32 @@ function renderStatusBar(state) {
 __name(renderStatusBar, "renderStatusBar");
 function renderNarrative(lines) {
   const el = document.getElementById("narrative");
+  if (!el) return;
   el.innerHTML = lines.map((t) => `<div class="scene-text">${t}</div>`).join("");
   el.scrollTop = el.scrollHeight;
 }
 __name(renderNarrative, "renderNarrative");
+function journalLog(entry) {
+  const journal = document.getElementById("journal");
+  if (!journal) return;
+  const day = entry.day || 0;
+  const date = entry.date || "";
+  const title = entry.title || `Day ${day}`;
+  const text = entry.text || "";
+  const dice = entry.dice || null;
+  const mech = entry.mech || "";
+  const collapsed = entry.collapsed ? "collapsed" : "";
+  const html = `
+    <div class="journal-entry ${collapsed}" data-day="${day}">
+      <div class="journal-header">${title}${date ? " \u2014 " + date : ""}</div>
+      <div class="journal-text">${text}</div>
+      ${dice ? `<div class="journal-dice ${dice.success ? "pass" : "fail"}">${dice.text}</div>` : ""}
+      ${mech ? `<div class="journal-mechanical">${mech}</div>` : ""}
+    </div>`;
+  journal.insertAdjacentHTML("beforeend", html);
+  journal.scrollTop = journal.scrollHeight;
+}
+__name(journalLog, "journalLog");
 
 // src/ui/persistence.js
 var STORAGE_KEY = "metis-trail-v2.save";
@@ -18456,7 +18478,17 @@ function bootstrap(seed = null) {
       haptics_default.travel();
       if (blocked === true) return;
       const after = game.getState();
-      if (after.wear > prevWear) audio_default.sfxWearDamage();
+      if (after.wear > prevWear) haptics_default.wear();
+      const node = NODES[after.node];
+      const prevNode = NODES[after.node - 1];
+      journalLog({
+        day: after.day,
+        date: after.month + " " + after.day,
+        title: "Travel",
+        text: prevNode && node ? `Traveled west from ${prevNode.name} toward ${node.name}.` : `Traveled west along the Carlton Trail.`,
+        mech: after.wear > prevWear ? "Wear +1" : "",
+        collapsed: true
+      });
       window.__METIS_RENDER__();
     });
     travelBtn.setAttribute("data-metis-travel-bound", "1");

@@ -1,6 +1,6 @@
 import { createGame } from './systems/engine.js';
 import { mount, find } from './ui/shell.js';
-import { renderStatusBar, renderNarrative, initMap, updateMap, renderTravelLinesView } from './ui/renderer.js';
+import { renderStatusBar, renderNarrative, journalLog, initMap, updateMap, renderTravelLinesView } from './ui/renderer.js';
 import { saveGame, loadGame, clearSave } from './ui/persistence.js';
 import { mountDebugUI } from './ui/debug.js';
 import { applyTheme } from './ui/theme.js';
@@ -115,7 +115,20 @@ export function bootstrap(seed = null) {
       if (blocked === true) return;
       // Play wear damage sound if wear increased
       const after = game.getState();
-      if (after.wear > prevWear) Audio.sfxWearDamage();
+      if (after.wear > prevWear) Haptics.wear();
+      // Log travel to journal
+      const node = NODES[after.node];
+      const prevNode = NODES[after.node - 1];
+      journalLog({
+        day: after.day,
+        date: after.month + ' ' + after.day,
+        title: 'Travel',
+        text: prevNode && node
+          ? `Traveled west from ${prevNode.name} toward ${node.name}.`
+          : `Traveled west along the Carlton Trail.`,
+        mech: after.wear > prevWear ? 'Wear +1' : '',
+        collapsed: true
+      });
       window.__METIS_RENDER__();
     });
     travelBtn.setAttribute('data-metis-travel-bound', '1');
