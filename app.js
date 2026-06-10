@@ -1716,7 +1716,7 @@ function createGame(seed = null) {
     usedWeight: 0,
     credit: { hbc: 0, metis: 0, nwmp: 0, mission: 0 },
     perishable: {},
-    preDeparture: false,
+    preDeparture: true,
     weather: initWeather()
   };
   function checkGameOver() {
