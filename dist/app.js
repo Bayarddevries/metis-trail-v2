@@ -18222,19 +18222,29 @@ var masterGain = null;
 var ambientNodes = [];
 function ensureCtx() {
   if (!ctx) {
-    ctx = new (window.AudioContext || window.webkitAudioContext)();
-    masterGain = ctx.createGain();
-    masterGain.gain.value = 0.3;
-    masterGain.connect(ctx.destination);
-  }
-  if (ctx.state === "suspended") {
-    ctx.resume();
+    try {
+      ctx = new (window.AudioContext || window.webkitAudioContext)();
+      masterGain = ctx.createGain();
+      masterGain.gain.value = 0.3;
+      masterGain.connect(ctx.destination);
+    } catch (_) {
+      return null;
+    }
   }
   return { ctx, masterGain };
 }
 __name(ensureCtx, "ensureCtx");
-function startAmbient() {
-  const { ctx: c, master } = ensureCtx();
+async function startAmbient() {
+  const audio = ensureCtx();
+  if (!audio) return;
+  const { ctx: c, master } = audio;
+  if (c.state === "suspended") {
+    try {
+      await c.resume();
+    } catch (_) {
+      return;
+    }
+  }
   const windBufferSize = c.sampleRate * 2;
   const windBuffer = c.createBuffer(1, windBufferSize, c.sampleRate);
   const windData = windBuffer.getChannelData(0);
@@ -18284,19 +18294,22 @@ function startAmbient() {
     const delay = 5e3 + Math.random() * 1e4;
     setTimeout(() => {
       if (!ctx || ctx.state === "closed") return;
-      const now = c.currentTime;
-      const chirpOsc = c.createOscillator();
-      chirpOsc.type = "sine";
-      chirpOsc.frequency.setValueAtTime(2200, now);
-      chirpOsc.frequency.linearRampToValueAtTime(2800, now + 0.1);
-      chirpOsc.frequency.linearRampToValueAtTime(1800, now + 0.2);
-      const chirpGain = c.createGain();
-      chirpGain.gain.setValueAtTime(0.08, now);
-      chirpGain.gain.linearRampToValueAtTime(0, now + 0.2);
-      chirpOsc.connect(chirpGain);
-      chirpGain.connect(master);
-      chirpOsc.start(now);
-      chirpOsc.stop(now + 0.25);
+      try {
+        const now = c.currentTime;
+        const chirpOsc = c.createOscillator();
+        chirpOsc.type = "sine";
+        chirpOsc.frequency.setValueAtTime(2200, now);
+        chirpOsc.frequency.linearRampToValueAtTime(2800, now + 0.1);
+        chirpOsc.frequency.linearRampToValueAtTime(1800, now + 0.2);
+        const chirpGain = c.createGain();
+        chirpGain.gain.setValueAtTime(0.08, now);
+        chirpGain.gain.linearRampToValueAtTime(0, now + 0.2);
+        chirpOsc.connect(chirpGain);
+        chirpGain.connect(master);
+        chirpOsc.start(now);
+        chirpOsc.stop(now + 0.25);
+      } catch (_) {
+      }
       scheduleBirdChirp();
     }, delay);
   }
@@ -18312,49 +18325,65 @@ function stopAmbient() {
     }
   });
   ambientNodes.length = 0;
+  if (ctx) {
+    try {
+      ctx.close();
+    } catch (_) {
+    }
+    ctx = null;
+    masterGain = null;
+  }
 }
 __name(stopAmbient, "stopAmbient");
-function playTone(freq, type, duration, volume = 0.3, ramp = "exp", endFreq = null) {
-  const { ctx: c, master } = ensureCtx();
-  const now = c.currentTime;
-  const osc = c.createOscillator();
-  osc.type = type;
-  osc.frequency.setValueAtTime(freq, now);
-  if (endFreq !== null) {
-    osc.frequency.linearRampToValueAtTime(endFreq, now + duration);
-  }
-  const g = c.createGain();
-  g.gain.setValueAtTime(volume, now);
-  if (ramp === "exp") {
+function playTone(freq, type, duration, volume = 0.3, endFreq = null) {
+  const audio = ensureCtx();
+  if (!audio) return;
+  const { ctx: c, master } = audio;
+  if (c.state === "suspended") return;
+  try {
+    const now = c.currentTime;
+    const osc = c.createOscillator();
+    osc.type = type;
+    osc.frequency.setValueAtTime(freq, now);
+    if (endFreq !== null) {
+      osc.frequency.linearRampToValueAtTime(endFreq, now + duration);
+    }
+    const g = c.createGain();
+    g.gain.setValueAtTime(volume, now);
     g.gain.exponentialRampToValueAtTime(1e-3, now + duration);
-  } else {
-    g.gain.linearRampToValueAtTime(0, now + duration);
+    osc.connect(g);
+    g.connect(master);
+    osc.start(now);
+    osc.stop(now + duration + 0.05);
+  } catch (_) {
   }
-  osc.connect(g);
-  g.connect(master);
-  osc.start(now);
-  osc.stop(now + duration + 0.05);
 }
 __name(playTone, "playTone");
 function sfxDiceRoll() {
-  const { ctx: c, master } = ensureCtx();
-  const now = c.currentTime;
-  const count = 8 + Math.floor(Math.random() * 5);
-  let t = now;
-  for (let i = 0; i < count; i++) {
-    const freq = 300 + Math.random() * 200;
-    const dur = 0.03 + Math.random() * 0.05;
-    const osc = c.createOscillator();
-    osc.type = "square";
-    osc.frequency.value = freq;
-    const g = c.createGain();
-    g.gain.setValueAtTime(0.25, t);
-    g.gain.exponentialRampToValueAtTime(1e-3, t + dur);
-    osc.connect(g);
-    g.connect(master);
-    osc.start(t);
-    osc.stop(t + dur + 0.01);
-    t += 0.03 + Math.random() * 0.05;
+  const audio = ensureCtx();
+  if (!audio) return;
+  const { ctx: c, master } = audio;
+  if (c.state === "suspended") return;
+  try {
+    const now = c.currentTime;
+    const count = 8 + Math.floor(Math.random() * 5);
+    let t = now;
+    for (let i = 0; i < count; i++) {
+      const freq = 300 + Math.random() * 200;
+      const dur = 0.03 + Math.random() * 0.05;
+      const osc = c.createOscillator();
+      osc.type = "square";
+      osc.frequency.value = freq;
+      const g = c.createGain();
+      g.gain.setValueAtTime(0.25, t);
+      g.gain.exponentialRampToValueAtTime(1e-3, t + dur);
+      osc.connect(g);
+      g.connect(master);
+      osc.start(t);
+      osc.stop(t + dur + 0.01);
+      t += 0.03 + Math.random() * 0.05;
+    }
+  } catch (_) {
   }
 }
 __name(sfxDiceRoll, "sfxDiceRoll");
@@ -18367,56 +18396,61 @@ function sfxStamp() {
 }
 __name(sfxStamp, "sfxStamp");
 function sfxGameOver() {
-  const { ctx: c, master } = ensureCtx();
-  const now = c.currentTime;
-  const crackLen = 0.15;
-  const crackBuf = c.createBuffer(1, c.sampleRate * crackLen, c.sampleRate);
-  const crackData = crackBuf.getChannelData(0);
-  for (let i = 0; i < crackData.length; i++) {
-    crackData[i] = (Math.random() * 2 - 1) * Math.exp(-i / (c.sampleRate * 0.03));
+  const audio = ensureCtx();
+  if (!audio) return;
+  const { ctx: c, master } = audio;
+  if (c.state === "suspended") return;
+  try {
+    const now = c.currentTime;
+    const crackLen = 0.15;
+    const crackBuf = c.createBuffer(1, c.sampleRate * crackLen, c.sampleRate);
+    const crackData = crackBuf.getChannelData(0);
+    for (let i = 0; i < crackData.length; i++) {
+      crackData[i] = (Math.random() * 2 - 1) * Math.exp(-i / (c.sampleRate * 0.03));
+    }
+    const crackSrc = c.createBufferSource();
+    crackSrc.buffer = crackBuf;
+    const crackGain = c.createGain();
+    crackGain.gain.value = 0.4;
+    crackSrc.connect(crackGain);
+    crackGain.connect(master);
+    crackSrc.start(now);
+    const thump = c.createOscillator();
+    thump.type = "sine";
+    thump.frequency.setValueAtTime(80, now);
+    thump.frequency.exponentialRampToValueAtTime(30, now + 0.3);
+    const thumpGain = c.createGain();
+    thumpGain.gain.setValueAtTime(0.35, now);
+    thumpGain.gain.exponentialRampToValueAtTime(1e-3, now + 0.3);
+    thump.connect(thumpGain);
+    thumpGain.connect(master);
+    thump.start(now);
+    thump.stop(now + 0.35);
+    const fadeLen = 3;
+    const fadeBuf = c.createBuffer(1, c.sampleRate * fadeLen, c.sampleRate);
+    const fadeData = fadeBuf.getChannelData(0);
+    for (let i = 0; i < fadeData.length; i++) {
+      fadeData[i] = Math.random() * 2 - 1;
+    }
+    const fadeSrc = c.createBufferSource();
+    fadeSrc.buffer = fadeBuf;
+    const fadeGain = c.createGain();
+    fadeGain.gain.setValueAtTime(0.2, now);
+    fadeGain.gain.linearRampToValueAtTime(0, now + fadeLen);
+    const fadeFilter = c.createBiquadFilter();
+    fadeFilter.type = "lowpass";
+    fadeFilter.frequency.setValueAtTime(800, now);
+    fadeFilter.frequency.linearRampToValueAtTime(100, now + fadeLen);
+    fadeSrc.connect(fadeFilter);
+    fadeFilter.connect(fadeGain);
+    fadeGain.connect(master);
+    fadeSrc.start(now);
+    fadeSrc.stop(now + fadeLen + 0.1);
+  } catch (_) {
   }
-  const crackSrc = c.createBufferSource();
-  crackSrc.buffer = crackBuf;
-  const crackGain = c.createGain();
-  crackGain.gain.value = 0.4;
-  crackSrc.connect(crackGain);
-  crackGain.connect(master);
-  crackSrc.start(now);
-  const thump = c.createOscillator();
-  thump.type = "sine";
-  thump.frequency.setValueAtTime(80, now);
-  thump.frequency.exponentialRampToValueAtTime(30, now + 0.3);
-  const thumpGain = c.createGain();
-  thumpGain.gain.setValueAtTime(0.35, now);
-  thumpGain.gain.exponentialRampToValueAtTime(1e-3, now + 0.3);
-  thump.connect(thumpGain);
-  thumpGain.connect(master);
-  thump.start(now);
-  thump.stop(now + 0.35);
-  const fadeLen = 3;
-  const fadeBuf = c.createBuffer(1, c.sampleRate * fadeLen, c.sampleRate);
-  const fadeData = fadeBuf.getChannelData(0);
-  for (let i = 0; i < fadeData.length; i++) {
-    fadeData[i] = Math.random() * 2 - 1;
-  }
-  const fadeSrc = c.createBufferSource();
-  fadeSrc.buffer = fadeBuf;
-  const fadeGain = c.createGain();
-  fadeGain.gain.setValueAtTime(0.2, now);
-  fadeGain.gain.linearRampToValueAtTime(0, now + fadeLen);
-  const fadeFilter = c.createBiquadFilter();
-  fadeFilter.type = "lowpass";
-  fadeFilter.frequency.setValueAtTime(800, now);
-  fadeFilter.frequency.linearRampToValueAtTime(100, now + fadeLen);
-  fadeSrc.connect(fadeFilter);
-  fadeFilter.connect(fadeGain);
-  fadeGain.connect(master);
-  fadeSrc.start(now);
-  fadeSrc.stop(now + fadeLen + 0.1);
 }
 __name(sfxGameOver, "sfxGameOver");
 var audio_default = {
-  ensureCtx,
   startAmbient,
   stopAmbient,
   sfxDiceRoll,
@@ -18427,113 +18461,25 @@ var audio_default = {
 
 // src/ui/icons.js
 var ICONS = {
-  "Pemmican Rations": `<svg viewBox="0 0 24 24" width="24" height="24" xmlns="http://www.w3.org/2000/svg" aria-label="Pemmican Rations">
-    <path d="M6 12 C6 8 10 6 12 6 C14 6 18 8 18 12 C18 16 14 18 12 18 C10 18 6 16 6 12Z" fill="none" stroke="currentColor" stroke-width="1.5"/>
-    <path d="M9 10 C10 11 14 11 15 10" fill="none" stroke="currentColor" stroke-width="1"/>
-    <path d="M9 13 C10 14 14 14 15 13" fill="none" stroke="currentColor" stroke-width="1"/>
-    <path d="M9 16 C10 17 14 17 15 16" fill="none" stroke="currentColor" stroke-width="1"/>
-  </svg>`,
-  "Spare Axle": `<svg viewBox="0 0 24 24" width="24" height="24" xmlns="http://www.w3.org/2000/svg" aria-label="Spare Axle">
-    <rect x="3" y="8" width="18" height="8" rx="1" fill="none" stroke="currentColor" stroke-width="1.5"/>
-    <line x1="3" y1="10" x2="4" y2="10" stroke="currentColor" stroke-width="0.8"/>
-    <line x1="3" y1="12" x2="4" y2="12" stroke="currentColor" stroke-width="0.8"/>
-    <line x1="3" y1="14" x2="4" y2="14" stroke="currentColor" stroke-width="0.8"/>
-    <line x1="20" y1="10" x2="21" y2="10" stroke="currentColor" stroke-width="0.8"/>
-    <line x1="20" y1="12" x2="21" y2="12" stroke="currentColor" stroke-width="0.8"/>
-    <line x1="20" y1="14" x2="21" y2="14" stroke="currentColor" stroke-width="0.8"/>
-    <circle cx="12" cy="12" r="2" fill="none" stroke="currentColor" stroke-width="1.2"/>
-  </svg>`,
-  "Shaganappi": `<svg viewBox="0 0 24 24" width="24" height="24" xmlns="http://www.w3.org/2000/svg" aria-label="Shaganappi">
-    <path d="M4 6 C8 4 16 4 20 6 C22 8 18 12 20 14 C22 16 22 18 18 20 C14 22 8 20 6 18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-    <path d="M6 8 C10 6 18 8 20 10" fill="none" stroke="currentColor" stroke-width="0.8"/>
-    <path d="M6 16 C10 14 18 16 20 18" fill="none" stroke="currentColor" stroke-width="0.8"/>
-  </svg>`,
-  "Tool Kit": `<svg viewBox="0 0 24 24" width="24" height="24" xmlns="http://www.w3.org/2000/svg" aria-label="Tool Kit">
-    <path d="M6 6 L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-    <rect x="4" y="3" width="4" height="5" rx="1" transform="rotate(-45 6 6)" fill="none" stroke="currentColor" stroke-width="1.5"/>
-    <path d="M16 16 L20 20" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-    <circle cx="18" cy="14" r="2" fill="none" stroke="currentColor" stroke-width="1.2"/>
-  </svg>`,
-  "Bison Hide": `<svg viewBox="0 0 24 24" width="24" height="24" xmlns="http://www.w3.org/2000/svg" aria-label="Bison Hide">
-    <path d="M5 7 C5 5 7 4 9 4 C11 4 12 5 12 7 C12 5 13 4 15 4 C17 4 19 5 19 7 C19 11 17 17 12 19 C7 17 5 11 5 7Z" fill="none" stroke="currentColor" stroke-width="1.5"/>
-    <path d="M8 8 C9 9 11 9 12 8" fill="none" stroke="currentColor" stroke-width="0.8"/>
-    <path d="M8 12 C9 13 11 13 12 12" fill="none" stroke="currentColor" stroke-width="0.8"/>
-    <path d="M8 16 C9 17 11 17 12 16" fill="none" stroke="currentColor" stroke-width="0.8"/>
-  </svg>`,
-  "Canvas Tarp": `<svg viewBox="0 0 24 24" width="24" height="24" xmlns="http://www.w3.org/2000/svg" aria-label="Canvas Tarp">
-    <path d="M12 4 L4 20 L20 20 Z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
-    <line x1="12" y1="4" x2="12" y2="20" stroke="currentColor" stroke-width="1.2" stroke-dasharray="2 2"/>
-    <path d="M8 14 L12 8 L16 14" fill="none" stroke="currentColor" stroke-width="0.8"/>
-  </svg>`,
-  "Firewood Bundle": `<svg viewBox="0 0 24 24" width="24" height="24" xmlns="http://www.w3.org/2000/svg" aria-label="Firewood Bundle">
-    <line x1="6" y1="8" x2="18" y2="8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-    <line x1="6" y1="12" x2="18" y2="12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-    <line x1="6" y1="16" x2="18" y2="16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-    <path d="M11 6 C11 6 12 7 12 8" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round"/>
-    <path d="M12 8 C12 9 13 10 14 9 C15 8 15 6 16 7 C17 8 17 10 18 9" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round"/>
-  </svg>`,
-  "Rope (50ft)": `<svg viewBox="0 0 24 24" width="24" height="24" xmlns="http://www.w3.org/2000/svg" aria-label="Rope">
-    <circle cx="12" cy="12" r="7" fill="none" stroke="currentColor" stroke-width="1.2"/>
-    <circle cx="12" cy="12" r="4.5" fill="none" stroke="currentColor" stroke-width="1"/>
-    <circle cx="12" cy="12" r="2" fill="none" stroke="currentColor" stroke-width="0.8"/>
-    <path d="M12 5 L12 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-  </svg>`,
-  "Ammunition Belt": `<svg viewBox="0 0 24 24" width="24" height="24" xmlns="http://www.w3.org/2000/svg" aria-label="Ammunition Belt">
-    <path d="M4 10 C4 8 6 7 10 7 C14 7 18 7 20 8 C21 9 21 11 20 12 C18 13 14 13 10 13 C6 13 4 12 4 10Z" fill="none" stroke="currentColor" stroke-width="1.5"/>
-    <circle cx="8" cy="10" r="1.2" fill="none" stroke="currentColor" stroke-width="1"/>
-    <circle cx="12" cy="10" r="1.2" fill="none" stroke="currentColor" stroke-width="1"/>
-    <circle cx="16" cy="10" r="1.2" fill="none" stroke="currentColor" stroke-width="1"/>
-    <path d="M4 10 L3 10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-    <path d="M20 10 L21 10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-  </svg>`,
-  "Medicine Pouch": `<svg viewBox="0 0 24 24" width="24" height="24" xmlns="http://www.w3.org/2000/svg" aria-label="Medicine Pouch">
-    <path d="M7 8 C7 6 9 5 12 5 C15 5 17 6 17 8 L17 18 C17 20 15 21 12 21 C9 21 7 20 7 18Z" fill="none" stroke="currentColor" stroke-width="1.5"/>
-    <path d="M7 9 L17 9" stroke="currentColor" stroke-width="1.2"/>
-    <path d="M12 5 L12 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-    <path d="M10 13 L14 13" stroke="currentColor" stroke-width="1" stroke-linecap="round"/>
-    <path d="M12 11 L12 15" stroke="currentColor" stroke-width="1" stroke-linecap="round"/>
-  </svg>`,
-  "Blanket": `<svg viewBox="0 0 24 24" width="24" height="24" xmlns="http://www.w3.org/2000/svg" aria-label="Blanket">
-    <rect x="4" y="5" width="16" height="14" rx="1" fill="none" stroke="currentColor" stroke-width="1.5"/>
-    <line x1="4" y1="10" x2="20" y2="10" stroke="currentColor" stroke-width="1.2"/>
-    <line x1="4" y1="14" x2="20" y2="14" stroke="currentColor" stroke-width="1.2"/>
-    <path d="M8 5 L8 19" stroke="currentColor" stroke-width="0.8"/>
-    <path d="M16 5 L16 19" stroke="currentColor" stroke-width="0.8"/>
-  </svg>`,
-  "Beaver Pelts": `<svg viewBox="0 0 24 24" width="24" height="24" xmlns="http://www.w3.org/2000/svg" aria-label="Beaver Pelts">
-    <path d="M12 5 C9 5 6 7 6 10 C6 13 8 16 12 19 C16 16 18 13 18 10 C18 7 15 5 12 5Z" fill="none" stroke="currentColor" stroke-width="1.5"/>
-    <circle cx="10" cy="9" r="1" fill="none" stroke="currentColor" stroke-width="1"/>
-    <circle cx="14" cy="9" r="1" fill="none" stroke="currentColor" stroke-width="1"/>
-    <path d="M11 11 C11.5 12 12.5 12 13 11" fill="none" stroke="currentColor" stroke-width="0.8"/>
-    <path d="M12 19 L12 21" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-  </svg>`,
-  // Crafted items (recipe outputs)
-  "Finished Hides": `<svg viewBox="0 0 24 24" width="24" height="24" xmlns="http://www.w3.org/2000/svg" aria-label="Finished Hides">
-    <rect x="5" y="5" width="14" height="14" rx="2" fill="none" stroke="currentColor" stroke-width="1.5"/>
-    <path d="M5 9 L19 9" stroke="currentColor" stroke-width="0.8"/>
-    <path d="M5 13 L19 13" stroke="currentColor" stroke-width="0.8"/>
-    <path d="M9 5 L9 19" stroke="currentColor" stroke-width="0.8"/>
-    <path d="M15 5 L15 19" stroke="currentColor" stroke-width="0.8"/>
-  </svg>`,
-  "Travois Kit": `<svg viewBox="0 0 24 24" width="24" height="24" xmlns="http://www.w3.org/2000/svg" aria-label="Travois Kit">
-    <line x1="4" y1="6" x2="12" y2="18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-    <line x1="20" y1="6" x2="12" y2="18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-    <line x1="6" y1="10" x2="18" y2="10" stroke="currentColor" stroke-width="1.2"/>
-    <line x1="8" y1="14" x2="16" y2="14" stroke="currentColor" stroke-width="1.2"/>
-    <circle cx="12" cy="18" r="1.5" fill="none" stroke="currentColor" stroke-width="1"/>
-  </svg>`,
-  "Gunpowder Pack": `<svg viewBox="0 0 24 24" width="24" height="24" xmlns="http://www.w3.org/2000/svg" aria-label="Gunpowder Pack">
-    <rect x="7" y="6" width="10" height="12" rx="2" fill="none" stroke="currentColor" stroke-width="1.5"/>
-    <path d="M10 6 L10 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-    <path d="M14 6 L14 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-    <circle cx="12" cy="12" r="2" fill="none" stroke="currentColor" stroke-width="1"/>
-    <path d="M12 14 L12 16" stroke="currentColor" stroke-width="0.8"/>
-    <path d="M10 16 L14 16" stroke="currentColor" stroke-width="0.8"/>
-  </svg>`
+  "Pemmican Rations": "\u{1F969}",
+  "Spare Axle": "\u{1FAB5}",
+  "Shaganappi": "\u{1FAA2}",
+  "Tool Kit": "\u2692\uFE0F",
+  "Bison Hide": "\u{1F9AC}",
+  "Canvas Tarp": "\u26FA",
+  "Firewood Bundle": "\u{1F525}",
+  "Rope (50ft)": "\u{1FAA2}",
+  "Ammunition Belt": "\u{1F3AF}",
+  "Medicine Pouch": "\u{1F48A}",
+  "Blanket": "\u{1F9E3}",
+  "Beaver Pelts": "\u{1F9AB}",
+  // Crafted items
+  "Finished Hides": "\u{1F9AC}",
+  "Travois Kit": "\u{1F6D2}",
+  "Gunpowder Pack": "\u{1F4A3}"
 };
 function getItemIcon(name3) {
-  if (ICONS[name3]) return ICONS[name3];
-  return `<svg viewBox="0 0 24 24" width="24" height="24" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>`;
+  return ICONS[name3] || "\u2022";
 }
 __name(getItemIcon, "getItemIcon");
 
@@ -19293,16 +19239,16 @@ function showCart(game) {
   if (!listEl) return;
   const overloaded = state.usedWeight > state.capacity;
   const excess = state.usedWeight - state.capacity;
-  const weightBar = overloaded ? `<div style="margin-bottom:10px;padding:8px;background:rgba(180,60,60,0.15);border:1px solid rgba(180,60,60,0.4);border-radius:4px;"><div style="font-weight:700;color:#8B0000;">\u26A0 Overloaded \u2014 ${state.usedWeight} / ${state.capacity} kg</div><div style="font-size:0.9em;color:#8B0000;margin-top:2px;">Offload at least <strong>${excess} kg</strong> before traveling.</div></div>` : `<div style="margin-bottom:10px;padding:8px;background:rgba(46,90,62,0.12);border:1px solid rgba(46,90,62,0.3);border-radius:4px;"><div style="font-weight:700;color:#2D4A3E;">Cart \u2014 ${state.usedWeight} / ${state.capacity} kg</div></div>`;
+  const weightBar = overloaded ? `<div style="margin-bottom:10px;padding:8px;background:rgba(180,60,60,0.15);border:1px solid rgba(180,60,60,0.4);border-radius:0;"><div style="font-weight:700;color:#8B0000;">\u26A0 Overloaded \u2014 ${state.usedWeight} / ${state.capacity} kg</div><div style="font-size:0.9em;color:#8B0000;margin-top:2px;">Offload at least <strong>${excess} kg</strong> before traveling.</div></div>` : `<div style="margin-bottom:10px;padding:8px;background:rgba(46,90,62,0.12);border:1px solid rgba(46,90,62,0.3);border-radius:0;"><div style="font-weight:700;color:#2D4A3E;">Cart \u2014 ${state.usedWeight} / ${state.capacity} kg</div></div>`;
   const items = cart.map((i) => {
-    const canUnload = overloaded && i.count > 0;
+    const canUnload = i.count > 0;
     const hint = i.category ? getCategoryHint(i.category) : "";
     const desc = i.desc ? `<div style="font-size:0.8em;color:#5a4a3a;margin-top:2px;">${i.desc}</div>` : "";
-    const mbStr = (i.type === "trade" || i.category === "furs") && i.mbValue ? `<span style="color:var(--clr-accent);font-size:0.85em;margin-left:4px;">${i.mbValue} MB</span>` : "";
+    const mbStr = (i.type === "trade" || i.category === "furs") && i.mbValue ? `<span style="color:var(--clr-accent);font-size:0.85em;margin-left:4px;">${i.mbValue} \u20A5</span>` : "";
     return `
-    <div class="cart-row" style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:6px 0;border-bottom:1px solid rgba(0,0,0,0.08);">
-      <span style="flex:1;"><span style="font-weight:600;">${getItemIcon(i.name)} ${i.name} \xD7${i.count} (${i.wt * i.count} kg)</span>${mbStr}${hint ? `<div style="font-size:0.75em;color:#6b5c4a;">${hint}</div>` : ""}${desc}</span>
-      ${canUnload ? `<button class="ctrl-btn unload-btn" data-item="${i.name}" style="padding:2px 10px;font-size:0.85em;">Unload ${i.name} (\u2212${i.wt} kg)</button>` : ""}
+    <div class="cart-row" style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;padding:6px 0;border-bottom:1px solid rgba(0,0,0,0.08);">
+      <span style="flex:1;"><span style="font-weight:600;">${getItemIcon(i.name)} ${i.name} \xD7${i.count} (${(i.wt * i.count).toFixed(1)} kg)</span>${mbStr}${hint ? `<div style="font-size:0.75em;color:#6b5c4a;margin-top:1px;">${hint}</div>` : ""}${desc}</span>
+      ${canUnload ? `<button class="ctrl-btn unload-btn" data-item="${i.name}" style="padding:2px 10px;font-size:0.85em;flex-shrink:0;">Unload (\u2212${i.wt} kg)</button>` : ""}
     </div>`;
   }).join("");
   listEl.innerHTML = weightBar + items;
@@ -19311,7 +19257,7 @@ function showCart(game) {
       const itemName = btn.dataset.item;
       game.offloadItem(itemName);
       const newState = game.getState();
-      if (newState.usedWeight <= newState.capacity) {
+      if (overloaded && newState.usedWeight <= newState.capacity) {
         document.getElementById("cart-overlay")?.classList.remove("active");
         window.__METIS_RENDER__();
       } else {
@@ -19324,16 +19270,16 @@ function showCart(game) {
 __name(showCart, "showCart");
 function getCategoryHint(category) {
   const map2 = {
-    provisions: "Restores food when needed.",
-    repair: "Reduces cart wear at settlements.",
-    parts: "Used for cart repair and crafting.",
-    furs: "Trade for MB credit at settlements.",
-    shelter: "Survival aid; shelters crew from weather.",
-    fuel: "Required for cold nights and some recipes.",
-    hunting: "Event bonuses and ammunition support.",
-    medical: "Restores crew condition when injured or ill.",
-    tool: "Enables repair and advanced crafting.",
-    ammo: "Hunting and defensive event bonuses."
+    provisions: "1 food/day keeps the crew alive. Running out means death.",
+    repair: "Reduces cart wear. No repair supplies = stranded when cart breaks.",
+    parts: "Needed for cart repair and crafting recipes at settlements.",
+    furs: "Trade goods. Sell at settlements for \u20A5 credit. Need \u20A5 to win.",
+    shelter: "Cold nights and river crossings. Tarp doubles as raft.",
+    fuel: "Required for cold nights. Without fire, crew condition drops.",
+    hunting: "Ammo enables hunting camp action. Also used in defensive events.",
+    medical: "Heals crew when injured or ill. Saves morale in crisis events.",
+    tool: "Enables major repairs and advanced crafting at settlements.",
+    ammo: "Required for hunting. Some events need ammunition."
   };
   return map2[category] || "";
 }
@@ -19504,14 +19450,15 @@ var CAMP_FLAVOR = {
       "A prairie grouse covey flushes at your feet. The hunt is quick and the meat is tender. A good day.",
       "A deer at the creek crossing. One shot, one kill. The crew will eat well for days."
     ],
+    mid: [
+      "You take a shot but the hit is poor. Some food, but not a clean kill. The crew makes do.",
+      "A close call \u2014 you wound it but it runs. You track it down eventually, but the meat is less than hoped.",
+      "A jackrabbit and a grouse. Not a feast, but the pot will boil tonight."
+    ],
     low: [
       "The shot goes wide. The game scatters and you return to camp empty-handed.",
       "You track a deer for hours but never get a clean shot. The ammunition is wasted.",
       "No game today. The prairie is empty and the hunt returns nothing."
-    ],
-    mid: [
-      "You take a shot but the hit is poor. Some food, but not a clean kill. The crew makes do.",
-      "A close call \u2014 you wound it but it runs. You track it down eventually, but the meat is less than hoped."
     ]
   },
   pemmican_process: {
@@ -19548,12 +19495,13 @@ var CAMP_FLAVOR = {
       "The repair is sound. The shaganappi binds tight and the cart rolls smoother by morning. Good work.",
       "A clean repair job. The cartwright would be proud. The wear comes off and the cart feels solid again."
     ],
+    mid: [
+      "A decent repair. The cart is sounder than before, and the shaganappi was well-used.",
+      "The work holds. Not pretty, but the cart will make it to the next settlement."
+    ],
     low: [
       "The repair is rough but it holds. The shaganappi is well-spent, even if the work is ugly.",
       "The fix is imperfect. Some wear comes off, but the cart still groans. It will do until the next settlement."
-    ],
-    mid: [
-      "A decent repair. The cart is sounder than before, and the shaganappi was well-used."
     ]
   },
   dance: {

@@ -1108,21 +1108,21 @@ function showCart(game) {
   const excess = state.usedWeight - state.capacity;
 
   const weightBar = overloaded
-    ? `<div style="margin-bottom:10px;padding:8px;background:rgba(180,60,60,0.15);border:1px solid rgba(180,60,60,0.4);border-radius:4px;"><div style="font-weight:700;color:#8B0000;">⚠ Overloaded — ${state.usedWeight} / ${state.capacity} kg</div><div style="font-size:0.9em;color:#8B0000;margin-top:2px;">Offload at least <strong>${excess} kg</strong> before traveling.</div></div>`
-    : `<div style="margin-bottom:10px;padding:8px;background:rgba(46,90,62,0.12);border:1px solid rgba(46,90,62,0.3);border-radius:4px;"><div style="font-weight:700;color:#2D4A3E;">Cart — ${state.usedWeight} / ${state.capacity} kg</div></div>`;
+    ? `<div style="margin-bottom:10px;padding:8px;background:rgba(180,60,60,0.15);border:1px solid rgba(180,60,60,0.4);border-radius:0;"><div style="font-weight:700;color:#8B0000;">⚠ Overloaded — ${state.usedWeight} / ${state.capacity} kg</div><div style="font-size:0.9em;color:#8B0000;margin-top:2px;">Offload at least <strong>${excess} kg</strong> before traveling.</div></div>`
+    : `<div style="margin-bottom:10px;padding:8px;background:rgba(46,90,62,0.12);border:1px solid rgba(46,90,62,0.3);border-radius:0;"><div style="font-weight:700;color:#2D4A3E;">Cart — ${state.usedWeight} / ${state.capacity} kg</div></div>`;
 
   const items = cart
     .map((i) => {
-      const canUnload = overloaded && i.count > 0;
+      const canUnload = i.count > 0;
       const hint = i.category ? getCategoryHint(i.category) : '';
       const desc = i.desc ? `<div style="font-size:0.8em;color:#5a4a3a;margin-top:2px;">${i.desc}</div>` : '';
       const mbStr = (i.type === 'trade' || i.category === 'furs') && i.mbValue
-        ? `<span style="color:var(--clr-accent);font-size:0.85em;margin-left:4px;">${i.mbValue} MB</span>`
+        ? `<span style="color:var(--clr-accent);font-size:0.85em;margin-left:4px;">${i.mbValue} ₥</span>`
         : '';
       return `
-    <div class="cart-row" style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:6px 0;border-bottom:1px solid rgba(0,0,0,0.08);">
-      <span style="flex:1;"><span style="font-weight:600;">${getItemIcon(i.name)} ${i.name} ×${i.count} (${i.wt * i.count} kg)</span>${mbStr}${hint ? `<div style="font-size:0.75em;color:#6b5c4a;">${hint}</div>` : ''}${desc}</span>
-      ${canUnload ? `<button class="ctrl-btn unload-btn" data-item="${i.name}" style="padding:2px 10px;font-size:0.85em;">Unload ${i.name} (−${i.wt} kg)</button>` : ''}
+    <div class="cart-row" style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;padding:6px 0;border-bottom:1px solid rgba(0,0,0,0.08);">
+      <span style="flex:1;"><span style="font-weight:600;">${getItemIcon(i.name)} ${i.name} ×${i.count} (${(i.wt * i.count).toFixed(1)} kg)</span>${mbStr}${hint ? `<div style="font-size:0.75em;color:#6b5c4a;margin-top:1px;">${hint}</div>` : ''}${desc}</span>
+      ${canUnload ? `<button class="ctrl-btn unload-btn" data-item="${i.name}" style="padding:2px 10px;font-size:0.85em;flex-shrink:0;">Unload (−${i.wt} kg)</button>` : ''}
     </div>`;
     })
     .join('');
@@ -1133,9 +1133,8 @@ function showCart(game) {
     btn.addEventListener('click', () => {
       const itemName = btn.dataset.item;
       game.offloadItem(itemName);
-      // Refresh cart; if no longer overloaded, close overlay and re-render
       const newState = game.getState();
-      if (newState.usedWeight <= newState.capacity) {
+      if (overloaded && newState.usedWeight <= newState.capacity) {
         document.getElementById('cart-overlay')?.classList.remove('active');
         window.__METIS_RENDER__();
       } else {
@@ -1149,16 +1148,16 @@ function showCart(game) {
 
 function getCategoryHint(category) {
   const map = {
-    provisions: 'Restores food when needed.',
-    repair: 'Reduces cart wear at settlements.',
-    parts: 'Used for cart repair and crafting.',
-    furs: 'Trade for MB credit at settlements.',
-    shelter: 'Survival aid; shelters crew from weather.',
-    fuel: 'Required for cold nights and some recipes.',
-    hunting: 'Event bonuses and ammunition support.',
-    medical: 'Restores crew condition when injured or ill.',
-    tool: 'Enables repair and advanced crafting.',
-    ammo: 'Hunting and defensive event bonuses.',
+    provisions: '1 food/day keeps the crew alive. Running out means death.',
+    repair: 'Reduces cart wear. No repair supplies = stranded when cart breaks.',
+    parts: 'Needed for cart repair and crafting recipes at settlements.',
+    furs: 'Trade goods. Sell at settlements for ₥ credit. Need ₥ to win.',
+    shelter: 'Cold nights and river crossings. Tarp doubles as raft.',
+    fuel: 'Required for cold nights. Without fire, crew condition drops.',
+    hunting: 'Ammo enables hunting camp action. Also used in defensive events.',
+    medical: 'Heals crew when injured or ill. Saves morale in crisis events.',
+    tool: 'Enables major repairs and advanced crafting at settlements.',
+    ammo: 'Required for hunting. Some events need ammunition.',
   };
   return map[category] || '';
 }
@@ -1338,14 +1337,15 @@ const CAMP_FLAVOR = {
       'A prairie grouse covey flushes at your feet. The hunt is quick and the meat is tender. A good day.',
       'A deer at the creek crossing. One shot, one kill. The crew will eat well for days.',
     ],
+    mid: [
+      'You take a shot but the hit is poor. Some food, but not a clean kill. The crew makes do.',
+      'A close call — you wound it but it runs. You track it down eventually, but the meat is less than hoped.',
+      'A jackrabbit and a grouse. Not a feast, but the pot will boil tonight.',
+    ],
     low: [
       'The shot goes wide. The game scatters and you return to camp empty-handed.',
       'You track a deer for hours but never get a clean shot. The ammunition is wasted.',
       'No game today. The prairie is empty and the hunt returns nothing.',
-    ],
-    mid: [
-      'You take a shot but the hit is poor. Some food, but not a clean kill. The crew makes do.',
-      'A close call — you wound it but it runs. You track it down eventually, but the meat is less than hoped.',
     ],
   },
   pemmican_process: {
@@ -1382,12 +1382,13 @@ const CAMP_FLAVOR = {
       'The repair is sound. The shaganappi binds tight and the cart rolls smoother by morning. Good work.',
       'A clean repair job. The cartwright would be proud. The wear comes off and the cart feels solid again.',
     ],
+    mid: [
+      'A decent repair. The cart is sounder than before, and the shaganappi was well-used.',
+      'The work holds. Not pretty, but the cart will make it to the next settlement.',
+    ],
     low: [
       'The repair is rough but it holds. The shaganappi is well-spent, even if the work is ugly.',
       'The fix is imperfect. Some wear comes off, but the cart still groans. It will do until the next settlement.',
-    ],
-    mid: [
-      'A decent repair. The cart is sounder than before, and the shaganappi was well-used.',
     ],
   },
   dance: {
