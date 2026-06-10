@@ -2,6 +2,31 @@
 
 All notable changes are documented here. Format loosely follows Keep a Changelog.
 
+## [v81] — 2026-06-10
+
+### Fix — pushOn() was a no-op (mutated getState() copy, not engine state)
+- `pushOn()` in `src/main.js` called `game.getState()` and mutated the returned object
+- `getState()` returns a copy, so mutations were silently lost — Push On did nothing
+- Fix: added `pushOn()` as a proper engine method in `src/systems/engine.js`
+- `main.js` `pushOn(game)` now delegates to `game.pushOn()`
+- Engine `pushOn()`: -1.5 food, +1 wear, -5 morale, travelDaysWithoutRest++, crew degradation, advance()
+
+### Updated — Headless playtesting harness for v79 mechanics
+- `tests/simulate-entry.js` rewritten to resolve camp actions (rest/forage/hunt/repair/scout/dance/pemmican_process/deeprest)
+- Added `pickCampAction()` with context-aware weighting (terrain, items, crew state, food)
+- Added `pushOn` support via engine method
+- Added tracking: pushOnCount, forageCount, huntCount, scoutCount, danceCount, pemmicanCount, deepRestCount, squealCount, sundayRestCount
+- Added weather distribution at game end
+- Added `currentTerrain` and `travelDaysWithoutRest` to `getState()` return
+- New balance analysis: no_trade detection, squeal event tracking, push-on rate, hunt frequency
+- **200-run results: 38.5% win rate (target 25-40% ✓)**
+  - Deaths: no_trade 40%, starvation 13%, cart_failure 8.5%
+  - Avg score: 810 (range 176–1090), median 826
+  - 0 triumphant (≥1100) — threshold may need lowering to 900
+  - Key issue: 40% reach Edmonton with no trade goods (trade goods too scarce)
+
+Files modified: `src/systems/engine.js`, `src/main.js`, `tests/simulate-entry.js`
+
 ## [v80] — 2026-06-10
 
 ### Pre-Departure Cart Packing Overlay (Issue #44)

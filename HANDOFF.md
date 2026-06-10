@@ -1,15 +1,33 @@
 # HANDOFF — Metis Trail V2
 
 **Last updated:** 2026-06-10 by OWL
-**Version:** v71 (dist at v79 after build)
+**Version:** v81
 **Server:** http://100.108.183.33:5173/ (python3 -m http.server in dist/)
 **Branch:** main, clean tree, pushed to origin
 
 ---
 
-## Session Summary (2026-06-10)
+## Session Summary (2026-06-10, Evening)
 
-### v71 — Engine API Restoration + Documentation + Debug Panel
+### v81 — pushOn Fix + Playtesting Harness Update
+- **Bug fix:** `pushOn()` in main.js was a no-op — mutated getState() copy, not engine state
+  - Added `pushOn()` as proper engine method: -1.5 food, +1 wear, -5 morale, travelDaysWithoutRest++, crew degradation, advance()
+  - main.js `pushOn(game)` now delegates to `game.pushOn()`
+- **Sim update:** `tests/simulate-entry.js` rewritten for v79 mechanics
+  - Camp action resolution: rest/forage/hunt/repair/scout/dance/pemmican_process/deeprest
+  - Context-aware camp action weighting (terrain, items, crew state, food)
+  - pushOn support via engine method
+  - New tracking: pushOn, forage, hunt, scout, dance, pemmican, deepRest, squeal, sundayRest
+  - Weather distribution at game end
+  - `getState()` now includes `currentTerrain` and `travelDaysWithoutRest`
+- **200-run sim results: 38.5% win rate (target 25-40% ✓)**
+  - Deaths: no_trade 40%, starvation 13%, cart_failure 8.5%
+  - Avg score: 810 (range 176–1090), median 826
+  - 0 triumphant (≥1100) — threshold may need lowering to 900
+  - Key issue: 40% reach Edmonton with no trade goods (trade goods too scarce)
+- Files: `src/systems/engine.js`, `src/main.js`, `tests/simulate-entry.js`, `CHANGELOG.md`
+
+### v80 — Pre-Departure Cart Packing Overlay (Issue #44)
 - **Fix:** Restored 14 missing public API methods on engine return object (accidentally removed in v70b):
   `getNodes`, `getCurrentNode`, `getNextNode`, `totalWeight`, `getCrew`, `getPendingEvent`, `getAvailableActions`, `isOver`, `hasWon`, `getScore`, `getPreDepartureItems`, `setPreDepartureCount`, `confirmPreDeparture`, `getScoreData`
 - **Docs:** Added conventional commit message format to AGENTS.md (feat:/fix:/docs:/chore:/balance: types with scope examples)

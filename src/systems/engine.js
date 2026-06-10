@@ -352,6 +352,20 @@ export function createGame(seed = null) {
     checkGameOver();
   }
 
+  function pushOn() {
+    if (S.pendingSettlement || S.over) return;
+    // Penalties for pushing on without resting
+    S.food = Math.max(0, Math.round((S.food - 1.5) * 10) / 10);
+    S.wear = Math.min(S.wear + 1, 99);
+    S.morale = Math.max(0, S.morale - 5);
+    S.travelDaysWithoutRest++;
+    // Crew degradation
+    if (S.travelDaysWithoutRest >= 5 && S.crew !== 'exhausted') S.crew = 'exhausted';
+    else if (S.travelDaysWithoutRest >= 3 && S.crew === 'rested') S.crew = 'tired';
+    advance();
+    checkGameOver();
+  }
+
   function settlementAction(action) {
     if (!S.pendingSettlement) return [];
     S.pendingSettlement = null;
@@ -399,32 +413,35 @@ export function createGame(seed = null) {
   return {
     travelOneDay,
     makeCamp,
+    pushOn,
     chooseEventChoice,
     settlementAction,
     getState() {
-        return {
-          day: S.day,
-          month: S.month,
-          year: S.year,
-          season: S.season,
-          crew: S.crew,
-          food: S.food,
-          wear: S.wear,
-          morale: S.morale,
-          node: S.node,
-          segmentDay: S.segmentDay,
-          over: S.over,
-          won: S.won,
-          endReason: S.endReason || null,
-          score: S.score,
-          pendingEvent: S.pendingEvent,
-          pendingSettlement: S.pendingSettlement,
-          usedWeight: totalWeight(cart),
-          capacity: S.capacity,
-          preDeparture: S.preDeparture,
-          weather: S.weather,
-        };
-      },
+      return {
+        day: S.day,
+        month: S.month,
+        year: S.year,
+        season: S.season,
+        crew: S.crew,
+        food: S.food,
+        wear: S.wear,
+        morale: S.morale,
+        node: S.node,
+        segmentDay: S.segmentDay,
+        over: S.over,
+        won: S.won,
+        endReason: S.endReason || null,
+        score: S.score,
+        pendingEvent: S.pendingEvent,
+        pendingSettlement: S.pendingSettlement,
+        usedWeight: totalWeight(cart),
+        capacity: S.capacity,
+        preDeparture: S.preDeparture,
+        weather: S.weather,
+        currentTerrain: NODES[S.node]?.terrain || 'plains',
+        travelDaysWithoutRest: S.travelDaysWithoutRest,
+      };
+    },
     getCart() {
       return JSON.parse(JSON.stringify(cart));
     },

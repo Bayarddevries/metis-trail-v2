@@ -189,22 +189,7 @@ function travelOneDay() {
 
 // Push On: skip camp, apply penalties, continue travel loop
 function pushOn(game) {
-  const state = game.getState();
-  // Penalties for pushing on without rest
-  state.food = Math.max(0, Math.round((state.food - 1.5) * 10) / 10);
-  state.wear = Math.min(state.wear + 1, 99); // extra wear
-  state.morale = Math.max(0, state.morale - 5);
-  state.travelDaysWithoutRest++; // no rest recovery
-  
-  // Crew state degrades
-  if (state.travelDaysWithoutRest >= 5 && state.crew !== 'exhausted') state.crew = 'exhausted';
-  else if (state.travelDaysWithoutRest >= 3 && state.crew === 'rested') state.crew = 'tired';
-  
-  // Advance weather for the "skipped" camp night
-  // (weather already advances during travelOneDay, so just show fragment)
-  const msg = 'You push on into the evening. The crew grumbles. No fire tonight — only cold miles.';
-  publishResult(msg);
-  window.__METIS_RENDER__();
+  game.pushOn();
 }
 
 const TRAVEL_FRAGMENTS = {

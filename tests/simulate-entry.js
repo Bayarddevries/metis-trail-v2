@@ -213,28 +213,20 @@ function runSim(seed) {
         const campRoll = Math.random() < 0.15; // 15% chance to camp opportunistically
 
         if (needsCamp || wantsCamp || campRoll) {
-          // Make camp — this advances 1 day, recovers crew, boosts morale
-          game.makeCamp();
-          campCount++;
-
-          // Now pick and execute a camp action
+          // Decide which camp action to take BEFORE calling makeCamp
+          // "push_on" means skip makeCamp entirely and apply penalties
           const cart = game.getCart();
           const campAction = pickCampAction(s, cart, Math.random);
 
           if (campAction === 'push_on') {
-            // Push On: skip camp benefits, apply penalties
-            // Re-create the game state to apply push-on penalties
-            // The engine doesn't have a pushOn() method exposed in the same way,
-            // so we simulate the penalties directly via travel without camp recovery
+            // Push On: skip camp, apply penalties directly
+            game.pushOn();
             pushOnCount++;
-            // Push On penalties: +1.5 food, +1 wear, -5 morale, no crew recovery
-            // We already called makeCamp() so we need to reverse the camp benefits
-            // and apply push-on penalties instead. Since the engine's makeCamp()
-            // already ran, we simulate push-on as: travel without the camp recovery.
-            // For sim purposes, we just track it and apply net effects:
-            // Net vs normal camp: -1.5 food, +1 wear, -20 morale (approx)
-            // This is a simplification; the real push-on skips makeCamp entirely.
           } else {
+            // Normal camp: make camp first, then execute action
+            game.makeCamp();
+            campCount++;
+
             const result = game.campAction(campAction);
             if (result && !result.error) {
               switch (campAction) {
