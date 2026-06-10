@@ -19205,7 +19205,8 @@ function showShop(game) {
   const confirmBtn = document.getElementById("pd-confirm");
   const balanceEl = document.getElementById("shop-balance");
   const shopStatusEl = document.getElementById("shop-status");
-  if (!listEl || !weightEl || !currentEl || !statusEl || !confirmBtn || !balanceEl || !shopStatusEl) return;
+  const foodCountEl = document.getElementById("shop-food-count");
+  if (!listEl || !weightEl || !currentEl || !statusEl || !confirmBtn || !balanceEl || !shopStatusEl || !foodCountEl) return;
   let balance = game.getCart().reduce((sum, i) => sum + (i.mbValue || 0) * i.count, 0);
   const startingBalance = balance;
   const shopItems = [
@@ -19236,7 +19237,8 @@ function showShop(game) {
       totalWeight2 += i.wt * i.count;
     });
     currentEl.textContent = totalWeight2.toFixed(1);
-    balanceEl.textContent = balance.toFixed(1);
+    balanceEl.textContent = Math.round(balance);
+    foodCountEl.textContent = "Food: " + totalFood;
     const capacity = state.capacity;
     weightEl.classList.remove("over", "at-capacity", "under");
     statusEl.classList.remove("over", "at-capacity", "under");
@@ -19262,9 +19264,9 @@ function showShop(game) {
   __name(recalc, "recalc");
   function renderList() {
     listEl.innerHTML = shopItems.map((item) => {
-      const hint = getCategoryHint(item.category);
       const canBuy = balance >= item.price;
       const itemWeight = (item.wt * item.count).toFixed(1);
+      const qty = purchased[item.name];
       return `
     <div class="pd-row" data-item="${item.name}">
       <div class="pd-item-info">
@@ -19273,8 +19275,9 @@ function showShop(game) {
         <div style="font-size:0.75em;color:#5a4a3a;margin-top:2px;">${item.desc}</div>
       </div>
       <div class="pd-controls">
-        <span class="pd-count">${purchased[item.name] > 0 ? `\xD7${purchased[item.name]}` : "\u2014"}</span>
+        <span class="pd-count">${qty > 0 ? "\xD7" + qty : "\u2014"}</span>
         <button class="pd-buy" data-item="${item.name}" ${canBuy ? "" : "disabled"}>Buy (${item.price} \u20A5)</button>
+        ${qty > 0 ? `<button class="pd-remove" data-item="${item.name}">Remove</button>` : ""}
         <span class="pd-weight">${itemWeight} kg</span>
       </div>
     </div>`;
@@ -19286,6 +19289,18 @@ function showShop(game) {
         if (item && balance >= item.price) {
           balance -= item.price;
           purchased[item.name]++;
+          recalc();
+          renderList();
+        }
+      });
+    });
+    listEl.querySelectorAll(".pd-remove").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const name3 = btn.dataset.item;
+        const item = shopItems.find((i) => i.name === name3);
+        if (item && purchased[item.name] > 0) {
+          balance += item.price;
+          purchased[item.name]--;
           recalc();
           renderList();
         }

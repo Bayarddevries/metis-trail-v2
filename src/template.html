@@ -1406,11 +1406,17 @@
   <div class="overlay" id="predeparture-overlay">
     <div class="overlay-card" style="max-width: 560px;">
       <h2>Fort Garry Outfitters</h2>
-      <p class="predeparture-subtitle">Buy supplies before the trail. You have <span id="shop-balance" style="font-weight:700;color:var(--clr-accent);">14</span> ₥ to spend.</p>
+      <p class="predeparture-subtitle">You've got trade goods to sell and a long road ahead. Outfit wisely.</p>
 
       <div class="predeparture-briefing">
         <p><strong>Outfitter's Brief:</strong> "Five hundred and sixty-seven miles to Fort Edmonton. You've got until November before the snow buries the Carlton Trail. Your Red River cart carries 100 kg max — every kilogram counts."</p>
-        <p class="briefing-hint"><em>Choose wisely. Overloaded carts break axles. Underloaded carts starve.</em></p>
+        <p class="briefing-hint"><em>Buy food, repair supplies, and gear. You'll need every bit of it on the trail. Once you head west, there's no turning back.</em></p>
+        <p style="margin-top:8px;font-size:0.9em;color:#5a4a3a;">Your trade goods are worth <span id="shop-starting-balance" style="font-weight:700;color:#8b6914;">14</span> ₥. Spend it all — you won't need money on the trail, just supplies.</p>
+      </div>
+
+      <div style="display:flex;justify-content:space-between;align-items:center;margin:12px 0 8px;">
+        <span style="font-family:var(--font-heading);font-size:13px;font-weight:600;color:#8b6914;">₥ REMAINING: <span id="shop-balance" style="font-size:16px;">14</span></span>
+        <span id="shop-food-count" style="font-size:12px;color:#5a4a3a;">Food: 0</span>
       </div>
 
       <div id="predeparture-weight" class="predeparture-weight">
@@ -1492,7 +1498,10 @@
     </div>
   </div>
 </div>
-  <script type="module" src="app.js?v=114"></script>
+  <script type="module" src="app.js?v=115"></script>
+<script>window.__METIS_ASSETS__={
+  "assets": []
+};</script>
 <script>window.__METIS_ASSETS__={
   "assets": []
 };</script>
