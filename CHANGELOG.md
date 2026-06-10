@@ -2,6 +2,23 @@
 
 All notable changes are documented here. Format loosely follows Keep a Changelog.
 
+## [v76] — 2026-06-10
+
+### Camp Overlay — Travel Loop Integration & Push On (Issue #66)
+- Modified `travelOneDay()` in `src/main.js` to automatically show camp overlay after each travel day (instead of auto-advancing with narrative)
+- Added "Push On" button to camp overlay (ghost style) alongside "Continue West" (primary style)
+- Implemented `pushOn(game)` function with penalties for skipping camp:
+  - +1.5 food consumption
+  - +1 cart wear
+  - -5 morale
+  - Increments `travelDaysWithoutRest` (no crew recovery)
+  - Crew state degrades (rested → tired → exhausted at 3/5 days)
+- After camp action, "Continue West" button closes overlay; user presses Travel again to continue
+- Bootstrap handlers wired for camp-continue (close) and camp-push-on (apply penalties + close)
+- Build uses existing `.ctrl-btn.ghost` and `.ctrl-btn.primary` classes
+
+Files modified: `src/main.js`, `src/template.html`, `dist/index.html`, `dist/app.js`
+
 ## [v75] — 2026-06-10
 
 ### Camp Overlay — Evening Campfire Aesthetic (Issue #64)

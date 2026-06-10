@@ -100,8 +100,21 @@ export function bootstrap(seed = null) {
 
   const campClose = find('#camp-close-btn');
   const campContinue = find('#camp-continue');
+  const campPushOn = find('#camp-push-on');
+
   if (campClose) campClose.onclick = () => find('#camp-overlay')?.classList.remove('active');
-  if (campContinue) campContinue.onclick = () => find('#camp-overlay')?.classList.remove('active');
+  if (campContinue) {
+    campContinue.onclick = () => {
+      find('#camp-overlay')?.classList.remove('active');
+      // After camp action, the travel loop waits for user to press Travel again
+    };
+  }
+  if (campPushOn) {
+    campPushOn.onclick = () => {
+      find('#camp-overlay')?.classList.remove('active');
+      pushOn(game);
+    };
+  }
 
   const campBtn = find('#btn-camp');
   if (campBtn) campBtn.onclick = () => showCamp(game);
@@ -173,10 +186,32 @@ function travelOneDay() {
   const state = game.getState();
 
   if (state.pendingEvent) return null;
+  if (state.over) return null; // End game handling will take over
+  if (state.pendingSettlement) return null; // Settlement handling will take over
 
-  const msg = buildTravelNarrative(prev, state, game);
-  publishResult(msg);
+  // Show camp overlay after travel day (instead of auto-advancing)
+  showCamp(game);
   return result;
+}
+
+// Push On: skip camp, apply penalties, continue travel loop
+function pushOn(game) {
+  const state = game.getState();
+  // Penalties for pushing on without rest
+  state.food = Math.max(0, Math.round((state.food - 1.5) * 10) / 10);
+  state.wear = Math.min(state.wear + 1, 99); // extra wear
+  state.morale = Math.max(0, state.morale - 5);
+  state.travelDaysWithoutRest++; // no rest recovery
+  
+  // Crew state degrades
+  if (state.travelDaysWithoutRest >= 5 && state.crew !== 'exhausted') state.crew = 'exhausted';
+  else if (state.travelDaysWithoutRest >= 3 && state.crew === 'rested') state.crew = 'tired';
+  
+  // Advance weather for the "skipped" camp night
+  // (weather already advances during travelOneDay, so just show fragment)
+  const msg = 'You push on into the evening. The crew grumbles. No fire tonight — only cold miles.';
+  publishResult(msg);
+  window.__METIS_RENDER__();
 }
 
 const TRAVEL_FRAGMENTS = {
