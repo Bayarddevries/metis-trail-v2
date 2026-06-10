@@ -11,3 +11,4 @@ app.js
 app.v*.js
 manifest.json
 *.local
+! dist/
