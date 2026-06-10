@@ -9,6 +9,8 @@ function monthName(month) {
   return MONTH_NAMES[month] || String(month);
 }
 
+export { monthName };
+
 let map = null;
 let tileLayer = null;
 let markerGroup = null;
@@ -253,11 +255,17 @@ export function journalLog(entry) {
   const mech = entry.mech || '';
   const collapsed = entry.collapsed ? 'collapsed' : '';
 
+  const diceHtml = dice
+    ? (typeof dice === 'string'
+      ? `<div class="journal-dice">${dice}</div>`
+      : `<div class="journal-dice ${dice.success ? 'pass' : 'fail'}">${dice.text}</div>`)
+    : '';
+
   const html = `
     <div class="journal-entry ${collapsed}" data-day="${day}">
       <div class="journal-header">${title}${date ? ' — ' + date : ''}</div>
       <div class="journal-text">${text}</div>
-      ${dice ? `<div class="journal-dice ${dice.success ? 'pass' : 'fail'}">${dice.text}</div>` : ''}
+      ${diceHtml}
       ${mech ? `<div class="journal-mechanical">${mech}</div>` : ''}
     </div>`;
 

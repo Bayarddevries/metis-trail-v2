@@ -1,6 +1,6 @@
 import { createGame } from './systems/engine.js';
 import { mount, find } from './ui/shell.js';
-import { renderStatusBar, renderNarrative, journalLog, initMap, updateMap, renderTravelLinesView } from './ui/renderer.js';
+import { renderStatusBar, renderNarrative, journalLog, initMap, updateMap, renderTravelLinesView, monthName } from './ui/renderer.js';
 import { saveGame, loadGame, clearSave } from './ui/persistence.js';
 import { mountDebugUI } from './ui/debug.js';
 import { applyTheme } from './ui/theme.js';
@@ -121,7 +121,7 @@ export function bootstrap(seed = null) {
       const prevNode = NODES[after.node - 1];
       journalLog({
         day: after.day,
-        date: after.month + ' ' + after.day,
+        date: monthName(after.month) + ' ' + after.day,
         title: 'Travel',
         text: prevNode && node
           ? `Traveled west from ${prevNode.name} toward ${node.name}.`
@@ -161,6 +161,18 @@ export function bootstrap(seed = null) {
 
   const settlementContinue = find('#settlement-continue');
   if (settlementContinue) settlementContinue.onclick = () => {
+    const st = game.getState().pendingSettlement;
+    const after = game.getState();
+    if (st) {
+      journalLog({
+        day: after.day,
+        date: monthName(after.month) + ' ' + after.day,
+        title: `Arrived at ${st.name}`,
+        text: st.desc || `${st.name} — a ${st.type} settlement on the Carlton Trail.`,
+        mech: '',
+        collapsed: true,
+      });
+    }
     game.settlementAction('continue');
     find('#settlement-overlay')?.classList.remove('active');
     window.__METIS_RENDER__();
@@ -168,6 +180,18 @@ export function bootstrap(seed = null) {
 
   const settlementClose = find('#settlement-close');
   if (settlementClose) settlementClose.onclick = () => {
+    const st = game.getState().pendingSettlement;
+    const after = game.getState();
+    if (st) {
+      journalLog({
+        day: after.day,
+        date: monthName(after.month) + ' ' + after.day,
+        title: `Arrived at ${st.name}`,
+        text: st.desc || `${st.name} — a ${st.type} settlement on the Carlton Trail.`,
+        mech: '',
+        collapsed: true,
+      });
+    }
     game.settlementAction('continue');
     find('#settlement-overlay')?.classList.remove('active');
     window.__METIS_RENDER__();
@@ -659,6 +683,7 @@ function showEvent(game) {
 
   // Track whether this event has a pending dice roll
   let diceResult = null;
+  let eventData = null; // captured for journal logging
 
   // Continue button handler — shared by dice and non-dice paths
   continueEl.onclick = () => {
@@ -667,7 +692,27 @@ function showEvent(game) {
     if (diceResult) {
       const outcome = buildEventChoiceOutcome(diceResult.stepLog, diceResult.before, game.getState());
       if (outcome) publishResult(outcome);
+      // Log event to journal
+      if (eventData) {
+        const after = game.getState();
+        const res = diceResult.result;
+        const mechParts = [];
+        if (after.food !== diceResult.before.food) mechParts.push(`${after.food - diceResult.before.food >= 0 ? '+' : ''}${(after.food - diceResult.before.food).toFixed(1)} Food`);
+        if (after.wear !== diceResult.before.wear) mechParts.push(`Wear ${after.wear - diceResult.before.wear >= 0 ? '+' : ''}${after.wear - diceResult.before.wear}`);
+        if (after.morale !== diceResult.before.morale) mechParts.push(`Morale ${after.morale - diceResult.before.morale >= 0 ? '+' : ''}${after.morale - diceResult.before.morale}`);
+        if (after.crew !== diceResult.before.crew) mechParts.push(`Crew: ${diceResult.before.crew} → ${after.crew}`);
+        journalLog({
+          day: after.day,
+          date: monthName(after.month) + ' ' + after.day,
+          title: eventData.classification || 'Event',
+          text: eventData.text || '',
+          dice: res && res.roll !== null ? `Rolled ${res.roll} — need ${res.dc}+ — ${res.success ? '✓ Success' : '✗ Failure'}` : null,
+          mech: mechParts.join(' · '),
+          collapsed: true,
+        });
+      }
       diceResult = null;
+      eventData = null;
     }
     // Close overlay and re-render
     continueEl.style.display = 'none';
@@ -702,6 +747,8 @@ function showEvent(game) {
     }
     btn.onclick = () => {
       const prev = game.getState();
+      // Capture event data before chooseEventChoice clears it
+      eventData = { classification: ev.classification, text: ev.text };
       const stepLog = game.chooseEventChoice(i);
       const entry = stepLog && stepLog[0] ? stepLog[0] : null;
       const res = entry && entry.result ? entry.result : entry;
@@ -1065,11 +1112,29 @@ function renderSettlementAction(container, action, game, before, beforeCart) {
   btn.textContent = actionLabel(action);
   btn.onclick = () => {
     hideOverlays();
+    const st = game.getState().pendingSettlement;
+    const beforeJournal = game.getState();
     game.settlementAction(action);
     const after = game.getState();
     const afterCart = game.getCart();
     const outcome = buildSettlementOutcome(action, before, after, beforeCart, afterCart);
     if (outcome) publishResult(outcome);
+    // Log settlement action to journal
+    if (st) {
+      const mechParts = [];
+      if (after.food !== beforeJournal.food) mechParts.push(`${after.food - beforeJournal.food >= 0 ? '+' : ''}${(after.food - beforeJournal.food).toFixed(1)} Food`);
+      if (after.wear !== beforeJournal.wear) mechParts.push(`Wear ${after.wear - beforeJournal.wear >= 0 ? '+' : ''}${after.wear - beforeJournal.wear}`);
+      if (after.morale !== beforeJournal.morale) mechParts.push(`Morale ${after.morale - beforeJournal.morale >= 0 ? '+' : ''}${after.morale - beforeJournal.morale}`);
+      if (after.crew !== beforeJournal.crew) mechParts.push(`Crew: ${beforeJournal.crew} → ${after.crew}`);
+      journalLog({
+        day: after.day,
+        date: monthName(after.month) + ' ' + after.day,
+        title: `${actionLabel(action)} at ${st.name}`,
+        text: buildSettlementJournalText(action, st),
+        mech: mechParts.join(' · '),
+        collapsed: true,
+      });
+    }
     window.__METIS_RENDER__();
   };
   container.appendChild(btn);
@@ -1503,65 +1568,133 @@ function showCamp(game) {
   const campRollEl = document.getElementById('camp-roll-display');
   if (campRollEl) { campRollEl.style.display = 'none'; campRollEl.innerHTML = ''; }
 
-  // Context helpers — all used for requirement badges, not for hiding
-  const hasAmmo = state.cart?.some(i => i.name === 'Ammunition Belt' && i.count > 0) ?? false;
-  const hasShaganappi = state.cart?.some(i => i.name === 'Shaganappi' && i.count > 0) ?? false;
-  const cartWear = state.wear > 0;
-  const hasNextNode = state.node < NODES.length - 1;
   const terrain = NODES[state.node]?.terrain || 'plains';
-  const canForage = terrain !== 'plains';
-  const canHunt = terrain !== 'wooded' && hasAmmo;
+  const hasAmmo = game.getCart()?.some(i => i.name === 'Ammunition Belt' && i.count > 0);
+  const hasShag = game.getCart()?.some(i => i.name === 'Shaganappi' && i.count > 0);
 
+  // Action definitions with cost, risk, and flavor text
   const actions = [
-    { type: 'rest', label: 'Rest', cost: '1 food', desc: 'Sleep and recover. Crew may improve.', req: state.food >= 1 ? '' : 'Need 1 food' },
-    { type: 'forage', label: 'Forage', cost: '1 day', desc: 'Search for edible plants and roots.', req: canForage ? '' : 'Only in woods/river' },
-    { type: 'hunt', label: 'Hunt', cost: '1 ammo · 1 day', desc: 'Stalk game for fresh meat.', req: canHunt ? '' : (!hasAmmo ? 'Need Ammunition Belt' : 'No game in woods') },
-    { type: 'pemmican_process', label: 'Process Pemmican', cost: '3 food', desc: 'Slice, dry, and render tallow into pemmican.', req: state.food >= 3 ? '' : 'Need 3 food' },
-    { type: 'repair', label: 'Repair', cost: '1 shaganappi', desc: 'Fix the cart. Reduces wear.', req: (cartWear && hasShaganappi) ? '' : (!cartWear ? 'Cart not worn' : 'Need Shaganappi') },
-    { type: 'scout', label: 'Scout', cost: '1 day', desc: 'Reconnoiter the trail ahead.', req: hasNextNode ? '' : 'At journey\'s end' },
-    { type: 'dance', label: 'Dance', cost: 'free', desc: 'Song and dance. Boosts morale.', req: '' },
-    { type: 'deeprest', label: 'Deep Rest', cost: '2 food · 2 days', desc: 'Two days of full recovery.', req: state.food >= 2 ? '' : 'Need 2 food' },
-    { type: 'push_on', label: 'Push On', cost: '1.5 food · wear/ morale', desc: 'Skip camp. Extra wear, no recovery.', req: '' },
+    {
+      type: 'rest', icon: '🛏️', label: 'Rest',
+      cost: '1 food',
+      risk: 'On fail: rough night, crew tired, +5 morale',
+      flavor: 'Sleep under the stars. The oxen graze. The fire crackles low.',
+      canDo: state.food >= 1,
+      needRoll: true,
+    },
+    {
+      type: 'forage', icon: '🌿', label: 'Forage',
+      cost: '1 day',
+      risk: 'On fail: lean haul, almost nothing found',
+      flavor: 'Search the grass for wild turnips, saskatoon berries, edible roots.',
+      canDo: true,
+      needRoll: true,
+    },
+    {
+      type: 'hunt', icon: '🏹', label: 'Hunt',
+      cost: '1 Ammunition Belt · 1 day',
+      risk: 'On fail: lose ammo, no pelts. Crit fail: morale −2',
+      flavor: terrain === 'river_valley' ? 'Track beaver along the creek.'
+        : terrain === 'uplands' ? 'Stalk elk through the high ground.'
+        : terrain === 'wooded' ? 'Hunt deer at the forest edge.'
+        : 'Stalk bison on the open prairie.',
+      canDo: !!hasAmmo,
+      needRoll: true,
+    },
+    {
+      type: 'repair', icon: '🔧', label: 'Repair',
+      cost: '1 Shaganappi',
+      risk: 'On fail: shaganappi wasted. Crit fail: wear +1',
+      flavor: 'Bind the wheels, lash the joints. Shaganappi holds the cart together.',
+      canDo: !!hasShag && state.wear > 0,
+      needRoll: true,
+    },
+    {
+      type: 'scout', icon: '🔭', label: 'Scout',
+      cost: '1 day',
+      risk: 'On fail: nothing useful. Crit fail: next event has no warning',
+      flavor: 'Ride ahead. Read the trail. Water, grass, and what lies beyond the next rise.',
+      canDo: state.node < NODES.length - 1,
+      needRoll: true,
+    },
+    {
+      type: 'dance', icon: '🎻', label: 'Dance',
+      cost: 'free',
+      risk: 'On fail: half-hearted. Crit fail: morale −3',
+      flavor: 'The fiddle starts. A Red River jig. Boots on hard ground. Nobody thinks about tomorrow.',
+      canDo: true,
+      needRoll: true,
+    },
+    {
+      type: 'pemmican_process', icon: '🥩', label: 'Process Pemmican',
+      cost: '3 food',
+      risk: 'On fail: poor yield, meat spoils',
+      flavor: 'Slice the lean meat thin. Dry it over the fire. Pound it fine. Render the tallow. Pack it tight.',
+      canDo: state.food >= 3,
+      needRoll: true,
+    },
+    {
+      type: 'deeprest', icon: '⛺', label: 'Deep Rest',
+      cost: '2 food · 2 days',
+      risk: 'Lose two days but crew fully recovers',
+      flavor: 'Two days of proper rest. Hot food, long sleep, time to mend what is broken.',
+      canDo: state.food >= 2,
+      needRoll: false,
+    },
+    {
+      type: 'push_on', icon: '⏩', label: 'Push On',
+      cost: '1.5 food · wear +1 · morale −5',
+      risk: 'Skip camp. No recovery. Cart takes extra damage.',
+      flavor: 'No rest. The trail does not wait. Drive on through the evening light.',
+      canDo: true,
+      needRoll: false,
+    },
   ];
 
   if (actionsEl) {
     actionsEl.innerHTML = '';
     actionsEl.style.display = 'grid';
-    actionsEl.style.visibility = 'visible';
-    const groups = [
-      { label: 'Rest & Recovery', types: new Set(['rest', 'deeprest', 'push_on']) },
-      { label: 'Camp Duties', types: new Set(['forage', 'hunt', 'pemmican_process', 'repair', 'scout', 'dance']) },
-    ];
-    const groupMap = new Map();
-    actions.forEach((a) => {
-      const entry = groups.find((g) => g.types.has(a.type));
-      if (!entry) return;
-      if (!groupMap.has(entry.label)) groupMap.set(entry.label, []);
-      groupMap.get(entry.label).push(a);
-    });
 
-    groupMap.forEach((list, label) => {
-      const header = document.createElement('div');
-      header.className = 'camp-group';
-      header.textContent = label;
-      actionsEl.appendChild(header);
-      list.forEach((a) => {
-        const btn = document.createElement('button');
-        const hasReq = a.req && a.req.length > 0;
-        btn.className = 'camp-action-btn' + (hasReq ? ' has-req' : '');
-        // Don't disable — show requirement badge instead
-        btn.innerHTML = `<div class="camp-action-label">${a.label}${hasReq ? `<span class="camp-req-badge">${a.req}</span>` : ''}</div><div class="camp-action-desc">${a.desc}</div><div class="camp-action-cost">${a.cost}</div>`;
+    actions.forEach((a) => {
+      const card = document.createElement('div');
+      card.className = 'camp-card';
+
+      const nameRow = document.createElement('div');
+      nameRow.className = 'camp-card-name';
+      nameRow.innerHTML = `<span class="camp-card-icon">${a.icon}</span> ${a.label}`;
+
+      const costRow = document.createElement('div');
+      costRow.className = 'camp-card-cost';
+      costRow.textContent = `Cost: ${a.cost}`;
+
+      const riskRow = document.createElement('div');
+      riskRow.className = 'camp-card-risk';
+      riskRow.textContent = `Risk: ${a.risk}`;
+
+      const flavorRow = document.createElement('div');
+      flavorRow.className = 'camp-card-flavor';
+      flavorRow.textContent = a.flavor;
+
+      const btn = document.createElement('button');
+      btn.className = 'camp-card-btn';
+      btn.textContent = 'Do It';
+      if (!a.canDo) {
+        btn.disabled = true;
+        btn.classList.add('disabled');
+      }
+
+      card.appendChild(nameRow);
+      card.appendChild(costRow);
+      card.appendChild(riskRow);
+      card.appendChild(flavorRow);
+      card.appendChild(btn);
+
+      if (a.canDo) {
         btn.addEventListener('click', () => {
-          // Check requirements on click
-          if (hasReq) {
-            const errEl = document.getElementById('camp-result');
-            if (errEl) { errEl.style.display = 'block'; errEl.textContent = a.req; }
-            return;
-          }
           let result;
           if (a.type === 'push_on') {
             pushOn(game);
-            result = { effects: ['Pushed on — extra wear, less food, lower morale'] };
+            result = { effects: ['Pushed on — extra wear, less food, lower morale'], critical: false };
           } else {
             result = game.campAction(a.type);
           }
@@ -1576,32 +1709,26 @@ function showCamp(game) {
             return;
           }
           const after = game.getState();
-          if (foodEl) foodEl.textContent = after.food;
+          if (foodEl) foodEl.textContent = Math.floor(after.food);
           if (wearEl) wearEl.textContent = after.wear;
           if (moraleEl) moraleEl.textContent = after.morale;
           if (crewEl) crewEl.textContent = after.crew;
           if (subEl) subEl.textContent = `Day ${after.day} — ${after.season}`;
-          actionsEl.style.display = 'none';
+
+          // Hide all cards, show result
+          document.querySelectorAll('.camp-card').forEach(c => { c.style.display = 'none'; });
 
           // Show dice roll if this action used one
-          if (result.roll !== null && rollEl) {
-            // DC thresholds per action type (matches engine.js campAction)
+          if (a.needRoll && result.roll !== null && rollEl) {
             const DC = {
-              rest: { high: 15, mid: 8 },
-              forage: { high: 12, mid: 8 },
-              hunt: { high: 10, mid: 6 },
-              repair: { high: 12, mid: 8 },
-              scout: { high: 9, mid: 5 },
-              deeprest: { high: 10, mid: 5 },
-            }[a.type] || { high: 10, mid: 6 };
-            const isSuccess = result.rollTotal >= DC.high;
-            const isMid = !isSuccess && result.rollTotal >= DC.mid;
-            const flavorText = getCampFlavorText(a.type, result.rollTotal, result.effects);
+              rest: 12, forage: 10, hunt: 10, repair: 8, scout: 9, dance: 8, pemmican_process: 10,
+            }[a.type] || 10;
+            const isSuccess = result.rollTotal >= DC;
             rollEl.style.display = 'flex';
             rollEl.innerHTML = `
               <div class="roll-label">Roll</div>
               <div class="die small font-spectral spin" id="camp-die">${result.roll}</div>
-              <div class="roll-total">Need ${DC.high}+ ${isSuccess ? '✓' : '✗'}</div>
+              <div class="roll-total">Need ${DC}+ ${isSuccess ? '✓' : '✗'}</div>
             `;
             // Animate the die
             const dieEl = document.getElementById('camp-die');
@@ -1618,7 +1745,12 @@ function showCamp(game) {
                 // Show result text after settle
                 if (errEl) {
                   errEl.style.display = 'block';
-                  errEl.innerHTML = flavorText;
+                  let html = '';
+                  if (result.critical) {
+                    html += `<div class="camp-critical">⚠ Critical Failure</div>`;
+                  }
+                  html += result.effects.join('<br>');
+                  errEl.innerHTML = html;
                 }
                 const continueEl = document.getElementById('camp-continue');
                 if (continueEl) continueEl.style.display = 'inline-block';
@@ -1628,16 +1760,41 @@ function showCamp(game) {
             // No dice — show result immediately
             if (errEl) {
               errEl.style.display = 'block';
-              errEl.textContent = (result?.effects || []).join('\n');
+              let html = '';
+              if (result.critical) {
+                html += `<div class="camp-critical">⚠ Critical Failure</div>`;
+              }
+              html += (result?.effects || []).join('<br>');
+              errEl.innerHTML = html;
             }
             const continueEl = document.getElementById('camp-continue');
             if (continueEl) continueEl.style.display = 'inline-block';
           }
+
+          // Log camp action to journal
+          const actionLabels = {
+            rest: 'Rest', forage: 'Forage', hunt: 'Hunt', repair: 'Repair',
+            scout: 'Scout', dance: 'Dance', pemmican_process: 'Process Pemmican',
+            deeprest: 'Deep Rest', push_on: 'Push On',
+          };
+          const mechParts = [];
+          if (after.food !== state.food) mechParts.push(`${after.food - state.food >= 0 ? '+' : ''}${(after.food - state.food).toFixed(1)} Food`);
+          if (after.wear !== state.wear) mechParts.push(`Wear ${after.wear - state.wear >= 0 ? '+' : ''}${after.wear - state.wear}`);
+          if (after.morale !== state.morale) mechParts.push(`Morale ${after.morale - state.morale >= 0 ? '+' : ''}${after.morale - state.morale}`);
+          if (after.crew !== state.crew) mechParts.push(`Crew: ${state.crew} → ${after.crew}`);
+          journalLog({
+            day: after.day,
+            date: monthName(after.month) + ' ' + after.day,
+            title: `Camp: ${actionLabels[a.type] || a.type}`,
+            text: a.flavor,
+            dice: result.roll !== null ? `Rolled ${result.roll} — need ${({rest:12,forage:10,hunt:10,repair:8,scout:9,dance:8,pemmican_process:10}[a.type]||10)}+ — ${result.rollTotal >= ({rest:12,forage:10,hunt:10,repair:8,scout:9,dance:8,pemmican_process:10}[a.type]||10) ? '✓ Success' : '✗ Failure'}${result.critical ? ' — ⚠ CRITICAL' : ''}` : null,
+            mech: mechParts.join(' · '),
+            collapsed: true,
+          });
         });
-        actionsEl.appendChild(btn);
-        btn.setAttribute('data-camp-type', a.type);
-        if (a.type === 'deeprest' || a.type === 'scout') btn.classList.add('costs-days');
-      });
+      }
+
+      actionsEl.appendChild(card);
     });
   }
 
@@ -1864,6 +2021,27 @@ function actionLabel(a) {
 }
 function actionSubtitle(a) {
   return '';
+}
+
+// Narrative journal text for settlement actions
+function buildSettlementJournalText(action, st) {
+  const stName = st?.name || 'the settlement';
+  const texts = {
+    rest: `A day of rest at ${stName}. The crew recovers, the oxen graze. The weight of the trail lifts, if only for a day.`,
+    trade: `Trade goods exchanged at ${stName}. The ledgers are updated, the cart a little lighter, the credit a little heavier.`,
+    repair: `The cart is tended at ${stName}. Shaganappi and effort — the wheels turn smoother.`,
+    heal: `The crew is tended at ${stName}. Wounds dressed, spirits mended.`,
+    buy_food: `Supplies taken on at ${stName}. The cart grows heavier with food for the trail ahead.`,
+    buy_repair: `Cart repaired at ${stName}. The wear comes off, the wheels turn true.`,
+    buy_heal: `The crew is healed at ${stName}. Morale restored, strength returned.`,
+    buy_info: `News gathered at ${stName}. The trail ahead becomes a little less uncertain.`,
+    craft: `Work done at ${stName}. Raw materials become something more useful.`,
+    forage: `Foraging around ${stName}. The land yields what it can.`,
+    gossip: `Talk at ${stName}. News from other travellers, rumours from the trail.`,
+    recruit: `New hands found at ${stName}. The crew grows by one.`,
+    rumours: `Stories traded at ${stName}. Every traveller has one.`,
+  };
+  return texts[action] || `Time spent at ${stName}.`;
 }
 
 // Expose render globally for event listener callbacks
