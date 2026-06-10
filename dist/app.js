@@ -351,7 +351,6 @@ var ITEMS = [
     mbValue: 0.4,
     perishable: true,
     desc: "Dried meat and fat. The staple of the prairie. Never truly spoils.",
-    icon: "\u{1F969}",
     source: {
       quote: "Pemmican... composed of pounded dried meat, melted fat, and berries.",
       author: "Ernest C. N. Acheson",
@@ -368,8 +367,7 @@ var ITEMS = [
     category: "parts",
     mbValue: 1.2,
     perishable: false,
-    desc: "Hard maple. Heavy but essential for a Red River cart.",
-    icon: "\u{1FAB5}"
+    desc: "Hard maple. Heavy but essential for a Red River cart."
   },
   {
     name: "Shaganappi",
@@ -380,7 +378,6 @@ var ITEMS = [
     mbValue: 0.6,
     perishable: false,
     desc: "Rawhide strips. Binding, lashing, and cart repair.",
-    icon: "\u{1FA92}",
     source: {
       quote: "Shaganappi... raw-hide thongs, much used by the half-breeds for binding their cart-wheels.",
       author: "R. G. McConnell",
@@ -397,8 +394,7 @@ var ITEMS = [
     category: "parts",
     mbValue: 1.8,
     perishable: false,
-    desc: "Axe, auger, drawknife. Required for major repairs.",
-    icon: "\u{1F6E0}\uFE0F"
+    desc: "Axe, auger, drawknife. Required for major repairs."
   },
   {
     name: "Bison Hide",
@@ -408,8 +404,7 @@ var ITEMS = [
     category: "furs",
     mbValue: 1.25,
     perishable: false,
-    desc: "Folded. Trade value: ~1.25 MB each at any post.",
-    icon: "\u{1F9AC}"
+    desc: "Folded. Trade value: ~1.25 MB each at any post."
   },
   {
     name: "Canvas Tarp",
@@ -419,8 +414,7 @@ var ITEMS = [
     category: "shelter",
     mbValue: 1,
     perishable: false,
-    desc: "Waterproof. Shelter and cart-raft conversion.",
-    icon: "\u26FA"
+    desc: "Waterproof. Shelter and cart-raft conversion."
   },
   {
     name: "Firewood Bundle",
@@ -430,8 +424,7 @@ var ITEMS = [
     category: "fuel",
     mbValue: 0.2,
     perishable: false,
-    desc: "Dried poplar. Required for cold nights.",
-    icon: "\u{1FAB5}"
+    desc: "Dried poplar. Required for cold nights."
   },
   {
     name: "Rope (50ft)",
@@ -441,8 +434,7 @@ var ITEMS = [
     category: "parts",
     mbValue: 0.5,
     perishable: false,
-    desc: "Hemp. Crossings, repairs, binding.",
-    icon: "\u{1FAA2}"
+    desc: "Hemp. Crossings, repairs, binding."
   },
   {
     name: "Ammunition Belt",
@@ -452,8 +444,7 @@ var ITEMS = [
     category: "hunting",
     mbValue: 0.9,
     perishable: false,
-    desc: "Shot and ball. For hunting and defence.",
-    icon: "\u{1F3AF}"
+    desc: "Shot and ball. For hunting and defence."
   },
   {
     name: "Medicine Pouch",
@@ -463,8 +454,7 @@ var ITEMS = [
     category: "medical",
     mbValue: 1.8,
     perishable: true,
-    desc: "Herbal remedies and bandages.",
-    icon: "\u{1FAD9}"
+    desc: "Herbal remedies and bandages."
   },
   {
     name: "Blanket",
@@ -474,8 +464,7 @@ var ITEMS = [
     category: "shelter",
     mbValue: 2.2,
     perishable: false,
-    desc: "Wool. Winter survival.",
-    icon: "\u{1F6CF}\uFE0F"
+    desc: "Wool. Winter survival."
   },
   {
     name: "Beaver Pelts",
@@ -486,7 +475,6 @@ var ITEMS = [
     mbValue: 3,
     perishable: false,
     desc: "Prime bundle. The foundation of the northern trade. ~3 MB each.",
-    icon: "\u{1F9AB}",
     source: {
       quote: "Beaver... the very foundation of the northern trade.",
       author: "HBC Archives",
@@ -18437,6 +18425,118 @@ var audio_default = {
   sfxGameOver
 };
 
+// src/ui/icons.js
+var ICONS = {
+  "Pemmican Rations": `<svg viewBox="0 0 24 24" width="24" height="24" xmlns="http://www.w3.org/2000/svg" aria-label="Pemmican Rations">
+    <path d="M6 12 C6 8 10 6 12 6 C14 6 18 8 18 12 C18 16 14 18 12 18 C10 18 6 16 6 12Z" fill="none" stroke="currentColor" stroke-width="1.5"/>
+    <path d="M9 10 C10 11 14 11 15 10" fill="none" stroke="currentColor" stroke-width="1"/>
+    <path d="M9 13 C10 14 14 14 15 13" fill="none" stroke="currentColor" stroke-width="1"/>
+    <path d="M9 16 C10 17 14 17 15 16" fill="none" stroke="currentColor" stroke-width="1"/>
+  </svg>`,
+  "Spare Axle": `<svg viewBox="0 0 24 24" width="24" height="24" xmlns="http://www.w3.org/2000/svg" aria-label="Spare Axle">
+    <rect x="3" y="8" width="18" height="8" rx="1" fill="none" stroke="currentColor" stroke-width="1.5"/>
+    <line x1="3" y1="10" x2="4" y2="10" stroke="currentColor" stroke-width="0.8"/>
+    <line x1="3" y1="12" x2="4" y2="12" stroke="currentColor" stroke-width="0.8"/>
+    <line x1="3" y1="14" x2="4" y2="14" stroke="currentColor" stroke-width="0.8"/>
+    <line x1="20" y1="10" x2="21" y2="10" stroke="currentColor" stroke-width="0.8"/>
+    <line x1="20" y1="12" x2="21" y2="12" stroke="currentColor" stroke-width="0.8"/>
+    <line x1="20" y1="14" x2="21" y2="14" stroke="currentColor" stroke-width="0.8"/>
+    <circle cx="12" cy="12" r="2" fill="none" stroke="currentColor" stroke-width="1.2"/>
+  </svg>`,
+  "Shaganappi": `<svg viewBox="0 0 24 24" width="24" height="24" xmlns="http://www.w3.org/2000/svg" aria-label="Shaganappi">
+    <path d="M4 6 C8 4 16 4 20 6 C22 8 18 12 20 14 C22 16 22 18 18 20 C14 22 8 20 6 18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+    <path d="M6 8 C10 6 18 8 20 10" fill="none" stroke="currentColor" stroke-width="0.8"/>
+    <path d="M6 16 C10 14 18 16 20 18" fill="none" stroke="currentColor" stroke-width="0.8"/>
+  </svg>`,
+  "Tool Kit": `<svg viewBox="0 0 24 24" width="24" height="24" xmlns="http://www.w3.org/2000/svg" aria-label="Tool Kit">
+    <path d="M6 6 L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+    <rect x="4" y="3" width="4" height="5" rx="1" transform="rotate(-45 6 6)" fill="none" stroke="currentColor" stroke-width="1.5"/>
+    <path d="M16 16 L20 20" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+    <circle cx="18" cy="14" r="2" fill="none" stroke="currentColor" stroke-width="1.2"/>
+  </svg>`,
+  "Bison Hide": `<svg viewBox="0 0 24 24" width="24" height="24" xmlns="http://www.w3.org/2000/svg" aria-label="Bison Hide">
+    <path d="M5 7 C5 5 7 4 9 4 C11 4 12 5 12 7 C12 5 13 4 15 4 C17 4 19 5 19 7 C19 11 17 17 12 19 C7 17 5 11 5 7Z" fill="none" stroke="currentColor" stroke-width="1.5"/>
+    <path d="M8 8 C9 9 11 9 12 8" fill="none" stroke="currentColor" stroke-width="0.8"/>
+    <path d="M8 12 C9 13 11 13 12 12" fill="none" stroke="currentColor" stroke-width="0.8"/>
+    <path d="M8 16 C9 17 11 17 12 16" fill="none" stroke="currentColor" stroke-width="0.8"/>
+  </svg>`,
+  "Canvas Tarp": `<svg viewBox="0 0 24 24" width="24" height="24" xmlns="http://www.w3.org/2000/svg" aria-label="Canvas Tarp">
+    <path d="M12 4 L4 20 L20 20 Z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+    <line x1="12" y1="4" x2="12" y2="20" stroke="currentColor" stroke-width="1.2" stroke-dasharray="2 2"/>
+    <path d="M8 14 L12 8 L16 14" fill="none" stroke="currentColor" stroke-width="0.8"/>
+  </svg>`,
+  "Firewood Bundle": `<svg viewBox="0 0 24 24" width="24" height="24" xmlns="http://www.w3.org/2000/svg" aria-label="Firewood Bundle">
+    <line x1="6" y1="8" x2="18" y2="8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+    <line x1="6" y1="12" x2="18" y2="12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+    <line x1="6" y1="16" x2="18" y2="16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+    <path d="M11 6 C11 6 12 7 12 8" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round"/>
+    <path d="M12 8 C12 9 13 10 14 9 C15 8 15 6 16 7 C17 8 17 10 18 9" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round"/>
+  </svg>`,
+  "Rope (50ft)": `<svg viewBox="0 0 24 24" width="24" height="24" xmlns="http://www.w3.org/2000/svg" aria-label="Rope">
+    <circle cx="12" cy="12" r="7" fill="none" stroke="currentColor" stroke-width="1.2"/>
+    <circle cx="12" cy="12" r="4.5" fill="none" stroke="currentColor" stroke-width="1"/>
+    <circle cx="12" cy="12" r="2" fill="none" stroke="currentColor" stroke-width="0.8"/>
+    <path d="M12 5 L12 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+  </svg>`,
+  "Ammunition Belt": `<svg viewBox="0 0 24 24" width="24" height="24" xmlns="http://www.w3.org/2000/svg" aria-label="Ammunition Belt">
+    <path d="M4 10 C4 8 6 7 10 7 C14 7 18 7 20 8 C21 9 21 11 20 12 C18 13 14 13 10 13 C6 13 4 12 4 10Z" fill="none" stroke="currentColor" stroke-width="1.5"/>
+    <circle cx="8" cy="10" r="1.2" fill="none" stroke="currentColor" stroke-width="1"/>
+    <circle cx="12" cy="10" r="1.2" fill="none" stroke="currentColor" stroke-width="1"/>
+    <circle cx="16" cy="10" r="1.2" fill="none" stroke="currentColor" stroke-width="1"/>
+    <path d="M4 10 L3 10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+    <path d="M20 10 L21 10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+  </svg>`,
+  "Medicine Pouch": `<svg viewBox="0 0 24 24" width="24" height="24" xmlns="http://www.w3.org/2000/svg" aria-label="Medicine Pouch">
+    <path d="M7 8 C7 6 9 5 12 5 C15 5 17 6 17 8 L17 18 C17 20 15 21 12 21 C9 21 7 20 7 18Z" fill="none" stroke="currentColor" stroke-width="1.5"/>
+    <path d="M7 9 L17 9" stroke="currentColor" stroke-width="1.2"/>
+    <path d="M12 5 L12 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+    <path d="M10 13 L14 13" stroke="currentColor" stroke-width="1" stroke-linecap="round"/>
+    <path d="M12 11 L12 15" stroke="currentColor" stroke-width="1" stroke-linecap="round"/>
+  </svg>`,
+  "Blanket": `<svg viewBox="0 0 24 24" width="24" height="24" xmlns="http://www.w3.org/2000/svg" aria-label="Blanket">
+    <rect x="4" y="5" width="16" height="14" rx="1" fill="none" stroke="currentColor" stroke-width="1.5"/>
+    <line x1="4" y1="10" x2="20" y2="10" stroke="currentColor" stroke-width="1.2"/>
+    <line x1="4" y1="14" x2="20" y2="14" stroke="currentColor" stroke-width="1.2"/>
+    <path d="M8 5 L8 19" stroke="currentColor" stroke-width="0.8"/>
+    <path d="M16 5 L16 19" stroke="currentColor" stroke-width="0.8"/>
+  </svg>`,
+  "Beaver Pelts": `<svg viewBox="0 0 24 24" width="24" height="24" xmlns="http://www.w3.org/2000/svg" aria-label="Beaver Pelts">
+    <path d="M12 5 C9 5 6 7 6 10 C6 13 8 16 12 19 C16 16 18 13 18 10 C18 7 15 5 12 5Z" fill="none" stroke="currentColor" stroke-width="1.5"/>
+    <circle cx="10" cy="9" r="1" fill="none" stroke="currentColor" stroke-width="1"/>
+    <circle cx="14" cy="9" r="1" fill="none" stroke="currentColor" stroke-width="1"/>
+    <path d="M11 11 C11.5 12 12.5 12 13 11" fill="none" stroke="currentColor" stroke-width="0.8"/>
+    <path d="M12 19 L12 21" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+  </svg>`,
+  // Crafted items (recipe outputs)
+  "Finished Hides": `<svg viewBox="0 0 24 24" width="24" height="24" xmlns="http://www.w3.org/2000/svg" aria-label="Finished Hides">
+    <rect x="5" y="5" width="14" height="14" rx="2" fill="none" stroke="currentColor" stroke-width="1.5"/>
+    <path d="M5 9 L19 9" stroke="currentColor" stroke-width="0.8"/>
+    <path d="M5 13 L19 13" stroke="currentColor" stroke-width="0.8"/>
+    <path d="M9 5 L9 19" stroke="currentColor" stroke-width="0.8"/>
+    <path d="M15 5 L15 19" stroke="currentColor" stroke-width="0.8"/>
+  </svg>`,
+  "Travois Kit": `<svg viewBox="0 0 24 24" width="24" height="24" xmlns="http://www.w3.org/2000/svg" aria-label="Travois Kit">
+    <line x1="4" y1="6" x2="12" y2="18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+    <line x1="20" y1="6" x2="12" y2="18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+    <line x1="6" y1="10" x2="18" y2="10" stroke="currentColor" stroke-width="1.2"/>
+    <line x1="8" y1="14" x2="16" y2="14" stroke="currentColor" stroke-width="1.2"/>
+    <circle cx="12" cy="18" r="1.5" fill="none" stroke="currentColor" stroke-width="1"/>
+  </svg>`,
+  "Gunpowder Pack": `<svg viewBox="0 0 24 24" width="24" height="24" xmlns="http://www.w3.org/2000/svg" aria-label="Gunpowder Pack">
+    <rect x="7" y="6" width="10" height="12" rx="2" fill="none" stroke="currentColor" stroke-width="1.5"/>
+    <path d="M10 6 L10 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+    <path d="M14 6 L14 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+    <circle cx="12" cy="12" r="2" fill="none" stroke="currentColor" stroke-width="1"/>
+    <path d="M12 14 L12 16" stroke="currentColor" stroke-width="0.8"/>
+    <path d="M10 16 L14 16" stroke="currentColor" stroke-width="0.8"/>
+  </svg>`
+};
+function getItemIcon(name3) {
+  if (ICONS[name3]) return ICONS[name3];
+  return `<svg viewBox="0 0 24 24" width="24" height="24" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>`;
+}
+__name(getItemIcon, "getItemIcon");
+
 // src/main.js
 syncLocalScores();
 function bootstrap(seed = null) {
@@ -18976,7 +19076,7 @@ function renderSettlementAction(container, action, game, before, beforeCart) {
       const inputs = r.inputs.map((inp) => `${inp.name}\xD7${inp.count} (${inp.have}/${inp.count})`).join(" + ");
       const info = document.createElement("div");
       info.style.cssText = "flex:1;font-size:12px;";
-      info.innerHTML = `<strong>${r.output.icon || ""} ${r.name}</strong> \u2014 ${inputs}`;
+      info.innerHTML = `<strong>${getItemIcon(r.output.name || r.name)} ${r.name}</strong> \u2014 ${inputs}`;
       const craftBtn = document.createElement("button");
       craftBtn.className = "ctrl-btn";
       craftBtn.style.cssText = "padding:3px 10px;font-size:11px;white-space:nowrap;";
@@ -19020,7 +19120,7 @@ function renderSettlementAction(container, action, game, before, beforeCart) {
       row.style.cssText = "display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px;padding:6px;background:rgba(255,255,255,0.5);border-radius:4px;";
       const info = document.createElement("div");
       info.style.cssText = "flex:1;font-size:12px;";
-      info.innerHTML = `${item.icon || ""} ${item.name} \xD7${item.count} <span style="color:var(--clr-accent);">\u2192 ${mbVal} MB</span>`;
+      info.innerHTML = `${getItemIcon(item.name)} ${item.name} \xD7${item.count} <span style="color:var(--clr-accent);">\u2192 ${mbVal} MB</span>`;
       const tradeBtn = document.createElement("button");
       tradeBtn.className = "ctrl-btn";
       tradeBtn.style.cssText = "padding:3px 10px;font-size:11px;white-space:nowrap;";
@@ -19201,7 +19301,7 @@ function showCart(game) {
     const mbStr = (i.type === "trade" || i.category === "furs") && i.mbValue ? `<span style="color:var(--clr-accent);font-size:0.85em;margin-left:4px;">${i.mbValue} MB</span>` : "";
     return `
     <div class="cart-row" style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:6px 0;border-bottom:1px solid rgba(0,0,0,0.08);">
-      <span style="flex:1;"><span style="font-weight:600;">${i.icon || ""} ${i.name} \xD7${i.count} (${i.wt * i.count} kg)</span>${mbStr}${hint ? `<div style="font-size:0.75em;color:#6b5c4a;">${hint}</div>` : ""}${desc}</span>
+      <span style="flex:1;"><span style="font-weight:600;">${getItemIcon(i.name)} ${i.name} \xD7${i.count} (${i.wt * i.count} kg)</span>${mbStr}${hint ? `<div style="font-size:0.75em;color:#6b5c4a;">${hint}</div>` : ""}${desc}</span>
       ${canUnload ? `<button class="ctrl-btn unload-btn" data-item="${i.name}" style="padding:2px 10px;font-size:0.85em;">Unload ${i.name} (\u2212${i.wt} kg)</button>` : ""}
     </div>`;
   }).join("");
@@ -19296,7 +19396,7 @@ function showPreDeparture(game) {
       return `
     <div class="pd-row" data-item="${item.name}">
       <div class="pd-item-info">
-        <span class="pd-icon">${item.icon || ""}</span>
+        <span class="pd-icon">${getItemIcon(item.name)}</span>
         <span class="pd-name">${item.name}</span>
         <span class="pd-category-hint">${hint}</span>
       </div>

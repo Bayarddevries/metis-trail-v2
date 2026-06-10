@@ -8,7 +8,6 @@ const ITEMS = [
     mbValue: 0.4,
     perishable: true,
     desc: 'Dried meat and fat. The staple of the prairie. Never truly spoils.',
-    icon: '🥩',
     source: {
       quote: 'Pemmican... composed of pounded dried meat, melted fat, and berries.',
       author: 'Ernest C. N. Acheson',
@@ -26,7 +25,6 @@ const ITEMS = [
     mbValue: 1.2,
     perishable: false,
     desc: 'Hard maple. Heavy but essential for a Red River cart.',
-    icon: '🪵',
   },
   {
     name: 'Shaganappi',
@@ -37,7 +35,6 @@ const ITEMS = [
     mbValue: 0.6,
     perishable: false,
     desc: 'Rawhide strips. Binding, lashing, and cart repair.',
-    icon: '🪒',
     source: {
       quote: 'Shaganappi... raw-hide thongs, much used by the half-breeds for binding their cart-wheels.',
       author: 'R. G. McConnell',
@@ -55,7 +52,6 @@ const ITEMS = [
     mbValue: 1.8,
     perishable: false,
     desc: 'Axe, auger, drawknife. Required for major repairs.',
-    icon: '🛠️',
   },
   {
     name: 'Bison Hide',
@@ -66,7 +62,6 @@ const ITEMS = [
     mbValue: 1.25,
     perishable: false,
     desc: 'Folded. Trade value: ~1.25 MB each at any post.',
-    icon: '🦬',
   },
   {
     name: 'Canvas Tarp',
@@ -77,7 +72,6 @@ const ITEMS = [
     mbValue: 1.0,
     perishable: false,
     desc: 'Waterproof. Shelter and cart-raft conversion.',
-    icon: '⛺',
   },
   {
     name: 'Firewood Bundle',
@@ -88,7 +82,6 @@ const ITEMS = [
     mbValue: 0.2,
     perishable: false,
     desc: 'Dried poplar. Required for cold nights.',
-    icon: '🪵',
   },
   {
     name: 'Rope (50ft)',
@@ -99,7 +92,6 @@ const ITEMS = [
     mbValue: 0.5,
     perishable: false,
     desc: 'Hemp. Crossings, repairs, binding.',
-    icon: '🪢',
   },
   {
     name: 'Ammunition Belt',
@@ -110,7 +102,6 @@ const ITEMS = [
     mbValue: 0.9,
     perishable: false,
     desc: 'Shot and ball. For hunting and defence.',
-    icon: '🎯',
   },
   {
     name: 'Medicine Pouch',
@@ -121,7 +112,6 @@ const ITEMS = [
     mbValue: 1.8,
     perishable: true,
     desc: 'Herbal remedies and bandages.',
-    icon: '🫙',
   },
   {
     name: 'Blanket',
@@ -132,7 +122,6 @@ const ITEMS = [
     mbValue: 2.2,
     perishable: false,
     desc: 'Wool. Winter survival.',
-    icon: '🛏️',
   },
   {
     name: 'Beaver Pelts',
@@ -143,7 +132,6 @@ const ITEMS = [
     mbValue: 3.0,
     perishable: false,
     desc: 'Prime bundle. The foundation of the northern trade. ~3 MB each.',
-    icon: '🦫',
     source: {
       quote: 'Beaver... the very foundation of the northern trade.',
       author: 'HBC Archives',

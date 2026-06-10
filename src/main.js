@@ -10,6 +10,7 @@ import { CONSTANTS } from './core/constants.js';
 import { saveScore, getTopScores, getMyScores, syncLocalScores } from './firebase.js';
 import Haptics from './ui/haptics.js';
 import Audio from './ui/audio.js';
+import { getItemIcon } from './ui/icons.js';
 
 // Sync any locally-saved scores on page load
 syncLocalScores();
@@ -878,7 +879,7 @@ function renderSettlementAction(container, action, game, before, beforeCart) {
       const inputs = r.inputs.map((inp) => `${inp.name}×${inp.count} (${inp.have}/${inp.count})`).join(' + ');
       const info = document.createElement('div');
       info.style.cssText = 'flex:1;font-size:12px;';
-      info.innerHTML = `<strong>${r.output.icon || ''} ${r.name}</strong> — ${inputs}`;
+      info.innerHTML = `<strong>${getItemIcon(r.output.name || r.name)} ${r.name}</strong> — ${inputs}`;
       const craftBtn = document.createElement('button');
       craftBtn.className = 'ctrl-btn';
       craftBtn.style.cssText = 'padding:3px 10px;font-size:11px;white-space:nowrap;';
@@ -924,7 +925,7 @@ function renderSettlementAction(container, action, game, before, beforeCart) {
       row.style.cssText = 'display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px;padding:6px;background:rgba(255,255,255,0.5);border-radius:4px;';
       const info = document.createElement('div');
       info.style.cssText = 'flex:1;font-size:12px;';
-      info.innerHTML = `${item.icon || ''} ${item.name} ×${item.count} <span style="color:var(--clr-accent);">→ ${mbVal} MB</span>`;
+      info.innerHTML = `${getItemIcon(item.name)} ${item.name} ×${item.count} <span style="color:var(--clr-accent);">→ ${mbVal} MB</span>`;
       const tradeBtn = document.createElement('button');
       tradeBtn.className = 'ctrl-btn';
       tradeBtn.style.cssText = 'padding:3px 10px;font-size:11px;white-space:nowrap;';
@@ -1120,7 +1121,7 @@ function showCart(game) {
         : '';
       return `
     <div class="cart-row" style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:6px 0;border-bottom:1px solid rgba(0,0,0,0.08);">
-      <span style="flex:1;"><span style="font-weight:600;">${i.icon || ''} ${i.name} ×${i.count} (${i.wt * i.count} kg)</span>${mbStr}${hint ? `<div style="font-size:0.75em;color:#6b5c4a;">${hint}</div>` : ''}${desc}</span>
+      <span style="flex:1;"><span style="font-weight:600;">${getItemIcon(i.name)} ${i.name} ×${i.count} (${i.wt * i.count} kg)</span>${mbStr}${hint ? `<div style="font-size:0.75em;color:#6b5c4a;">${hint}</div>` : ''}${desc}</span>
       ${canUnload ? `<button class="ctrl-btn unload-btn" data-item="${i.name}" style="padding:2px 10px;font-size:0.85em;">Unload ${i.name} (−${i.wt} kg)</button>` : ''}
     </div>`;
     })
@@ -1224,7 +1225,7 @@ function showPreDeparture(game) {
       return `
     <div class="pd-row" data-item="${item.name}">
       <div class="pd-item-info">
-        <span class="pd-icon">${item.icon || ''}</span>
+        <span class="pd-icon">${getItemIcon(item.name)}</span>
         <span class="pd-name">${item.name}</span>
         <span class="pd-category-hint">${hint}</span>
       </div>
