@@ -150,3 +150,7 @@ Use this file to log bugs, blockers, and known gaps during work sessions. Each i
 ### #49 — Add doc comments to exported engine.js functions
 - Labels: documentation
 - JSDoc/JS comments on all public engine methods for reliability
+
+### #71 — End-game scores show decimal points
+- Labels: bug
+- Final score and some end-game scores display with decimal points instead of whole numbers
