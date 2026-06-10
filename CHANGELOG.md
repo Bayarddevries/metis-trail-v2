@@ -2,6 +2,20 @@
 
 All notable changes are documented here. Format loosely follows Keep a Changelog.
 
+## [v79] — 2026-06-10
+
+### Camp UI Overhaul — Polishing the Camp Experience
+- **Prominent header**: Changed "Make Camp" to `<h1>` with larger Playfair Display font, centered, uppercase, letter-spaced
+- **Campfire art panel**: Added `.camp-art` div (80px tall) at top of overlay with layered campfire background (glow, embers, flicker, paper texture)
+- **Requirement badges instead of disabled buttons**: All 9 camp actions now visible with orange requirement badges (e.g., "Need 1 food", "Only in woods/river", "Need Ammunition Belt") instead of opaque disabled state — click shows requirement in result area
+- **Single bottom button**: Removed separate "Push On" button; consolidated to single "Continue West" primary button
+- **"Push On" as camp action**: Added to "Rest & Recovery" group — applies penalties (1.5 food, +1 wear, -5 morale, no recovery) when chosen
+- **Renamed groups**: "Recovery" → "Rest & Recovery" (includes Push On), "Trail work" + "Upkeep" → "Camp Duties" (6 actions)
+- **Fixed "Women's work" text**: Process Pemmican description changed to "Slice, dry, and render tallow into pemmican."
+- **CSS additions**: `.camp-art`, larger `.camp-header`, `.camp-action-btn.has-req` (70% opacity), `.camp-req-badge` (orange warning badge), `.camp-action-label` flex layout
+
+Files modified: `src/main.js`, `src/template.html`, `dist/index.html`, `dist/app.js`
+
 ## [v78] — 2026-06-10
 
 ### Integration Test — Travel → Camp → Travel Loop (Issue #69)

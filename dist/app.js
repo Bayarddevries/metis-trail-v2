@@ -18179,17 +18179,10 @@ function bootstrap(seed = null) {
   }
   const campClose = find("#camp-close-btn");
   const campContinue = find("#camp-continue");
-  const campPushOn = find("#camp-push-on");
   if (campClose) campClose.onclick = () => find("#camp-overlay")?.classList.remove("active");
   if (campContinue) {
     campContinue.onclick = () => {
       find("#camp-overlay")?.classList.remove("active");
-    };
-  }
-  if (campPushOn) {
-    campPushOn.onclick = () => {
-      find("#camp-overlay")?.classList.remove("active");
-      pushOn(game);
     };
   }
   const campBtn = find("#btn-camp");
@@ -19092,23 +19085,23 @@ function showCamp(game) {
   const canForage = terrain !== "plains";
   const canHunt = terrain !== "wooded" && hasAmmo;
   const actions = [
-    { type: "rest", label: "Rest", cost: "1 food", desc: "Sleep and recover. Crew may improve.", available: state.food >= 1 },
-    { type: "forage", label: "Forage", cost: "1 day", desc: "Search for edible plants and roots.", available: canForage },
-    { type: "hunt", label: "Hunt", cost: "1 ammo \xB7 1 day", desc: "Stalk game for fresh meat.", available: canHunt, unavailableReason: !hasAmmo ? "Need Ammunition Belt" : "No game in woods" },
-    { type: "pemmican_process", label: "Process Pemmican", cost: "3 food", desc: "Slice, dry, and render tallow. Women's work.", available: state.food >= 3 },
-    { type: "repair", label: "Repair", cost: "1 shaganappi", desc: "Fix the cart. Reduces wear.", available: cartWear && hasShaganappi, unavailableReason: !cartWear ? "Cart not worn" : "Need Shaganappi" },
-    { type: "scout", label: "Scout", cost: "1 day", desc: "Reconnoiter the trail ahead.", available: hasNextNode },
-    { type: "dance", label: "Dance", cost: "free", desc: "Song and dance. Boosts morale.", available: true },
-    { type: "deeprest", label: "Deep Rest", cost: "2 food \xB7 2 days", desc: "Two days of full recovery.", available: state.food >= 2 }
+    { type: "rest", label: "Rest", cost: "1 food", desc: "Sleep and recover. Crew may improve.", req: state.food >= 1 ? "" : "Need 1 food" },
+    { type: "forage", label: "Forage", cost: "1 day", desc: "Search for edible plants and roots.", req: canForage ? "" : "Only in woods/river" },
+    { type: "hunt", label: "Hunt", cost: "1 ammo \xB7 1 day", desc: "Stalk game for fresh meat.", req: canHunt ? "" : !hasAmmo ? "Need Ammunition Belt" : "No game in woods" },
+    { type: "pemmican_process", label: "Process Pemmican", cost: "3 food", desc: "Slice, dry, and render tallow into pemmican.", req: state.food >= 3 ? "" : "Need 3 food" },
+    { type: "repair", label: "Repair", cost: "1 shaganappi", desc: "Fix the cart. Reduces wear.", req: cartWear && hasShaganappi ? "" : !cartWear ? "Cart not worn" : "Need Shaganappi" },
+    { type: "scout", label: "Scout", cost: "1 day", desc: "Reconnoiter the trail ahead.", req: hasNextNode ? "" : "At journey's end" },
+    { type: "dance", label: "Dance", cost: "free", desc: "Song and dance. Boosts morale.", req: "" },
+    { type: "deeprest", label: "Deep Rest", cost: "2 food \xB7 2 days", desc: "Two days of full recovery.", req: state.food >= 2 ? "" : "Need 2 food" },
+    { type: "push_on", label: "Push On", cost: "1.5 food \xB7 wear/ morale", desc: "Skip camp. Extra wear, no recovery.", req: "" }
   ];
   if (actionsEl) {
     actionsEl.innerHTML = "";
     actionsEl.style.display = "grid";
     actionsEl.style.visibility = "visible";
     const groups = [
-      { label: "Recovery", types: /* @__PURE__ */ new Set(["rest", "deeprest"]) },
-      { label: "Trail work", types: /* @__PURE__ */ new Set(["forage", "hunt", "scout", "pemmican_process"]) },
-      { label: "Upkeep", types: /* @__PURE__ */ new Set(["repair", "dance"]) }
+      { label: "Rest & Recovery", types: /* @__PURE__ */ new Set(["rest", "deeprest", "push_on"]) },
+      { label: "Camp Duties", types: /* @__PURE__ */ new Set(["forage", "hunt", "pemmican_process", "repair", "scout", "dance"]) }
     ];
     const groupMap = /* @__PURE__ */ new Map();
     actions.forEach((a) => {
@@ -19124,15 +19117,25 @@ function showCamp(game) {
       actionsEl.appendChild(header);
       list.forEach((a) => {
         const btn = document.createElement("button");
-        const isAvailable = a.available !== false;
-        btn.className = "camp-action-btn" + (isAvailable ? "" : " disabled");
-        btn.disabled = !isAvailable;
-        if (!isAvailable && a.unavailableReason) {
-          btn.title = a.unavailableReason;
-        }
-        btn.innerHTML = `<div class="camp-action-label">${a.label}</div><div class="camp-action-desc">${a.desc}</div><div class="camp-action-cost">${a.cost}</div>`;
+        const hasReq = a.req && a.req.length > 0;
+        btn.className = "camp-action-btn" + (hasReq ? " has-req" : "");
+        btn.innerHTML = `<div class="camp-action-label">${a.label}${hasReq ? `<span class="camp-req-badge">${a.req}</span>` : ""}</div><div class="camp-action-desc">${a.desc}</div><div class="camp-action-cost">${a.cost}</div>`;
         btn.addEventListener("click", () => {
-          const result = game.campAction(a.type);
+          if (hasReq) {
+            const errEl2 = document.getElementById("camp-result");
+            if (errEl2) {
+              errEl2.style.display = "block";
+              errEl2.textContent = a.req;
+            }
+            return;
+          }
+          let result;
+          if (a.type === "push_on") {
+            pushOn(game);
+            result = { effects: ["Pushed on \u2014 extra wear, less food, lower morale"] };
+          } else {
+            result = game.campAction(a.type);
+          }
           const errEl = document.getElementById("camp-result");
           const rollEl = document.getElementById("camp-roll-display");
           if (!result) {

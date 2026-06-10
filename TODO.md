@@ -123,8 +123,9 @@ Legend: `pending` | `in_progress` | `blocked` | `done`
 - [x] Camp bug #34 closed — action panel now rebuilds on every open
 - [x] Evening campfire background on camp overlay (#64) — warm glow, ember noise, flicker layers
 - [x] Wire camp overlay into travel loop with "Push On" (#66) — automatic camp after travel, Push On applies penalties
-- [x] Camp action context filtering (#65) — terrain/item/state-based availability with disabled tooltips
+- [x] Camp action context filtering (#65) — terrain/item/state-based availability with requirement badges
 - [x] Integration test — travel → camp → travel loop (#69) — 16 tests covering full loop
+- [x] Camp UI overhaul: prominent header, campfire art panel, requirement badges instead of disabled buttons, single Continue button, Push On as camp action
 - [ ] Add camp activity failures/flavor branching based on crew state (future)
 - [ ] Expand scoring to reward well-timed camps (Phase 3)
 
