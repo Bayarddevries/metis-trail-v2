@@ -1302,16 +1302,15 @@ function showShop(game) {
       if (purchased[item.name] > 0) {
         for (let i = 0; i < purchased[item.name]; i++) {
           if (item.category === 'provisions') {
-            // Food goes directly to game state
-            game.addFood(item.count); // item.count = 5 rations per pack
+            game.addFood(item.count);
           } else {
             game.buyItem(item.name, item.wt, item.category);
           }
         }
       }
     });
-    // Clear trade goods (they were converted to ₥)
     game.clearTradeGoods();
+    game.confirmPreDeparture(); // sets S.preDeparture = false
     document.getElementById('predeparture-overlay')?.classList.remove('active');
     window.__METIS_RENDER__();
   };
