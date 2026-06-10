@@ -51,105 +51,53 @@ Legend: `pending` | `in_progress` | `blocked` | `done`
 - [ ] Basic icons (#10)
 - [ ] Replace travel debug narrative with atmospheric fragments (done v64)
 
-### Audit P0 — Period-Accurate Sharp-Corner Aesthetic (2026-06-09 audit)
-- [x] #50 — Strip all `border-radius` and `box-shadow` for sharp corners
-- [x] #51 — Desaturate map tiles (`grayscale(1) contrast(1.1) brightness(0.9)`) and hide OSM attribution
-- [x] #52 — Add paper texture with ruled lines and ledger margin to narrative panel
-- [x] #55 — Add mobile breakpoints (768px, 420px, landscape) and 44px minimum touch targets
+## Sprint 1: Fix & Stabilize ✅ COMPLETE
+- [x] Kill audio module
+- [x] Fix hunt/repair item check
+- [x] Fix #71 decimal scores
+- [x] Fix #72 end button sizes
+- [x] Fix #73 HoF load
+- [x] Fix lined paper CSS
 
-### Phase 9 — Leaderboard
-- [x] Firebase leaderboard (#12) — v69
-- [x] Player name input
-- [x] My Scores with 8 sort options
-- [x] Lane A interface enhancements: aged palette, button hierarchy, camp grouping, status urgency, travel narrative dedupe, close-buttons touch hardening
-- [x] `docs/interface-enhancement-report.html` — interface audit with prioritized improvement options
-- [x] Touch-target hardening: `.action-primary/.action-secondary/.action-ghost`, min 44px viewport height target
-- [x] Settlements UI polish: explicit action labels/subtitles, primary/secondary/utility visual hierarchy, stronger buttons, clearer trade/craft disabled/empty states
-- [x] Fix #27 duplicate texture buckets (dead `const`) removed
-- [x] Fix #37 access-denied retry loop replaced by deterministic nav error handling
-- [x] Fix #38 meshgroup auto-centering after async tree load
-- [x] Fix #38 node-edge near-hit bug
+## Sprint 2: Core Redesign ✅ COMPLETE
+- [x] Build starting shop screen
+- [x] Build narrative journal (basic — travel logging only)
+- [x] Unify cart overlay
+- [x] Redesign camp action cards with cost/risk/flavor text per action
+- [x] Critical failures on roll 1 — extra consequences per action type
+- [x] Journal logging for events, camp actions, settlements
+- [x] Hunt gives trade goods (pelts/hides) not food
 
-### Phase 5 — Content & Mechanics Expansion
-- [x] Conditional endings (GitHub issue #14) — 6 ending types with narratives, source quotes, scoring (v36)
-- [x] Pre-departure cart packing (GitHub issue #15) — let players choose starting loadout (v80)
-- [x] Weather system (GitHub issue #13) — seasonal effects on travel and events (v65)
-- [x] MB currency economy — Made Beaver system replacing barter (v82)
-- [x] Highscore/leaderboard (GitHub issue #12) — score tracking by outcome type (v69, Firebase)
-- [ ] Add second half of Carlton Trail nodes with citations
-- [ ] Add scout/guide hire moral choices with history anchoring
+## Sprint 3: Settlements & Economy — IN PROGRESS
+- [ ] Settlement Overlay Redesign — type-specific overlays with action cards
+- [ ] HBC Fort Actions — trade goods→₥, buy supplies, rest, trail intel
+- [ ] Métis Camp Actions — gossip, recruit, dance, share food, craft hides
+- [ ] NWMP Post Actions — fines, permits, duty, ammo, rest
+- [ ] Mission Actions — heal, free rest+blessing, blessing, limited trade
+- [ ] Settlement Data — settlementType, name, description, priceMultiplier per node
+- [ ] Hunting Events — terrain-specific (bison/beaver/elk/deer) with DCs
+- [ ] Price Variation — settlement × category × distance multipliers
+- [ ] Endgame Scoring Screen — breakdown, tiers, narrative endings
+- [ ] Engine API — getSettlementActions, settlementAction, getTradeEstimate, getEndgameScore, getSettlementData
 
-## Phase 6 — Playtesting & Balance (COMPLETE)
-- [x] **Headless playtesting harness** — automated simulations using the real engine
-  - [x] Write `tests/simulate-entry.js` + `scripts/build-test.mjs`
-  - [x] Run 300 simulations with realistic weighted player choices
-  - [x] Aggregate: win rate, avg score, death reasons, item usage
-  - [x] Realistic-choice run: 88.7% victory, 4.0% cart failure, 7.3% starvation
-  - [x] User accepted balance outcomes as-is; no values changed
-- [x] **Browser click-through QA** — visual end-to-end testing
-  - [x] Full flow verified: intro → travel → events → settlement → endings
-  - [x] Map rendering verified (Leaflet tiles + cart marker present)
-  - [x] Ending overlay verified (title, narrative, score breakdown, source quote)
-- [x] **Balance pass** — findings documented, baseline accepted
-  - [x] Document realistic-choice balance outcomes
-  - [x] Surrender/reduce mapping kept executable with env passed through
-  - [x] User stated ship as-is after seeing results
+## Sprint 4: Visual Unification — PENDING
+- [ ] Color Palette — CSS custom properties via theme.js
+- [ ] Overlay Unification — shared .overlay-panel base class
+- [ ] Status Bar Redesign — two clusters with brass separator
+- [ ] Map Styling — sepia tiles, dotted trail, typed markers, cart SVG
+- [ ] Button Polish — primary/secondary/ghost hierarchy, 44px targets
+- [ ] Journal Polish — collapse chevrons, consistent dice/mechanical
+- [ ] Dice Consistency — wooden block, settle animation, ink-stamp
 
-## Phase 7 — Cart UX & Crafting Exposure (v41-v44) — COMPLETE
-- [x] Starting cart weight reduced: Pemmican 20→15, Firewood 3→2 (~128 kg)
-- [x] Category tooltips in cart overlay (`getCategoryHint()`)
-- [x] MB display removed from cart rows and crafting panel
-- [x] Crafting exposed at Métis and NWMP settlements (`availableSettlementActions` includes 'craft')
-- [x] Pre-departure overlay built: briefing, category legend, weight tracking, +/- controls, Auto-Pack, Confirm Loadout
-- [x] Engine API: `getPreDepartureItems()`, `setPreDepartureCount()`, `confirmPreDeparture()`
-- [x] Main.js: `showPreDeparture()` with full UI logic
-- [x] Overlay sequence fixed — intro now precedes pre-departure (#32)
-- [x] Version drift sync — `src/template.html` matches `dist/index.html` (v44)
-- [x] HBC crafting reachable: 'craft' action confirmed present in HBC `availableSettlementActions()` (was already added in v41)
-- [x] Settlement actions pruned: removed `recruit`/`forage`/`rumours` — all dominated by other actions (#31, v52)
-
-## Phase 8 — Win Rate Normalization & Polish (CURRENT)
-- [x] Post-balance baseline accepted: 300-run realistic-choice sim results shipped as current balance
-- [x] Dice clarity: DC → "Need X+" directional hint on events and camp (#41, #58)
-- [x] Camp dice fix: per-action DCs, reset on reopen, show threshold (#41)
-- [x] End-screen leaderboard: no auto-popup, "View Hall of Fame" button (#70)
-- [x] Party name + profanity filter (#40)
-- [x] Status bar grouping: Journey + Cart clusters with brass separator (#56)
-- [x] Weather text: emoji → period descriptors (#57)
-- [x] Die restyle: wooden block with grain texture (#53)
-- [x] Ink-stamp: success/fail CSS variants (#54)
-- [x] MB currency symbol: 💎 MB → ₥ (mill sign)
-- [ ] Win rate 66.5% post-balance, still above 25-40% target but accepted by user
-- [ ] Options remain: weather system, higher food consumption, more aggressive event penalties, time pressure
-- [ ] Cart unload buttons show item name for clarity
-- [ ] Basic icons / map markers (Issue #10, #26)
-- [x] Haptics module (#59)
-- [x] Web Audio ambient engine (#60)
-- [x] SVG icons for all 12 inventory items (#10)
-- [x] Secondary sources rewritten as period voices (#42)
-
-## Phase 9 — Unauthored Events & Historical Gaps (IDENTIFIED, NOT STARTED)
-- [ ] Many events still lack primary source citations — audit all 55 events for source coverage gaps
-- [ ] No events for: smallpox/epidemic, encounter with HBC officers, buffalo hunt scenes, river ferry crossings
-- [ ] Women and children presence needs expansion beyond current 4 events (cultural review #25 follow-up)
-- [ ] French-language dialogue options missing (Métis were bilingual — period quotes in French would add authenticity)
-- [ ] No "gossip trail" mechanic — intelligence from other travellers at settlements is underused
-- [ ] Seasonal events too uniform — early June should feel different from late October
-- [ ] Events referencing / interaction with the land / game trailing off in the west — need more prairie-specific events
-
-## Phase 0 — Camp Overhaul (IMPLEMENTED)
-- [x] Add `campAction()` engine method with 7 activities (rest/forage/hunt/repair/scout/dance/deeprest)
-- [x] Add `#camp-overlay` with action buttons, action panel vis resets on reopen and one-action-per-open flow
-- [x] Fix camp freeze when loopback founder flow is fed back via restart loop
-- [x] Wire Camp button to `showCamp()` and continue/close handlers
-- [x] Camp bug #34 closed — action panel now rebuilds on every open
-- [x] Evening campfire background on camp overlay (#64) — warm glow, ember noise, flicker layers
-- [x] Wire camp overlay into travel loop with "Push On" (#66) — automatic camp after travel, Push On applies penalties
-- [x] Camp action context filtering (#65) — terrain/item/state-based availability with requirement badges
-- [x] Integration test — travel → camp → travel loop (#69) — 16 tests covering full loop
-- [x] Camp UI overhaul: prominent header, campfire art panel, requirement badges instead of disabled buttons, single Continue button, Push On as camp action
-- [ ] Add camp activity failures/flavor branching based on crew state (future)
-- [ ] Expand scoring to reward well-timed camps (Phase 3)
+## Sprint 5: Content & Historical Depth — FUTURE
+- [ ] Audit all 55 events for source coverage gaps
+- [ ] Add missing events: smallpox, HBC officers, buffalo hunt, river ferry
+- [ ] Expand women/children presence (currently 4 events)
+- [ ] French-language dialogue options
+- [ ] Gossip trail mechanic at settlements
+- [ ] Seasonal event variation (June vs October)
+- [ ] Prairie-specific events for western trail
+- [ ] Second half of Carlton Trail nodes with citations
 
 ## Ongoing
 - [ ] Review and approve all historical content before merge
