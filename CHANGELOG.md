@@ -2,6 +2,31 @@
 
 All notable changes are documented here. Format loosely follows Keep a Changelog.
 
+## [v78] — 2026-06-10
+
+### Integration Test — Travel → Camp → Travel Loop (Issue #69)
+- Added `tests/integration-camp-loop.test.js` with 16 tests covering the full travel → camp → travel loop:
+  - **Camp overlay triggers**: Travel advances state; camp overlay logic verified
+  - **makeCamp()**: Increments camps counter, resets travelDaysWithoutRest, recovers crew, boosts morale
+  - **Multiple travel → camp cycles**: 10+ cycle loop verified
+  - **Push On penalties**: Extra food consumption (+1.5), wear (+1), morale (-5), no crew recovery, travelDaysWithoutRest++
+  - **Crew degradation**: rested → tired at 3 days, exhausted at 5 days of Push On
+  - **Context filtering availability**:
+    - Rest: requires food ≥ 1
+    - Forage: river_valley/wooded only (not plains)
+    - Hunt: requires Ammunition Belt + open terrain (not wooded)
+    - Process Pemmican: requires food ≥ 3
+    - Repair: requires wear > 0 + Shaganappi (starting cart has 3)
+    - Scout: requires next node exists
+    - Dance: always available
+    - Deep Rest: requires food ≥ 2
+  - **Camp action effects**: Rest recovers crew, actions return dice rolls
+  - **Full game completion**: Headless simulation with camp logic reaches game end
+- All tests pass with Bun test runner
+- Verifies #64, #65, #66 work together as integrated system
+
+Files added: `tests/integration-camp-loop.test.js`
+
 ## [v77] — 2026-06-10
 
 ### Camp Action Context Filtering (Issue #65)
