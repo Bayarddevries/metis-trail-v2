@@ -19763,7 +19763,7 @@ function showEnd(game) {
   const wearPenalty = state.wear * state.wear * 40;
   const scoreLines = [
     { label: "Base score", value: 1e3 },
-    { label: `MB value (${mbVal.toFixed(1)} \xD7 80)`, value: Math.round(mbVal * 80) },
+    { label: `MB value (${Math.round(mbVal)} \xD7 80)`, value: Math.round(mbVal * 80) },
     { label: `Food bonus (${foodBonus} \xD7 12)`, value: foodBonus * 12 },
     { label: `Crew condition (${state.crew})`, value: crewBonus },
     { label: `Days on trail (${state.day} \xD7 -8)`, value: -daysPenalty },
@@ -19802,9 +19802,8 @@ function showEnd(game) {
   if (endCard && !document.getElementById("end-leaderboard-btn")) {
     const lbBtn = document.createElement("button");
     lbBtn.id = "end-leaderboard-btn";
-    lbBtn.className = "ctrl-btn";
+    lbBtn.className = "restart-btn";
     lbBtn.style.marginTop = "10px";
-    lbBtn.style.fontSize = "12px";
     lbBtn.textContent = "\u{1F3C6} View Hall of Fame";
     lbBtn.onclick = () => showLeaderboard();
     endCard.appendChild(lbBtn);
@@ -19826,15 +19825,14 @@ function loadHallOfFame() {
   container.innerHTML = '<div class="lb-loading">Loading...</div>';
   getTopScores().then((scores) => {
     cachedTopScores = scores;
-    if (!scores) {
-      container.innerHTML = '<div class="lb-error">Leaderboard unavailable \u2014 playing offline</div>';
-      return;
-    }
-    if (scores.length === 0) {
+    if (!scores || scores.length === 0) {
       container.innerHTML = '<div class="lb-empty">No scores yet. Be the first!</div>';
       return;
     }
     container.innerHTML = '<div class="lb-list">' + scores.map((s, i) => renderLbEntry(s, i + 1)).join("") + "</div>";
+  }).catch((err) => {
+    console.warn("[Metis] Hall of Fame load failed:", err);
+    container.innerHTML = '<div class="lb-error">Leaderboard unavailable \u2014 playing offline</div>';
   });
 }
 __name(loadHallOfFame, "loadHallOfFame");

@@ -1663,7 +1663,7 @@ function showEnd(game) {
 
   const scoreLines = [
     { label: 'Base score', value: 1000 },
-    { label: `MB value (${mbVal.toFixed(1)} × 80)`, value: Math.round(mbVal * 80) },
+    { label: `MB value (${Math.round(mbVal)} × 80)`, value: Math.round(mbVal * 80) },
     { label: `Food bonus (${foodBonus} × 12)`, value: foodBonus * 12 },
     { label: `Crew condition (${state.crew})`, value: crewBonus },
     { label: `Days on trail (${state.day} × -8)`, value: -daysPenalty },
@@ -1709,9 +1709,8 @@ function showEnd(game) {
   if (endCard && !document.getElementById('end-leaderboard-btn')) {
     const lbBtn = document.createElement('button');
     lbBtn.id = 'end-leaderboard-btn';
-    lbBtn.className = 'ctrl-btn';
+    lbBtn.className = 'restart-btn';
     lbBtn.style.marginTop = '10px';
-    lbBtn.style.fontSize = '12px';
     lbBtn.textContent = '🏆 View Hall of Fame';
     lbBtn.onclick = () => showLeaderboard();
     endCard.appendChild(lbBtn);
@@ -1737,15 +1736,14 @@ function loadHallOfFame() {
 
   getTopScores().then((scores) => {
     cachedTopScores = scores;
-    if (!scores) {
-      container.innerHTML = '<div class="lb-error">Leaderboard unavailable — playing offline</div>';
-      return;
-    }
-    if (scores.length === 0) {
+    if (!scores || scores.length === 0) {
       container.innerHTML = '<div class="lb-empty">No scores yet. Be the first!</div>';
       return;
     }
     container.innerHTML = '<div class="lb-list">' + scores.map((s, i) => renderLbEntry(s, i + 1)).join('') + '</div>';
+  }).catch((err) => {
+    console.warn('[Metis] Hall of Fame load failed:', err);
+    container.innerHTML = '<div class="lb-error">Leaderboard unavailable — playing offline</div>';
   });
 }
 
