@@ -26,7 +26,7 @@ export const CONSTANTS = Object.freeze({
   WEATHER_MORALE_MOD: { clear: 0, overcast: -1, rain: -2, storm: -4, snow: -3 },
   WEATHER_EVENT_MOD: { clear: 0, overcast: 0, rain: 0.10, storm: 0.15, snow: 0.10 },
   WEATHER_CAMP_MORALE: { clear: 15, overcast: 15, rain: 10, storm: 5, snow: 5 },
-  WEATHER_LABELS: { clear: '☀ Clear', overcast: '☁ Overcast', rain: '🌧 Rain', storm: '⛈ Storm', snow: '❄ Snow' },
+  WEATHER_LABELS: { clear: 'Clear', overcast: 'Overcast', rain: 'Rain', storm: 'Storm', snow: 'Snow' },
   // MB (Made Beaver) currency system
   MB_WIN_THRESHOLD: 10,      // minimum MB value needed at Edmonton to win
   MB_FOOD_COST: 0.5,         // 1 MB buys 2 food at base rate

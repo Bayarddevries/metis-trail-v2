@@ -58,15 +58,29 @@ export function bootstrap(seed = null) {
     if (savedName) nameInput.value = savedName;
   }
 
+  // Profanity filter for party names
+  const PROFANE = /\b(f+u+c+k+|s+h+i+t+|b+i+t+c+h+|a+s+s+h+o+l+e+|d+a+m+n+|c+u+n+t+|f+a+g+|n+i+g+g+|r+e+t+a+r+d+|w+h+o+r+e+|s+l+u+t+|p+i+s+s+|t+i+t+s+|d+i+c+k+|p+u+s+s+y+|c+o+c+k+|m+e+r+d+e+|p+u+t+a+|b+a+r+d+a+s+h+|b+o+r+d+e+l+|c+h+i+n+k+|g+o+o+k+|k+i+k+e+|s+p+i+c+|w+e+t+b+a+c+k+|t+r+a+n+n+y+|d+y+k+e+|k+a+f+i+r+|m+u+l+a+t+t+o+|p+a+k+i+|s+q+u+a+w+|w+o+g+|z+i+g+g+e+r+)\b/gi;
+  function sanitizeName(raw) {
+    let cleaned = raw.replace(PROFANE, (m) => '*'.repeat(m.length));
+    // Also block names that are just symbols/numbers
+    if (!/[a-zA-Z]/.test(cleaned)) cleaned = 'Traveller';
+    return cleaned.substring(0, 32);
+  }
+
   // Event delegation on #game-root survives DOM rebuilds from render()
   const gameRoot = find('#game-root');
   if (gameRoot) {
     gameRoot.addEventListener('click', (e) => {
       if (e.target.closest('#intro-start')) {
-        // Save player name
-        const nameVal = nameInput?.value?.trim() || '';
+        // Save player name (sanitized)
+        const rawName = nameInput?.value?.trim() || '';
+        const nameVal = sanitizeName(rawName) || 'Traveller';
         if (nameVal) {
           localStorage.setItem('metisPlayerName', nameVal);
+        }
+        // Update input to show sanitized version
+        if (nameInput && rawName !== nameVal) {
+          nameInput.value = nameVal;
         }
         const introOverlay = find('#intro-overlay');
         if (introOverlay) {
@@ -491,7 +505,7 @@ function renderDicePill(result) {
   rc.innerHTML = `
     <div class="roll-label">Roll</div>
     <div id="die" class="die small font-spectral">-</div>
-    <div class="roll-label">DC ${result.dc}</div>
+    <div class="roll-label">Need ${result.dc}+</div>
   `;
 }
 
@@ -530,7 +544,7 @@ function revealDiceOutcome(diceResult) {
   const outcomeEl = document.getElementById('event-dice-outcome');
   if (outcomeEl) {
     // Roll line
-    const rollHtml = `<span class="outcome-roll">Rolled ${result.roll} vs DC ${result.dc}</span>`;
+    const rollHtml = `<span class="outcome-roll">Rolled ${result.roll} — need ${result.dc}+</span>`;
     const resultHtml = result.success
       ? '<span class="outcome-pass">Success</span>'
       : '<span class="outcome-fail">Failure</span>';
@@ -643,9 +657,15 @@ function showEvent(game) {
   (ev.choices || []).forEach((ch, i) => {
     const btn = document.createElement('button');
     btn.className = 'choice-btn';
+    const hasItem = !ch.requiresItem || (game.getCart()?.some(it => it.name === ch.requiresItem.name && it.count >= ch.requiresItem.count));
+    if (ch.requiresItem && !hasItem) {
+      btn.disabled = true;
+      btn.style.opacity = '0.45';
+      btn.style.cursor = 'not-allowed';
+    }
     btn.textContent = ch.text;
     const costParts = [];
-    if (typeof ch.dc === 'number') costParts.push(`DC ${ch.dc}`);
+    if (typeof ch.dc === 'number') costParts.push(`Roll ${ch.dc}+`);
     if (typeof ch.food === 'number' && ch.food < 0) costParts.push(`${ch.food} food`);
     if (typeof ch.wear === 'number' && ch.wear > 0) costParts.push(`+${ch.wear} wear`);
     if (typeof ch.morale === 'number' && ch.morale < 0) costParts.push(`${ch.morale} morale`);
@@ -715,7 +735,7 @@ function buildEventChoiceOutcome(stepLog, before, after) {
   const entry = stepLog && stepLog[0] ? stepLog[0] : null;
   const res = entry && entry.result ? entry.result : entry;
   if (res && res.roll !== null && res.dc !== null) {
-    msgs.push(`Rolled ${res.roll} vs DC ${res.dc}: ${res.success ? 'Success' : 'Failure'}`);
+    msgs.push(`Rolled ${res.roll} (needed ${res.dc}+): ${res.success ? 'Success' : 'Failure'}`);
   }
   if (res && res.text) msgs.push(res.text);
   if (after.food !== before.food) msgs.push(`${after.food - before.food >= 0 ? '+' : ''}${after.food - before.food} Food`);
@@ -1435,6 +1455,9 @@ function showCamp(game) {
   if (crewEl) crewEl.textContent = state.crew;
   if (subEl) subEl.textContent = `Day ${state.day} — ${state.season}`;
   if (resultEl) { resultEl.style.display = 'none'; resultEl.textContent = ''; }
+  // Reset camp dice display from previous camp
+  const campRollEl = document.getElementById('camp-roll-display');
+  if (campRollEl) { campRollEl.style.display = 'none'; campRollEl.innerHTML = ''; }
 
   // Context helpers — all used for requirement badges, not for hiding
   const hasAmmo = state.cart?.some(i => i.name === 'Ammunition Belt' && i.count > 0) ?? false;
@@ -1518,13 +1541,23 @@ function showCamp(game) {
 
           // Show dice roll if this action used one
           if (result.roll !== null && rollEl) {
-            const isSuccess = result.rollTotal >= 10; // generic threshold
+            // DC thresholds per action type (matches engine.js campAction)
+            const DC = {
+              rest: { high: 15, mid: 8 },
+              forage: { high: 12, mid: 8 },
+              hunt: { high: 10, mid: 6 },
+              repair: { high: 12, mid: 8 },
+              scout: { high: 9, mid: 5 },
+              deeprest: { high: 10, mid: 5 },
+            }[a.type] || { high: 10, mid: 6 };
+            const isSuccess = result.rollTotal >= DC.high;
+            const isMid = !isSuccess && result.rollTotal >= DC.mid;
             const flavorText = getCampFlavorText(a.type, result.rollTotal, result.effects);
             rollEl.style.display = 'flex';
             rollEl.innerHTML = `
               <div class="roll-label">Roll</div>
               <div class="die small font-spectral spin" id="camp-die">${result.roll}</div>
-              <div class="roll-total">${result.rollTotal} ${isSuccess ? '✓' : '✗'}</div>
+              <div class="roll-total">Need ${DC.high}+ ${isSuccess ? '✓' : '✗'}</div>
             `;
             // Animate the die
             const dieEl = document.getElementById('camp-die');
@@ -1656,10 +1689,18 @@ function showEnd(game) {
     }
   });
 
-  // Show leaderboard after a short delay so end screen renders first
-  setTimeout(() => {
-    showLeaderboard();
-  }, 300);
+  // Show "View Hall of Fame" button on end screen instead of auto-popup
+  const endCard = document.querySelector('#end-overlay .end-card');
+  if (endCard && !document.getElementById('end-leaderboard-btn')) {
+    const lbBtn = document.createElement('button');
+    lbBtn.id = 'end-leaderboard-btn';
+    lbBtn.className = 'ctrl-btn';
+    lbBtn.style.marginTop = '10px';
+    lbBtn.style.fontSize = '12px';
+    lbBtn.textContent = '🏆 View Hall of Fame';
+    lbBtn.onclick = () => showLeaderboard();
+    endCard.appendChild(lbBtn);
+  }
 }
 
 // ── Leaderboard ─────────────────────────────────────────────────────
@@ -1700,7 +1741,7 @@ function loadMyScores() {
 
   const name = localStorage.getItem('metisPlayerName') || '';
   if (!name) {
-    container.innerHTML = '<div class="lb-empty">Set your name in the intro to track personal scores.</div>';
+    container.innerHTML = '<div class="lb-empty">Set your party name in the intro to track personal scores.</div>';
     return;
   }
 

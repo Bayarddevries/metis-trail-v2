@@ -61,6 +61,8 @@
   .stat-value.weather-snow { color: #B8C4D0; }
   .stat-value.mb-ok { color: #C99A3B; }
   .stat-value.mb-low { color: #e63946; }
+  .stat-group { display: flex; align-items: center; gap: 10px; }
+  .stat-group + .stat-group { padding-left: 14px; border-left: 1px solid rgba(184,134,11,0.25); }
   .segment-progress {
     flex: 1;
     text-align: center;
@@ -699,6 +701,8 @@
     opacity: 0.85;
     margin-bottom: 10px;
   }
+  .event-stamp.success { border-color: #4A6741; color: #4A6741; }
+  .event-stamp.fail { border-color: #8B2500; color: #8B2500; transform: rotate(2deg); }
   .event-choices { display: flex; flex-direction: column; gap: 5px; }
   .choice-btn {
     display: flex;
@@ -761,6 +765,7 @@
     height: 44px;
     border-radius: 0;
     background: var(--clr-bg);
+    background-image: repeating-linear-gradient(45deg, transparent, transparent 3px, rgba(60,40,15,0.06) 3px, rgba(60,40,15,0.06) 4px);
     border: 2px solid var(--clr-ink);
     display: flex;
     align-items: center;
@@ -1250,15 +1255,19 @@
 <div id="game-root">
   <div id="game-container">
     <div id="status-bar">
-      <span class="stat"><span class="stat-label">Day</span><span class="stat-value" id="s-day">1</span></span>
-      <span class="stat"><span class="stat-label" id="s-month">June 15</span></span>
-      <span class="stat"><span class="stat-label" id="s-season">Summer</span></span>
-      <span class="stat"><span class="stat-label">Weather</span><span class="stat-value weather-clear" id="s-weather">☀ Clear</span></span>
-      <span class="stat"><span class="stat-label">MB</span><span class="stat-value mb-ok" id="s-mb">💎 0 MB</span></span>
+      <div class="stat-group">
+        <span class="stat"><span class="stat-label">Day</span><span class="stat-value" id="s-day">1</span></span>
+        <span class="stat"><span class="stat-label" id="s-month">June 15</span></span>
+        <span class="stat"><span class="stat-label" id="s-season">Summer</span></span>
+      </div>
       <span class="segment-progress" id="s-segment">Fort Garry — begin your journey</span>
-      <span class="stat"><span class="stat-label">Food</span><span class="stat-value" id="s-food">30</span></span>
-      <span class="stat"><span class="stat-label">Wear</span><span class="stat-value" id="s-wear">0</span></span>
-      <span class="stat"><span class="stat-label">Crew</span><span class="stat-value" id="s-crew">Rested</span></span>
+      <div class="stat-group">
+        <span class="stat"><span class="stat-label">Weather</span><span class="stat-value weather-clear" id="s-weather">Clear</span></span>
+        <span class="stat"><span class="stat-label">MB</span><span class="stat-value mb-ok" id="s-mb">0 ₥</span></span>
+        <span class="stat"><span class="stat-label">Food</span><span class="stat-value" id="s-food">30</span></span>
+        <span class="stat"><span class="stat-label">Wear</span><span class="stat-value" id="s-wear">0</span></span>
+        <span class="stat"><span class="stat-label">Crew</span><span class="stat-value" id="s-crew">Rested</span></span>
+      </div>
     </div>
 
     <div id="map-panel">
@@ -1354,8 +1363,8 @@
           <strong>On sources:</strong> This game draws on primary sources from the 1860s–1900s. Some quotes use terms that were common in period writing but are offensive today. These are shown in their original form for historical accuracy. Where a quote's language may be jarring, we've added a brief context note.
         </div>
         <div class="intro-name-row">
-          <label for="intro-name-input" class="intro-name-label">What is your name, traveller?</label>
-          <input type="text" id="intro-name-input" class="intro-name-input" placeholder="Enter your name..." maxlength="32" autocomplete="off" />
+          <label for="intro-name-input" class="intro-name-label">What is your party's name, traveller?</label>
+          <input type="text" id="intro-name-input" class="intro-name-input" placeholder="Enter party name..." maxlength="32" autocomplete="off" />
         </div>
       </div>
       <div class="intro-actions">
@@ -1460,7 +1469,10 @@
     </div>
   </div>
 </div>
-  <script type="module" src="app.js?v=105"></script>
+  <script type="module" src="app.js?v=106"></script>
+<script>window.__METIS_ASSETS__={
+  "assets": []
+};</script>
 <script>window.__METIS_ASSETS__={
   "assets": []
 };</script>

@@ -30,7 +30,7 @@ var CONSTANTS = Object.freeze({
   WEATHER_MORALE_MOD: { clear: 0, overcast: -1, rain: -2, storm: -4, snow: -3 },
   WEATHER_EVENT_MOD: { clear: 0, overcast: 0, rain: 0.1, storm: 0.15, snow: 0.1 },
   WEATHER_CAMP_MORALE: { clear: 15, overcast: 15, rain: 10, storm: 5, snow: 5 },
-  WEATHER_LABELS: { clear: "\u2600 Clear", overcast: "\u2601 Overcast", rain: "\u{1F327} Rain", storm: "\u26C8 Storm", snow: "\u2744 Snow" },
+  WEATHER_LABELS: { clear: "Clear", overcast: "Overcast", rain: "Rain", storm: "Storm", snow: "Snow" },
   // MB (Made Beaver) currency system
   MB_WIN_THRESHOLD: 10,
   // minimum MB value needed at Edmonton to win
@@ -2799,13 +2799,13 @@ function renderStatusBar(state) {
   const weatherEl = document.getElementById("s-weather");
   if (weatherEl) {
     const w = state.weather || "clear";
-    weatherEl.textContent = CONSTANTS.WEATHER_LABELS[w] || "\u2600 Clear";
+    weatherEl.textContent = CONSTANTS.WEATHER_LABELS[w] || "Clear";
     weatherEl.className = "stat-value weather-" + w;
   }
   const mbEl = document.getElementById("s-mb");
   if (mbEl) {
     const mb = state.mbValue || 0;
-    mbEl.textContent = `\u{1F48E} ${mb.toFixed(1)} MB`;
+    mbEl.textContent = `${mb.toFixed(1)} \u20A5`;
     mbEl.className = "stat-value" + (mb < CONSTANTS.MB_WIN_THRESHOLD ? " mb-low" : " mb-ok");
   }
   if (!window.__METIS_PENDING_RESULT__) window.__METIS_PENDING_RESULT__ = null;
@@ -18231,13 +18231,24 @@ function bootstrap(seed = null) {
     const savedName = localStorage.getItem("metisPlayerName");
     if (savedName) nameInput.value = savedName;
   }
+  const PROFANE = /\b(f+u+c+k+|s+h+i+t+|b+i+t+c+h+|a+s+s+h+o+l+e+|d+a+m+n+|c+u+n+t+|f+a+g+|n+i+g+g+|r+e+t+a+r+d+|w+h+o+r+e+|s+l+u+t+|p+i+s+s+|t+i+t+s+|d+i+c+k+|p+u+s+s+y+|c+o+c+k+|m+e+r+d+e+|p+u+t+a+|b+a+r+d+a+s+h+|b+o+r+d+e+l+|c+h+i+n+k+|g+o+o+k+|k+i+k+e+|s+p+i+c+|w+e+t+b+a+c+k+|t+r+a+n+n+y+|d+y+k+e+|k+a+f+i+r+|m+u+l+a+t+t+o+|p+a+k+i+|s+q+u+a+w+|w+o+g+|z+i+g+g+e+r+)\b/gi;
+  function sanitizeName(raw) {
+    let cleaned = raw.replace(PROFANE, (m) => "*".repeat(m.length));
+    if (!/[a-zA-Z]/.test(cleaned)) cleaned = "Traveller";
+    return cleaned.substring(0, 32);
+  }
+  __name(sanitizeName, "sanitizeName");
   const gameRoot = find("#game-root");
   if (gameRoot) {
     gameRoot.addEventListener("click", (e) => {
       if (e.target.closest("#intro-start")) {
-        const nameVal = nameInput?.value?.trim() || "";
+        const rawName = nameInput?.value?.trim() || "";
+        const nameVal = sanitizeName(rawName) || "Traveller";
         if (nameVal) {
           localStorage.setItem("metisPlayerName", nameVal);
+        }
+        if (nameInput && rawName !== nameVal) {
+          nameInput.value = nameVal;
         }
         const introOverlay = find("#intro-overlay");
         if (introOverlay) {
@@ -18400,7 +18411,7 @@ function renderDicePill(result) {
   rc.innerHTML = `
     <div class="roll-label">Roll</div>
     <div id="die" class="die small font-spectral">-</div>
-    <div class="roll-label">DC ${result.dc}</div>
+    <div class="roll-label">Need ${result.dc}+</div>
   `;
 }
 __name(renderDicePill, "renderDicePill");
@@ -18434,7 +18445,7 @@ function revealDiceOutcome(diceResult) {
   const result = diceResult.result;
   const outcomeEl = document.getElementById("event-dice-outcome");
   if (outcomeEl) {
-    const rollHtml = `<span class="outcome-roll">Rolled ${result.roll} vs DC ${result.dc}</span>`;
+    const rollHtml = `<span class="outcome-roll">Rolled ${result.roll} \u2014 need ${result.dc}+</span>`;
     const resultHtml = result.success ? '<span class="outcome-pass">Success</span>' : '<span class="outcome-fail">Failure</span>';
     let flavorText = result.text || "";
     flavorText = flavorText.replace(/^(Success|Failure)\.\s*/, "");
@@ -18521,9 +18532,15 @@ function showEvent(game) {
   (ev.choices || []).forEach((ch, i) => {
     const btn = document.createElement("button");
     btn.className = "choice-btn";
+    const hasItem = !ch.requiresItem || game.getCart()?.some((it2) => it2.name === ch.requiresItem.name && it2.count >= ch.requiresItem.count);
+    if (ch.requiresItem && !hasItem) {
+      btn.disabled = true;
+      btn.style.opacity = "0.45";
+      btn.style.cursor = "not-allowed";
+    }
     btn.textContent = ch.text;
     const costParts = [];
-    if (typeof ch.dc === "number") costParts.push(`DC ${ch.dc}`);
+    if (typeof ch.dc === "number") costParts.push(`Roll ${ch.dc}+`);
     if (typeof ch.food === "number" && ch.food < 0) costParts.push(`${ch.food} food`);
     if (typeof ch.wear === "number" && ch.wear > 0) costParts.push(`+${ch.wear} wear`);
     if (typeof ch.morale === "number" && ch.morale < 0) costParts.push(`${ch.morale} morale`);
@@ -18586,7 +18603,7 @@ function buildEventChoiceOutcome(stepLog, before, after) {
   const entry = stepLog && stepLog[0] ? stepLog[0] : null;
   const res = entry && entry.result ? entry.result : entry;
   if (res && res.roll !== null && res.dc !== null) {
-    msgs.push(`Rolled ${res.roll} vs DC ${res.dc}: ${res.success ? "Success" : "Failure"}`);
+    msgs.push(`Rolled ${res.roll} (needed ${res.dc}+): ${res.success ? "Success" : "Failure"}`);
   }
   if (res && res.text) msgs.push(res.text);
   if (after.food !== before.food) msgs.push(`${after.food - before.food >= 0 ? "+" : ""}${after.food - before.food} Food`);
@@ -19257,6 +19274,11 @@ function showCamp(game) {
     resultEl.style.display = "none";
     resultEl.textContent = "";
   }
+  const campRollEl = document.getElementById("camp-roll-display");
+  if (campRollEl) {
+    campRollEl.style.display = "none";
+    campRollEl.innerHTML = "";
+  }
   const hasAmmo = state.cart?.some((i) => i.name === "Ammunition Belt" && i.count > 0) ?? false;
   const hasShaganappi = state.cart?.some((i) => i.name === "Shaganappi" && i.count > 0) ?? false;
   const cartWear = state.wear > 0;
@@ -19340,13 +19362,22 @@ function showCamp(game) {
           if (subEl) subEl.textContent = `Day ${after.day} \u2014 ${after.season}`;
           actionsEl.style.display = "none";
           if (result.roll !== null && rollEl) {
-            const isSuccess = result.rollTotal >= 10;
+            const DC = {
+              rest: { high: 15, mid: 8 },
+              forage: { high: 12, mid: 8 },
+              hunt: { high: 10, mid: 6 },
+              repair: { high: 12, mid: 8 },
+              scout: { high: 9, mid: 5 },
+              deeprest: { high: 10, mid: 5 }
+            }[a.type] || { high: 10, mid: 6 };
+            const isSuccess = result.rollTotal >= DC.high;
+            const isMid = !isSuccess && result.rollTotal >= DC.mid;
             const flavorText = getCampFlavorText(a.type, result.rollTotal, result.effects);
             rollEl.style.display = "flex";
             rollEl.innerHTML = `
               <div class="roll-label">Roll</div>
               <div class="die small font-spectral spin" id="camp-die">${result.roll}</div>
-              <div class="roll-total">${result.rollTotal} ${isSuccess ? "\u2713" : "\u2717"}</div>
+              <div class="roll-total">Need ${DC.high}+ ${isSuccess ? "\u2713" : "\u2717"}</div>
             `;
             const dieEl = document.getElementById("camp-die");
             let ticks = 0;
@@ -19457,9 +19488,17 @@ function showEnd(game) {
       console.log("[Metis] Score saved to Firestore:", result.id);
     }
   });
-  setTimeout(() => {
-    showLeaderboard();
-  }, 300);
+  const endCard = document.querySelector("#end-overlay .end-card");
+  if (endCard && !document.getElementById("end-leaderboard-btn")) {
+    const lbBtn = document.createElement("button");
+    lbBtn.id = "end-leaderboard-btn";
+    lbBtn.className = "ctrl-btn";
+    lbBtn.style.marginTop = "10px";
+    lbBtn.style.fontSize = "12px";
+    lbBtn.textContent = "\u{1F3C6} View Hall of Fame";
+    lbBtn.onclick = () => showLeaderboard();
+    endCard.appendChild(lbBtn);
+  }
 }
 __name(showEnd, "showEnd");
 var cachedTopScores = null;
@@ -19495,7 +19534,7 @@ function loadMyScores() {
   container.innerHTML = '<div class="lb-loading">Loading...</div>';
   const name3 = localStorage.getItem("metisPlayerName") || "";
   if (!name3) {
-    container.innerHTML = '<div class="lb-empty">Set your name in the intro to track personal scores.</div>';
+    container.innerHTML = '<div class="lb-empty">Set your party name in the intro to track personal scores.</div>';
     return;
   }
   getMyScores(name3).then((scores) => {

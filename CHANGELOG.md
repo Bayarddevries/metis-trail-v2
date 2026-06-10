@@ -2,6 +2,36 @@
 
 All notable changes are documented here. Format loosely follows Keep a Changelog.
 
+## [v83] — 2026-06-10
+
+### Dice Clarity & Camp Fix
+- DC display changed from "DC 12" to "Need 12+" on event choices, camp dice, and outcome text — players now know which direction to roll
+- Camp dice now uses per-action DC thresholds from engine (rest 15/8, forage 12/8, hunt 10/6, etc.) instead of hardcoded 10
+- Camp dice display shows "Need X+ ✓/✗" instead of raw total
+- Camp roll display resets on each camp open (was persisting from previous camp)
+- Event choice buttons requiring items are now disabled (opacity 0.45) when player lacks the item
+
+### End Screen / Leaderboard (#70)
+- Removed auto-popup of leaderboard after game over (was covering end-screen narrative)
+- Added "🏆 View Hall of Fame" button to end-screen overlay instead
+- Score breakdown and narrative now always visible before player chooses to view leaderboard
+
+### Party Name (#40)
+- Intro text changed from "What is your name?" to "What is your party's name?"
+- Placeholder text: "Enter party name..."
+- Profanity filter on party name input: common slurs/profanity replaced with asterisks
+- Names with no letters default to "Traveller"
+- Leaderboard "My Scores" message updated to reference "party name"
+
+### UI Polish
+- **#53**: Die restyled as wooden block — added diagonal wood-grain texture via CSS gradient
+- **#54**: Added `.event-stamp.success` (green) and `.event-stamp.fail` (red, opposite tilt) CSS classes
+- **#56**: Status bar grouped into Journey cluster (Day/Month/Season) + Cart cluster (Weather/MB/Food/Wear/Crew) with brass vertical separator
+- **#57**: Weather display changed from emoji ("☀ Clear") to period text ("Clear") in status bar, constants, and renderer
+- MB currency symbol changed from "💎 0 MB" to "0 ₥" (mill sign) in status bar
+
+Files modified: `src/main.js`, `src/template.html`, `src/ui/renderer.js`, `src/core/constants.js`
+
 ## [v82] — 2026-06-10
 
 ### Economy Overhaul — Made Beaver (MB) Currency System

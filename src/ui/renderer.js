@@ -218,7 +218,7 @@ export function renderStatusBar(state) {
   const weatherEl = document.getElementById('s-weather');
   if (weatherEl) {
     const w = state.weather || 'clear';
-    weatherEl.textContent = CONSTANTS.WEATHER_LABELS[w] || '☀ Clear';
+    weatherEl.textContent = CONSTANTS.WEATHER_LABELS[w] || 'Clear';
     weatherEl.className = 'stat-value weather-' + w;
   }
 
@@ -226,7 +226,7 @@ export function renderStatusBar(state) {
   const mbEl = document.getElementById('s-mb');
   if (mbEl) {
     const mb = state.mbValue || 0;
-    mbEl.textContent = `💎 ${mb.toFixed(1)} MB`;
+    mbEl.textContent = `${mb.toFixed(1)} ₥`;
     mbEl.className = 'stat-value' + (mb < CONSTANTS.MB_WIN_THRESHOLD ? ' mb-low' : ' mb-ok');
   }
 
