@@ -123,8 +123,10 @@ Legend: `pending` | `in_progress` | `blocked` | `done`
 - [ ] Options remain: weather system, higher food consumption, more aggressive event penalties, time pressure
 - [ ] Cart unload buttons show item name for clarity
 - [ ] Basic icons / map markers (Issue #10, #26)
-- [ ] Haptics module (#59)
-- [ ] Web Audio ambient engine (#60)
+- [x] Haptics module (#59)
+- [x] Web Audio ambient engine (#60)
+- [x] SVG icons for all 12 inventory items (#10)
+- [x] Secondary sources rewritten as period voices (#42)
 
 ## Phase 9 — Unauthored Events & Historical Gaps (IDENTIFIED, NOT STARTED)
 - [ ] Many events still lack primary source citations — audit all 55 events for source coverage gaps
