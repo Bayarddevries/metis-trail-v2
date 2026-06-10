@@ -2,6 +2,45 @@
 
 All notable changes are documented here. Format loosely follows Keep a Changelog.
 
+## [v82] — 2026-06-10
+
+### Economy Overhaul — Made Beaver (MB) Currency System
+
+Replaced barter-only trade with a proper currency economy grounded in the historical HBC "Made Beaver" accounting system.
+
+**Core changes:**
+- Trade goods (Bison Hides, Beaver Pelts) now convert to **MB credit** at settlements instead of food
+- MB credit is per-settlement-type (HBC, Métis, NWMP, Mission) — spend it where you earn it
+- New settlement actions: `buy_food` (0.5 MB → 2 food), `buy_repair` (2 MB → −2 wear), `buy_heal` (1 MB → +20 morale), `buy_info` (0.5 MB → trail intel)
+- Win condition: reach Edmonton with ≥10 MB value in trade goods (was: has any trade goods)
+- Score formula: MB value × 80 (was: trade unit count × 120)
+- Settlement visits now allow multiple actions (trade + buy + rest) per visit
+- `settlementAction()` no longer clears `pendingSettlement` on non-continue actions
+
+**Starting loadout rebalance:**
+- Food: 27 → 23 (increased pressure to trade early)
+- Bison Hides: 2 → 4 (more trade goods = more MB potential)
+- Beaver Pelts: 2 → 3 (同上)
+- Starting MB value: ~8.5 → ~17 (well above 10 MB threshold if managed well)
+
+**UI changes:**
+- Status bar: added MB indicator (💎 X.X MB) with color coding (gold if ≥ threshold, red if below)
+- Trade panel: shows MB yield per good instead of food yield
+- Cart overlay: shows MB value on trade/fur items
+- Settlement actions: buy options shown as secondary actions (behind "More actions" toggle)
+- Ending text updated: no_trade ending references MB instead of "empty cart"
+- Tips updated: all references to "keep trade goods" changed to "manage MB credit"
+
+**Sim results (50 runs):**
+- Win rate: 30% (target 25-40% ✓)
+- Deaths: starvation 52%, cart_failure 14%, no_trade 4%
+- Avg MB at end: 11.8 (winners, need 10 to win ✓)
+- no_trade dropped from 46% → 4% ✓
+
+**New constants:** `MB_WIN_THRESHOLD`, `MB_FOOD_COST`, `MB_REPAIR_COST`, `MB_HEAL_COST`, `MB_INFO_COST`
+
+Files modified: `src/core/constants.js`, `src/systems/engine.js`, `src/data/items.js`, `src/data/endings.js`, `src/main.js`, `src/ui/renderer.js`, `src/template.html`, `tests/simulate-entry.js`
+
 ## [v81] — 2026-06-10
 
 ### Fix — pushOn() was a no-op (mutated getState() copy, not engine state)

@@ -73,7 +73,8 @@ Legend: `pending` | `in_progress` | `blocked` | `done`
 ## Phase 5 — Content & Mechanics Expansion
 - [x] Conditional endings (GitHub issue #14) — 6 ending types with narratives, source quotes, scoring (v36)
 - [ ] Pre-departure cart packing (GitHub issue #15) — let players choose starting loadout
-- [ ] Weather system (GitHub issue #13) — seasonal effects on travel and events
+- [x] Weather system (GitHub issue #13) — seasonal effects on travel and events
+- [x] MB currency economy — Made Beaver system replacing barter (v82)
 - [ ] Highscore/leaderboard (GitHub issue #12) — score tracking by outcome type
 - [ ] Add second half of Carlton Trail nodes with citations
 - [ ] Add scout/guide hire moral choices with history anchoring

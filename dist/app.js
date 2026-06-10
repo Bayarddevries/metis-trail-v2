@@ -30,7 +30,18 @@ var CONSTANTS = Object.freeze({
   WEATHER_MORALE_MOD: { clear: 0, overcast: -1, rain: -2, storm: -4, snow: -3 },
   WEATHER_EVENT_MOD: { clear: 0, overcast: 0, rain: 0.1, storm: 0.15, snow: 0.1 },
   WEATHER_CAMP_MORALE: { clear: 15, overcast: 15, rain: 10, storm: 5, snow: 5 },
-  WEATHER_LABELS: { clear: "\u2600 Clear", overcast: "\u2601 Overcast", rain: "\u{1F327} Rain", storm: "\u26C8 Storm", snow: "\u2744 Snow" }
+  WEATHER_LABELS: { clear: "\u2600 Clear", overcast: "\u2601 Overcast", rain: "\u{1F327} Rain", storm: "\u26C8 Storm", snow: "\u2744 Snow" },
+  // MB (Made Beaver) currency system
+  MB_WIN_THRESHOLD: 10,
+  // minimum MB value needed at Edmonton to win
+  MB_FOOD_COST: 0.5,
+  // 1 MB buys 2 food at base rate
+  MB_REPAIR_COST: 2,
+  // 2 MB for a settlement-quality repair (-2 wear)
+  MB_HEAL_COST: 1,
+  // 1 MB for medical treatment (+20 morale)
+  MB_INFO_COST: 0.5
+  // 0.5 MB for trail intelligence / gossip
 });
 function crewMod(state) {
   return CONSTANTS.CREW_MOD[state.crew] ?? 0;
@@ -392,12 +403,12 @@ var ITEMS = [
   {
     name: "Bison Hide",
     wt: 6,
-    count: 2,
+    count: 4,
     type: "trade",
     category: "furs",
     mbValue: 1.25,
     perishable: false,
-    desc: "Folded. Trade value: ~1.25 MB each at Edmonton.",
+    desc: "Folded. Trade value: ~1.25 MB each at any post.",
     icon: "\u{1F9AC}"
   },
   {
@@ -469,12 +480,12 @@ var ITEMS = [
   {
     name: "Beaver Pelts",
     wt: 4,
-    count: 2,
+    count: 3,
     type: "trade",
     category: "furs",
     mbValue: 3,
     perishable: false,
-    desc: "Prime bundle. Trade value: ~3 MB.",
+    desc: "Prime bundle. The foundation of the northern trade. ~3 MB each.",
     icon: "\u{1F9AB}",
     source: {
       quote: "Beaver... the very foundation of the northern trade.",
@@ -1696,7 +1707,7 @@ function createGame(seed = null) {
     date: { month: CONSTANTS.START_MONTH, day: CONSTANTS.START_DAY },
     season: seasonFor(CONSTANTS.START_MONTH),
     crew: "rested",
-    food: 27,
+    food: 23,
     wear: 0,
     morale: 70,
     node: 0,
@@ -1715,10 +1726,20 @@ function createGame(seed = null) {
     capacity: 100,
     usedWeight: 0,
     credit: { hbc: 0, metis: 0, nwmp: 0, mission: 0 },
+    mbValue: 0,
+    // total MB value of all trade goods in cart
     perishable: {},
     preDeparture: true,
     weather: initWeather()
   };
+  function calcMB() {
+    return cart.filter((i) => i.type === "trade" || i.category === "furs").reduce((s, i) => s + (i.mbValue || 0) * i.count, 0);
+  }
+  __name(calcMB, "calcMB");
+  function recalcMB() {
+    S2.mbValue = Math.round(calcMB() * 100) / 100;
+  }
+  __name(recalcMB, "recalcMB");
   function checkGameOver() {
     if (S2.over) return;
     if (S2.food <= 0) {
@@ -1819,12 +1840,14 @@ function createGame(seed = null) {
           result.effects.push(`+${g.amt} ${g.name}`);
         }
       });
+      recalcMB();
     }
     if (ch.consumesItem) {
       const idx = cart.findIndex((i) => i.name === ch.consumesItem);
       if (idx !== -1 && cart[idx].count > 0) {
         cart[idx].count--;
         result.effects.push(`-1 ${ch.consumesItem}`);
+        recalcMB();
       }
     }
     if (ch.extraProgress) {
@@ -1859,14 +1882,13 @@ function createGame(seed = null) {
   __name(pickEventWithChance, "pickEventWithChance");
   function calcScore() {
     if (!S2.won) return 0;
-    const tradeUnits = cart.filter((i) => i.type === "trade" && i.count > 0).reduce((s, i) => s + i.count, 0);
     const daysPenalty = S2.day;
     const wearPenalty = S2.wear * S2.wear;
     const foodBonus = Math.min(S2.food, 25);
     const crewBonus = S2.crew === "rested" ? 30 : S2.crew === "tired" ? 10 : 0;
     const noRestPenalty = Math.max(0, S2.travelDaysWithoutRest - 3) * 15;
     let score = 1e3;
-    score += tradeUnits * 120;
+    score += Math.round(S2.mbValue * 80);
     score += foodBonus * 12;
     score += crewBonus;
     score -= daysPenalty * 8;
@@ -1913,6 +1935,7 @@ function createGame(seed = null) {
       }
       if (S2.node >= NODES.length - 1) {
         const hasTrade = cart.some((i) => i.type === "trade" && i.count > 0);
+        recalcMB();
         S2.over = true;
         if (S2.food <= 0) {
           S2.endReason = "starvation";
@@ -1921,7 +1944,7 @@ function createGame(seed = null) {
         } else if (S2.morale <= 0) {
           S2.endReason = "abandoned";
         } else {
-          S2.won = hasTrade;
+          S2.won = S2.mbValue >= CONSTANTS.MB_WIN_THRESHOLD;
           S2.score = calcScore();
           S2.endReason = S2.won ? "victory" : "no_trade";
         }
@@ -1950,8 +1973,9 @@ function createGame(seed = null) {
       S2.segmentDay = 0;
       if (S2.node >= NODES.length - 1) {
         const hasTrade = cart.some((i) => i.type === "trade" && i.count > 0);
+        recalcMB();
         S2.over = true;
-        S2.won = hasTrade && S2.wear < CONSTANTS.MAX_WEAR;
+        S2.won = S2.mbValue >= CONSTANTS.MB_WIN_THRESHOLD && S2.wear < CONSTANTS.MAX_WEAR;
         S2.score = calcScore();
       } else {
         const n = NODES[S2.node];
@@ -1989,8 +2013,10 @@ function createGame(seed = null) {
   __name(pushOn2, "pushOn");
   function settlementAction(action) {
     if (!S2.pendingSettlement) return [];
-    S2.pendingSettlement = null;
-    if (action === "continue") return [];
+    if (action === "continue") {
+      S2.pendingSettlement = null;
+      return [];
+    }
     if (action === "rest") {
       S2.crew = "rested";
       S2.food += 2;
@@ -2003,6 +2029,7 @@ function createGame(seed = null) {
       if (S2.wear > 0 && shag && shag.count > 0) {
         shag.count--;
         S2.wear = Math.max(0, S2.wear - 2);
+        recalcMB();
       } else if (S2.wear > 0) {
         S2.wear = Math.max(0, S2.wear - 2);
       }
@@ -2015,9 +2042,44 @@ function createGame(seed = null) {
       const tg = cart.find((i) => i.type === "trade" && i.count > 0);
       if (tg) {
         tg.count--;
-        const foodGain = Math.floor(rand() * 5) + 6;
-        S2.food += foodGain;
+        recalcMB();
+        const mbGain = tg.mbValue || 1;
+        S2.credit[S2.pendingSettlement?.type || "hbc"] = (S2.credit[S2.pendingSettlement?.type || "hbc"] || 0) + mbGain;
         S2.tradesMade++;
+      }
+    }
+    if (action === "buy_food") {
+      const cost = CONSTANTS.MB_FOOD_COST;
+      const settleType = S2.pendingSettlement?.type || "hbc";
+      if ((S2.credit[settleType] || 0) >= cost) {
+        S2.credit[settleType] -= cost;
+        S2.food += Math.floor(1 / cost);
+      }
+    }
+    if (action === "buy_repair") {
+      const cost = CONSTANTS.MB_REPAIR_COST;
+      const settleType = S2.pendingSettlement?.type || "hbc";
+      if ((S2.credit[settleType] || 0) >= cost && S2.wear > 0) {
+        S2.credit[settleType] -= cost;
+        S2.wear = Math.max(0, S2.wear - 2);
+      }
+    }
+    if (action === "buy_heal") {
+      const cost = CONSTANTS.MB_HEAL_COST;
+      const settleType = S2.pendingSettlement?.type || "hbc";
+      if ((S2.credit[settleType] || 0) >= cost) {
+        S2.credit[settleType] -= cost;
+        S2.morale = Math.min(100, S2.morale + 20);
+        S2.crew = "rested";
+      }
+    }
+    if (action === "buy_info") {
+      const cost = CONSTANTS.MB_INFO_COST;
+      const settleType = S2.pendingSettlement?.type || "hbc";
+      if ((S2.credit[settleType] || 0) >= cost) {
+        S2.credit[settleType] -= cost;
+        S2.morale = Math.min(100, S2.morale + 5);
+        S2.flags["trail_intel_" + S2.node] = true;
       }
     }
     if (action === "craft") {
@@ -2058,7 +2120,9 @@ function createGame(seed = null) {
         preDeparture: S2.preDeparture,
         weather: S2.weather,
         currentTerrain: NODES[S2.node]?.terrain || "plains",
-        travelDaysWithoutRest: S2.travelDaysWithoutRest
+        travelDaysWithoutRest: S2.travelDaysWithoutRest,
+        mbValue: S2.mbValue,
+        credit: { ...S2.credit }
       };
     },
     getCart() {
@@ -2068,6 +2132,7 @@ function createGame(seed = null) {
       const idx = cart.findIndex((i) => i.name === name3);
       if (idx === -1 || cart[idx].count <= 0) return false;
       cart[idx].count--;
+      recalcMB();
       return true;
     },
     getTradeEstimate(itemName) {
@@ -2376,11 +2441,13 @@ function createGame(seed = null) {
       const clamped = Math.max(0, Math.min(newCount, maxCount));
       item.count = clamped;
       S2.usedWeight = totalWeight(cart);
+      recalcMB();
       return true;
     },
     confirmPreDeparture() {
       S2.preDeparture = false;
       S2.usedWeight = totalWeight(cart);
+      recalcMB();
       return cart.map((i) => ({ name: i.name, count: i.count, wt: i.wt }));
     },
     getScoreData() {
@@ -2401,6 +2468,7 @@ function createGame(seed = null) {
         weather: S2.weather,
         cartItems: cart.reduce((s, i) => s + i.count, 0),
         tradeGoods: tradeGoods.reduce((s, i) => s + i.count, 0),
+        mbValue: S2.mbValue,
         distance: S2.node,
         seed: S2.seed
       };
@@ -2409,12 +2477,12 @@ function createGame(seed = null) {
 }
 __name(createGame, "createGame");
 function availableSettlementActions(type) {
-  const base = ["rest"];
-  if (type === "hbc") return [...base, "trade", "repair", "craft"];
-  if (type === "metis") return [...base, "craft", "trade"];
-  if (type === "trading") return [...base, "trade"];
-  if (type === "mission") return [...base, "heal"];
-  if (type === "nwmp") return [...base, "craft", "trade"];
+  const base = ["rest", "trade", "buy_food"];
+  if (type === "hbc") return [...base, "buy_repair", "craft", "buy_info"];
+  if (type === "metis") return [...base, "craft", "buy_info"];
+  if (type === "trading") return [...base, "buy_repair", "buy_info"];
+  if (type === "mission") return [...base, "buy_heal", "buy_info"];
+  if (type === "nwmp") return [...base, "craft", "buy_info"];
   return base;
 }
 __name(availableSettlementActions, "availableSettlementActions");
@@ -2734,6 +2802,12 @@ function renderStatusBar(state) {
     weatherEl.textContent = CONSTANTS.WEATHER_LABELS[w] || "\u2600 Clear";
     weatherEl.className = "stat-value weather-" + w;
   }
+  const mbEl = document.getElementById("s-mb");
+  if (mbEl) {
+    const mb = state.mbValue || 0;
+    mbEl.textContent = `\u{1F48E} ${mb.toFixed(1)} MB`;
+    mbEl.className = "stat-value" + (mb < CONSTANTS.MB_WIN_THRESHOLD ? " mb-low" : " mb-ok");
+  }
   if (!window.__METIS_PENDING_RESULT__) window.__METIS_PENDING_RESULT__ = null;
   renderTravelLinesView(state, window._metisGame, window.__METIS_PENDING_RESULT__);
 }
@@ -2794,22 +2868,22 @@ var ENDINGS = {
     id: "victory",
     title: "Fort Edmonton at Last!",
     narrative: {
-      high: "The palisade walls at Edmonton. Your cart made it \u2014 axle held, wheels still on. The crew's behind you, hollow-eyed but standing. You've still got furs in the cart. They'll fetch something.",
-      humble: "You reach Fort Edmonton with nothing left to give but your word. The cart groans as you roll through the gate \u2014 held together by rope and stubbornness. The crew is hollow-eyed but standing. You have no trade goods to sell, no extra food to spare. But you arrived. Against the prairie, the weather, and every broken trail between Garry and Edmonton, you arrived."
+      high: "The palisade walls at Edmonton. Your cart made it \u2014 axle held, wheels still on. The crew's behind you, hollow-eyed but standing. You've still got MB credit to your name. The Company men will pay well.",
+      humble: "You reach Fort Edmonton with nothing left to give but your word. The cart groans as you roll through the gate \u2014 held together by rope and stubbornness. The crew is hollow-eyed but standing. Your MB credit is thin, but you arrived. Against the prairie, the weather, and every broken trail between Garry and Edmonton, you arrived."
     },
     quote: getSource("FORT_EDMONTON"),
     quoteHigh: getSource("SAWYER_TRIAL"),
-    tip: "Tip: Trade goods are the key to a high score. Keep at least one fur or hide in your cart when you reach Edmonton. Repair wear early \u2014 letting the cart degrade costs points fast."
+    tip: "Tip: Trade goods for MB credit at settlements, then spend MB on food and repairs. Keep your total MB value above 8 when you reach Edmonton. Repair wear early \u2014 letting the cart degrade costs points fast."
   },
   no_trade: {
     id: "no_trade",
     title: "Empty-Handed at Edmonton",
     narrative: {
-      high: "You reach Fort Edmonton, but your cart is empty of trade goods. Every fur and hide was sold or traded along the way to survive. You made the journey, but the Company men at the post look at your bare cart and shake their heads. A trip without profit is just a long walk.",
-      humble: "The gates of Fort Edmonton are open before you, but there is nothing to show for the journey. No furs, no hides, no trade goods. You sold everything to keep the crew alive through the hardest stretches. You survived \u2014 but the ledger will not remember this trip."
+      high: "You reach Fort Edmonton, but your MB credit is gone. Every fur and hide was traded along the way to survive \u2014 food, repairs, medicine. You made the journey, but the Company men at the post look at your bare cart and empty ledger and shake their heads. A trip without profit is just a long walk.",
+      humble: "The gates of Fort Edmonton are open before you, but there is nothing to show for the journey. No furs, no hides, no MB credit to your name. You spent everything to keep the crew alive through the hardest stretches. You survived \u2014 but the ledger will not remember this trip."
     },
     quote: getSource("HBC_JOURNAL"),
-    tip: "Tip: Don't trade away all your furs and hides for food. Keep at least one trade good in your cart for the final score. Balance survival with profit \u2014 forage and hunt to supplement food instead of liquidating cargo."
+    tip: "Tip: Trade goods for MB credit at settlements, then spend MB on food and repairs. Keep your total MB value above 8 when you reach Edmonton. Balance survival with profit \u2014 forage and hunt to supplement food instead of trading away all your cargo."
   },
   starvation: {
     id: "starvation",
@@ -18559,12 +18633,16 @@ function showSettlement(game) {
   const primaryActions = [];
   const secondaryActions = [];
   (available.actions || []).forEach((action) => {
-    if (["craft"].includes(action)) {
+    if (["craft", "buy_food", "buy_repair", "buy_heal", "buy_info"].includes(action)) {
       if (action === "craft") {
         const recipes2 = game.getAvailableRecipes();
         if (recipes2.length > 0) secondaryActions.push(action);
       } else {
-        secondaryActions.push(action);
+        const state = game.getState();
+        const settleType = state.pendingSettlement?.type || "hbc";
+        const credit = state.credit?.[settleType] || 0;
+        const costs = { buy_food: CONSTANTS.MB_FOOD_COST, buy_repair: CONSTANTS.MB_REPAIR_COST, buy_heal: CONSTANTS.MB_HEAL_COST, buy_info: CONSTANTS.MB_INFO_COST };
+        if (credit >= (costs[action] || 0)) secondaryActions.push(action);
       }
     } else {
       primaryActions.push(action);
@@ -18658,28 +18736,26 @@ function renderSettlementAction(container, action, game, before, beforeCart) {
     tradePanel.style.cssText = "width:100%;margin-top:8px;padding:10px;background:rgba(46,90,62,0.08);border:1px solid rgba(46,90,62,0.3);border-radius:6px;";
     const panelTitle = document.createElement("div");
     panelTitle.style.cssText = "font-family:var(--font-heading);font-size:12px;font-weight:600;color:var(--clr-accent);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px;";
-    panelTitle.textContent = "Trade";
+    panelTitle.textContent = "Trade Goods for MB Credit";
     tradePanel.appendChild(panelTitle);
     tradeItems.forEach((item) => {
-      const est = game.getTradeEstimate(item.name);
-      const multStr = est && est.mult > 1 ? " \u2191" : est && est.mult < 1 ? " \u2193" : "";
+      const mbVal = item.mbValue || 1;
       const row = document.createElement("div");
       row.style.cssText = "display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px;padding:6px;background:rgba(255,255,255,0.5);border-radius:4px;";
       const info = document.createElement("div");
       info.style.cssText = "flex:1;font-size:12px;";
-      info.innerHTML = `${item.icon || ""} ${item.name} \xD7${item.count} <span style="color:var(--clr-accent);">${est ? est.min + "-" + est.max + " food" : ""}${multStr}</span>`;
+      info.innerHTML = `${item.icon || ""} ${item.name} \xD7${item.count} <span style="color:var(--clr-accent);">\u2192 ${mbVal} MB</span>`;
       const tradeBtn = document.createElement("button");
       tradeBtn.className = "ctrl-btn";
       tradeBtn.style.cssText = "padding:3px 10px;font-size:11px;white-space:nowrap;";
       tradeBtn.textContent = `Trade ${item.name}`;
       tradeBtn.onclick = () => {
         hideOverlays();
-        const result = game.tradeItem(item.name);
-        if (result) {
-          publishResult(`Traded 1 ${result.item} \u2192 +${result.foodGain} food.`);
-        } else {
-          publishResult("Trade failed \u2014 no trade goods available.");
-        }
+        const beforeMB = game.getState().mbValue;
+        game.settlementAction("trade");
+        const afterMB = game.getState().mbValue;
+        const gained = afterMB < beforeMB ? item.mbValue || 1 : item.mbValue || 1;
+        publishResult(`Traded 1 ${item.name} \u2192 +${gained.toFixed(2)} MB credit.`);
         window.__METIS_RENDER__();
       };
       row.appendChild(info);
@@ -18687,6 +18763,99 @@ function renderSettlementAction(container, action, game, before, beforeCart) {
       tradePanel.appendChild(row);
     });
     container.appendChild(tradePanel);
+    return;
+  }
+  if (action === "buy_food") {
+    const state = game.getState();
+    const settleType = state.pendingSettlement?.type || "hbc";
+    const credit = state.credit?.[settleType] || 0;
+    const cost = CONSTANTS.MB_FOOD_COST;
+    const foodGain = Math.floor(1 / cost);
+    const btn2 = document.createElement("button");
+    btn2.className = "ctrl-btn settlement-action-btn secondary-action";
+    btn2.textContent = `Buy Food (${cost} MB \u2192 +${foodGain} food)`;
+    if (credit < cost) {
+      btn2.style.opacity = "0.5";
+      btn2.style.cursor = "not-allowed";
+      btn2.title = `Need ${cost} MB credit. You have ${credit.toFixed(1)} MB.`;
+    }
+    btn2.onclick = () => {
+      if (credit < cost) return;
+      hideOverlays();
+      game.settlementAction("buy_food");
+      publishResult(`Bought ${foodGain} food for ${cost} MB.`);
+      window.__METIS_RENDER__();
+    };
+    container.appendChild(btn2);
+    return;
+  }
+  if (action === "buy_repair") {
+    const state = game.getState();
+    const settleType = state.pendingSettlement?.type || "hbc";
+    const credit = state.credit?.[settleType] || 0;
+    const cost = CONSTANTS.MB_REPAIR_COST;
+    const btn2 = document.createElement("button");
+    btn2.className = "ctrl-btn settlement-action-btn secondary-action";
+    btn2.textContent = `Repair Cart (${cost} MB \u2192 \u22122 wear)`;
+    if (credit < cost || state.wear <= 0) {
+      btn2.style.opacity = "0.5";
+      btn2.style.cursor = "not-allowed";
+      btn2.title = credit < cost ? `Need ${cost} MB credit. You have ${credit.toFixed(1)} MB.` : "Cart does not need repair.";
+    }
+    btn2.onclick = () => {
+      if (credit < cost || state.wear <= 0) return;
+      hideOverlays();
+      game.settlementAction("buy_repair");
+      publishResult(`Cart repaired for ${cost} MB.`);
+      window.__METIS_RENDER__();
+    };
+    container.appendChild(btn2);
+    return;
+  }
+  if (action === "buy_heal") {
+    const state = game.getState();
+    const settleType = state.pendingSettlement?.type || "hbc";
+    const credit = state.credit?.[settleType] || 0;
+    const cost = CONSTANTS.MB_HEAL_COST;
+    const btn2 = document.createElement("button");
+    btn2.className = "ctrl-btn settlement-action-btn secondary-action";
+    btn2.textContent = `Heal Crew (${cost} MB \u2192 +20 morale)`;
+    if (credit < cost) {
+      btn2.style.opacity = "0.5";
+      btn2.style.cursor = "not-allowed";
+      btn2.title = `Need ${cost} MB credit. You have ${credit.toFixed(1)} MB.`;
+    }
+    btn2.onclick = () => {
+      if (credit < cost) return;
+      hideOverlays();
+      game.settlementAction("buy_heal");
+      publishResult(`Crew healed for ${cost} MB.`);
+      window.__METIS_RENDER__();
+    };
+    container.appendChild(btn2);
+    return;
+  }
+  if (action === "buy_info") {
+    const state = game.getState();
+    const settleType = state.pendingSettlement?.type || "hbc";
+    const credit = state.credit?.[settleType] || 0;
+    const cost = CONSTANTS.MB_INFO_COST;
+    const btn2 = document.createElement("button");
+    btn2.className = "ctrl-btn settlement-action-btn secondary-action";
+    btn2.textContent = `Gather Intel (${cost} MB \u2192 trail info)`;
+    if (credit < cost) {
+      btn2.style.opacity = "0.5";
+      btn2.style.cursor = "not-allowed";
+      btn2.title = `Need ${cost} MB credit. You have ${credit.toFixed(1)} MB.`;
+    }
+    btn2.onclick = () => {
+      if (credit < cost) return;
+      hideOverlays();
+      game.settlementAction("buy_info");
+      publishResult(`Gathered trail intelligence for ${cost} MB.`);
+      window.__METIS_RENDER__();
+    };
+    container.appendChild(btn2);
     return;
   }
   const btn = document.createElement("button");
@@ -18714,9 +18883,13 @@ function buildSettlementOutcome(action, before, after, beforeCart, afterCart) {
   if (after.crew !== before.crew) msgs.push(`Crew: ${before.crew} -> ${after.crew}`);
   if (after.day !== before.day) msgs.push(`${after.day - before.day} Day(s)`);
   if (action === "trade") {
-    const gained = afterCart.reduce((s, i) => s + Math.max(0, i.count - (beforeCart.find((j2) => j2.name === i.name)?.count || 0)), 0);
-    if (gained > 0) msgs.push(`Food gained.`);
+    const lost = beforeCart.reduce((s, i) => s + i.count, 0) - afterCart.reduce((s, i) => s + i.count, 0);
+    if (lost > 0) msgs.push(`Traded ${lost} good(s) for MB credit.`);
   }
+  if (action === "buy_food") msgs.push("Bought food with MB credit.");
+  if (action === "buy_repair") msgs.push("Repaired cart with MB credit.");
+  if (action === "buy_heal") msgs.push("Healed crew with MB credit.");
+  if (action === "buy_info") msgs.push("Gathered trail intelligence.");
   if (action === "repair") msgs.push("Cart repaired.");
   if (action === "grease") msgs.push("Axle greased.");
   if (action === "heal") msgs.push("Healed.");
@@ -18749,9 +18922,10 @@ function showCart(game) {
     const canUnload = overloaded && i.count > 0;
     const hint = i.category ? getCategoryHint(i.category) : "";
     const desc = i.desc ? `<div style="font-size:0.8em;color:#5a4a3a;margin-top:2px;">${i.desc}</div>` : "";
+    const mbStr = (i.type === "trade" || i.category === "furs") && i.mbValue ? `<span style="color:var(--clr-accent);font-size:0.85em;margin-left:4px;">${i.mbValue} MB</span>` : "";
     return `
     <div class="cart-row" style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:6px 0;border-bottom:1px solid rgba(0,0,0,0.08);">
-      <span style="flex:1;"><span style="font-weight:600;">${i.icon || ""} ${i.name} \xD7${i.count} (${i.wt * i.count} kg)</span>${hint ? `<div style="font-size:0.75em;color:#6b5c4a;">${hint}</div>` : ""}${desc}</span>
+      <span style="flex:1;"><span style="font-weight:600;">${i.icon || ""} ${i.name} \xD7${i.count} (${i.wt * i.count} kg)</span>${mbStr}${hint ? `<div style="font-size:0.75em;color:#6b5c4a;">${hint}</div>` : ""}${desc}</span>
       ${canUnload ? `<button class="ctrl-btn unload-btn" data-item="${i.name}" style="padding:2px 10px;font-size:0.85em;">Unload ${i.name} (\u2212${i.wt} kg)</button>` : ""}
     </div>`;
   }).join("");
@@ -18777,7 +18951,7 @@ function getCategoryHint(category) {
     provisions: "Restores food when needed.",
     repair: "Reduces cart wear at settlements.",
     parts: "Used for cart repair and crafting.",
-    furs: "Trade value: high at Edmonton.",
+    furs: "Trade for MB credit at settlements.",
     shelter: "Survival aid; shelters crew from weather.",
     fuel: "Required for cold nights and some recipes.",
     hunting: "Event bonuses and ammunition support.",
@@ -18799,18 +18973,18 @@ function showPreDeparture(game) {
   const autoBtn = document.getElementById("pd-auto");
   if (!listEl || !weightEl || !currentEl || !statusEl || !confirmBtn) return;
   const autoPack = {
-    "Pemmican Rations": 10,
+    "Pemmican Rations": 8,
     "Spare Axle": 1,
     "Shaganappi": 3,
     "Tool Kit": 1,
-    "Bison Hide": 2,
+    "Bison Hide": 3,
     "Canvas Tarp": 1,
     "Firewood Bundle": 1,
     "Rope (50ft)": 1,
     "Ammunition Belt": 1,
     "Medicine Pouch": 1,
     "Blanket": 1,
-    "Beaver Pelts": 1
+    "Beaver Pelts": 2
   };
   function recalc() {
     let total = 0;
@@ -19243,14 +19417,14 @@ function showEnd(game) {
       sourceEl.style.display = "none";
     }
   }
-  const tradeUnits = cart.filter((i) => i.type === "trade" && i.count > 0).reduce((s, i) => s + i.count, 0);
+  const mbVal = state.mbValue || 0;
   const foodBonus = Math.min(state.food, 25);
   const crewBonus = state.crew === "rested" ? 30 : state.crew === "tired" ? 10 : 0;
   const daysPenalty = state.day * 8;
   const wearPenalty = state.wear * state.wear * 40;
   const scoreLines = [
     { label: "Base score", value: 1e3 },
-    { label: `Trade goods (${tradeUnits} \xD7 120)`, value: tradeUnits * 120 },
+    { label: `MB value (${mbVal.toFixed(1)} \xD7 80)`, value: Math.round(mbVal * 80) },
     { label: `Food bonus (${foodBonus} \xD7 12)`, value: foodBonus * 12 },
     { label: `Crew condition (${state.crew})`, value: crewBonus },
     { label: `Days on trail (${state.day} \xD7 -8)`, value: -daysPenalty },
@@ -19394,10 +19568,14 @@ __name(escapeHtml, "escapeHtml");
 function actionLabel(a) {
   const map2 = {
     rest: "Rest \xB7 1 day \xB7 +2 food \xB7 +25 morale",
-    trade: "Trade",
+    trade: "Trade Goods \u2192 MB Credit",
     repair: "Repair \xB7 \u22122 wear",
     heal: "Heal \xB7 +20 morale",
-    craft: "Craft"
+    craft: "Craft",
+    buy_food: "Buy Food (0.5 MB)",
+    buy_repair: "Repair (2 MB)",
+    buy_heal: "Heal (1 MB)",
+    buy_info: "Intel (0.5 MB)"
   };
   return map2[a] || a;
 }

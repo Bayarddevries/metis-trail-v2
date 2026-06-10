@@ -222,6 +222,14 @@ export function renderStatusBar(state) {
     weatherEl.className = 'stat-value weather-' + w;
   }
 
+  // MB (Made Beaver) currency display
+  const mbEl = document.getElementById('s-mb');
+  if (mbEl) {
+    const mb = state.mbValue || 0;
+    mbEl.textContent = `💎 ${mb.toFixed(1)} MB`;
+    mbEl.className = 'stat-value' + (mb < CONSTANTS.MB_WIN_THRESHOLD ? ' mb-low' : ' mb-ok');
+  }
+
   if (!window.__METIS_PENDING_RESULT__) window.__METIS_PENDING_RESULT__ = null;
   renderTravelLinesView(state, window._metisGame, window.__METIS_PENDING_RESULT__);
 }

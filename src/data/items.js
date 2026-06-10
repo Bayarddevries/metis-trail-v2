@@ -60,12 +60,12 @@ const ITEMS = [
   {
     name: 'Bison Hide',
     wt: 6,
-    count: 2,
+    count: 4,
     type: 'trade',
     category: 'furs',
     mbValue: 1.25,
     perishable: false,
-    desc: 'Folded. Trade value: ~1.25 MB each at Edmonton.',
+    desc: 'Folded. Trade value: ~1.25 MB each at any post.',
     icon: '🦬',
   },
   {
@@ -137,12 +137,12 @@ const ITEMS = [
   {
     name: 'Beaver Pelts',
     wt: 4,
-    count: 2,
+    count: 3,
     type: 'trade',
     category: 'furs',
     mbValue: 3.0,
     perishable: false,
-    desc: 'Prime bundle. Trade value: ~3 MB.',
+    desc: 'Prime bundle. The foundation of the northern trade. ~3 MB each.',
     icon: '🦫',
     source: {
       quote: 'Beaver... the very foundation of the northern trade.',

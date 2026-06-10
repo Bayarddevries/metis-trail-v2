@@ -52,7 +52,7 @@ export function createGame(seed = null) {
     date: { month: CONSTANTS.START_MONTH, day: CONSTANTS.START_DAY },
     season: seasonFor(CONSTANTS.START_MONTH),
     crew: 'rested',
-    food: 27,
+    food: 23,
     wear: 0,
     morale: 70,
     node: 0,
@@ -71,10 +71,21 @@ export function createGame(seed = null) {
     capacity: 100,
     usedWeight: 0,
     credit: { hbc: 0, metis: 0, nwmp: 0, mission: 0 },
+    mbValue: 0,          // total MB value of all trade goods in cart
     perishable: {},
     preDeparture: true,
     weather: initWeather(),
   };
+
+  // ── MB helpers ────────────────────────────────────────────────────
+  function calcMB() {
+    return cart.filter(i => i.type === 'trade' || i.category === 'furs')
+      .reduce((s, i) => s + (i.mbValue || 0) * i.count, 0);
+  }
+
+  function recalcMB() {
+    S.mbValue = Math.round(calcMB() * 100) / 100;
+  }
 
   function checkGameOver() {
     if (S.over) return;
@@ -179,12 +190,14 @@ export function createGame(seed = null) {
           result.effects.push(`+${g.amt} ${g.name}`);
         }
       });
+      recalcMB();
     }
     if (ch.consumesItem) {
       const idx = cart.findIndex((i) => i.name === ch.consumesItem);
       if (idx !== -1 && cart[idx].count > 0) {
         cart[idx].count--;
         result.effects.push(`-1 ${ch.consumesItem}`);
+        recalcMB();
       }
     }
     if (ch.extraProgress) {
@@ -222,7 +235,6 @@ export function createGame(seed = null) {
 
   function calcScore() {
     if (!S.won) return 0;
-    const tradeUnits = cart.filter((i) => i.type === 'trade' && i.count > 0).reduce((s, i) => s + i.count, 0);
     const daysPenalty = S.day;
     const wearPenalty = S.wear * S.wear;
     const foodBonus = Math.min(S.food, 25);
@@ -230,7 +242,7 @@ export function createGame(seed = null) {
     const noRestPenalty = Math.max(0, S.travelDaysWithoutRest - 3) * 15;
 
     let score = 1000;
-    score += tradeUnits * 120;
+    score += Math.round(S.mbValue * 80);
     score += foodBonus * 12;
     score += crewBonus;
     score -= daysPenalty * 8;
@@ -288,6 +300,7 @@ export function createGame(seed = null) {
       }
       if (S.node >= NODES.length - 1) {
         const hasTrade = cart.some((i) => i.type === 'trade' && i.count > 0);
+        recalcMB();
         S.over = true;
         // Check starvation/wear before declaring victory
         if (S.food <= 0) {
@@ -297,7 +310,7 @@ export function createGame(seed = null) {
         } else if (S.morale <= 0) {
           S.endReason = 'abandoned';
         } else {
-          S.won = hasTrade;
+          S.won = S.mbValue >= CONSTANTS.MB_WIN_THRESHOLD;
           S.score = calcScore();
           S.endReason = S.won ? 'victory' : 'no_trade';
         }
@@ -327,8 +340,9 @@ export function createGame(seed = null) {
       S.segmentDay = 0;
       if (S.node >= NODES.length - 1) {
         const hasTrade = cart.some((i) => i.type === 'trade' && i.count > 0);
+        recalcMB();
         S.over = true;
-        S.won = hasTrade && S.wear < CONSTANTS.MAX_WEAR;
+        S.won = S.mbValue >= CONSTANTS.MB_WIN_THRESHOLD && S.wear < CONSTANTS.MAX_WEAR;
         S.score = calcScore();
       } else {
         const n = NODES[S.node];
@@ -368,8 +382,11 @@ export function createGame(seed = null) {
 
   function settlementAction(action) {
     if (!S.pendingSettlement) return [];
-    S.pendingSettlement = null;
-    if (action === 'continue') return [];
+    // Only clear pendingSettlement on 'continue' — other actions keep the settlement open
+    if (action === 'continue') {
+      S.pendingSettlement = null;
+      return [];
+    }
     if (action === 'rest') {
       S.crew = 'rested';
       S.food += 2;
@@ -377,11 +394,13 @@ export function createGame(seed = null) {
       S.morale = Math.min(100, S.morale + 25);
       advance();
     }
+    // Legacy repair/heal (free, no MB cost) — kept for backward compat
     if (action === 'repair') {
       const shag = cart.find((i) => i.name === 'Shaganappi');
       if (S.wear > 0 && shag && shag.count > 0) {
         shag.count--;
         S.wear = Math.max(0, S.wear - 2);
+        recalcMB();
       } else if (S.wear > 0) {
         S.wear = Math.max(0, S.wear - 2);
       }
@@ -394,9 +413,46 @@ export function createGame(seed = null) {
       const tg = cart.find((i) => i.type === 'trade' && i.count > 0);
       if (tg) {
         tg.count--;
-        const foodGain = Math.floor(rand() * 5) + 6;
-        S.food += foodGain;
+        recalcMB();
+        const mbGain = tg.mbValue || 1;
+        S.credit[S.pendingSettlement?.type || 'hbc'] =
+          (S.credit[S.pendingSettlement?.type || 'hbc'] || 0) + mbGain;
         S.tradesMade++;
+      }
+    }
+    if (action === 'buy_food') {
+      const cost = CONSTANTS.MB_FOOD_COST;
+      const settleType = S.pendingSettlement?.type || 'hbc';
+      if ((S.credit[settleType] || 0) >= cost) {
+        S.credit[settleType] -= cost;
+        S.food += Math.floor(1 / cost); // 0.5 MB → 2 food
+      }
+    }
+    if (action === 'buy_repair') {
+      const cost = CONSTANTS.MB_REPAIR_COST;
+      const settleType = S.pendingSettlement?.type || 'hbc';
+      if ((S.credit[settleType] || 0) >= cost && S.wear > 0) {
+        S.credit[settleType] -= cost;
+        S.wear = Math.max(0, S.wear - 2);
+      }
+    }
+    if (action === 'buy_heal') {
+      const cost = CONSTANTS.MB_HEAL_COST;
+      const settleType = S.pendingSettlement?.type || 'hbc';
+      if ((S.credit[settleType] || 0) >= cost) {
+        S.credit[settleType] -= cost;
+        S.morale = Math.min(100, S.morale + 20);
+        S.crew = 'rested';
+      }
+    }
+    if (action === 'buy_info') {
+      const cost = CONSTANTS.MB_INFO_COST;
+      const settleType = S.pendingSettlement?.type || 'hbc';
+      if ((S.credit[settleType] || 0) >= cost) {
+        S.credit[settleType] -= cost;
+        // Trail intel: small morale boost + flag
+        S.morale = Math.min(100, S.morale + 5);
+        S.flags['trail_intel_' + S.node] = true;
       }
     }
     if (action === 'craft') {
@@ -440,6 +496,8 @@ export function createGame(seed = null) {
         weather: S.weather,
         currentTerrain: NODES[S.node]?.terrain || 'plains',
         travelDaysWithoutRest: S.travelDaysWithoutRest,
+        mbValue: S.mbValue,
+        credit: { ...S.credit },
       };
     },
     getCart() {
@@ -449,6 +507,7 @@ export function createGame(seed = null) {
       const idx = cart.findIndex((i) => i.name === name);
       if (idx === -1 || cart[idx].count <= 0) return false;
       cart[idx].count--;
+      recalcMB();
       return true;
     },
     getTradeEstimate(itemName) {
@@ -771,11 +830,13 @@ export function createGame(seed = null) {
       const clamped = Math.max(0, Math.min(newCount, maxCount));
       item.count = clamped;
       S.usedWeight = totalWeight(cart);
+      recalcMB();
       return true;
     },
     confirmPreDeparture() {
       S.preDeparture = false;
       S.usedWeight = totalWeight(cart);
+      recalcMB();
       return cart.map((i) => ({ name: i.name, count: i.count, wt: i.wt }));
     },
     getScoreData() {
@@ -796,6 +857,7 @@ export function createGame(seed = null) {
         weather: S.weather,
         cartItems: cart.reduce((s, i) => s + i.count, 0),
         tradeGoods: tradeGoods.reduce((s, i) => s + i.count, 0),
+        mbValue: S.mbValue,
         distance: S.node,
         seed: S.seed,
       };
@@ -804,12 +866,12 @@ export function createGame(seed = null) {
 }
 
 function availableSettlementActions(type) {
-  const base = ['rest'];
-  if (type === 'hbc') return [...base, 'trade', 'repair', 'craft'];
-  if (type === 'metis') return [...base, 'craft', 'trade'];
-  if (type === 'trading') return [...base, 'trade'];
-  if (type === 'mission') return [...base, 'heal'];
-  if (type === 'nwmp') return [...base, 'craft', 'trade'];
+  const base = ['rest', 'trade', 'buy_food'];
+  if (type === 'hbc') return [...base, 'buy_repair', 'craft', 'buy_info'];
+  if (type === 'metis') return [...base, 'craft', 'buy_info'];
+  if (type === 'trading') return [...base, 'buy_repair', 'buy_info'];
+  if (type === 'mission') return [...base, 'buy_heal', 'buy_info'];
+  if (type === 'nwmp') return [...base, 'craft', 'buy_info'];
   return base;
 }
 

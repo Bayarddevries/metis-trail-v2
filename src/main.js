@@ -768,14 +768,18 @@ function showSettlement(game) {
   const primaryActions = [];
   const secondaryActions = [];
   (available.actions || []).forEach((action) => {
-    if (['craft'].includes(action)) {
+    if (['craft', 'buy_food', 'buy_repair', 'buy_heal', 'buy_info'].includes(action)) {
       // Only add craft to secondary if there are usable recipes
       if (action === 'craft') {
         const recipes = game.getAvailableRecipes();
         if (recipes.length > 0) secondaryActions.push(action);
-        // If no recipes, craft is silently skipped (no empty toggle)
       } else {
-        secondaryActions.push(action);
+        // Buy actions: only show if player has enough credit
+        const state = game.getState();
+        const settleType = state.pendingSettlement?.type || 'hbc';
+        const credit = state.credit?.[settleType] || 0;
+        const costs = { buy_food: CONSTANTS.MB_FOOD_COST, buy_repair: CONSTANTS.MB_REPAIR_COST, buy_heal: CONSTANTS.MB_HEAL_COST, buy_info: CONSTANTS.MB_INFO_COST };
+        if (credit >= (costs[action] || 0)) secondaryActions.push(action);
       }
     } else {
       primaryActions.push(action);
@@ -865,7 +869,7 @@ function renderSettlementAction(container, action, game, before, beforeCart) {
     return;
   }
 
-  // Special handling for trade: show yield estimate per trade good
+  // Special handling for trade: show MB yield per trade good
   if (action === 'trade') {
     const cart = game.getCart();
     const tradeItems = cart.filter((i) => i.type === 'trade' && i.count > 0);
@@ -882,28 +886,26 @@ function renderSettlementAction(container, action, game, before, beforeCart) {
     tradePanel.style.cssText = 'width:100%;margin-top:8px;padding:10px;background:rgba(46,90,62,0.08);border:1px solid rgba(46,90,62,0.3);border-radius:6px;';
     const panelTitle = document.createElement('div');
     panelTitle.style.cssText = 'font-family:var(--font-heading);font-size:12px;font-weight:600;color:var(--clr-accent);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px;';
-    panelTitle.textContent = 'Trade';
+    panelTitle.textContent = 'Trade Goods for MB Credit';
     tradePanel.appendChild(panelTitle);
     tradeItems.forEach((item) => {
-      const est = game.getTradeEstimate(item.name);
-      const multStr = est && est.mult > 1 ? ' ↑' : est && est.mult < 1 ? ' ↓' : '';
+      const mbVal = item.mbValue || 1;
       const row = document.createElement('div');
       row.style.cssText = 'display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px;padding:6px;background:rgba(255,255,255,0.5);border-radius:4px;';
       const info = document.createElement('div');
       info.style.cssText = 'flex:1;font-size:12px;';
-      info.innerHTML = `${item.icon || ''} ${item.name} ×${item.count} <span style="color:var(--clr-accent);">${est ? est.min + '-' + est.max + ' food' : ''}${multStr}</span>`;
+      info.innerHTML = `${item.icon || ''} ${item.name} ×${item.count} <span style="color:var(--clr-accent);">→ ${mbVal} MB</span>`;
       const tradeBtn = document.createElement('button');
       tradeBtn.className = 'ctrl-btn';
       tradeBtn.style.cssText = 'padding:3px 10px;font-size:11px;white-space:nowrap;';
       tradeBtn.textContent = `Trade ${item.name}`;
       tradeBtn.onclick = () => {
         hideOverlays();
-        const result = game.tradeItem(item.name);
-        if (result) {
-          publishResult(`Traded 1 ${result.item} → +${result.foodGain} food.`);
-        } else {
-          publishResult('Trade failed — no trade goods available.');
-        }
+        const beforeMB = game.getState().mbValue;
+        game.settlementAction('trade');
+        const afterMB = game.getState().mbValue;
+        const gained = afterMB < beforeMB ? (item.mbValue || 1) : (item.mbValue || 1);
+        publishResult(`Traded 1 ${item.name} → +${gained.toFixed(2)} MB credit.`);
         window.__METIS_RENDER__();
       };
       row.appendChild(info);
@@ -911,6 +913,104 @@ function renderSettlementAction(container, action, game, before, beforeCart) {
       tradePanel.appendChild(row);
     });
     container.appendChild(tradePanel);
+    return;
+  }
+
+  // MB spending actions
+  if (action === 'buy_food') {
+    const state = game.getState();
+    const settleType = state.pendingSettlement?.type || 'hbc';
+    const credit = state.credit?.[settleType] || 0;
+    const cost = CONSTANTS.MB_FOOD_COST;
+    const foodGain = Math.floor(1 / cost);
+    const btn = document.createElement('button');
+    btn.className = 'ctrl-btn settlement-action-btn secondary-action';
+    btn.textContent = `Buy Food (${cost} MB → +${foodGain} food)`;
+    if (credit < cost) {
+      btn.style.opacity = '0.5';
+      btn.style.cursor = 'not-allowed';
+      btn.title = `Need ${cost} MB credit. You have ${credit.toFixed(1)} MB.`;
+    }
+    btn.onclick = () => {
+      if (credit < cost) return;
+      hideOverlays();
+      game.settlementAction('buy_food');
+      publishResult(`Bought ${foodGain} food for ${cost} MB.`);
+      window.__METIS_RENDER__();
+    };
+    container.appendChild(btn);
+    return;
+  }
+
+  if (action === 'buy_repair') {
+    const state = game.getState();
+    const settleType = state.pendingSettlement?.type || 'hbc';
+    const credit = state.credit?.[settleType] || 0;
+    const cost = CONSTANTS.MB_REPAIR_COST;
+    const btn = document.createElement('button');
+    btn.className = 'ctrl-btn settlement-action-btn secondary-action';
+    btn.textContent = `Repair Cart (${cost} MB → −2 wear)`;
+    if (credit < cost || state.wear <= 0) {
+      btn.style.opacity = '0.5';
+      btn.style.cursor = 'not-allowed';
+      btn.title = credit < cost ? `Need ${cost} MB credit. You have ${credit.toFixed(1)} MB.` : 'Cart does not need repair.';
+    }
+    btn.onclick = () => {
+      if (credit < cost || state.wear <= 0) return;
+      hideOverlays();
+      game.settlementAction('buy_repair');
+      publishResult(`Cart repaired for ${cost} MB.`);
+      window.__METIS_RENDER__();
+    };
+    container.appendChild(btn);
+    return;
+  }
+
+  if (action === 'buy_heal') {
+    const state = game.getState();
+    const settleType = state.pendingSettlement?.type || 'hbc';
+    const credit = state.credit?.[settleType] || 0;
+    const cost = CONSTANTS.MB_HEAL_COST;
+    const btn = document.createElement('button');
+    btn.className = 'ctrl-btn settlement-action-btn secondary-action';
+    btn.textContent = `Heal Crew (${cost} MB → +20 morale)`;
+    if (credit < cost) {
+      btn.style.opacity = '0.5';
+      btn.style.cursor = 'not-allowed';
+      btn.title = `Need ${cost} MB credit. You have ${credit.toFixed(1)} MB.`;
+    }
+    btn.onclick = () => {
+      if (credit < cost) return;
+      hideOverlays();
+      game.settlementAction('buy_heal');
+      publishResult(`Crew healed for ${cost} MB.`);
+      window.__METIS_RENDER__();
+    };
+    container.appendChild(btn);
+    return;
+  }
+
+  if (action === 'buy_info') {
+    const state = game.getState();
+    const settleType = state.pendingSettlement?.type || 'hbc';
+    const credit = state.credit?.[settleType] || 0;
+    const cost = CONSTANTS.MB_INFO_COST;
+    const btn = document.createElement('button');
+    btn.className = 'ctrl-btn settlement-action-btn secondary-action';
+    btn.textContent = `Gather Intel (${cost} MB → trail info)`;
+    if (credit < cost) {
+      btn.style.opacity = '0.5';
+      btn.style.cursor = 'not-allowed';
+      btn.title = `Need ${cost} MB credit. You have ${credit.toFixed(1)} MB.`;
+    }
+    btn.onclick = () => {
+      if (credit < cost) return;
+      hideOverlays();
+      game.settlementAction('buy_info');
+      publishResult(`Gathered trail intelligence for ${cost} MB.`);
+      window.__METIS_RENDER__();
+    };
+    container.appendChild(btn);
     return;
   }
 
@@ -940,9 +1040,13 @@ function buildSettlementOutcome(action, before, after, beforeCart, afterCart) {
   if (after.crew !== before.crew) msgs.push(`Crew: ${before.crew} -> ${after.crew}`);
   if (after.day !== before.day) msgs.push(`${after.day - before.day} Day(s)`);
   if (action === 'trade') {
-    const gained = afterCart.reduce((s, i) => s + Math.max(0, i.count - (beforeCart.find(j => j.name === i.name)?.count || 0)), 0);
-    if (gained > 0) msgs.push(`Food gained.`);
+    const lost = beforeCart.reduce((s, i) => s + i.count, 0) - afterCart.reduce((s, i) => s + i.count, 0);
+    if (lost > 0) msgs.push(`Traded ${lost} good(s) for MB credit.`);
   }
+  if (action === 'buy_food') msgs.push('Bought food with MB credit.');
+  if (action === 'buy_repair') msgs.push('Repaired cart with MB credit.');
+  if (action === 'buy_heal') msgs.push('Healed crew with MB credit.');
+  if (action === 'buy_info') msgs.push('Gathered trail intelligence.');
   if (action === 'repair') msgs.push('Cart repaired.');
   if (action === 'grease') msgs.push('Axle greased.');
   if (action === 'heal') msgs.push('Healed.');
@@ -981,9 +1085,12 @@ function showCart(game) {
       const canUnload = overloaded && i.count > 0;
       const hint = i.category ? getCategoryHint(i.category) : '';
       const desc = i.desc ? `<div style="font-size:0.8em;color:#5a4a3a;margin-top:2px;">${i.desc}</div>` : '';
+      const mbStr = (i.type === 'trade' || i.category === 'furs') && i.mbValue
+        ? `<span style="color:var(--clr-accent);font-size:0.85em;margin-left:4px;">${i.mbValue} MB</span>`
+        : '';
       return `
     <div class="cart-row" style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:6px 0;border-bottom:1px solid rgba(0,0,0,0.08);">
-      <span style="flex:1;"><span style="font-weight:600;">${i.icon || ''} ${i.name} ×${i.count} (${i.wt * i.count} kg)</span>${hint ? `<div style="font-size:0.75em;color:#6b5c4a;">${hint}</div>` : ''}${desc}</span>
+      <span style="flex:1;"><span style="font-weight:600;">${i.icon || ''} ${i.name} ×${i.count} (${i.wt * i.count} kg)</span>${mbStr}${hint ? `<div style="font-size:0.75em;color:#6b5c4a;">${hint}</div>` : ''}${desc}</span>
       ${canUnload ? `<button class="ctrl-btn unload-btn" data-item="${i.name}" style="padding:2px 10px;font-size:0.85em;">Unload ${i.name} (−${i.wt} kg)</button>` : ''}
     </div>`;
     })
@@ -1014,7 +1121,7 @@ function getCategoryHint(category) {
     provisions: 'Restores food when needed.',
     repair: 'Reduces cart wear at settlements.',
     parts: 'Used for cart repair and crafting.',
-    furs: 'Trade value: high at Edmonton.',
+    furs: 'Trade for MB credit at settlements.',
     shelter: 'Survival aid; shelters crew from weather.',
     fuel: 'Required for cold nights and some recipes.',
     hunting: 'Event bonuses and ammunition support.',
@@ -1037,20 +1144,20 @@ function showPreDeparture(game) {
 
   if (!listEl || !weightEl || !currentEl || !statusEl || !confirmBtn) return;
 
-  // Auto-pack preset (balanced loadout ~92.5 kg)
+  // Auto-pack preset (balanced loadout ~95 kg, ~10 MB)
   const autoPack = {
-    'Pemmican Rations': 10,
+    'Pemmican Rations': 8,
     'Spare Axle': 1,
     'Shaganappi': 3,
     'Tool Kit': 1,
-    'Bison Hide': 2,
+    'Bison Hide': 3,
     'Canvas Tarp': 1,
     'Firewood Bundle': 1,
     'Rope (50ft)': 1,
     'Ammunition Belt': 1,
     'Medicine Pouch': 1,
     'Blanket': 1,
-    'Beaver Pelts': 1,
+    'Beaver Pelts': 2,
   };
 
   function recalc() {
@@ -1502,7 +1609,7 @@ function showEnd(game) {
   }
 
   // Detailed scoring breakdown
-  const tradeUnits = cart.filter((i) => i.type === 'trade' && i.count > 0).reduce((s, i) => s + i.count, 0);
+  const mbVal = state.mbValue || 0;
   const foodBonus = Math.min(state.food, 25);
   const crewBonus = state.crew === 'rested' ? 30 : state.crew === 'tired' ? 10 : 0;
   const daysPenalty = state.day * 8;
@@ -1510,7 +1617,7 @@ function showEnd(game) {
 
   const scoreLines = [
     { label: 'Base score', value: 1000 },
-    { label: `Trade goods (${tradeUnits} × 120)`, value: tradeUnits * 120 },
+    { label: `MB value (${mbVal.toFixed(1)} × 80)`, value: Math.round(mbVal * 80) },
     { label: `Food bonus (${foodBonus} × 12)`, value: foodBonus * 12 },
     { label: `Crew condition (${state.crew})`, value: crewBonus },
     { label: `Days on trail (${state.day} × -8)`, value: -daysPenalty },
@@ -1658,10 +1765,14 @@ function escapeHtml(str) {
 function actionLabel(a) {
   const map = {
     rest: 'Rest · 1 day · +2 food · +25 morale',
-    trade: 'Trade',
+    trade: 'Trade Goods → MB Credit',
     repair: 'Repair · −2 wear',
     heal: 'Heal · +20 morale',
     craft: 'Craft',
+    buy_food: 'Buy Food (0.5 MB)',
+    buy_repair: 'Repair (2 MB)',
+    buy_heal: 'Heal (1 MB)',
+    buy_info: 'Intel (0.5 MB)',
   };
   return map[a] || a;
 }

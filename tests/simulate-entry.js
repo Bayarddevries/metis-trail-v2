@@ -1,4 +1,5 @@
 import { createGame } from '../src/systems/engine.js';
+import { CONSTANTS } from '../src/core/constants.js';
 
 const SIM_COUNT = process.argv[2] ? parseInt(process.argv[2], 10) : 200;
 
@@ -24,13 +25,57 @@ function weightedChoiceIndex(choices, rand) {
 }
 
 // ─── Settlement action weighting ───────────────────────────────────
+// MB-based economy: trade goods → MB credit → spend on food/repair/heal
 function pickSettlementAction(actions, state, rand) {
   const weights = actions.map(a => {
-    if (a === 'continue') return 35;
+    if (a === 'continue') return 15;
     if (a === 'rest' && (state.crew !== 'rested' || state.morale < 50)) return 30;
-    if (a === 'rest') return 10;
-    if (a === 'trade' && state.food < 10) return 30;
-    if (a === 'trade') return 15;
+    if (a === 'rest') {
+      // If we have credit and food is low, prefer buying food over resting
+      const credit = state.credit?.[state.pendingSettlementType || 'hbc'] || 0;
+      if (credit >= 0.5 && state.food < 10) return 5;
+      return 10;
+    }
+    // Trade: convert goods to MB credit. Only trade when food is adequate.
+    if (a === 'trade') {
+      const mb = state.mbValue || 0;
+      if (mb >= 8) return 2;  // already at win threshold, rarely trade more
+      if (state.food > 15) return 20;  // food surplus, safe to trade
+      if (state.food > 10) return 12;
+      return 2;  // low food, don't trade — buy food instead
+    }
+    // Buy food with MB credit — CRITICAL priority when food is low
+    if (a === 'buy_food') {
+      const credit = state.credit?.[state.pendingSettlementType || 'hbc'] || 0;
+      if (credit < 0.5) return 0;
+      if (state.food < 3) return 80;
+      if (state.food < 6) return 60;
+      if (state.food < 10) return 45;
+      if (state.food < 15) return 30;
+      return 10;
+    }
+    // Buy repair with MB credit
+    if (a === 'buy_repair') {
+      const credit = state.credit?.[state.pendingSettlementType || 'hbc'] || 0;
+      if (credit < 2 || state.wear <= 0) return 0;
+      if (state.wear >= 4) return 35;
+      if (state.wear >= 2) return 20;
+      return 5;
+    }
+    // Buy heal with MB credit
+    if (a === 'buy_heal') {
+      const credit = state.credit?.[state.pendingSettlementType || 'hbc'] || 0;
+      if (credit < 1) return 0;
+      if (state.morale < 30) return 30;
+      if (state.morale < 50) return 15;
+      return 3;
+    }
+    // Buy info with MB credit
+    if (a === 'buy_info') {
+      const credit = state.credit?.[state.pendingSettlementType || 'hbc'] || 0;
+      if (credit < 0.5) return 0;
+      return 5;
+    }
     if (a === 'repair' && state.wear >= 3) return 30;
     if (a === 'repair' && state.wear >= 1) return 15;
     if (a === 'repair') return 3;
@@ -156,6 +201,10 @@ function runSim(seed) {
   let pushOnCount = 0;
   let eventCount = 0;
   let tradeCount = 0;
+  let buyFoodCount = 0;
+  let buyRepairCount = 0;
+  let buyHealCount = 0;
+  let buyInfoCount = 0;
   let repairCount = 0;
   let restCount = 0;
   let continueCount = 0;
@@ -195,12 +244,26 @@ function runSim(seed) {
     } else if (s.pendingSettlement) {
       const actions = game.getAvailableActions();
       if (actions.type === 'settlement') {
-        const action = pickSettlementAction(actions.actions, s, Math.random);
-        if (action === 'continue') continueCount++;
-        else if (action === 'trade') tradeCount++;
-        else if (action === 'repair') repairCount++;
-        else if (action === 'rest') restCount++;
-        game.settlementAction(action);
+        // Allow multiple actions per settlement visit (up to 3)
+        const settleType = s.pendingSettlement?.type || 'hbc';
+        const stateForWeights = { ...s, pendingSettlementType: settleType };
+        for (let actionSlot = 0; actionSlot < 2; actionSlot++) {
+          const availableNow = game.getAvailableActions();
+          if (availableNow.type !== 'settlement') break;
+          const action = pickSettlementAction(availableNow.actions, game.getState(), Math.random);
+          if (action === 'continue') { continueCount++; break; }
+          if (action === 'rest') { restCount++; game.settlementAction(action); continue; }
+          if (action === 'trade') { tradeCount++; game.settlementAction(action); continue; }
+          if (action === 'buy_food') { buyFoodCount++; game.settlementAction(action); continue; }
+          if (action === 'buy_repair') { buyRepairCount++; game.settlementAction(action); continue; }
+          if (action === 'buy_heal') { buyHealCount++; game.settlementAction(action); continue; }
+          if (action === 'buy_info') { buyInfoCount++; game.settlementAction(action); continue; }
+          if (action === 'repair') { repairCount++; game.settlementAction(action); continue; }
+          if (action === 'craft') { game.settlementAction(action); continue; }
+          break; // unknown action, leave
+        }
+        // After actions, continue west
+        game.settlementAction('continue');
       }
     } else {
       const actions = game.getAvailableActions();
@@ -279,11 +342,17 @@ function runSim(seed) {
     finalSeason: final.season,
     finalWeather: final.weather,
     tradeGoodsRemaining: tradeGoods,
+    mbValue: final.mbValue || 0,
+    credit: final.credit || {},
     campCount,
     pushOnCount,
     travelCount,
     eventCount,
     tradeCount,
+    buyFoodCount,
+    buyRepairCount,
+    buyHealCount,
+    buyInfoCount,
     forageCount,
     huntCount,
     scoutCount,
@@ -341,6 +410,11 @@ function aggregate(results) {
     ? victories.reduce((s, r) => s + r.tradeGoodsRemaining, 0) / victories.length
     : 0;
 
+  // MB value for winners
+  const avgMBAtEnd = victories.length
+    ? victories.reduce((s, r) => s + (r.mbValue || 0), 0) / victories.length
+    : 0;
+
   // How far did losses get?
   const lossNodes = losses.map(r => r.finalNode);
   const avgLossNode = lossNodes.length ? Math.round(lossNodes.reduce((s, v) => s + v, 0) * 10 / lossNodes.length) / 10 : 0;
@@ -387,6 +461,10 @@ function aggregate(results) {
     pushOn: avg('pushOnCount'),
     events: avg('eventCount'),
     trade: avg('tradeCount'),
+    buyFood: avg('buyFoodCount'),
+    buyRepair: avg('buyRepairCount'),
+    buyHeal: avg('buyHealCount'),
+    buyInfo: avg('buyInfoCount'),
     forage: avg('forageCount'),
     hunt: avg('huntCount'),
     scout: avg('scoutCount'),
@@ -409,6 +487,7 @@ function aggregate(results) {
     avgFinalMorale: Math.round(avg('finalMorale')),
     avgFinalNode: Math.round(avg('finalNode') * 10) / 10,
     avgTradeGoodsAtEnd: Math.round(avgTradeGoodsAtEnd * 10) / 10,
+    avgMBAtEnd: Math.round(avgMBAtEnd * 10) / 10,
     avgLossNode,
     avgFoodAtStarvation: Math.round(avgFoodAtStarvation * 10) / 10,
     reasons, avgDaysByReason, avgNodeByReason, actionFreq, weatherDist,
@@ -468,6 +547,7 @@ console.log(`  Avg final wear:         ${s.avgFinalWear}`);
 console.log(`  Avg final morale:       ${s.avgFinalMorale}`);
 console.log(`  Avg furthest node:      ${s.avgFinalNode}/12 (12 = Fort Edmonton)`);
 console.log(`  Avg trade goods at end: ${s.avgTradeGoodsAtEnd} (winners)`);
+console.log(`  Avg MB value at end:    ${s.avgMBAtEnd} (winners, need ${CONSTANTS.MB_WIN_THRESHOLD} to win)`);
 console.log(`  Avg node at death:      ${s.avgLossNode} (losers)`);
 console.log(`  Avg food at starvation: ${s.avgFoodAtStarvation}\n`);
 
@@ -560,11 +640,11 @@ if (cartFailPct > 15) {
   console.log();
 }
 if (noTradePct > 20) {
-  console.log(`🟠 NO_TRADE LOSSES: ${Math.round(noTradePct)}% reach Edmonton with no trade goods`);
-  console.log(`   → Trade goods are too scarce or too heavy`);
+  console.log(`🟠 NO_TRADE LOSSES: ${Math.round(noTradePct)}% reach Edmonton without enough MB`);
+  console.log(`   → MB win threshold may be too high (currently ${CONSTANTS.MB_WIN_THRESHOLD})`);
   console.log(`   → Add more trade-good-giving events`);
   console.log(`   → Reduce trade good weight`);
-  console.log(`   → Make trade at settlements more rewarding`);
+  console.log(`   → Make trading at settlements more rewarding`);
   console.log();
 }
 
