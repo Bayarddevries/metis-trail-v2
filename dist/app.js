@@ -19204,7 +19204,8 @@ function showShop(game) {
   const statusEl = document.getElementById("pd-weight-status");
   const confirmBtn = document.getElementById("pd-confirm");
   const balanceEl = document.getElementById("shop-balance");
-  if (!listEl || !weightEl || !currentEl || !statusEl || !confirmBtn || !balanceEl) return;
+  const shopStatusEl = document.getElementById("shop-status");
+  if (!listEl || !weightEl || !currentEl || !statusEl || !confirmBtn || !balanceEl || !shopStatusEl) return;
   let balance = game.getCart().reduce((sum, i) => sum + (i.mbValue || 0) * i.count, 0);
   const startingBalance = balance;
   const shopItems = [
@@ -19249,6 +19250,13 @@ function showShop(game) {
       statusEl.classList.add("under");
       statusEl.textContent = `${(capacity - totalWeight2).toFixed(1)} kg spare`;
       confirmBtn.disabled = totalFood < 10;
+      if (totalFood < 10) {
+        shopStatusEl.textContent = `Need ${10 - totalFood} more food to begin.`;
+        shopStatusEl.style.color = "#8b2500";
+      } else {
+        shopStatusEl.textContent = "Ready to depart!";
+        shopStatusEl.style.color = "#4a7a3a";
+      }
     }
   }
   __name(recalc, "recalc");
@@ -19262,7 +19270,6 @@ function showShop(game) {
       <div class="pd-item-info">
         <span class="pd-icon">${getItemIcon(item.name)}</span>
         <span class="pd-name">${item.name}</span>
-        <span class="pd-category-hint">${hint}</span>
         <div style="font-size:0.75em;color:#5a4a3a;margin-top:2px;">${item.desc}</div>
       </div>
       <div class="pd-controls">
