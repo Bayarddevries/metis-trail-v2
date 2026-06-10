@@ -2,73 +2,50 @@
 
 - Last updated: 2026-06-10
 - Branch: main
-- Latest commit: 5662be0
+- Latest commit: 2579bc8
 - Remote: origin https://github.com/Bayarddevries/metis-trail-v2.git
-- Working tree: clean (DESIGN.md uncommitted)
+- Working tree: clean
 
 ## Verified state
 
 - https://bayarddevries.github.io/metis-trail-v2/ serving latest build
 - Local test server: http://100.108.183.33:8081/index.html
 - Build command: `bun scripts/build.mjs`
-- Audio module DELETED (was causing console errors)
+- Current version: v119
 
 ## DESIGN DOCUMENT
 
-**READ `DESIGN.md` BEFORE DOING ANY WORK.** It contains the complete redesign plan.
-All future work should follow that document. Update it as decisions are made.
+**READ `DESIGN.md` BEFORE DOING ANY WORK.** It contains the complete redesign plan with all context.
 
-## What was done today
+## What's COMPLETE
 
-### v83 — Dice clarity, camp fix, party name, UI polish
-- DC display: "DC 12" → "Need 12+" everywhere
-- Camp dice: per-action DC thresholds, reset on reopen
-- End-screen: no auto-popup, "View Hall of Fame" button
+- Shop screen (buy supplies with ₥, trade goods only start)
+- Narrative journal (basic — travel logging)
+- Cart overlay (detailed, unload buttons)
+- Audio module removed
+- Hunt/repair bug fixed
+- Dice clarity ("Need X+" instead of "DC X")
 - Party name + profanity filter
-- Status bar: Journey + Cart clusters
-- Weather: emoji → text
-- Die: wooden block CSS
-- Ink-stamp: success/fail CSS
-- MB symbol: 💎 → ₥
+- Status bar grouping
+- Weather text (no emoji)
+- Lined paper simplified
+- Settlement rest fixed
 
-### v84 — Haptics, audio, sources, icons
-- Haptics module created and wired
-- Audio module created (then DELETED — too fragile)
-- Secondary sources rewritten as period voices
-- SVG icons created (then reverted to emoji — SVG too small)
+## What's NEXT — Sprint 2 Remaining
 
-### v85 — Bug fixes
-- Audio removed entirely
-- Cart overlay: always shows unload buttons, detailed descriptions
-- Category hints: more informative ("1 food/day keeps the crew alive...")
-- Lined paper: simplified CSS
-- Hunt/repair fix: use game.getCart() instead of state.cart (was undefined)
+1. **Camp action cards** — Redesign from grouped layout to individual cards showing: name, cost, risk, flavor text, button
+2. **Critical failures** — Roll 1 on camp actions triggers extra consequences (see DESIGN.md section 7)
+3. **Journal logging** — Add event outcomes, camp actions, and settlement visits to the journal (currently only logs travel)
 
-## Known bugs (from GitHub issues)
+## Key Files
 
-- #71 — Final score shows decimal points
-- #72 — End-game buttons different sizes
-- #73 — Hall of Fame doesn't load
-- Hunt/repair "missing items" — FIXED in v85 (state.cart was undefined)
-
-## Next work (from DESIGN.md Sprint 1)
-
-1. Fix #71, #72, #73
-2. Build starting shop screen
-3. Build narrative journal
-4. Unify visual style
-
-## Files modified recently
-
-- `src/main.js` — main game logic, UI handlers
+- `src/main.js` — Main game logic, UI handlers, shop, journal
+- `src/systems/engine.js` — Game engine, camp actions, settlement actions
 - `src/template.html` — HTML structure, CSS
-- `src/ui/haptics.js` — haptic feedback (keep)
-- `src/ui/audio.js` — DELETED
-- `src/ui/icons.js` — emoji icons (keep)
-- `src/ui/renderer.js` — status bar, map rendering
-- `src/data/sources/index.js` — rewritten period voices
-- `src/data/items.js` — icon fields removed
-- `DESIGN.md` — NEW, comprehensive redesign plan
+- `src/ui/renderer.js` — Journal logging, status bar, map
+- `src/data/events.js` — Event definitions
+- `src/data/nodes.js` — Trail nodes, settlement types
+- `DESIGN.md` — Full design document
 
 ## Conventions
 
@@ -78,3 +55,9 @@ All future work should follow that document. Update it as decisions are made.
 - Sync `src/template.html` version with `dist/index.html` after each build
 - Update DESIGN.md as work progresses
 - Update HANDOFF.md with each session
+
+## Known Issues
+
+- Cart shows empty on returning players (old save data) — clear localStorage
+- Journal only logs travel, not events/camp/settlements yet
+- Camp actions still use old grouped layout

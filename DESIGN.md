@@ -1,12 +1,12 @@
 # Metis Trail V2 — Design Document
 > Last updated: 2026-06-10
-> Status: PLANNING — do not build until plan is approved
+> Status: IN PROGRESS — Sprint 2 partially complete
 
 ---
 
 ## 1. CORE GAME LOOP
 
-1. **Fort Garry** → Start with trade goods, buy supplies at shop
+1. **Fort Garry** → Start with trade goods only, buy supplies at shop
 2. **Travel** → Consume 1 food/day, cart wears down, events trigger
 3. **Camp** → Forage, hunt, repair, scout, rest, dance
 4. **Settlement** → Trade goods for ₥, buy supplies, get intel
@@ -15,26 +15,62 @@
 
 ---
 
-## 2. STARTING SHOP (replaces pre-departure overlay)
+## 2. COMPLETED WORK
 
-### Starting Loadout (FIXED — player does NOT choose)
+### v83 — Dice Clarity & UI Polish
+- DC display: "DC 12" → "Need 12+" everywhere
+- Camp dice: per-action DC thresholds, reset on reopen
+- End-screen: no auto-popup, "View Hall of Fame" button
+- Party name + profanity filter
+- Status bar: Journey + Cart clusters with brass separator
+- Weather: emoji → text
+- Die: wooden block CSS
+- Ink-stamp: success/fail CSS
+- MB symbol: 💎 → ₥ (mill sign)
+
+### v84 — Haptics, Sources, Icons
+- Haptics module created and wired
+- Audio module created then DELETED (too fragile, browser compatibility issues)
+- Secondary sources rewritten as period voices
+- SVG icons attempted, reverted to emoji (SVG too small at 24x24)
+
+### v85 — Bug Fixes
+- Audio module fully removed
+- Cart overlay: always shows unload buttons, detailed descriptions
+- Category hints: more informative ("1 food/day keeps the crew alive...")
+- Lined paper simplified (clean cream background, no ruled lines)
+- Hunt/repair item check fixed (was using undefined state.cart)
+
+### v86-v87 — Shop Screen
+- Starting loadout: trade goods only (4 Bison Hides + 3 Beaver Pelts = ~14 ₥)
+- Shop screen replaces pre-departure packing
+- Buy supplies with ₥, remove items to get ₥ back
+- Balance display updates in real-time
+- Food count display
+- Confirm button requires 10+ food
+- Rich shop text (outfitter's briefing, hints)
+- Dotted overlay background removed
+
+### v88 — Journal & Settlement Fixes
+- Narrative panel replaced with accumulating journal log
+- Journal entries: day/date header, event text, dice results, outcomes
+- Most recent entry expanded, older ones collapsed
+- Settlement rest fixed (costs 1 food, doesn't advance day)
+
+---
+
+## 3. STARTING SHOP (COMPLETE)
+
+### Starting Loadout (FIXED)
 - 4× Bison Hide (trade good, ~1.25 ₥ each = 5 ₥)
 - 3× Beaver Pelts (trade good, ~3.0 ₥ each = 9 ₥)
 - **Total starting value: ~14 ₥**
 - NO food, NO repair supplies, NO ammo, NO medicine, NO tools
-- Player is a hunter heading west to sell their haul
 
-### Shop Screen Layout
-- Header: "Fort Garry Outfitters — Stock Up Before the Trail"
-- Subheader: "You have X ₥ in trade goods to spend"
-- Item list: each item shows name, description, price in ₥, [Buy] button
-- Running balance at bottom: "₥ remaining: X"
-- "Confirm Outfit" button to begin journey
-
-### Shop Prices (moderate — balance can be tuned)
+### Shop Prices
 | Item | Price (₥) | Notes |
 |---|---|---|
-| Pemmican Rations (×5) | 2.5 | Bulk food purchase |
+| Pemmican Rations (×5) | 2.5 | Bulk food, 5 rations per pack |
 | Spare Axle | 3.0 | Expensive, critical |
 | Shaganappi (×3) | 1.5 | Repair material |
 | Tool Kit | 2.5 | Enables major repairs |
@@ -45,201 +81,105 @@
 | Medicine Pouch | 3.0 | Expensive, critical |
 | Blanket (×2) | 2.0 | Winter survival |
 
-### Shop Constraints
-- Player cannot buy everything — must prioritize
-- Cannot sell trade goods back (already converted to ₥ value)
-- Confirm button disabled until player has at least 10 food
+### Shop Features
+- Balance display (₥ remaining)
+- Food count display
+- Buy and Remove buttons
+- Weight tracking with trade goods included
+- Confirm disabled until 10+ food
+- Status message explaining requirements
 
 ---
 
-## 3. NARRATIVE JOURNAL (replaces narrative panel)
+## 4. NARRATIVE JOURNAL (COMPLETE)
 
 ### Behavior
-- ALWAYS VISIBLE in main game view (not overlay, not toggleable)
+- ALWAYS VISIBLE in main game view (replaces old narrative panel)
 - Scrolls top (Day 1) → bottom (most recent)
-- Replaces the current `#narrative` div entirely
+- Each entry: day/date header, event text, dice results, outcomes
+- Most recent entry auto-expanded, older ones collapsed (click to expand)
 
 ### Entry Format
 ```
 ━━━━━━━━━━━━━━━━━━━━
-Day 15 — July 28 — Summer
+Day 15 — July 28
 ━━━━━━━━━━━━━━━━━━━━
-[Event text...]
-
-→ Chose: "Set a splice with rope and wedges"
-→ Rolled 14 — need 12+ — ✓ Success
-→ The jury-rig holds. Progress is slow, but the cart is rolling again.
-→ Wear +1
+Traveled west from Fort Garry toward White Horse Plains.
+Wear +1
 ```
 
-### Entry Types
-- **Travel**: "Traveled west from [Node A] toward [Node B]. [Atmospheric fragment.]"
+### Entry Types Implemented
+- **Travel**: Shows "Traveled west from [Node A] toward [Node B]." + wear changes
+
+### Entry Types TODO
 - **Event**: Full event text + choice + dice result + outcome
 - **Camp**: Action taken + dice result + flavor text + effects
 - **Settlement**: Arrival + actions taken + results
-- **Critical Failures**: Highlighted with ⚠ and red text
-
-### Visual Style
-- Cream background (#f5e6c8)
-- Aged ink text (#3a2f1f)
-- Day headers in tarnished brass (#8b6914)
-- Most recent entry auto-expanded
-- Older entries collapsed (click header to expand)
-- NO ruled lines, NO paper texture
-- Scrollbar styled to match
 
 ---
 
-## 4. CART OVERLAY (single screen)
+## 5. CART OVERLAY (COMPLETE)
 
-### Access
-- Cart button in controls → opens overlay
-- Accessible anytime (not just when overloaded)
-
-### Layout
-```
-┌─────────────────────────────────────┐
-│ Cart — 87.5 / 100 kg          [✕]  │
-├─────────────────────────────────────┤
-│ 🥩 Pemmican Rations ×7 (17.5 kg)   │
-│ Dried meat and fat. The staple...   │
-│ [Unload (−2.5 kg)]                  │
-├─────────────────────────────────────┤
-│ 🦬 Bison Hide ×4 (24.0 kg)         │
-│ Trade value: 1.25 ₥ each           │
-│ [Unload (−6.0 kg)]                  │
-└─────────────────────────────────────┘
-```
-
-### Weight Bar
-- Green if under capacity: "Cart — 87.5 / 100 kg"
-- Red if over: "⚠ Overloaded — 108 / 100 kg — Offload 8 kg"
-- Always visible at top of overlay
-
-### Item Details
-- Name, count, total weight
-- Description (readable, NO texture behind text)
-- Category hint: "Trade goods. Sell at settlements for ₥ credit."
-- MB value for trade goods
-- Unload button on EVERY item (not just when overloaded)
+### Features
+- Accessible via Cart button anytime
+- Shows all items with: name, count, weight, description, category hint
+- Unload button on every item (not just when overloaded)
+- Weight bar at top: green if under capacity, red if over
+- MB value shown for trade goods
 
 ---
 
-## 5. CAMP ACTION CARDS
+## 6. SETTLEMENTS (PARTIAL)
 
-### Card Layout
-```
-┌─────────────────────────────────────┐
-│ 🏹 Hunt                             │
-│ Cost: 1 Ammunition Belt · 1 day     │
-│ Risk: Lose ammo, no pelts on fail   │
-│ "The prairie offers game if you     │
-│  know where to look."               │
-│                          [Do It]    │
-└─────────────────────────────────────┘
-```
+### Current State
+- 4 settlement types: hbc, metis, trading, mission
+- Actions: rest, trade, buy_food, buy_repair, buy_heal, buy_info, craft
+- Rest costs 1 food, sets crew to rested, +15 morale
 
-### All 7 Actions + Push On
-
-| Action | Cost | Risk on Failure | Flavor |
-|---|---|---|---|
-| Rest | 1 food | Crew stays tired | "Sleep under the stars..." |
-| Forage | 1 day | Got lost, lose a day | "Search for edible roots..." |
-| Hunt | 1 ammo, 1 day | Lose ammo, no pelts | "The prairie offers game..." |
-| Repair | 1 shaganappi | Waste materials, wear stays | "Shaganappi binds tight..." |
-| Scout | 1 day | Walk into next event blind | "Reconnoiter the trail ahead..." |
-| Dance | Free | Morale drops (awkward night) | "Song and dance by firelight..." |
-| Deep Rest | 2 food, 2 days | Waste food, minimal gain | "Two days of full recovery..." |
-| Push On | 1.5 food, wear/morale | Extra wear, no recovery | "Skip camp. The trail waits." |
-
-### Critical Failures
-- Roll 1, or fail by 5+ → extra consequence
-- Failed hunt: lose ammo AND morale −2
-- Failed repair: waste shaganappi AND wear +1
-- Failed scout: next event has no warning
-- Failed forage: lose an extra day
-- Failed dance: morale −3
-- Failed deep rest: waste food, crew still tired
+### TODO per DESIGN.md
+- **HBC Fort**: Trade goods → ₥, Buy supplies, Rest, Get trail intel
+- **Métis Camp**: Trade gossip, Recruit crew, Dance (morale), Share food
+- **NWMP Post**: Pay fines, Get permits, Report for duty, Buy ammo
+- **Mission**: Heal crew, Rest, Get blessing (morale)
+- Price variation by location
 
 ---
 
-## 6. SETTLEMENTS (4 types, automatic arrival)
+## 7. CAMP ACTIONS (PARTIAL)
 
-### Arrival
-- Automatic when reaching a settlement node
-- Settlement overlay shows immediately
-- Player picks an action, then "Continue West" to leave
+### Current State
+- 7 actions + push_on
+- All have flavor text pools (high/mid/low tiers)
+- Dice rolls with per-action DC thresholds
+- Missing mid-tier entries for hunt and repair (FIXED)
 
-### HBC Fort
-> "The palisade walls rise from the prairie. Company men in dark coats move between warehouses. The flag snaps in the wind."
-
-| Action | Effect |
-|---|---|
-| Trade Goods → ₥ | Sell trade goods for ₥ credit |
-| Buy Supplies | Spend ₥ on food, repair, ammo |
-| Rest | Recover crew condition (costs 1 food) |
-| Get Intel | Learn about trail ahead (costs 0.5 ₥) |
-
-### Métis Camp
-> "Canvas tents in a circle. A fiddle starts up. Children run between the carts. The smell of pemmican and smoke."
-
-| Action | Effect |
-|---|---|
-| Trade Gossip | Get trail intel for free (maybe inaccurate) |
-| Recruit Crew | Add crew member (costs 2 ₥ + 1 food) |
-| Dance | Morale +15, costs 1 day |
-| Share Food | Give 2 food, gain morale +10 and gossip |
-
-### NWMP Post
-> "Red-coated Mounties stand at attention. A Union Jack flies over the stockade. Papers must be shown."
-
-| Action | Effect |
-|---|---|
-| Pay Fines | Clear any penalties (costs ₥) |
-| Get Permits | Required for some trail sections |
-| Report Duty | Morale +5, maybe get supplies |
-| Buy Ammo | Ammunition at regulated prices |
-
-### Mission
-> "A wooden cross rises above the spire. The bell rings across the prairie. Peace here, but the trail calls."
-
-| Action | Effect |
-|---|---|
-| Heal Crew | Restore crew to rested (free) |
-| Rest | Full recovery, 1 day |
-| Get Blessing | Morale +20, 1 day |
-| Confession | Morale +10, free |
-
-### Price Variation
-- HBC Fort: base prices
-- Métis Camp: food cheaper, no ammo
-- NWMP Post: ammo available, other items expensive
-- Mission: healing free, nothing for sale
+### TODO
+- Redesign as cards showing: name, cost, risk, flavor text, button
+- Critical failures (roll 1): extra consequences
+  - Failed hunt: lose ammo + morale −2
+  - Failed repair: waste shaganappi + wear +1
+  - Failed scout: next event has no warning
+  - Failed forage: lose an extra day
+  - Failed dance: morale −3
 
 ---
 
-## 7. HUNTING REWORK
+## 8. HUNTING REWORK (TODO)
 
-### Success → Trade Goods (NOT food)
-- Plains: Deer hide (0.75 ₥) or Bison hide (1.25 ₥, rare)
-- River: Beaver pelt (3.0 ₥)
-- Wooded: Deer hide (0.75 ₥)
-- Uplands: Elk hide (1.5 ₥)
+### Current State
+- Hunt gives food directly on success
 
-### Failure
-- Normal fail: lose 1 ammo, no pelts
-- Critical fail (roll 1 or fail by 5+): lose 1 ammo, morale −2
-
-### Terrain Dependency
-- Can only hunt on: plains, river, wooded, uplands
-- Cannot hunt on: (none — all terrain has game)
-- Better prey on certain terrains
+### TODO per DESIGN.md
+- Hunt success → trade goods (pelts/hides) added to cart, NOT food
+- Different prey by terrain: deer (plains), beaver (river), elk (uplands)
+- Failed hunt: lose 1 ammo, no pelts
+- Critical fail: lose ammo AND morale −2
 
 ---
 
-## 8. VISUAL STYLE (unified)
+## 9. VISUAL STYLE (TODO)
 
-### Color Palette
+### Target Palette
 | Role | Hex | Usage |
 |---|---|---|
 | Dark bg | #1a1208 | Main background, status bar |
@@ -250,36 +190,25 @@ Day 15 — July 28 — Summer
 | Accent | #8b6914 | Brass — headers, borders, highlights |
 | Success | #4a7a3a | Green — muted, period |
 | Danger | #8b2500 | Red — muted, period |
-| Warning | #b4842c | Yellow — muted |
 
-### Typography
-- Headings: Playfair Display (already loaded)
-- Body: Crimson Text (already loaded)
-- Monospace: (not needed)
-- Max 3 font families
-
-### Components
-- **Borders**: 1px solid, NO border-radius, color matches surface
-- **Buttons**: flat, ink-on-paper, brass border on hover
-- **NO box-shadow anywhere**
-- **NO gradient text**
-- **NO glassmorphism**
-- **NO rounded corners**
+### Component Rules
+- Borders: 1px solid, NO border-radius, color matches surface
+- Buttons: flat, ink-on-paper, brass border on hover
+- NO box-shadow anywhere
+- NO gradient text
+- NO glassmorphism
+- NO rounded corners
+- NO dotted/noise textures
 
 ### Map
 - Full sepia desaturation
-- NO modern markers
-- NO highway signs
+- NO modern markers, NO highway signs
 - Trail shown as dotted line
 - Settlements as simple circles
 
 ---
 
-## 9. ENDGAME (Fort Edmonton)
-
-### Arrival
-- Automatic when reaching final node
-- Endgame overlay shows
+## 10. ENDGAME (TODO)
 
 ### Scoring
 | Factor | Points |
@@ -292,88 +221,77 @@ Day 15 — July 28 — Summer
 | Wear penalty (×−40) | Variable |
 
 ### Ending Tiers
-| Score | Tier | Narrative |
-|---|---|---|
-| < 500 | Barely Survived | "You arrived with nothing but your life..." |
-| 500–1200 | Solid Profit | "A respectable haul. The Company men nod..." |
-| 1200+ | Legendary Haul | "The talk of the fort. Your name will be remembered..." |
-
-### Ending Screen Shows
-- Final score with breakdown
-- Trade goods delivered
-- Crew condition
-- Days on trail
-- Narrative summary paragraph
-- "Play Again" button
-- "View Hall of Fame" button
-
----
-
-## 10. WHAT'S CUT
-
-- ❌ Audio module (removed)
-- ❌ Crafting system (no meaningful use — will be re-added later when crafted items have purpose)
-- ❌ Pre-departure packing screen (replaced by shop)
-- ❌ Paper texture / ruled lines (replaced by clean journal)
-- ❌ Redundant cart screens (merged to one)
-- ❌ Modern map markers (replaced by period-appropriate)
-
----
-
-## 11. OPEN QUESTIONS / DECISIONS NEEDED
-
-1. **Win condition**: Currently need 10 ₥ at Edmonton. Change to score-based? Or keep ₥ threshold?
-2. **Starting ₥ value**: 14 ₥ from trade goods. Enough? Too much?
-3. **Shop prices**: Moderate. Will need playtesting to balance.
-4. **Hunt prey table**: Need to define exact prey per terrain with probabilities.
-5. **Settlement price variation**: Exact multipliers per location type TBD.
-6. **Critical failure threshold**: Fail by 5+ or just roll 1?
-
----
-
-## 12. FILES THAT NEED CHANGES
-
-| File | Change |
+| Score | Tier |
 |---|---|
-| `src/template.html` | Journal panel, shop screen, settlement overlays, visual style |
-| `src/main.js` | Shop logic, journal log, camp cards, cart overlay, critical failures |
-| `src/systems/engine.js` | Camp action consequences, hunt rewards, settlement actions |
-| `src/data/items.js` | Remove crafting recipes, add hunt prey items |
-| `src/data/nodes.js` | Settlement types, terrain for hunting |
-| `src/ui/theme.js` | New color palette |
-| `src/ui/icons.js` | Keep emoji, ensure consistency |
-| `src/ui/haptics.js` | Keep as-is |
-| `src/ui/audio.js` | DELETED |
-| `src/data/events.js` | Settlement-specific events, hunt events |
+| < 500 | Barely Survived |
+| 500–1200 | Solid Profit |
+| 1200+ | Legendary Haul |
 
 ---
 
-## 13. SPRINT ORDER
+## 11. FILES THAT NEED CHANGES
 
-### Sprint 1: Fix & Stabilize
+| File | Status | What's Left |
+|---|---|---|
+| `src/template.html` | Partial | Camp cards, settlement overlays, visual style |
+| `src/main.js` | Partial | Camp cards, critical failures, event journal logging, settlement rework |
+| `src/systems/engine.js` | Partial | Hunt rewards, settlement actions, critical failures |
+| `src/data/items.js` | Done | — |
+| `src/data/nodes.js` | TODO | Settlement types, terrain for hunting |
+| `src/ui/theme.js` | TODO | New color palette |
+| `src/ui/renderer.js` | Partial | Journal logging for events/camp/settlements |
+| `src/ui/haptics.js` | Done | — |
+| `src/ui/audio.js` | DELETED | — |
+| `src/ui/icons.js` | Done | — |
+| `src/data/events.js` | TODO | Settlement-specific events, hunt events |
+
+---
+
+## 12. SPRINT ORDER
+
+### Sprint 1: Fix & Stabilize ✅ COMPLETE
 - [x] Kill audio module
-- [ ] Fix hunt/repair item check bug (state.cart undefined)
-- [ ] Fix #71 decimal scores
-- [ ] Fix #72 end button sizes
-- [ ] Fix #73 Hall of Fame load
-- [ ] Fix lined paper CSS
+- [x] Fix hunt/repair item check
+- [x] Fix #71 decimal scores
+- [x] Fix #72 end button sizes
+- [x] Fix #73 HoF load
+- [x] Fix lined paper CSS
 
-### Sprint 2: Core Redesign
-- [ ] Build starting shop screen
-- [ ] Build narrative journal (replace narrative panel)
-- [ ] Unify cart overlay (single detailed screen)
-- [ ] Redesign camp action cards
-- [ ] Add critical failure consequences
+### Sprint 2: Core Redesign — PARTIAL
+- [x] Build starting shop screen
+- [x] Build narrative journal (basic — travel logging only)
+- [x] Unify cart overlay
+- [ ] Redesign camp action cards + critical failures
+- [ ] Add event/camp/settlement journal logging
 
-### Sprint 3: Settlements & Economy
+### Sprint 3: Settlements & Economy — TODO
 - [ ] Rework 4 settlement types with distinct actions
 - [ ] Add hunting-for-trade-goods events
 - [ ] Implement price variation by location
 - [ ] Build endgame scoring screen
 
-### Sprint 4: Visual Unification
+### Sprint 4: Visual Unification — TODO
 - [ ] Apply gritty color palette everywhere
 - [ ] Unify all overlay styles
 - [ ] Redesign status bar
 - [ ] Map styling (sepia, no modern markers)
 - [ ] Polish all buttons, borders, spacing
+
+---
+
+## 13. KNOWN ISSUES
+
+- Cart shows empty on returning players (old save data) — clear localStorage to fix
+- Settlement rest button works but UI doesn't clearly show what it does
+- Camp action cards still use old grouped layout, not card-based design
+- Journal only logs travel, not events/camp/settlements yet
+- Audio 404 in browser cache — users must hard refresh (Ctrl+Shift+R)
+
+---
+
+## 14. OPEN QUESTIONS
+
+1. **Win condition**: Currently need 10 ₥ at Edmonton. Keep or change to score-based?
+2. **Starting ₥ value**: 14 ₥ from trade goods. Enough? Too much?
+3. **Hunt prey table**: Exact prey per terrain with probabilities TBD
+4. **Settlement price variation**: Exact multipliers per location type TBD
