@@ -41,15 +41,15 @@ Legend: `pending` | `in_progress` | `blocked` | `done`
 - [x] Add itemBonus/consumesItem/requiresItem event choice fields
 - [ ] Add second half of Carlton Trail nodes with citations
 - [ ] Add scout/guide hire moral choices with history anchoring
-- [ ] Polish end-game scoring and local leaderboard
 - [x] Weather system — seasonal effects on travel and events (v65)
 - [x] Conditional endings — multiple ending paths (v36, 6 ending types)
-- [x] Pre-departure cart packing — let players choose starting loadout
+- [x] Pre-departure cart packing — let players choose starting loadout (v80)
 
 ### Phase 4 — UI/UX Polish
 - [x] Mobile bar, button hierarchy, camp grouping, settlement polish done
-- [x] Location/node markers on map (#26)
+- [x] Location/node markers on map (#26) (v55)
 - [ ] Basic icons (#10)
+- [ ] Replace travel debug narrative with atmospheric fragments (done v64)
 
 ### Audit P0 — Period-Accurate Sharp-Corner Aesthetic (2026-06-09 audit)
 - [x] #50 — Strip all `border-radius` and `box-shadow` for sharp corners
@@ -70,12 +70,12 @@ Legend: `pending` | `in_progress` | `blocked` | `done`
 - [x] Fix #38 meshgroup auto-centering after async tree load
 - [x] Fix #38 node-edge near-hit bug
 
-## Phase 5 — Content & Mechanics Expansion
+### Phase 5 — Content & Mechanics Expansion
 - [x] Conditional endings (GitHub issue #14) — 6 ending types with narratives, source quotes, scoring (v36)
-- [ ] Pre-departure cart packing (GitHub issue #15) — let players choose starting loadout
-- [x] Weather system (GitHub issue #13) — seasonal effects on travel and events
+- [x] Pre-departure cart packing (GitHub issue #15) — let players choose starting loadout (v80)
+- [x] Weather system (GitHub issue #13) — seasonal effects on travel and events (v65)
 - [x] MB currency economy — Made Beaver system replacing barter (v82)
-- [ ] Highscore/leaderboard (GitHub issue #12) — score tracking by outcome type
+- [x] Highscore/leaderboard (GitHub issue #12) — score tracking by outcome type (v69, Firebase)
 - [ ] Add second half of Carlton Trail nodes with citations
 - [ ] Add scout/guide hire moral choices with history anchoring
 

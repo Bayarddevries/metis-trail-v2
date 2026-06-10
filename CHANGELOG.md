@@ -41,6 +41,11 @@ Replaced barter-only trade with a proper currency economy grounded in the histor
 
 Files modified: `src/core/constants.js`, `src/systems/engine.js`, `src/data/items.js`, `src/data/endings.js`, `src/main.js`, `src/ui/renderer.js`, `src/template.html`, `tests/simulate-entry.js`
 
+### Docs sync pass
+- Synced `TODO.md`, `HANDOFF.md`, `ISSUES.md` to current build state
+- Corrected duplicate `v70` header in changelog
+- Version references updated across handoff docs
+
 ## [v81] — 2026-06-10
 
 ### Fix — pushOn() was a no-op (mutated getState() copy, not engine state)

@@ -2,110 +2,114 @@
 
 Use this file to log bugs, blockers, and known gaps during work sessions. Each item should be short, searchable, and include a short reproduction or evidence note.
 
-**Note:** GitHub issues are the source of truth. This file is for local-only items and session notes. Run `gh issue list` for the canonical open list.
+**Note:** GitHub issues are the source of truth. This file is for local-only items and session notes.
+
+---
 
 ## Active (Local Only)
 
-### 42. MCP Playwright click selector resolution fails
+### 42. Playwright click resolution blocked
 - Opened: 2026-06-08
 - Labels: tooling, qa, blocked
 - Summary: Playwright navigation works, but click targeting via button text/ref/@id forms does not resolve. Blocks browser verification of UI changes.
 - Workaround: Verify via source inspection and local server checks instead of automated clicks.
-- Impact: Cannot complete browser QA steps reliably. Manual device testing still works.
-
-### 12. Highscore/leaderboard
-- Opened: 2026-06-07
-- Resolved: 2026-06-09 (v69)
-- Fix: Firebase Firestore leaderboard with Hall of Fame (top 10) and My Scores (personal history with 8 sort options). Player name collected at game start. Local fallback for offline.
 
 ---
 
 ## Resolved
 
-### 38. Camp events need dice rolls and more flavor text
-- Opened: 2026-06-08
-- Resolved: 2026-06-09 (v67)
-- Fix: Added dice roll animation to camp actions (rest, forage, hunt, scout). Added rich flavor text for all 7 camp actions with 3 outcome tiers. Action buttons now show descriptions.
+### #49 — JSDoc comments on exported engine.js functions
+- Status: Done (v71)
+- Note: JSDoc comments added to all public engine methods.
 
-### 39. More actions toggle empty
-- Opened: 2026-06-09
-- Resolved: 2026-06-09 (v67)
-- Fix: 'More actions' toggle now only shows when craft has usable recipes. No more empty toggle.
-- Opened: 2026-06-08
-- Resolved: 2026-06-08 (v50, v51)
-- Fix: Removed pass/fail pill from renderDicePill(). Outcome reveals after dice-settle animation completes (animationend event).
+### #48 — Standardize conventional commit messages
+- Status: Done (v71)
+- Note: Commit conventions added to AGENTS.md.
 
-### 30. Food is showing in decimal places
-- Opened: 2026-06-08
-- Resolved: 2026-06-08 (v50)
-- Fix: Round to 1 decimal after DAILY_FOOD subtraction; Math.floor() on display in status bar and camp overlay.
+### #47 — mountDebugUI behind ?debug=1
+- Status: Done (v71)
 
-### 33. Crafting discoverability in settlement UI
-- Opened: 2026-06-07
-- Resolved: 2026-06-08 (v56)
-- Fix: Added hint line below settlement description when recipes are available. Shows recipe name + inputs for single recipe, count for multiple. Hidden when no recipes match.
+### #46 — Save/load validation and schema version
+- Status: Done (v81)
 
-### 26. Add location/node markers on map
-- Opened: 2026-06-07
-- Resolved: 2026-06-08 (v55)
-- Fix: Added colored circle markers for all 16 trail nodes. Color-coded by settlement type (HBC=red, Métis=green, NWMP=blue, Mission=gold, Trading=brown, River=blue). Current node larger (9px), visited small gray (5px), future medium (6px). Tooltips show node names.
+### #45 — Unit tests for calendar and PRNG
+- Status: Done (v81)
 
-### 35. Reduce action-dense screens by grouping secondary actions
-- Opened: 2026-06-08
-- Resolved: 2026-06-08 (v54)
-- Fix: Primary actions always visible; secondary (craft) behind "More actions ▶" toggle. No toggle on settlements with no secondary actions.
+### #44 — Pre-departure cart packing overlay
+- Status: Done (v80)
 
-### 34. Audit and consolidate primary/secondary action verbs
-- Opened: 2026-06-08
-- Resolved: 2026-06-08 (v53)
-- Fix: Single pattern across all panels — verb-first label, cost inline, single line. Removed dead actionLabel/actionSubtitle entries. Settlement buttons simplified from label+subtitle divs to single text line.
+### #43 — Duplicate stat headings in status bar
+- Status: Done (v50/v61)
 
-### 31. Prune redundant settlement/camp actions
-- Opened: 2026-06-07
-- Resolved: 2026-06-08 (v52)
-- Fix: Removed `recruit` (dominated by `rest`), `forage` (camp version better), `rumours` (no mechanical effect) from all settlement types. Removed dead settlementAction() handlers.
+### #42 — Playwright click resolution blocked (local)
+- Status: Open
+- Summary: Playwright cannot resolve button text/ref/@id click selectors. Workaround: manual source inspection + local server checks.
 
-### 32. Overlay sequence broken — pre-departure shows before intro
-- Opened: 2026-06-07
-- Resolved: 2026-06-07 (v44 per TODO.md)
-- Fix: bootstrap() always shows intro first. Pre-departure activates after "Begin Journey" click.
+### #41 — Remove dead code / convention cleanup
+- Status: Done (v81)
 
-### 33. HBC crafting recipe unreachable
-- Opened: 2026-06-07
-- Resolved: 2026-06-07 (v41 — 'craft' added to HBC actions)
-- Note: HBC `availableSettlementActions()` now includes 'craft'. Recipe `finished_hides` with `settlement: 'hbc'` is reachable.
+### #40 — Trace invisible render failures after engine changes
+- Status: Done (v80)
 
-### 34. Camp overlay loses action panel on reopen
-- Opened: 2026-06-07
-- Resolved: 2026-06-07 (v47)
-- Fix: `showCamp()` now resets `actionsEl.style.display = 'grid'` before rebuilding.
+### #39 — More actions toggle empty states
+- Status: Done (v67)
 
-### 36. Day 1 first travel resolves to settlement overlay
-- Opened: 2026-06-08
-- Resolved: 2026-06-08 (v50)
-- Fix: Skip `pendingSettlement` when `S.node <= 1` (first arrival after start).
+### #38 — Camp events need dice rolls and more flavor text
+- Status: Done (v67)
 
-### 37. Gabriel Dumont cannot be at all ferry crossings
-- Opened: 2026-06-08
-- Resolved: 2026-06-08 (v50)
-- Fix: Removed duplicate `river_ferry_dumont` event. Only `ferry_gabriel` (river_valley pool) remains.
+### #37 — Gabriel Dumont cannot be at all ferry crossings
+- Status: Done (v50)
 
-### 43. Duplicate stat headings in status bar
-- Opened: 2026-06-08
-- Resolved: 2026-06-08 (v49)
-- Fix: Replaced `innerHTML` with `textContent` + `className` on stat-value spans in `renderStatusBar()`.
+### #36 — Day 1 first travel resolves to settlement overlay
+- Status: Done (v50)
+
+### #35 — Reduce action-dense screens by grouping secondary actions
+- Status: Done (v54)
+
+### #34 — Audit and consolidate primary/secondary action verbs
+- Status: Done (v53)
+
+### #33 — Crafting discoverability in settlement UI
+- Status: Done (v56)
+
+### #32 — Overlay sequence broken — pre-departure shows before intro
+- Status: Done (v44)
+
+### #31 — Prune redundant settlement/camp actions
+- Status: Done (v52)
+
+### #30 — Food showing in decimal places
+- Status: Done (v50)
+
+### #29 — Dice timing: pass/fail pill shown before settle
+- Status: Done (v50/v51)
+
+### #27 — Duplicate texture/dep files
+- Status: Done (v69)
+
+### #26 — Add location/node markers on map
+- Status: Done (v55)
+
+### #25 — Cultural/peer review (women/children presence)
+- Status: Done (v70)
+
+### #12 — Highscore/leaderboard
+- Status: Done (v69)
+
+### #13 — Weather system
+- Status: Done (v65)
 
 ---
 
 ## External (docs completed 2026-06-09, implementation in progress)
 
-### 25. Cultural/peer review
+### #25 — Cultural/peer review
 - Status: Review doc complete, implementation in progress
 - Deliverable: [docs/cultural-review.md](docs/cultural-review.md)
 - Implemented in v70: Women/children presence (4 new events, 4 new sources, camp action, settlement descriptions, Batoche foreshadowing, dog reference)
 - Remaining: Secondary source reformatting → tracked as GitHub #42
 
-### 6. AI writing trend review
+### #6 — AI writing trend review
 - Status: Review doc complete, implementation done
 - Deliverable: [docs/writing-review.md](docs/writing-review.md)
 - Implemented in v70: All 16 rewrite recommendations applied (12 events, 4 endings, travel fragments, camp flavor, intro text, source context UI)
@@ -125,6 +129,7 @@ Use this file to log bugs, blockers, and known gaps during work sessions. Each i
 ### #44 — Pre-departure cart packing overlay
 - Labels: enhancement
 - Player configures starting cart before journey; blocked by overlay sequence bug
+- Note: API exists; UI exists; overlay sequence fixed in v44.
 
 ### #45 — Unit tests for calendar and PRNG
 - Labels: enhancement
@@ -144,4 +149,4 @@ Use this file to log bugs, blockers, and known gaps during work sessions. Each i
 
 ### #49 — Add doc comments to exported engine.js functions
 - Labels: documentation
-- JSDoc/JS comments on all public engine methods for handoff reliability
+- JSDoc/JS comments on all public engine methods for reliability

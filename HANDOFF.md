@@ -1,13 +1,18 @@
 # HANDOFF — Metis Trail V2
 
 **Last updated:** 2026-06-10 by OWL
-**Version:** v81
+**Version:** v82
 **Server:** http://100.108.183.33:5173/ (python3 -m http.server in dist/)
 **Branch:** main, clean tree, pushed to origin
 
 ---
 
 ## Session Summary (2026-06-10, Evening)
+
+### v82 — Docs sync pass (no content changes)
+- Updated `TODO.md`: mark completed items with version refs; eliminated double-listed "leaderboard" and "debug narrative" entries; fixed duplicate “v70” heading noise.
+- Updated `HANDOFF.md` for consistency with current build state.
+- Earlier in session: added v82 v81/v80/v79/v78/v77/v76/v75/v74/v73/v72/v71/v70+ changelog/Handoff entries.
 
 ### v81 — pushOn Fix + Playtesting Harness Update
 - **Bug fix:** `pushOn()` in main.js was a no-op — mutated getState() copy, not engine state
@@ -28,147 +33,36 @@
 - Files: `src/systems/engine.js`, `src/main.js`, `tests/simulate-entry.js`, `CHANGELOG.md`
 
 ### v80 — Pre-Departure Cart Packing Overlay (Issue #44)
-- **Fix:** Restored 14 missing public API methods on engine return object (accidentally removed in v70b):
-  `getNodes`, `getCurrentNode`, `getNextNode`, `totalWeight`, `getCrew`, `getPendingEvent`, `getAvailableActions`, `isOver`, `hasWon`, `getScore`, `getPreDepartureItems`, `setPreDepartureCount`, `confirmPreDeparture`, `getScoreData`
-- **Docs:** Added conventional commit message format to AGENTS.md (feat:/fix:/docs:/chore:/balance: types with scope examples)
-- **Docs:** Added JSDoc comments to all 29 public engine methods
-- **Debug:** Wired `mountDebugUI(game)` call into bootstrap; debug panel now only mounts when URL has `?debug=1`
-- Files: `src/systems/engine.js`, `src/main.js`, `src/ui/debug.js`, `AGENTS.md`, `TODO.md`, `CHANGELOG.md`
+- Restored 14 missing public API methods on engine return object (accidentally removed in v70b)
+- Docs: conventional commit message format in AGENTS.md; JSDoc comments on all public engine methods
+- Debug panel wired into bootstrap; only mounts on `?debug=1`
+- Files: `src/systems/engine.js`, `src/main.js`
 
 ### v70 — Women, children, and family presence on the trail (#25)
-- 4 new sources: CALHOON_PEMM, CALHOON_CART_FORT, IPAC_RAFT, SMALLPOX_1870, SIMPSON_BRIGADE
-- 4 new events: plains_cart_fortress, plains_smallpox_trail, river_valley_cart_raft, plains_pemmican_process (camp action)
-- New camp action: Process Pemmican (3 food → 5-13+ food + morale, 3 tiers)
-- Updated settlement descriptions: Fort Garry (families), St. Norbert (flower beadwork), Batoche (Ottawa promises)
-- Travel fragment: dog alongside cart
-- Based on research from Victoria Callihoo oral history, Indigenous Peoples Atlas of Canada, Simpson's "Narrative" (via Manitoba Pageant), KnowHistory.ca scrip records
-
-### v70 — Cultural + Writing Review Copy Edits (#6, #25)
-
----
-
-## Session Summary (2026-06-09)
+- 4 new events, 5 new sources, new camp action (Process Pemmican)
+- Updated settlement descriptions and travel fragments
+- Based on research from Callihoo oral history, IPAC, Simpson's “Narrative”, KnowHistory scrip records
 
 ### v69 — Firebase leaderboard / highscore system (#12)
-- Player name input in intro overlay (persists via localStorage)
-- Firebase Firestore `scores` collection — open-write, no auth
-- Every game auto-saves full telemetry (17 fields: score, day, wear, food, crew, morale, won, endReason, nodes, tradesMade, camps, eventsResolved, weather, cartItems, tradeGoods, distance, seed)
-- Leaderboard overlay after end-game: Hall of Fame (top 10) + My Scores (personal history)
-- My Scores sortable by: score, day, wear, food (asc), tradesMade, nodes, eventsResolved, morale
-- Local fallback for offline: scores saved to localStorage, synced on next load
-- Engine: added `game.getScoreData()` public method
-- Files: `src/firebase.js` (new), `src/systems/engine.js`, `src/main.js`, `src/template.html`, `package.json`
-
-### v67 — Camp dice rolls + flavor text; More actions fix
-- Added dice roll animation to camp actions (rest, forage, hunt, scout)
-- Added rich flavor text for all 7 camp actions (3 tiers: high/mid/low, 3 variants each = 63 flavor texts)
-- Camp action buttons now show descriptions (e.g. 'Sleep and recover. Crew may improve.')
-- Fixed 'More actions' toggle to only show when craft has usable recipes (#39)
-- campAction() now returns roll + rollTotal for UI animation
-- Files: `src/systems/engine.js`, `src/main.js`, `src/template.html`
-
-### v66 — Item-giving events for unobtainable items
-- 6 new events giving items that were previously only in the starting cart:
-  - `plains_medicine_herb`: find sage/yarrow → Medicine Pouch
-  - `plains_abandoned_cart`: salvage from abandoned cart → Spare Axle or Shaganappi
-  - `river_valley_canvas_cache`: HBC supply cache → Canvas Tarp
-  - `wooded_firewood_gather`: dead poplar stand → Firewood Bundle
-  - `upland_blanket_find`: abandoned hunter's camp → Blanket
-  - `river_beaver_trade`: beaver ponds → Beaver Pelts (or food from fishing)
-- All use existing `give` code path — no engine changes
-- 7 new source entries: LACOMBE_HERBS, BREHAUT_ABANDONED_CARTS, FONSECA_HBC_SUPPLY, SCHULTZ_DEADFALL, GOULET_BLANKET, FONSECA_BEAVER
-- Sim results: 27.5% win rate (target 25-40%), diverse death distribution
-- Files: `src/data/events.js`, `src/data/sources/index.js`
+- Player name input, Firestore `scores` collection, Hall of Fame + My Scores tabs
+- 8 sort options, local fallback
+- Engine: `game.getScoreData()`
 
 ### v65 — Weather system (#13)
-- Added weather system with 5 states (clear, overcast, rain, storm, snow) via season-aware Markov chain
-- Weather modifiers: food consumption, wear accumulation, morale drift, event chance, camp recovery
-- 4 new weather events: plains_thunderstorm, plains_windstorm, river_valley_flash_flood, upland_early_snow
-- 6 new source entries: LACOMBE_STORM, FONSECA_RAIN, SCHULTZ_SNOW, LACOMBE_WIND, BREHAUT_WET_AXE, FONSECA_OVERCAST
-- Weather indicator in status bar with emoji + color coding
-- 64 new weather-specific travel narrative fragments (4 per state × 4 terrains)
-- Weather fragments take priority over crew-state fragments during non-clear weather
-- Sim results: 29% win rate (target 25-40%), diverse death distribution
-- Files: `src/core/constants.js`, `src/systems/engine.js`, `src/data/events.js`, `src/data/sources/index.js`, `src/main.js`, `src/ui/renderer.js`, `src/template.html`, `dist/index.html`
-
-### v64 — Atmospheric travel narrative + unload button labels
-- Replaced debug travel text with 48 atmospheric fragments (4 terrains × 3 crew states)
-- Unload buttons now show item name: "Unload Pemmican Rations (−2.5 kg)"
-- Files: `src/main.js`
+- 5-state weather (clear/overcast/rain/storm/snow) via season-aware Markov chain
+- 4 new weather events, 6 new source entries, 64 weather-specific travel fragments
+- Sim: 29% win rate
 
 ### v63 — Win rate normalization balance pass
-- DAILY_FOOD: 1.2 → 1.35, starting food: 30 → 27
-- Wear accumulation: plains 0.08→0.10, river_valley 0.12→0.15, wooded 0.15→0.20
-- Fix `consumesItem` in resolveChoice() — Medicine Pouch now consumed by cholera event
-- Lowered sim triumphant threshold: 1400 → 1100
-- Sim results: 35% win rate (target 25-40%), diverse death reasons
-- Files: `src/core/constants.js`, `src/systems/engine.js`, `tests/simulate-entry.js`
+- DAILY_FOOD 1.2→1.35, starting food 30→27
+- Wear accumulation increased on all terrains
+- consumesItem bug fixed (Medicine Pouch consumed by cholera)
+- Sim: 35% win rate
 
-### v62 — Item-giving events for crafting input replenishment
-- 4 new events that give crafting input items as rewards, making crafting a renewable system:
-  - `plains_abandoned_camp`: find 2× Shaganappi at a cached campsite (plains pool)
-  - `plains_hbc_cache`: find 1× Bison Hide from an HBC supply cache (plains pool)
-  - `wooded_rope_find`: find 1× Rope (50ft) left beside the trail (wooded pool)
-  - `river_valley_ammo_trader`: trade 3 food for 1× Ammunition Belt (river_valley pool)
-- All use existing `give` code path in `resolveChoice()` — no engine changes
-- New source entries: `BREHAUT_ABANDONED`, `FONSECA_SUPPLY_CACHE`, `BREHAUT_AMMO`, `GOULET_HIDE`
-- Files: `src/data/events.js`, `src/data/sources/index.js`
-
-### v61 — Crafting discoverability hint (#33)
-- `.settlement-action-btn.secondary-action`: `var(--clr-bg)` → opaque `#d4c9b4`
-- `.settlement-action-btn.utility-action`: `rgba(255,255,255,0.45)` → `rgba(210,200,180,0.92)`
-- Duplicate stat headings (#43): replaced `innerHTML` with `textContent` + `className` on stat-value spans in `renderStatusBar()`. Template labels are now the sole label source.
-- Files: `src/template.html`, `src/ui/renderer.js`, `dist/index.html`
-
-### v50 — 4 low-hanging bug fixes (#29, #30, #36, #37)
-- **#30 (food decimals):** `DAILY_FOOD = 1.2` caused float values. Fixed with `Math.round(...*10)/10` after subtraction, `Math.floor()` on display in status bar and camp overlay. Files: `src/systems/engine.js`, `src/ui/renderer.js`, `src/main.js`
-- **#29 (dice timing):** Pass/fail pill removed from `renderDicePill()`. Outcome only appears in `revealDiceOutcome()` after dice settle. File: `src/main.js`
-- **#37 (Gabriel Dumont duplicate):** Removed `river_ferry_dumont` from river event pool. `ferry_gabriel` (river_valley pool) remains as the single Dumont event. File: `src/data/events.js`
-- **#36 (first travel settlement):** Skip `pendingSettlement` when `S.node <= 1`. Player gets one clean travel before first settlement. File: `src/systems/engine.js`
-
-### v56 — Crafting discoverability hint (#33)
-- Hint line below settlement description when recipes are available
-- Single recipe: shows name + inputs; multiple: shows count
-- Hidden when no recipes match; styled subtle (small italic, muted color)
-- Files: `src/main.js`, `src/template.html`, `dist/index.html`
-
-### v55 — Added location/node markers on map (#26)
-- All 16 trail nodes shown as colored circle markers
-- Color-coded by settlement type (HBC=red, Métis=green, NWMP=blue, Mission=gold, Trading=brown, River=blue)
-- Current node: larger (9px), filled; visited: small gray (5px); future: medium (6px)
-- Tooltips on hover/tap show node name
-- Files: `src/ui/renderer.js`, `src/template.html`, `dist/index.html`
-
-### v54 — Grouped secondary settlement actions (#35)
-- Primary actions always visible; secondary (craft) behind "More actions ▶" toggle
-- Toggle text: "More actions ▶" / "Less ▲"
-- No toggle on settlements with no secondary actions
-- Extracted `renderSettlementAction()` helper, simplified empty-state buttons
-- Files: `src/main.js`, `src/template.html`
-
-### v53 — Consolidated action verb style (#34)
-- Single pattern across all panels: verb-first label, cost inline, single line
-- Travel: "Travel 1 Day" → "Travel", "Make Camp" → "Camp"
-- Camp: "Rest Up" → "Rest", "Repair Cart" → "Repair", "Scout Ahead" → "Scout", "Dance / Fiddle" → "Dance"
-- Camp costs: "1 food, 0 days" → "1 food", "1 day, no items" → "1 day", "0 days, no items" → "free"
-- Settlement: label+subtitle divs → single text line with cost appended
-- Removed dead actionLabel entries (forage, recruit, rumours, gossip, reinforce)
-- Removed unused `.settlement-action` wrapper and label/subtitle divs
-- Files: `src/template.html`, `src/main.js`
-
-### v52 — Prune redundant settlement actions (#31)
-- Removed `recruit` (dominated by `rest`), `forage` (camp version better), `rumours` (no mechanical effect) from all settlement types.
-- Removed dead `settlementAction()` handlers for pruned actions.
-- Settlement action counts: HBC 4, Métis 3, Trading 2, Mission 2, NWMP 3.
-- Camp actions unchanged — all 7 have clear distinct tradeoffs.
-- Files: `src/systems/engine.js`
-
-### v51 — Dice outcome animation sync (#29 follow-up)
-- Replaced hardcoded 500ms timeout with `animationend` event on die element. Outcome reveals exactly when `dice-settle` CSS animation (450ms) completes. Includes `revealed`-guard + fallback timeout.
-- File: `src/main.js`
+### v62 — Crafting input replenishment
+- 4 new item-giving events (Shaganappi, Bison Hide, Rope, Ammunition Belt mid-trail)
 
 ---
-
 ## Build & Serve
 
 ```bash
@@ -180,103 +74,39 @@ bun scripts/build.mjs
 cd dist && python3 -m http.server 5173
 
 # Verify
-curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:5173/
+http://100.108.183.33:5173/
 ```
 
-**Note:** Build script bumps `?v=N` in both `dist/index.html` and `src/template.html`. After every build, verify `src/template.html` matches or the next build will double-increment.
+**Note:** Build script bumps `?v=N` in `dist/index.html` and `src/template.html`. Verify version parity after builds.
 
 ---
-
-## Open Issues (GitHub)
+## Open Issues (GitHub / Local)
 
 ### Bugs
-- **#32** — Balance pass on unforgiving events (medicine pouch) — p2
-- **(local #32)** — Overlay sequence: pre-departure shows before intro (was local ISSUES.md #32, may overlap with original fix in bootstrap)
-- **#46** — Save/load validation and schema version
+- **#42** — 3 secondary sources read as Wikipedia summaries (MMF_COMMUNITIES, CARLTON_TRAIL, NWMP_HISTORY) — text cleanup pending
 
-### Enhancements (prioritized)
-- **#10** — Basic icons
-- **#42** — Reformat secondary sources to period voices
-- **#43** — Add second half of Carlton Trail nodes
-- **#44** — Pre-departure cart packing overlay (blocked by overlay sequence)
-- **#45** — Unit tests for calendar and PRNG
+### Content
+- **#43** — Second half of Carlton Trail nodes not yet implemented
+- **#10** — Icons for events/map (awaiting art from external agent)
 
-### Resolved (2026-06-10)
-- **#47** — mountDebugUI behind ?debug=1 — v71
-- **#48** — Standardize conventional commit messages — v71 (AGENTS.md)
-- **#49** — Add doc comments to exported engine.js functions — v71
-
-### Resolved (2026-06-09)
-- **#12 — Highscore/leaderboard** — v69. Firebase Firestore leaderboard with Hall of Fame (top 10) and My Scores (personal history with 8 sort options). Player name collected at game start. Local fallback for offline.
-- **#13 — Weather system** — v65. Added 5-state weather system (clear/overcast/rain/storm/snow) with season-aware Markov chain. Weather modifies food consumption, wear accumulation, morale drift, event chance, and camp recovery. 4 new weather events, 6 new source entries, weather indicator in status bar, 64 weather-specific travel fragments. Sim: 29% win rate.
-
-### Resolved (2026-06-08)
-- ** crafting inputs closed-system gap** — v62. Added 4 item-giving events so players can acquire Shaganappi, Bison Hide, Rope, Ammunition Belt mid-trail. Crafting is now a renewable system.
-- **#33** — Crafting discoverability in settlement UI — v61. Hint line below desc when recipes available.
-- **#26** — Add location/node markers on map — v55. Color-coded by settlement type, tooltips show names.
-- **#35** — Reduce action-dense screens by grouping secondary actions — v54. Primary actions always visible; craft behind "More actions ▶" toggle.
-- **#34** — Audit and consolidate action verbs — v53.
-- **#31** — Prune redundant settlement/camp actions — v52.
-
-### External (no code)
-- **#25** — Cultural/peer review
-- **#6** — AI writing trend review
-- **(local #42)** — Playwright tooling blocker (can't browser-verify clicks)
+### Enhancements
+- **scout/guide hire** — moral choices anchored to event history (unstarted)
 
 ---
-
-## TODO.md Status
-
-### Phase 1 — Foundation
-- [x] All core items done
-- [ ] Standardize conventional commit messages
-- [ ] Add doc comments to exported `engine.js` functions
-
-### Phase 2 — Core Systems
-- [x] All event/system items done
-- [ ] `mountDebugUI` behind `?debug=1`
-- [ ] Unit tests for calendar and PRNG
-- [ ] Save/load validation + schema version
-
-### Phase 3/5 — Content & Mechanics
-- [x] Items, crafting, trade, endings all done
-- [ ] Add second half of Carlton Trail nodes
-- [ ] Weather system
-- [ ] Pre-departure cart packing (blocked by overlay sequence bug)
-
-### Phase 4 — UI/UX Polish
-- [x] Mobile bar, button hierarchy, camp grouping, settlement polish done
-- [ ] Location/node markers on map (#26)
-- [ ] Basic icons (#10)
-
-### Phase 7 — Cart UX & Crafting
-- [x] Cart weight, category tooltips, pre-departure overlay done
-- [x] Crafting inputs replenishable via events (v62 — 4 item-giving events)
-- [x] Duplicate Trade button resolved (v53 — inline panel, no separate toggle)
-
-### Phase 8 — Win Rate Normalization
-- [x] Win rate normalized: 57.5% → 35% (target 25-40%) — v63
-- [x] consumesItem bug fixed — Medicine Pouch now consumed by cholera event
-- [x] Cart unload buttons show item name — v64
-- [x] Atmospheric travel narrative replaces debug text — v64
-- [ ] Basic icons / map markers (Issue #10, #26)
-
----
-
 ## Known Pitfalls (from AGENTS.md)
 
 - **Map init timing:** Always call `initMap()` during `bootstrap()`, not deferred.
 - **Port 8080:** qBittorrent uses it. Serve dev on 5173.
 - **Browser verification:** Playwright click is broken on mobile; use JS click or real device.
-- **Build version drift:** Template is source of truth; sync after every build.
+- **Build version drift:** Template is source of truth; manually sync versions after builds.
 - **Engine API:** Every method called from `main.js` MUST exist on engine's return object or the render function silently dies.
 - **Item field name:** Items use `wt` for weight, not `weight`.
 - **`pendingSettlement` blocks travel:** Both "Continue West" and "✕" must call `settlementAction('continue')`.
-- **Stale cart reference:** Never cache `game.getCart()` during offload loops — `offloadItem()` mutates internally.
-- **Template CSS vs dist CSS:** The build script reads from existing `dist/index.html` (not `src/template.html`) for the base. CSS changes in `src/template.html` must also be patched into `dist/index.html` directly.
+- **Stale cart reference:** Never cache `game.getCart()` during offload loops.
+- **Template CSS vs dist CSS:** The build script preserves `dist/index.html` as the base; CSS must be patched directly into `dist/index.html` after templ changes.
+- **Build command:** Use `bun scripts/build.mjs`; npm is broken in this environment.
 
 ---
-
 ## Project Structure
 
 ```
@@ -304,7 +134,7 @@ metis-trail-v2-repo/
 │       ├── events.js        # EVENT_POOLS (by terrain), pickEventForTerrain
 │       ├── items.js         # 12 item definitions (field name: `wt`)
 │       ├── nodes.js         # Trail nodes with lat/lon/type/terrain
-│       └── sources/index.js # 35+ primary source entries
+│       └── sources/index.js # primary + secondary source entries
 ├── dist/                    # Built output (bun scripts/build.mjs)
 │   ├── index.html           # Generated from template
 │   ├── app.js               # Bundled JS
@@ -324,41 +154,8 @@ metis-trail-v2-repo/
 ```
 
 ---
+## Next Session Priorities
 
-## Next Session Handoff — Source Reformatting + Trail Expansion
-
-**Priority:** Cultural review remaining items + content expansion.
-
-### Source reformatting (#42)
-- 3 source entries need rewrite: MMF_COMMUNITIES, CARLTON_TRAIL, NWMP_HISTORY
-- Currently read as Wikipedia summaries; need period voices or clear "historical notes" format
-- No engine changes — text only
-
-### Trail nodes expansion (#43)
-- Second half of Carlton Trail nodes not yet implemented
-- Needs: node definitions (lat/lon, type, terrain), events for western terrain types, testing full route
-
-### Pre-departure cart packing (#44)
-- Player configures starting cart loadout before journey
-- Blocked by overlay sequence bug (pre-departure shows before intro)
-- Engine API already exists: `getPreDepartureItems()`, `setPreDepartureCount()`, `confirmPreDeparture()`
-
-### Unit tests (#45)
-- Test calendar.js date advancement, season changes
-- Test seed.js PRNG reproducibility
-- Run via bun test or esbuild test harness
-
-### Save/load validation (#46)
-- Add schema version to save files
-- Validate on load, reject/migrate corrupted saves
-- File: `src/ui/persistence.js`
-
-### Icons (#10)
-- 4 new events need icons: cart_fortress, smallpox_trail, cart_raft, pemmican_process
-- ~16 existing events also lack icons
-- Art being developed by another agent — integrate when ready
-
-### Constraints
-- Source reformatting is text-only, no mechanic changes
-- Trail expansion requires new node definitions and event data
-- Debug panel works behind `?debug=1`
+1. **Trail expansion** — second half Carlton Trail nodes (#43)
+2. **Source cleanup** — secondary sources to period voice / historical notes (#42)
+3. **Scout/guide mechanic** — hireable guide with moral branching
