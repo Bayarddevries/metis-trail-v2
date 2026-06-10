@@ -942,7 +942,8 @@
   .camp-actions { display: grid; grid-template-columns: 1fr; gap: 6px; position: relative; z-index: 1; }
   .camp-action-btn { width: 100%; text-align: left; padding: 10px 12px; background: var(--clr-ink); border: 2px solid var(--clr-ink); border-radius: 0; cursor: pointer; font-family: var(--font-heading); color: var(--clr-card-bg); min-height: 44px; transition: background 0.15s, color 0.15s, border-color 0.15s; }
   .camp-action-btn:hover:not(:disabled) { background: var(--clr-card-bg); color: var(--clr-ink); border-color: var(--clr-ink); }
-  .camp-action-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .camp-action-btn:disabled { opacity: 0.5; cursor: not-allowed; background: var(--clr-bg-dark); border-color: var(--clr-muted); color: var(--clr-muted); }
+  .camp-action-btn.disabled { opacity: 0.5; cursor: not-allowed; background: var(--clr-bg-dark); border-color: var(--clr-muted); color: var(--clr-muted); }
   .camp-action-label { font-size: 13px; font-weight: 700; color: inherit; }
   .camp-action-cost { font-size: 11px; color: var(--clr-muted); margin-top: 2px; }
   .camp-action-desc { font-size: 11px; color: var(--clr-source-context); margin-top: 2px; line-height: 1.3; font-style: italic; }
@@ -1451,7 +1452,10 @@
     </div>
   </div>
 </div>
-  <script type="module" src="app.js?v=97"></script>
+  <script type="module" src="app.js?v=98"></script>
+<script>window.__METIS_ASSETS__={
+  "assets": []
+};</script>
 <script>window.__METIS_ASSETS__={
   "assets": []
 };</script>

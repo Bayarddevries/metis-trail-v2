@@ -19084,15 +19084,22 @@ function showCamp(game) {
     resultEl.style.display = "none";
     resultEl.textContent = "";
   }
+  const hasAmmo = state.cart?.some((i) => i.name === "Ammunition Belt" && i.count > 0) ?? false;
+  const hasShaganappi = state.cart?.some((i) => i.name === "Shaganappi" && i.count > 0) ?? false;
+  const cartWear = state.wear > 0;
+  const hasNextNode = state.node < NODES.length - 1;
+  const terrain = NODES[state.node]?.terrain || "plains";
+  const canForage = terrain !== "plains";
+  const canHunt = terrain !== "wooded" && hasAmmo;
   const actions = [
-    { type: "rest", label: "Rest", cost: "1 food", desc: "Sleep and recover. Crew may improve." },
-    { type: "forage", label: "Forage", cost: "1 day", desc: "Search for edible plants and roots." },
-    { type: "hunt", label: "Hunt", cost: "1 ammo \xB7 1 day", desc: "Stalk game for fresh meat." },
-    { type: "pemmican_process", label: "Process Pemmican", cost: "3 food", desc: "Slice, dry, and render tallow. Women's work." },
-    { type: "repair", label: "Repair", cost: "1 shaganappi", desc: "Fix the cart. Reduces wear." },
-    { type: "scout", label: "Scout", cost: "1 day", desc: "Reconnoiter the trail ahead." },
-    { type: "dance", label: "Dance", cost: "free", desc: "Song and dance. Boosts morale." },
-    { type: "deeprest", label: "Deep Rest", cost: "2 food \xB7 2 days", desc: "Two days of full recovery." }
+    { type: "rest", label: "Rest", cost: "1 food", desc: "Sleep and recover. Crew may improve.", available: state.food >= 1 },
+    { type: "forage", label: "Forage", cost: "1 day", desc: "Search for edible plants and roots.", available: canForage },
+    { type: "hunt", label: "Hunt", cost: "1 ammo \xB7 1 day", desc: "Stalk game for fresh meat.", available: canHunt, unavailableReason: !hasAmmo ? "Need Ammunition Belt" : "No game in woods" },
+    { type: "pemmican_process", label: "Process Pemmican", cost: "3 food", desc: "Slice, dry, and render tallow. Women's work.", available: state.food >= 3 },
+    { type: "repair", label: "Repair", cost: "1 shaganappi", desc: "Fix the cart. Reduces wear.", available: cartWear && hasShaganappi, unavailableReason: !cartWear ? "Cart not worn" : "Need Shaganappi" },
+    { type: "scout", label: "Scout", cost: "1 day", desc: "Reconnoiter the trail ahead.", available: hasNextNode },
+    { type: "dance", label: "Dance", cost: "free", desc: "Song and dance. Boosts morale.", available: true },
+    { type: "deeprest", label: "Deep Rest", cost: "2 food \xB7 2 days", desc: "Two days of full recovery.", available: state.food >= 2 }
   ];
   if (actionsEl) {
     actionsEl.innerHTML = "";
@@ -19117,7 +19124,12 @@ function showCamp(game) {
       actionsEl.appendChild(header);
       list.forEach((a) => {
         const btn = document.createElement("button");
-        btn.className = "camp-action-btn";
+        const isAvailable = a.available !== false;
+        btn.className = "camp-action-btn" + (isAvailable ? "" : " disabled");
+        btn.disabled = !isAvailable;
+        if (!isAvailable && a.unavailableReason) {
+          btn.title = a.unavailableReason;
+        }
         btn.innerHTML = `<div class="camp-action-label">${a.label}</div><div class="camp-action-desc">${a.desc}</div><div class="camp-action-cost">${a.cost}</div>`;
         btn.addEventListener("click", () => {
           const result = game.campAction(a.type);
