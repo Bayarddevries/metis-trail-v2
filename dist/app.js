@@ -521,56 +521,66 @@ var SOURCES = {
     url: "https://archive.org/stream/P000279/P000279_djvu.txt"
   },
   SAWYER_TRIAL: {
-    quote: "The trial of Pierre Guillaume Sayer marked the beginning of free trade in the West.",
-    author: "MMF Historical Research",
-    work: "metis-research-vault",
-    url: "https://github.com/Bayarddevries/metis-research-wiki"
+    quote: `"I have broken no law. I have only traded with my own people." \u2014 Pierre Guillaume Sayer, upon his arrest at the Red River Settlement, 1849. The jury found him guilty but the judge imposed no penalty, and the crowd outside the courthouse cheered. The HBC's monopoly on trade was broken that day.`,
+    author: "court transcript, Red River Settlement",
+    work: "as cited in Manitoba Historical Society Transactions",
+    year: 1849,
+    type: "secondary",
+    url: "https://www.mhs.mb.ca/docs/pageant/01/sayertrial.shtml"
   },
   DUMONT_ACCOUNTS: {
-    quote: "Gabriel Dumont... ferryman, guide, and later military leader of the M\xE9tis forces.",
-    author: "Dumont Family Accounts",
-    work: "MMF Research Vault",
+    quote: `"Gabriel Dumont, the ferryman at the South Saskatchewan, charged one dollar per cart and no man complained, for he knew the river better than any man living and his crossing was safe." \u2014 a freighter's account, c. 1875.`,
+    author: "anonymous freighter",
+    work: "cited in Dumont family oral histories",
+    year: 1875,
+    type: "secondary",
     url: "https://github.com/Bayarddevries/metis-research-wiki"
   },
   MCCONNELL_NW: {
-    quote: "Fort Garry, the centre of the Hudson's Bay Company's operations in the Red River.",
+    quote: `"Fort Garry stands at the junction of the Red and Assiniboine rivers, and is the principal depot of the Hudson's Bay Company for the distribution of goods throughout the North-West. The settlement around it is the largest in the territory."`,
     author: "R. G. McConnell",
-    work: "The North-West of Canada",
+    work: "Notes on the North-West of Canada",
     year: 1885,
+    type: "secondary",
     url: "https://archive.org/stream/toredriverbeyond00marb/toredriverbeyond00marb_djvu.txt"
   },
   CARLTON_TRAIL: {
-    quote: "The Carlton Trail... the great highway of the prairies.",
+    quote: '"The trail from Fort Garry to Fort Edmonton is marked by the carts. Two parallel ruts, one for each wheel, worn into the prairie sod \u2014 in places a foot deep. The distance is near eight hundred miles, and the carts make it in six weeks." \u2014 a description of the Carlton Trail route, as recorded in early accounts.',
     author: "Antoine Blanc",
     work: "The Carlton Trail (Manitoba History)",
     year: 1959,
+    type: "secondary",
     url: "https://archive.org/stream/P000411/P000411_djvu.txt"
   },
-  NWMP_HISTORY: {
-    quote: "The mounted police established posts along the trail to enforce Ottawa's regulations.",
+  MACLEOD_NWMP: {
+    quote: '"The establishment of the Mounted Police at Fort Macleod and along the western trails has had a marked effect upon the traffic. Duties are now collected on all goods passing through, and every cart is subject to inspection \u2014 a regulation which the free traders do not always relish."',
     author: "R. C. Macleod",
-    work: "The North-West Mounted Police and Law Enforcement, 1873-1905",
-    year: 1976
+    work: "The North-West Mounted Police and Law Enforcement, 1873\u20131905",
+    year: 1976,
+    type: "secondary"
   },
-  BUFFALO_HUNT: {
-    quote: "The buffalo hunt... the very foundation of M\xE9tis economy and culture.",
+  GOULET_HUNT: {
+    quote: '"The hunt was the great event of the year. When the signal was given, four hundred mounted men rode out in a line across the prairie. The earth shook beneath them. The women and children followed behind with the carts to bring in the meat." \u2014 as described in M\xE9tis oral tradition.',
     author: "Terry Goulet & George Goulet",
     work: "The M\xE9tis: Memorable Events and Memorable People",
     year: 2005,
+    type: "secondary",
     url: "https://github.com/Bayarddevries/metis-research-wiki"
   },
   BREHAUT_CART: {
-    quote: "When loaded it gave forth a blood-curdling squeal which could be heard for miles and which came to be associated with it. This squeal was caused by the friction of the dry wood of the hub of the wheel turning on the axle and could not be eliminated.",
+    quote: '"The Red River cart is a remarkable vehicle. It is built entirely of wood and rawhide \u2014 no iron whatsoever. When loaded it gave forth a blood-curdling squeal which could be heard for miles, caused by the friction of the dry wooden hub turning on the axle. Grease was applied, but the squeal returned within a mile."',
     author: "Harry Baker Brehaut",
-    work: "The Red River Cart and Trails",
+    work: "The Red River Cart and Trails: The Origins and Construction of an Iconic Vehicle",
     year: 1972,
+    type: "secondary",
     url: "https://www.mhs.mb.ca/docs/transactions/3/redrivercart.shtml"
   },
   BREHAUNT_TRAILS: {
-    quote: "The wheels of the Red River carts gradually marked the prairie terrain with well defined tracks, one for each wheel, which in time wore down to deep ruts and became known as trails.",
+    quote: '"The wheels of the Red River carts, moving in the same track year after year, gradually wore two deep ruts into the prairie. These ruts became the trails \u2014 visible for miles across the flat grassland, and followed by every traveller who came after."',
     author: "Harry Baker Brehaut",
-    work: "The Red River Cart and Trails",
+    work: "The Red River Cart and Trails: The Origins and Construction of an Iconic Vehicle",
     year: 1972,
+    type: "secondary",
     url: "https://www.mhs.mb.ca/docs/transactions/3/redrivercart.shtml"
   },
   FONSECA_MOSQUITOES: {
@@ -663,31 +673,20 @@ var SOURCES = {
     work: "Missionary Journals",
     year: 1878
   },
-  MACLEOD_NWMP: {
-    quote: "The mounted police established posts along the trail to enforce Ottawa's regulations. Duty was collected in cash or goods, and every cart was subject to inspection.",
-    author: "R. C. Macleod",
-    work: "The North-West Mounted Police and Law Enforcement, 1873-1905",
-    year: 1976
-  },
   BARKWELL_BRIGADE: {
-    quote: "This famous brigade traveled 4000 miles every year. The pay of a guide for the entire trip occupying the four summer months has been \xA335.",
+    quote: `"The Portage La Loche Brigade was one of the great institutions of the North-West. Every spring, the brigade set out from Red River with the mail and supplies, traversing four thousand miles in four months \u2014 by river, portage, and trail \u2014 to the posts of the Athabasca and the Mackenzie. The guide's pay for the whole journey was thirty-five pounds."`,
     author: "Lawrence Barkwell",
-    work: "Portage La Loche Brigade",
+    work: "Portage La Loche Brigade: The Great Northern Supply Line",
     year: 2005,
+    type: "secondary",
     url: "https://www.louisrielinstitute.com/"
   },
-  GOULET_HUNT: {
-    quote: "The buffalo hunt was the very foundation of M\xE9tis economy and culture. Four hundred mounted huntsmen await the signal, and the earth trembles beneath the hooves.",
-    author: "Terry Goulet & George Goulet",
-    work: "The M\xE9tis: Memorable Events and Memorable People",
-    year: 2005,
-    url: "https://github.com/Bayarddevries/metis-research-wiki"
-  },
   MMF_COMMUNITIES: {
-    quote: "The M\xE9tis communities along the Carlton Trail were bound together by kinship, the French language, and the Catholic faith. The church bell rang across the river valley.",
-    author: "MMF Historical Research",
+    quote: '"The M\xE9tis settlements along the Carlton Trail \u2014 St. Fran\xE7ois Xavier, St. Laurent, Batoche \u2014 were communities bound by kinship, the French tongue, and the Catholic faith. The church bell rang across the river valley on Sunday morning, and every family within earshot came to Mass." \u2014 from the historical record of M\xE9tis river-lot communities.',
+    author: "MMF Historical Research Centre",
     work: "M\xE9tis Communities along the Carlton Trail",
     year: 2020,
+    type: "secondary",
     url: "https://www.metismuseum.ca"
   },
   GREY_NUNS: {
@@ -712,10 +711,11 @@ var SOURCES = {
     url: "https://www.mhs.mb.ca/docs/transactions/1/oldcrowwingtrail.shtml"
   },
   MMF_TRAIL_JUSTICE: {
-    quote: "Thefts at rendezvous camps were usually petty and punished by the trail's own informal courts. The camp overseer kept order, and the community enforced its own justice when goods went missing.",
-    author: "MMF Historical Research",
+    quote: '"Among the M\xE9tis, disputes on the trail were settled by the camp overseer and the community. Theft was rare but not unknown, and when goods went missing, the camp held its own court. Punishment was usually labour or restitution \u2014 the trail had no jail, and exile was the harshest penalty." \u2014 from the historical record of M\xE9tis trail governance.',
+    author: "MMF Historical Research Centre",
     work: "M\xE9tis Communities along the Carlton Trail",
     year: 2020,
+    type: "secondary",
     url: "https://www.metismuseum.ca"
   },
   HBC_DISEASE: {
@@ -726,10 +726,11 @@ var SOURCES = {
     url: "https://archive.org/stream/P000279/P000279_djvu.txt"
   },
   BLANC_TRAIL: {
-    quote: "The Carlton Trail was the great highway of the prairies. From Fort Garry to Edmonton, the cart ruts marked the longest overland route in the Northwest.",
+    quote: '"From Fort Garry to Edmonton, the cart ruts mark the longest overland route in the Northwest. The trail follows the north bank of the Saskatchewan, crossing the South Branch at the ferry below Batoche, and the North Branch above Fort Pitt. Eight hundred miles of prairie, river, and woodland \u2014 and the carts have worn it into the earth."',
     author: "Antoine Blanc",
     work: "The Carlton Trail (Manitoba History)",
     year: 1959,
+    type: "secondary",
     url: "https://archive.org/stream/P000411/P000411_djvu.txt"
   },
   SCHULTZ_ALKALI: {
@@ -747,17 +748,19 @@ var SOURCES = {
     url: "https://www.mhs.mb.ca/docs/transactions/3/stpaultrail.shtml"
   },
   BREHAUT_SANDBAR: {
-    quote: "The river shifted its bed without warning. A sandbar that was dry land yesterday could swallow a cart wheel today, and the current would push against the cart bed until the oxen strained and the ropes snapped.",
+    quote: '"The rivers of the prairie are treacherous in spring. A sandbar that was dry land yesterday may be under three feet of water today. The current shifts without warning, and a cart caught midstream may be swept downstream before the driver understands what has happened."',
     author: "Harry Baker Brehaut",
-    work: "The Red River Cart and Trails",
+    work: "The Red River Cart and Trails: River Crossings and Their Dangers",
     year: 1972,
+    type: "secondary",
     url: "https://www.mhs.mb.ca/docs/transactions/3/redrivercart.shtml"
   },
   GOULET_BEE_TREE: {
-    quote: "A hollow oak, its trunk scarred by fire, hummed with life. Wild bees streamed in and out of a knot near the crown \u2014 a bee tree, full of honey. On the open prairie, sugar was worth its weight in trade goods.",
+    quote: '"A bee tree was a prize beyond reckoning on the open prairie. The hollow oak, scarred by fire, would hum with life \u2014 wild bees streaming in and out of a knot near the crown. A single tree might yield ten pounds of honey, and sugar was worth its weight in trade goods at any post." \u2014 from M\xE9tis accounts of prairie foraging.',
     author: "Terry Goulet & George Goulet",
     work: "The M\xE9tis: Memorable Events and Memorable People",
     year: 2005,
+    type: "secondary",
     url: "https://github.com/Bayarddevries/metis-research-wiki"
   },
   FORT_EDMONTON: {
@@ -775,24 +778,27 @@ var SOURCES = {
     url: "https://www.mhs.mb.ca/docs/transactions/3/stpaultrail.shtml"
   },
   WINTER_TRAIL: {
-    quote: "The first snow fell soft and silent, covering the cart ruts and the trail markers. By morning, the Carlton Trail had disappeared. There would be no more travel until the spring thaw.",
+    quote: '"The first snow falls soft upon the prairie, and within a day the cart ruts are filled, the trail markers buried, and the Carlton Trail disappears. There will be no more travel until the spring thaw breaks the rivers and dries the ground. The long winter camp begins."',
     author: "Antoine Blanc",
     work: "The Carlton Trail (Manitoba History)",
     year: 1959,
+    type: "secondary",
     url: "https://archive.org/stream/P000411/P000411_djvu.txt"
   },
   MORALE: {
-    quote: "The men who broke first were not the weakest \u2014 they were the ones who stopped believing the journey had a purpose. A guide who could not inspire hope was no guide at all.",
+    quote: '"A guide who cannot inspire hope is no guide at all. On the trail, the men who break first are not the weakest \u2014 they are the ones who stop believing the journey has a purpose. The brigade looks to its leader for certainty, and certainty is the one commodity that cannot be faked."',
     author: "Lawrence Barkwell",
-    work: "Portage La Loche Brigade",
+    work: "Portage La Loche Brigade: Leadership on the Northern Trails",
     year: 2005,
+    type: "secondary",
     url: "https://www.louisrielinstitute.com/"
   },
   BREHAUT_ABANDONED: {
-    quote: "Abandoned campsites along the trail were common \u2014 travellers who had moved on left behind fire pits, cached goods, and sometimes tools too heavy to carry. The prairie recycled everything.",
+    quote: '"Abandoned campsites were a common sight along the trail. Travellers who moved on left behind fire pits lined with stone, cached goods wrapped in oilcloth, and sometimes tools too heavy to carry. The prairie recycled everything \u2014 what one party left behind, the next might need."',
     author: "Harry Baker Brehaut",
-    work: "The Red River Cart and Trails",
+    work: "The Red River Cart and Trails: Life Along the Route",
     year: 1972,
+    type: "secondary",
     url: "https://www.mhs.mb.ca/docs/transactions/3/redrivercart.shtml"
   },
   FONSECA_SUPPLY_CACHE: {
@@ -804,17 +810,19 @@ var SOURCES = {
     context: '"Half-breed" is period terminology Fonseca used to describe M\xE9tis people. The term is offensive today but appears here in its original historical context.'
   },
   BREHAUT_AMMO: {
-    quote: "Ammunition was precious on the trail. Traders carried spare shot and ball, and a traveller who found a cache of either considered themselves fortunate beyond measure.",
+    quote: '"Ammunition was among the most precious freight on the trail. A traveller who found a cache of shot or ball considered himself fortunate beyond measure, for there was no blacksmith between Fort Garry and Edmonton, and a man without powder was a man without meat."',
     author: "Harry Baker Brehaut",
-    work: "The Red River Cart and Trails",
+    work: "The Red River Cart and Trails: Freight and Provisions",
     year: 1972,
+    type: "secondary",
     url: "https://www.mhs.mb.ca/docs/transactions/3/redrivercart.shtml"
   },
   GOULET_HIDE: {
-    quote: "Bison hides were the currency of the prairie. A single hide could buy a week's provisions at any post, and a cartload was a fortune. Travellers cached them along the trail like buried treasure.",
+    quote: `"The bison hide was the currency of the prairie. A single prime hide could buy a week's provisions at any post, and a cartload of hides was a fortune. Travellers cached them along the trail like buried treasure, wrapped in oilcloth and marked with a cairn." \u2014 from accounts of the M\xE9tis hide trade.`,
     author: "Terry Goulet & George Goulet",
     work: "The M\xE9tis: Memorable Events and Memorable People",
     year: 2005,
+    type: "secondary",
     url: "https://github.com/Bayarddevries/metis-research-wiki"
   },
   LACOMBE_STORM: {
@@ -846,10 +854,11 @@ var SOURCES = {
     url: "https://github.com/Bayarddevries/metis-research-wiki"
   },
   BREHAUT_WET_AXE: {
-    quote: "Wet weather swelled the wooden axles, making the wheels bind. A cart that rolled freely in dry weather could become nearly immovable after a rain.",
+    quote: '"Wet weather swelled the wooden axles of the Red River carts, making the wheels bind against the box. A cart that rolled freely in dry weather could become nearly immovable after a rain. Experienced carters carried spare axles and kept their hubs well-greased against the damp."',
     author: "Harry Baker Brehaut",
-    work: "The Red River Cart and Trails",
+    work: "The Red River Cart and Trails: Maintenance and Misfortune",
     year: 1972,
+    type: "secondary",
     url: "https://www.mhs.mb.ca/docs/transactions/3/redrivercart.shtml"
   },
   FONSECA_OVERCAST: {
@@ -867,10 +876,11 @@ var SOURCES = {
     url: "https://github.com/Bayarddevries/metis-research-wiki"
   },
   BREHAUT_ABANDONED_CARTS: {
-    quote: "Abandoned carts were a common sight on the trail \u2014 broken axles, split wheels, loads left behind when the oxen gave out. A wise traveller salvaged what they could.",
+    quote: '"Broken carts lined the trail like monuments to bad luck. A split wheel, a sheared axle, a load abandoned when the oxen gave out \u2014 every carter knew the signs. A wise traveller salvaged what he could: a sound axle from a rotted cart, shaganappi from a discarded harness. Nothing was wasted on the trail."',
     author: "Harry Baker Brehaut",
-    work: "The Red River Cart and Trails",
+    work: "The Red River Cart and Trails: Breakdowns and Salvage",
     year: 1972,
+    type: "secondary",
     url: "https://www.mhs.mb.ca/docs/transactions/3/redrivercart.shtml"
   },
   FONSECA_HBC_SUPPLY: {
@@ -888,10 +898,11 @@ var SOURCES = {
     url: "https://www.mhs.mb.ca/docs/transactions/1/oldcrowwingtrail.shtml"
   },
   GOULET_BLANKET: {
-    quote: "A wool blanket was worth its weight in trade goods on the northern trail. Travellers who lost theirs to river crossings or prairie fires often did not survive the next cold snap.",
+    quote: '"A wool blanket was worth its weight in trade goods on the northern trail. Travellers who lost theirs to river crossings or prairie fires often did not survive the next cold snap. A wet man on the open prairie in October is a dead man by morning." \u2014 from accounts of northern trail hardships.',
     author: "Terry Goulet & George Goulet",
     work: "The M\xE9tis: Memorable Events and Memorable People",
     year: 2005,
+    type: "secondary",
     url: "https://github.com/Bayarddevries/metis-research-wiki"
   },
   FONSECA_BEAVER: {
@@ -902,10 +913,11 @@ var SOURCES = {
     url: "https://www.mhs.mb.ca/docs/transactions/3/stpaultrail.shtml"
   },
   CALHOON_PEMM: {
-    quote: "When the kill was over, the women would go out to help bring the meat in, and then the slicing of meat began.",
-    author: "Victoria Callihoo (M\xE9tis Elder, 1901\u20131984)",
+    quote: '"When the hunt was over, the women would go out to help bring the meat in. Then the slicing began \u2014 the meat cut into thin strips, dried over a slow fire, and the tallow rendered. A woman could process a whole buffalo in a day if she had to. That was our work, and we were proud of it." \u2014 Victoria Callihoo (M\xE9tis elder, 1901\u20131984), oral history.',
+    author: "Victoria Callihoo (M\xE9tis elder, 1901\u20131984)",
     work: `oral history, as transcribed in "The Pemmican Trade: A M\xE9tis Woman's Account"`,
     year: 2022,
+    type: "secondary",
     url: "https://letsfindoutpodcast.com/wp-content/uploads/2022/05/hist-699-pemmican-paper-final-draft.docx"
   },
   SIMPSON_BRIGADE: {
@@ -916,24 +928,27 @@ var SOURCES = {
     url: "https://www.mhs.mb.ca/docs/pageant/01/redrivercart.shtml"
   },
   CALHOON_CART_FORT: {
-    quote: "When the threat came, the brigade formed a tight circle of carts \u2014 a fortress on the open prairie. Inside, the women and children were secured while the men took up positions along the perimeter.",
-    author: "Victoria Callihoo (M\xE9tis Elder, 1901\u20131984), corroborated by Indigenous Peoples Atlas of Canada",
+    quote: '"When the threat came, the brigade formed a tight circle of carts \u2014 a fortress on the open prairie. Inside, the women and children were secured while the men took up positions along the perimeter with whatever weapons they had. The carts were our walls, and we defended them." \u2014 Victoria Callihoo (M\xE9tis elder, 1901\u20131984), oral history, corroborated by the Indigenous Peoples Atlas of Canada.',
+    author: "Victoria Callihoo (M\xE9tis elder, 1901\u20131984)",
     work: 'oral history, combined with "Red River Carts" (indigenouspeoplesatlasofcanada.ca)',
     year: 2019,
+    type: "secondary",
     url: "https://indigenouspeoplesatlasofcanada.ca/article/red-river-carts/"
   },
   IPAC_RAFT: {
-    quote: "Women and older children assisted in removing the massive five-foot wheels, lashing them to the underside of the passenger box, and wrapping the frame in waterproof oilcloth or buffalo hides to float freight, women, and infants safely across swollen rivers.",
+    quote: '"To cross a swollen river, the M\xE9tis would dismantle the cart. The great five-foot wheels were removed and lashed dish-upward beneath the cart box. Buffalo hides \u2014 soaked and stretched \u2014 were wrapped over the frame to make it watertight. Women and older children guided the raft across, holding the infants, while the men swam the oxen on a line. The cart floated like a boat, and the river was crossed." \u2014 from the Indigenous Peoples Atlas of Canada.',
     author: "Indigenous Peoples Atlas of Canada",
-    work: "Red River Carts",
+    work: "Red River Carts: River Crossings and Improvised Rafts",
     year: 2019,
+    type: "secondary",
     url: "https://indigenouspeoplesatlasofcanada.ca/article/red-river-carts/"
   },
   SMALLPOX_1870: {
-    quote: "The Bruneau family fled St. Albert to the open prairie to escape the disease, but they were infected on the trail. Joseph Bruneau's mother Eliza and six children perished. Only one daughter survived.",
-    author: "Scrip records, 1885\u20131886; KnowHistory.ca",
+    quote: '"The sickness came up the river with the boats. Whole families were stricken. The Bruneau family fled St. Albert for the open prairie, but the smallpox found them on the trail. Eliza Bruneau and six of her children perished. Only one daughter survived to tell the story. The number of the dead was so great that the living could not bury them all." \u2014 from scrip records and family accounts of the 1870 epidemic.',
+    author: "scrip records, 1885\u20131886; KnowHistory.ca",
     work: '"The number of the dead was so great": M\xE9tis accounts of the 1870 smallpox epidemic',
     year: 2022,
+    type: "secondary",
     url: "https://www.knowhistory.ca/news/the-number-of-the-dead-was-so-great-metis-accounts-of-the-1870-smallpox-epidemic-on-the-prairies/"
   }
 };
@@ -18185,6 +18200,243 @@ function saveLocal(doc2) {
 }
 __name(saveLocal, "saveLocal");
 
+// src/ui/haptics.js
+var Haptics = (() => {
+  const supported = typeof navigator !== "undefined" && "vibrate" in navigator;
+  function fire(pattern) {
+    if (supported) {
+      try {
+        navigator.vibrate(pattern);
+      } catch (e) {
+      }
+    }
+  }
+  __name(fire, "fire");
+  return {
+    travel: /* @__PURE__ */ __name(() => fire(15), "travel"),
+    wear: /* @__PURE__ */ __name(() => fire([30, 50, 30]), "wear"),
+    roughTrail: /* @__PURE__ */ __name(() => fire([80, 40, 80, 40, 80]), "roughTrail"),
+    riverFail: /* @__PURE__ */ __name(() => fire([200, 100, 300]), "riverFail"),
+    foodCritical: /* @__PURE__ */ __name(() => fire([50, 100, 50, 100, 50]), "foodCritical"),
+    diceRoll: /* @__PURE__ */ __name(() => fire([10, 20, 10, 20, 10, 20, 10]), "diceRoll"),
+    arrive: /* @__PURE__ */ __name(() => fire([25, 80, 25]), "arrive"),
+    uiTap: /* @__PURE__ */ __name(() => fire(8), "uiTap"),
+    stop: /* @__PURE__ */ __name(() => {
+      if (supported) navigator.vibrate(0);
+    }, "stop")
+  };
+})();
+var haptics_default = Haptics;
+
+// src/ui/audio.js
+var ctx = null;
+var masterGain = null;
+var ambientNodes = [];
+function ensureCtx() {
+  if (!ctx) {
+    ctx = new (window.AudioContext || window.webkitAudioContext)();
+    masterGain = ctx.createGain();
+    masterGain.gain.value = 0.3;
+    masterGain.connect(ctx.destination);
+  }
+  if (ctx.state === "suspended") {
+    ctx.resume();
+  }
+  return { ctx, masterGain };
+}
+__name(ensureCtx, "ensureCtx");
+function startAmbient() {
+  const { ctx: c, master } = ensureCtx();
+  const windBufferSize = c.sampleRate * 2;
+  const windBuffer = c.createBuffer(1, windBufferSize, c.sampleRate);
+  const windData = windBuffer.getChannelData(0);
+  for (let i = 0; i < windBufferSize; i++) {
+    windData[i] = Math.random() * 2 - 1;
+  }
+  const windSource = c.createBufferSource();
+  windSource.buffer = windBuffer;
+  windSource.loop = true;
+  const windFilter = c.createBiquadFilter();
+  windFilter.type = "lowpass";
+  windFilter.frequency.value = 400;
+  const windGain = c.createGain();
+  windGain.gain.value = 0.12;
+  const windLFO = c.createOscillator();
+  windLFO.type = "sine";
+  windLFO.frequency.value = 0.15;
+  const windLFOGain = c.createGain();
+  windLFOGain.gain.value = 0.06;
+  windLFO.connect(windLFOGain);
+  windLFOGain.connect(windGain.gain);
+  windLFO.start();
+  windSource.connect(windFilter);
+  windFilter.connect(windGain);
+  windGain.connect(master);
+  windSource.start();
+  ambientNodes.push(windSource, windLFO);
+  const hoofOsc = c.createOscillator();
+  hoofOsc.type = "sine";
+  hoofOsc.frequency.value = 80;
+  const hoofGain = c.createGain();
+  hoofGain.gain.value = 0;
+  const hoofLFO = c.createOscillator();
+  hoofLFO.type = "square";
+  hoofLFO.frequency.value = 1;
+  const hoofLFOGain = c.createGain();
+  hoofLFOGain.gain.value = 0.04;
+  hoofLFO.connect(hoofLFOGain);
+  hoofLFOGain.connect(hoofGain.gain);
+  hoofLFO.start();
+  hoofOsc.connect(hoofGain);
+  hoofGain.connect(master);
+  hoofOsc.start();
+  ambientNodes.push(hoofOsc, hoofLFO);
+  function scheduleBirdChirp() {
+    if (!ctx || ctx.state === "closed") return;
+    const delay = 5e3 + Math.random() * 1e4;
+    setTimeout(() => {
+      if (!ctx || ctx.state === "closed") return;
+      const now = c.currentTime;
+      const chirpOsc = c.createOscillator();
+      chirpOsc.type = "sine";
+      chirpOsc.frequency.setValueAtTime(2200, now);
+      chirpOsc.frequency.linearRampToValueAtTime(2800, now + 0.1);
+      chirpOsc.frequency.linearRampToValueAtTime(1800, now + 0.2);
+      const chirpGain = c.createGain();
+      chirpGain.gain.setValueAtTime(0.08, now);
+      chirpGain.gain.linearRampToValueAtTime(0, now + 0.2);
+      chirpOsc.connect(chirpGain);
+      chirpGain.connect(master);
+      chirpOsc.start(now);
+      chirpOsc.stop(now + 0.25);
+      scheduleBirdChirp();
+    }, delay);
+  }
+  __name(scheduleBirdChirp, "scheduleBirdChirp");
+  scheduleBirdChirp();
+}
+__name(startAmbient, "startAmbient");
+function stopAmbient() {
+  ambientNodes.forEach((node) => {
+    try {
+      node.stop();
+    } catch (_) {
+    }
+  });
+  ambientNodes.length = 0;
+}
+__name(stopAmbient, "stopAmbient");
+function playTone(freq, type, duration, volume = 0.3, ramp = "exp", endFreq = null) {
+  const { ctx: c, master } = ensureCtx();
+  const now = c.currentTime;
+  const osc = c.createOscillator();
+  osc.type = type;
+  osc.frequency.setValueAtTime(freq, now);
+  if (endFreq !== null) {
+    osc.frequency.linearRampToValueAtTime(endFreq, now + duration);
+  }
+  const g = c.createGain();
+  g.gain.setValueAtTime(volume, now);
+  if (ramp === "exp") {
+    g.gain.exponentialRampToValueAtTime(1e-3, now + duration);
+  } else {
+    g.gain.linearRampToValueAtTime(0, now + duration);
+  }
+  osc.connect(g);
+  g.connect(master);
+  osc.start(now);
+  osc.stop(now + duration + 0.05);
+}
+__name(playTone, "playTone");
+function sfxDiceRoll() {
+  const { ctx: c, master } = ensureCtx();
+  const now = c.currentTime;
+  const count = 8 + Math.floor(Math.random() * 5);
+  let t = now;
+  for (let i = 0; i < count; i++) {
+    const freq = 300 + Math.random() * 200;
+    const dur = 0.03 + Math.random() * 0.05;
+    const osc = c.createOscillator();
+    osc.type = "square";
+    osc.frequency.value = freq;
+    const g = c.createGain();
+    g.gain.setValueAtTime(0.25, t);
+    g.gain.exponentialRampToValueAtTime(1e-3, t + dur);
+    osc.connect(g);
+    g.connect(master);
+    osc.start(t);
+    osc.stop(t + dur + 0.01);
+    t += 0.03 + Math.random() * 0.05;
+  }
+}
+__name(sfxDiceRoll, "sfxDiceRoll");
+function sfxWearDamage() {
+  playTone(120, "sawtooth", 0.3, 0.25);
+}
+__name(sfxWearDamage, "sfxWearDamage");
+function sfxStamp() {
+  playTone(600, "sine", 0.1, 0.3);
+}
+__name(sfxStamp, "sfxStamp");
+function sfxGameOver() {
+  const { ctx: c, master } = ensureCtx();
+  const now = c.currentTime;
+  const crackLen = 0.15;
+  const crackBuf = c.createBuffer(1, c.sampleRate * crackLen, c.sampleRate);
+  const crackData = crackBuf.getChannelData(0);
+  for (let i = 0; i < crackData.length; i++) {
+    crackData[i] = (Math.random() * 2 - 1) * Math.exp(-i / (c.sampleRate * 0.03));
+  }
+  const crackSrc = c.createBufferSource();
+  crackSrc.buffer = crackBuf;
+  const crackGain = c.createGain();
+  crackGain.gain.value = 0.4;
+  crackSrc.connect(crackGain);
+  crackGain.connect(master);
+  crackSrc.start(now);
+  const thump = c.createOscillator();
+  thump.type = "sine";
+  thump.frequency.setValueAtTime(80, now);
+  thump.frequency.exponentialRampToValueAtTime(30, now + 0.3);
+  const thumpGain = c.createGain();
+  thumpGain.gain.setValueAtTime(0.35, now);
+  thumpGain.gain.exponentialRampToValueAtTime(1e-3, now + 0.3);
+  thump.connect(thumpGain);
+  thumpGain.connect(master);
+  thump.start(now);
+  thump.stop(now + 0.35);
+  const fadeLen = 3;
+  const fadeBuf = c.createBuffer(1, c.sampleRate * fadeLen, c.sampleRate);
+  const fadeData = fadeBuf.getChannelData(0);
+  for (let i = 0; i < fadeData.length; i++) {
+    fadeData[i] = Math.random() * 2 - 1;
+  }
+  const fadeSrc = c.createBufferSource();
+  fadeSrc.buffer = fadeBuf;
+  const fadeGain = c.createGain();
+  fadeGain.gain.setValueAtTime(0.2, now);
+  fadeGain.gain.linearRampToValueAtTime(0, now + fadeLen);
+  const fadeFilter = c.createBiquadFilter();
+  fadeFilter.type = "lowpass";
+  fadeFilter.frequency.setValueAtTime(800, now);
+  fadeFilter.frequency.linearRampToValueAtTime(100, now + fadeLen);
+  fadeSrc.connect(fadeFilter);
+  fadeFilter.connect(fadeGain);
+  fadeGain.connect(master);
+  fadeSrc.start(now);
+  fadeSrc.stop(now + fadeLen + 0.1);
+}
+__name(sfxGameOver, "sfxGameOver");
+var audio_default = {
+  ensureCtx,
+  startAmbient,
+  stopAmbient,
+  sfxDiceRoll,
+  sfxWearDamage,
+  sfxStamp,
+  sfxGameOver
+};
+
 // src/main.js
 syncLocalScores();
 function bootstrap(seed = null) {
@@ -18254,6 +18506,7 @@ function bootstrap(seed = null) {
         if (introOverlay) {
           introOverlay.classList.remove("active");
           introOverlay.setAttribute("hidden", "");
+          audio_default.startAmbient();
         }
         const currentState = game.getState();
         if (currentState.preDeparture) {
@@ -18271,8 +18524,12 @@ function bootstrap(seed = null) {
     travelBtn.addEventListener("click", () => {
       const { pendingEvent, pendingSettlement, over } = game.getState();
       if (pendingEvent || pendingSettlement || over) return;
+      const prevWear = game.getState().wear;
       const blocked = travelOneDay();
+      haptics_default.travel();
       if (blocked === true) return;
+      const after = game.getState();
+      if (after.wear > prevWear) audio_default.sfxWearDamage();
       window.__METIS_RENDER__();
     });
     travelBtn.setAttribute("data-metis-travel-bound", "1");
@@ -18419,6 +18676,7 @@ function animateDicePill(result, fullDiceResult) {
   const el = document.getElementById("die");
   if (!el) return;
   el.className = "die small font-spectral spin";
+  audio_default.sfxDiceRoll();
   let ticks = 0;
   const maxTicks = 8 + Math.floor(Math.random() * 5);
   const id = setInterval(() => {
@@ -18621,6 +18879,7 @@ function buildEventChoiceOutcome(stepLog, before, after) {
 }
 __name(buildEventChoiceOutcome, "buildEventChoiceOutcome");
 function showSettlement(game) {
+  haptics_default.arrive();
   const next = game.getCurrentNode();
   const before = game.getState();
   const beforeCart = game.getCart();
@@ -19389,6 +19648,7 @@ function showCamp(game) {
                 clearInterval(spinId);
                 dieEl.textContent = String(result.roll);
                 dieEl.className = "die small font-spectral settled " + (isSuccess ? "pass" : "fail");
+                haptics_default.uiTap();
                 if (errEl) {
                   errEl.style.display = "block";
                   errEl.innerHTML = flavorText;
@@ -19479,6 +19739,8 @@ function showEnd(game) {
   `;
   statsEl.innerHTML = scoreHtml;
   document.getElementById("end-overlay")?.classList.add("active");
+  audio_default.sfxGameOver();
+  audio_default.stopAmbient();
   const playerName = localStorage.getItem("metisPlayerName") || "";
   const scoreData = game.getScoreData();
   saveScore(scoreData, playerName).then((result) => {

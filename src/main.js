@@ -8,6 +8,8 @@ import { NODES } from './data/nodes.js';
 import { ENDINGS } from './data/endings.js';
 import { CONSTANTS } from './core/constants.js';
 import { saveScore, getTopScores, getMyScores, syncLocalScores } from './firebase.js';
+import Haptics from './ui/haptics.js';
+import Audio from './ui/audio.js';
 
 // Sync any locally-saved scores on page load
 syncLocalScores();
@@ -86,6 +88,7 @@ export function bootstrap(seed = null) {
         if (introOverlay) {
           introOverlay.classList.remove('active');
           introOverlay.setAttribute('hidden', '');
+          Audio.startAmbient();
         }
         // If pre-departure is enabled, show it now
         const currentState = game.getState();
@@ -105,8 +108,13 @@ export function bootstrap(seed = null) {
     travelBtn.addEventListener('click', () => {
       const { pendingEvent, pendingSettlement, over } = game.getState();
       if (pendingEvent || pendingSettlement || over) return;
+      const prevWear = game.getState().wear;
       const blocked = travelOneDay();
+      Haptics.travel();
       if (blocked === true) return;
+      // Play wear damage sound if wear increased
+      const after = game.getState();
+      if (after.wear > prevWear) Audio.sfxWearDamage();
       window.__METIS_RENDER__();
     });
     travelBtn.setAttribute('data-metis-travel-bound', '1');
@@ -513,6 +521,7 @@ function animateDicePill(result, fullDiceResult) {
   const el = document.getElementById('die');
   if (!el) return;
   el.className = 'die small font-spectral spin';
+  Audio.sfxDiceRoll();
 
   let ticks = 0;
   const maxTicks = 8 + Math.floor(Math.random() * 5);
@@ -753,6 +762,7 @@ function buildEventChoiceOutcome(stepLog, before, after) {
 }
 
 function showSettlement(game) {
+  Haptics.arrive();
   const next = game.getCurrentNode();
   const before = game.getState();
   const beforeCart = game.getCart();
@@ -1570,6 +1580,7 @@ function showCamp(game) {
                 clearInterval(spinId);
                 dieEl.textContent = String(result.roll);
                 dieEl.className = 'die small font-spectral settled ' + (isSuccess ? 'pass' : 'fail');
+                Haptics.uiTap();
                 // Show result text after settle
                 if (errEl) {
                   errEl.style.display = 'block';
@@ -1677,6 +1688,8 @@ function showEnd(game) {
 
   statsEl.innerHTML = scoreHtml;
   document.getElementById('end-overlay')?.classList.add('active');
+  Audio.sfxGameOver();
+  Audio.stopAmbient();
 
   // Auto-save score to Firebase
   const playerName = localStorage.getItem('metisPlayerName') || '';
