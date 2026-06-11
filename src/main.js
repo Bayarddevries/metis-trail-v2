@@ -939,16 +939,28 @@ function showSettlement(game) {
 
   // Get settlement-specific actions from engine
   const actions = game.getSettlementActions(node.type);
-  
+
+  // #81 — Track whether an action has been performed this visit
+  let settlementActionPerformed = false;
+
   // Render each action as a card (matching camp card pattern)
   actions.forEach((action) => {
-    renderSettlementActionCard(actionsEl, action, game, before, beforeCart, node);
+    renderSettlementActionCard(actionsEl, action, game, before, beforeCart, node, () => {
+      // Callback when any action is performed — disable all other buttons
+      settlementActionPerformed = true;
+      container.querySelectorAll('.settlement-action-card-btn').forEach(b => {
+        if (!b.disabled) {
+          b.disabled = true;
+          b.classList.add('disabled');
+        }
+      });
+    });
   });
 
   document.getElementById('settlement-overlay')?.classList.add('active');
 }
 
-function renderSettlementActionCard(container, action, game, before, beforeCart, node) {
+function renderSettlementActionCard(container, action, game, before, beforeCart, node, onActionPerformed) {
   const card = document.createElement('div');
   card.className = 'settlement-action-card';
 
@@ -1065,6 +1077,8 @@ function renderSettlementActionCard(container, action, game, before, beforeCart,
             const after = game.getState();
             const gained = (item.mbValue || 1);
             const afterCart = game.getCart();
+            // #81 — Disable all other settlement action buttons
+            if (onActionPerformed) onActionPerformed();
             // Show result in settlement overlay
             showSettlementResult(container, action, node, beforeJournal, after, beforeCart, afterCart, `Traded 1 ${item.name} → +${gained.toFixed(2)} MB credit.`, game);
           };
@@ -1082,6 +1096,8 @@ function renderSettlementActionCard(container, action, game, before, beforeCart,
   } else {
     btn.onclick = () => {
       if (!canDo) return;
+      // #81 — Disable all other settlement action buttons
+      if (onActionPerformed) onActionPerformed();
       const st = game.getState().pendingSettlement;
       const beforeJournal = game.getState();
       const beforeCart = game.getCart();
@@ -1720,6 +1736,12 @@ function showCamp(game) {
 
       if (a.canDo) {
         btn.addEventListener('click', () => {
+          // #81 — One action per camp visit: disable all other buttons
+          document.querySelectorAll('.camp-card-btn').forEach(b => {
+            b.disabled = true;
+            b.classList.add('disabled');
+          });
+
           let result;
           if (a.type === 'push_on') {
             pushOn(game);

@@ -44,5 +44,5 @@ export function wearMod(wear) {
 }
 
 export function totalMod(state) {
-  return crewMod(state) + wearMod(state.wear);
+  return crewMod(state) + wearMod(state.wear) + (state.blessingDays > 0 ? 1 : 0);
 }

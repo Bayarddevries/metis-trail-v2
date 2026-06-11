@@ -52,7 +52,7 @@ function wearMod(wear) {
 }
 __name(wearMod, "wearMod");
 function totalMod(state) {
-  return crewMod(state) + wearMod(state.wear);
+  return crewMod(state) + wearMod(state.wear) + (state.blessingDays > 0 ? 1 : 0);
 }
 __name(totalMod, "totalMod");
 
@@ -1595,6 +1595,10 @@ function createGame(seed = null) {
     return d20(rand);
   }
   __name(d, "d");
+  function blessingMod() {
+    return S2.blessingDays > 0 ? 1 : 0;
+  }
+  __name(blessingMod, "blessingMod");
   function pickWeighted(weights) {
     const total = Object.values(weights).reduce((s, w) => s + w, 0);
     let r = rand() * total;
@@ -1650,7 +1654,8 @@ function createGame(seed = null) {
     // total MB value of all trade goods in cart
     perishable: {},
     preDeparture: true,
-    weather: initWeather()
+    weather: initWeather(),
+    blessingDays: 0
   };
   function calcMB() {
     return cart.filter((i) => i.type === "trade" || i.category === "furs").reduce((s, i) => s + (i.mbValue || 0) * i.count, 0);
@@ -1827,6 +1832,7 @@ function createGame(seed = null) {
     S2.segmentDay++;
     S2.travelDaysWithoutRest++;
     advance();
+    if (S2.blessingDays > 0) S2.blessingDays--;
     const wearChance = { plains: 0.1, river_valley: 0.15, wooded: 0.2 };
     const weatherWearMult = CONSTANTS.WEATHER_WEAR_MULT[S2.weather] || 1;
     if (rand() < (wearChance[NODES[S2.node].terrain] || 0.2) * weatherWearMult) S2.wear++;
@@ -2040,7 +2046,8 @@ function createGame(seed = null) {
         currentTerrain: NODES[S2.node]?.terrain || "plains",
         travelDaysWithoutRest: S2.travelDaysWithoutRest,
         mbValue: S2.mbValue,
-        credit: { ...S2.credit }
+        credit: { ...S2.credit },
+        blessingDays: S2.blessingDays
       };
     },
     getCart() {
@@ -2737,8 +2744,8 @@ function executeSettlementAction(actionId, type, state, cart, params) {
     if (state.food < 1) return { error: "Need 1 food for blessing" };
     state.food -= 1;
     state.morale = Math.min(100, state.morale + 10);
-    state.flags.blessed = true;
-    return { blessed: true, moraleGain: 10 };
+    state.blessingDays = 3;
+    return { blessed: true, moraleGain: 10, blessingDays: 3 };
   }
   if (actionId === "trade_limited") {
     return { action: "trade_limited", message: "Limited trade available: buy pemmican (0.5 \u20A5), sell blankets (1.5 \u20A5)", credit: state.credit[type] };
@@ -3120,6 +3127,17 @@ function renderStatusBar(state) {
     const mb = Math.round(state.mbValue || 0);
     mbEl.textContent = `${mb} \u20A5`;
     mbEl.className = "stat-value" + (mb < CONSTANTS.MB_WIN_THRESHOLD ? " mb-low" : " mb-ok");
+  }
+  const blessingWrap = document.getElementById("s-blessing-wrap");
+  const blessingEl = document.getElementById("s-blessing");
+  if (blessingWrap && blessingEl) {
+    const bd = state.blessingDays || 0;
+    if (bd > 0) {
+      blessingEl.textContent = `\u271D ${bd}d`;
+      blessingWrap.style.display = "inline";
+    } else {
+      blessingWrap.style.display = "none";
+    }
   }
   if (!window.__METIS_PENDING_RESULT__) window.__METIS_PENDING_RESULT__ = null;
 }
@@ -3842,9 +3860,9 @@ __name(_Component, "Component");
 var Component = _Component;
 var DEFAULT_ENTRY_NAME = "[DEFAULT]";
 var _Provider = class _Provider {
-  constructor(name3, container) {
+  constructor(name3, container2) {
     this.name = name3;
-    this.container = container;
+    this.container = container2;
     this.component = null;
     this.instances = /* @__PURE__ */ new Map();
     this.instancesDeferred = /* @__PURE__ */ new Map();
@@ -4426,8 +4444,8 @@ replaceTraps((oldTraps) => ({
 
 // node_modules/@firebase/app/dist/esm/index.esm.js
 var _PlatformLoggerServiceImpl = class _PlatformLoggerServiceImpl {
-  constructor(container) {
-    this.container = container;
+  constructor(container2) {
+    this.container = container2;
   }
   // In initial implementation, this will be called by installations on
   // auth token refresh, and installations will send this string.
@@ -4614,13 +4632,13 @@ var ERRORS = {
 };
 var ERROR_FACTORY = new ErrorFactory("app", "Firebase", ERRORS);
 var _FirebaseAppImpl = class _FirebaseAppImpl {
-  constructor(options, config, container) {
+  constructor(options, config, container2) {
     this._isDeleted = false;
     this._options = { ...options };
     this._config = { ...config };
     this._name = config.name;
     this._automaticDataCollectionEnabled = config.automaticDataCollectionEnabled;
-    this._container = container;
+    this._container = container2;
     this.container.addComponent(new Component(
       "app",
       () => this,
@@ -4702,11 +4720,11 @@ function initializeApp(_options, rawConfig = {}) {
       throw ERROR_FACTORY.create("duplicate-app", { appName: name3 });
     }
   }
-  const container = new ComponentContainer(name3);
+  const container2 = new ComponentContainer(name3);
   for (const component of _components.values()) {
-    container.addComponent(component);
+    container2.addComponent(component);
   }
-  const newApp = new FirebaseAppImpl(options, config, container);
+  const newApp = new FirebaseAppImpl(options, config, container2);
   _apps.set(name3, newApp);
   return newApp;
 }
@@ -4824,8 +4842,8 @@ __name(computeKey, "computeKey");
 var MAX_HEADER_BYTES = 1024;
 var MAX_NUM_STORED_HEARTBEATS = 30;
 var _HeartbeatServiceImpl = class _HeartbeatServiceImpl {
-  constructor(container) {
-    this.container = container;
+  constructor(container2) {
+    this.container = container2;
     this._heartbeatsCache = null;
     const app2 = this.container.getProvider("app").getImmediate();
     this._storage = new HeartbeatStorageImpl(app2);
@@ -5020,13 +5038,13 @@ __name(getEarliestHeartbeatIdx, "getEarliestHeartbeatIdx");
 function registerCoreComponents(variant) {
   _registerComponent(new Component(
     "platform-logger",
-    (container) => new PlatformLoggerServiceImpl(container),
+    (container2) => new PlatformLoggerServiceImpl(container2),
     "PRIVATE"
     /* ComponentType.PRIVATE */
   ));
   _registerComponent(new Component(
     "heartbeat",
-    (container) => new HeartbeatServiceImpl(container),
+    (container2) => new HeartbeatServiceImpl(container2),
     "PRIVATE"
     /* ComponentType.PRIVATE */
   ));
@@ -19149,13 +19167,22 @@ function showSettlement(game) {
   descEl.textContent = node.desc || "";
   actionsEl.innerHTML = "";
   const actions = game.getSettlementActions(node.type);
+  let settlementActionPerformed = false;
   actions.forEach((action) => {
-    renderSettlementActionCard(actionsEl, action, game, before, beforeCart, node);
+    renderSettlementActionCard(actionsEl, action, game, before, beforeCart, node, () => {
+      settlementActionPerformed = true;
+      container.querySelectorAll(".settlement-action-card-btn").forEach((b2) => {
+        if (!b2.disabled) {
+          b2.disabled = true;
+          b2.classList.add("disabled");
+        }
+      });
+    });
   });
   document.getElementById("settlement-overlay")?.classList.add("active");
 }
 __name(showSettlement, "showSettlement");
-function renderSettlementActionCard(container, action, game, before, beforeCart, node) {
+function renderSettlementActionCard(container2, action, game, before, beforeCart, node, onActionPerformed) {
   const card = document.createElement("div");
   card.className = "settlement-action-card";
   const nameRow = document.createElement("div");
@@ -19259,7 +19286,8 @@ function renderSettlementActionCard(container, action, game, before, beforeCart,
             const after = game.getState();
             const gained = item.mbValue || 1;
             const afterCart = game.getCart();
-            showSettlementResult(container, action, node, beforeJournal, after, beforeCart, afterCart, `Traded 1 ${item.name} \u2192 +${gained.toFixed(2)} MB credit.`, game);
+            if (onActionPerformed) onActionPerformed();
+            showSettlementResult(container2, action, node, beforeJournal, after, beforeCart, afterCart, `Traded 1 ${item.name} \u2192 +${gained.toFixed(2)} MB credit.`, game);
           };
           subRow.appendChild(subBtn);
           card.appendChild(subRow);
@@ -19276,13 +19304,14 @@ function renderSettlementActionCard(container, action, game, before, beforeCart,
   } else {
     btn.onclick = () => {
       if (!canDo) return;
+      if (onActionPerformed) onActionPerformed();
       const st2 = game.getState().pendingSettlement;
       const beforeJournal2 = game.getState();
       const beforeCart2 = game.getCart();
       const result = game.settlementAction(action.id);
       const after = game.getState();
       const afterCart = game.getCart();
-      showSettlementResult(container, action, node, beforeJournal2, after, beforeCart2, afterCart, null, game);
+      showSettlementResult(container2, action, node, beforeJournal2, after, beforeCart2, afterCart, null, game);
     };
   }
   card.appendChild(nameRow);
@@ -19290,11 +19319,11 @@ function renderSettlementActionCard(container, action, game, before, beforeCart,
   card.appendChild(riskRow);
   card.appendChild(flavorRow);
   card.appendChild(btn);
-  container.appendChild(card);
+  container2.appendChild(card);
 }
 __name(renderSettlementActionCard, "renderSettlementActionCard");
-function showSettlementResult(container, action, node, before, after, beforeCart, afterCart, overrideOutcome, game) {
-  container.querySelectorAll(".settlement-action-card").forEach((c) => {
+function showSettlementResult(container2, action, node, before, after, beforeCart, afterCart, overrideOutcome, game) {
+  container2.querySelectorAll(".settlement-action-card").forEach((c) => {
     c.style.display = "none";
   });
   const outcome = overrideOutcome || buildSettlementOutcome(action.id, before, after, beforeCart, afterCart);
@@ -19344,7 +19373,7 @@ function showSettlementResult(container, action, node, before, after, beforeCart
     window.__METIS_RENDER__();
   };
   resultCard.appendChild(continueBtn);
-  container.appendChild(resultCard);
+  container2.appendChild(resultCard);
 }
 __name(showSettlementResult, "showSettlementResult");
 function buildSettlementOutcome(action, before, after, beforeCart, afterCart) {
@@ -19881,6 +19910,10 @@ function showCamp(game) {
       card.appendChild(btn);
       if (a.canDo) {
         btn.addEventListener("click", () => {
+          document.querySelectorAll(".camp-card-btn").forEach((b2) => {
+            b2.disabled = true;
+            b2.classList.add("disabled");
+          });
           let result;
           if (a.type === "push_on") {
             pushOn(game);
@@ -20104,29 +20137,29 @@ function showLeaderboard() {
 }
 __name(showLeaderboard, "showLeaderboard");
 function loadHallOfFame() {
-  const container = document.getElementById("lb-hall-of-fame");
-  if (!container) return;
-  container.innerHTML = '<div class="lb-loading">Loading...</div>';
+  const container2 = document.getElementById("lb-hall-of-fame");
+  if (!container2) return;
+  container2.innerHTML = '<div class="lb-loading">Loading...</div>';
   getTopScores().then((scores) => {
     cachedTopScores = scores;
     if (!scores || scores.length === 0) {
-      container.innerHTML = '<div class="lb-empty">No scores yet. Be the first!</div>';
+      container2.innerHTML = '<div class="lb-empty">No scores yet. Be the first!</div>';
       return;
     }
-    container.innerHTML = '<div class="lb-list">' + scores.map((s, i) => renderLbEntry(s, i + 1)).join("") + "</div>";
+    container2.innerHTML = '<div class="lb-list">' + scores.map((s, i) => renderLbEntry(s, i + 1)).join("") + "</div>";
   }).catch((err) => {
     console.warn("[Metis] Hall of Fame load failed:", err);
-    container.innerHTML = '<div class="lb-error">Leaderboard unavailable \u2014 playing offline</div>';
+    container2.innerHTML = '<div class="lb-error">Leaderboard unavailable \u2014 playing offline</div>';
   });
 }
 __name(loadHallOfFame, "loadHallOfFame");
 function loadMyScores() {
-  const container = document.getElementById("lb-my-list");
-  if (!container) return;
-  container.innerHTML = '<div class="lb-loading">Loading...</div>';
+  const container2 = document.getElementById("lb-my-list");
+  if (!container2) return;
+  container2.innerHTML = '<div class="lb-loading">Loading...</div>';
   const name3 = localStorage.getItem("metisPlayerName") || "";
   if (!name3) {
-    container.innerHTML = '<div class="lb-empty">Set your party name in the intro to track personal scores.</div>';
+    container2.innerHTML = '<div class="lb-empty">Set your party name in the intro to track personal scores.</div>';
     return;
   }
   getMyScores(name3).then((scores) => {
@@ -20147,11 +20180,11 @@ function loadMyScores() {
 }
 __name(loadMyScores, "loadMyScores");
 function renderMyScoresSorted() {
-  const container = document.getElementById("lb-my-list");
-  if (!container || !cachedMyScores) return;
+  const container2 = document.getElementById("lb-my-list");
+  if (!container2 || !cachedMyScores) return;
   const sortKey = document.getElementById("lb-sort-select")?.value || "score";
   const sorted = sortScores(cachedMyScores, sortKey);
-  container.innerHTML = '<div class="lb-list">' + sorted.map((s, i) => renderLbEntry(s, i + 1)).join("") + "</div>";
+  container2.innerHTML = '<div class="lb-list">' + sorted.map((s, i) => renderLbEntry(s, i + 1)).join("") + "</div>";
 }
 __name(renderMyScoresSorted, "renderMyScoresSorted");
 function sortScores(scores, key) {

@@ -218,6 +218,19 @@ export function renderStatusBar(state) {
     mbEl.className = 'stat-value' + (mb < CONSTANTS.MB_WIN_THRESHOLD ? ' mb-low' : ' mb-ok');
   }
 
+  // #80 — Blessing indicator
+  const blessingWrap = document.getElementById('s-blessing-wrap');
+  const blessingEl = document.getElementById('s-blessing');
+  if (blessingWrap && blessingEl) {
+    const bd = state.blessingDays || 0;
+    if (bd > 0) {
+      blessingEl.textContent = `✝ ${bd}d`;
+      blessingWrap.style.display = 'inline';
+    } else {
+      blessingWrap.style.display = 'none';
+    }
+  }
+
   if (!window.__METIS_PENDING_RESULT__) window.__METIS_PENDING_RESULT__ = null;
 }
 

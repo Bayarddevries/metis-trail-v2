@@ -17,6 +17,11 @@ export function createGame(seed = null) {
     return d20(rand);
   }
 
+  // #80 — Blessing roll buff: +1 to all dice rolls when blessingDays > 0
+  function blessingMod() {
+    return S.blessingDays > 0 ? 1 : 0;
+  }
+
   // ── Weather helpers ──────────────────────────────────────────────
   function pickWeighted(weights) {
     const total = Object.values(weights).reduce((s, w) => s + w, 0);
@@ -75,6 +80,7 @@ export function createGame(seed = null) {
     perishable: {},
     preDeparture: true,
     weather: initWeather(),
+    blessingDays: 0,
   };
 
   // ── MB helpers ────────────────────────────────────────────────────
@@ -265,6 +271,8 @@ export function createGame(seed = null) {
     S.segmentDay++;
     S.travelDaysWithoutRest++;
     advance();
+    // #80 — Decrement blessing days
+    if (S.blessingDays > 0) S.blessingDays--;
 
     const wearChance = { plains: 0.10, river_valley: 0.15, wooded: 0.20 };
     const weatherWearMult = CONSTANTS.WEATHER_WEAR_MULT[S.weather] || 1;
@@ -496,6 +504,7 @@ export function createGame(seed = null) {
         travelDaysWithoutRest: S.travelDaysWithoutRest,
         mbValue: S.mbValue,
         credit: { ...S.credit },
+        blessingDays: S.blessingDays,
       };
     },
     getCart() {
@@ -1236,8 +1245,8 @@ function executeSettlementAction(actionId, type, state, cart, params) {
     if (state.food < 1) return { error: 'Need 1 food for blessing' };
     state.food -= 1;
     state.morale = Math.min(100, state.morale + 10);
-    state.flags.blessed = true; // Next event DC -1
-    return { blessed: true, moraleGain: 10 };
+    state.blessingDays = 3;
+    return { blessed: true, moraleGain: 10, blessingDays: 3 };
   }
 
   if (actionId === 'trade_limited') {

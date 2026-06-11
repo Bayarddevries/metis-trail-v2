@@ -69,6 +69,7 @@
   .stat-value.weather-snow { color: var(--clr-weather-snow); }
   .stat-value.mb-ok { color: var(--clr-accent); }
   .stat-value.mb-low { color: var(--clr-danger); }
+  .stat-value.blessing-active { color: var(--clr-blessing); }
   .stat-group { display: flex; align-items: center; gap: 8px; }
   .stat-group + .stat-group { padding-left: 12px; border-left: 1px solid var(--clr-accent); }
   .segment-progress {
@@ -1570,6 +1571,7 @@
       <div class="stat-group">
         <span class="stat"><span class="stat-label">Weather</span><span class="stat-value weather-clear" id="s-weather">Clear</span></span>
         <span class="stat"><span class="stat-label">MB</span><span class="stat-value mb-ok" id="s-mb">0 ₥</span></span>
+        <span class="stat" id="s-blessing-wrap" style="display:none;"><span class="stat-label">Blessing</span><span class="stat-value blessing-active" id="s-blessing">✝ 3d</span></span>
         <span class="stat"><span class="stat-label">Food</span><span class="stat-value" id="s-food">30</span></span>
         <span class="stat"><span class="stat-label">Wear</span><span class="stat-value" id="s-wear">0</span></span>
         <span class="stat"><span class="stat-label">Crew</span><span class="stat-value" id="s-crew">Rested</span></span>
