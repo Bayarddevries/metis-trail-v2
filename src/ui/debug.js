@@ -1,5 +1,4 @@
 import { CONSTANTS } from '../core/constants.js';
-import { bus } from '../systems/events.js';
 
 const STORAGE_KEY = 'metis-trail-v2.save';
 
