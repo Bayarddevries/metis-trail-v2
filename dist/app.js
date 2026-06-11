@@ -3076,20 +3076,6 @@ function updateMap(state) {
   L.marker([cartLat, cartLon], { icon: cartIcon }).addTo(markerGroup);
 }
 __name(updateMap, "updateMap");
-function renderTravelLinesView(state, gameRef, result) {
-  const here = gameRef?.getCurrentNode?.();
-  const next = gameRef?.getNextNode?.();
-  const lines = [];
-  if (here) {
-    lines.push(`${here.name} \u2014 Day ${state.day}`);
-    if (here.desc) lines.push(here.desc);
-  }
-  if (next) lines.push(`Next: ${next.name}`);
-  if (result) lines.push(result);
-  if (!lines.length) lines.push("On the trail...");
-  renderNarrative(lines);
-}
-__name(renderTravelLinesView, "renderTravelLinesView");
 function renderStatusBar(state) {
   const node = NODES[state.node];
   const next = NODES[state.node + 1];
@@ -3136,16 +3122,8 @@ function renderStatusBar(state) {
     mbEl.className = "stat-value" + (mb < CONSTANTS.MB_WIN_THRESHOLD ? " mb-low" : " mb-ok");
   }
   if (!window.__METIS_PENDING_RESULT__) window.__METIS_PENDING_RESULT__ = null;
-  renderTravelLinesView(state, window._metisGame, window.__METIS_PENDING_RESULT__);
 }
 __name(renderStatusBar, "renderStatusBar");
-function renderNarrative(lines) {
-  const el = document.getElementById("narrative");
-  if (!el) return;
-  el.innerHTML = lines.map((t) => `<div class="scene-text">${t}</div>`).join("");
-  el.scrollTop = el.scrollHeight;
-}
-__name(renderNarrative, "renderNarrative");
 function journalLog(entry) {
   const journal = document.getElementById("journal");
   if (!journal) return;
@@ -18850,7 +18828,6 @@ function render() {
     return;
   }
   hideOverlays();
-  renderTravelLinesView(state, game, window.__METIS_PENDING_RESULT__);
   window.__METIS_PENDING_RESULT__ = null;
   renderTrailIntel(state);
 }

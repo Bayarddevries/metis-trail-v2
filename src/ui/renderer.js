@@ -166,20 +166,6 @@ export function updateMap(state) {
   L.marker([cartLat, cartLon], { icon: cartIcon }).addTo(markerGroup);
 }
 
-export function renderTravelLinesView(state, gameRef, result) {
-  const here = gameRef?.getCurrentNode?.();
-  const next = gameRef?.getNextNode?.();
-  const lines = [];
-  if (here) {
-    lines.push(`${here.name} — Day ${state.day}`);
-    if (here.desc) lines.push(here.desc);
-  }
-  if (next) lines.push(`Next: ${next.name}`);
-  if (result) lines.push(result);
-  if (!lines.length) lines.push('On the trail...');
-  renderNarrative(lines);
-}
-
 export function renderStatusBar(state) {
   const node = NODES[state.node];
   const next = NODES[state.node + 1];
@@ -233,14 +219,6 @@ export function renderStatusBar(state) {
   }
 
   if (!window.__METIS_PENDING_RESULT__) window.__METIS_PENDING_RESULT__ = null;
-  renderTravelLinesView(state, window._metisGame, window.__METIS_PENDING_RESULT__);
-}
-
-export function renderNarrative(lines) {
-  const el = document.getElementById('narrative');
-  if (!el) return;
-  el.innerHTML = lines.map((t) => `<div class="scene-text">${t}</div>`).join('');
-  el.scrollTop = el.scrollHeight;
 }
 
 export function journalLog(entry) {

@@ -1,6 +1,6 @@
 import { createGame } from './systems/engine.js';
 import { mount, find } from './ui/shell.js';
-import { renderStatusBar, renderNarrative, journalLog, initMap, updateMap, renderTravelLinesView, monthName } from './ui/renderer.js';
+import { renderStatusBar, journalLog, initMap, updateMap, monthName } from './ui/renderer.js';
 import { saveGame, loadGame, clearSave } from './ui/persistence.js';
 import { mountDebugUI } from './ui/debug.js';
 import { applyTheme } from './ui/theme.js';
@@ -549,7 +549,6 @@ function render() {
     return;
   }
   hideOverlays();
-  renderTravelLinesView(state, game, window.__METIS_PENDING_RESULT__);
   window.__METIS_PENDING_RESULT__ = null;
   renderTrailIntel(state);
 }
