@@ -55,7 +55,32 @@ This is a process improvement, not a feature. But it matters for long-term conte
 ### French-Language Dialogue Options
 Some events could offer French dialogue options (historically accurate for Métis carters). This is a localization/internationalization challenge on top of a content challenge. Very long-term.
 
-## Principles for Managing Scope
+### Carlton Trail Expansion — Western Nodes (#43)
+The current trail covers the eastern portion. The full Carlton Trail continues west past Edmonton toward Fort Saskatchewan and beyond. Expanding the node map to include the western half would:
+- Double the journey length and content scope
+- Require new terrain types (boreal forest, river crossings)
+- Need new settlement types and events for western forts
+- Require careful historical research for western trail conditions
+
+This is a major content expansion — only pursue after the eastern trail is fully polished and the content pipeline is mature.
+
+## Review Cadence
+
+### Cultural Review (#25) — Every 2 weeks
+Every other week, run a focused cultural review pass:
+- Read through all new/changed event text for cultural sensitivity
+- Check that Métis, Cree, and other Indigenous voices are represented accurately
+- Flag any content that needs a second pair of eyes from the community
+- Log findings in ISSUES.md with `[cultural]` tag
+
+### AI Writing Trend Review (#6) — Every 2 weeks (alternating with cultural)
+On alternating weeks, run an AI-writing audit:
+- Use the Hermes `dogfood` skill or manual review to scan new content for AI patterns
+- Look for: generic sensory language, anachronistic phrasing, repetitive sentence structures, "as if" constructions, overuse of metaphor
+- Rewrite flagged passages in a more grounded, period-appropriate voice
+- Log findings in ISSUES.md with `[writing]` tag
+
+**Schedule:** Cultural review on 1st/3rd weeks, AI writing review on 2nd/4th weeks of each month.
 
 1. **The journal is the game.** Every feature should make the journal better. If it doesn't improve the diary, it's scope creep.
 2. **One journey must be perfect before we add more.** No campaign mode until single-journey is excellent.
