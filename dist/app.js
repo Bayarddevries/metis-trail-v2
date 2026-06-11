@@ -18676,7 +18676,6 @@ function bootstrap(seed = null) {
           }
         });
       }
-      game2.clearTradeGoods();
       game2.confirmPreDeparture();
       document.getElementById("predeparture-overlay")?.classList.remove("active");
       window.__METIS_RENDER__();

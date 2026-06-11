@@ -136,7 +136,6 @@ export function bootstrap(seed = null) {
           }
         });
       }
-      game.clearTradeGoods();
       game.confirmPreDeparture();
       document.getElementById('predeparture-overlay')?.classList.remove('active');
       window.__METIS_RENDER__();
