@@ -1,135 +1,127 @@
 # HANDOFF — Metis Trail V2
 
-**Version:** v152+
-**Last updated:** 2026-06-11 (evening)
+**Version:** v10
+**Last updated:** 2026-06-11 (night)
 **Current branch:** main (build deploys to gh-pages)
+**Live URL:** https://bayarddevries.github.io/metis-trail-v2/
 
 ---
 
 ## 1. What Just Happened
 
-Consolidation & overhaul pass. 16 commits across 8 phases:
+Sprint 6/7 Gameplay Polish — Phases A, B, and C completed and deployed.
 
-### Completed Phases
+### Phase A — Critical Bug Fixes
+- **#79 Settlement actions broken:** Rewrote `showSettlement()`. Root cause: `beforeJournal` undefined variable in trade sub-button handler caused silent JS error. Settlement action cards now match camp card style (icon/name/cost/risk/flavor in grid). Added `settlement-roll-display` and `settlement-result` overlay areas for dice animation + flavor text + Continue West.
+- **#70 End screen all zeros:** `getEndgameScore()` returned empty `{}` for losses → NaN. Fixed with `safeNum()` helper (`Number.isFinite()`), optional chaining, `Math.round()` on all score lines.
+- **#80 Blessing roll buff:** `blessingDays` counter in state, decremented in `travelOneDay()`, +1 to all dice rolls via `totalMod` when >0. ✝ indicator in status bar.
+- **#81 One action per visit:** `performedAction` flag disables all buttons after first click in both camp and settlement.
 
-**Phase 0 — Pre-Flight:** Baseline verified, build serves at `http://100.108.183.33:8081/index.html`
+### Phase B — UI/UX Polish
+- **#83 Scrolling consolidation:** 100dvh, sticky status bar/bottom panel, removed inner shop scroll, overflow:hidden on html/body.
+- **#75 Shop clarity:** Trade goods section with ₥ value, green Buy / red Remove buttons, swapped order.
+- **#81 Camp Push On auto-close:** After Push On, camp overlay closes automatically (no redundant Continue West). Journal logged immediately.
+- **Roll label/total visibility:** Changed from `--clr-ink-on-dark` to `--clr-ink-on-light` for readable contrast on gold pill background.
 
-**Phase 1 — Kill Dead Code:**
-- Removed `src/ui/audio.js` (264 lines) and all 5 Audio call sites
-- Removed dead `bus` import from `debug.js` (kept file — has useful `mountDebugUI`, `saveGame`, `loadGame`)
-- Build now completely clean
-
-**Phase 2 — Fix Narrative Rendering:**
-- Removed `renderNarrative()` and `renderTravelLinesView()` from renderer.js — both wrote to `#narrative` which didn't exist in the template
-- Removed all imports and call points from main.js
-- Journal is now the sole narrative surface
-
-**Phase 3 — Fix Shop Confirm:**
-- Removed `game.clearTradeGoods()` from confirm handler — was destroying the player's trade goods before confirming
-- Starting trade goods chain verified intact: 4× Bison Hide + 3× Beaver Pelts = ~14 ₥
-
-**Phase 4 — Consolidate Settlements:**
-- Removed duplicate `getDefaultSettlementActions()` (52 lines) from main.js
-- UI now uses engine's `game.getSettlementActions(node.type)` directly
-- Engine action IDs verified in sync with `executeSettlementAction()`
-
-**Phase 5 — Fix End Screen Scoring:**
-- Replaced inline score calculation with `game.getEndgameScore()`
-- Fixed base score from 1000 → 500 (per DESIGN.md §10)
-- Tier thresholds: <500 Barely Survived, 500-1200 Solid Profit, 1200+ Legendary Haul
-
-**Phase 6 — Contrast Audit #2:**
-- Darkened `--clr-muted`: `#9a8a6a` → `#6b5740`
-- Darkened `--clr-source-text`: `#a09070` → `#c4b080` (lightened, was too dark on dark bg)
-- Darkened `--clr-choice-cost`: `#b0a080` → `#9a8a6a` (lightened for dark bg readability)
-- Darkened `--clr-source-context`: `#8a7a5a` → `#a09070` (lightened)
-- Event text changed from `--clr-ink-on-dark` to `--clr-ink-on-light` on light overlay cards
-- Event source quotes: background changed from invisible `gold-faint` to solid `bg-dark` with light text
-
-**Phase 7 — Journal First-Person Narrative:**
-- Created `buildTravelJournalEntry()` — atmospheric first-person travel prose using terrain/season/weather fragments
-- Created `buildEventJournalEntry()` — combines event description with outcome text
-- Created `buildSettlementJournalText()` — unique flavor per action type (rest, trade, gossip, etc.)
-- Camp journal entries use existing `CAMP_FLAVOR` text pools with dice results
-- All entries are collapsible (click header to toggle)
-- Most recent entry expanded by default, older ones collapsed
-
-**Additional Fixes:**
-- Cleaned up 66 duplicate `__METIS_ASSETS__` script blocks from template.html (build script was injecting on every rebuild)
-- Fixed build script to stop injecting into `src/template.html` (only `dist/index.html` gets manifest)
-- Removed leftover `renderNarrative()` call in `render()` that was crashing the game
+### Phase C — Journal & Content Polish
+- **#89 Journal day grouping:** Entries grouped under collapsible day headers ("Day N — Month Day" with ▼/▶ toggle). Type labels on sub-entries.
+- **#88/#90 Settlement gossip flavor text:** 5 unique settlement-type voices (hbc, metis, mission, nwmp, trading) with intel text from `trailIntel` passed through `getState()`.
+- **#79 Settlement result in-place:** Result card replaces action cards with flavor text + effects + Continue West (no modal).
+- **#86 Sim test updated:** Action objects with `.id`, one-action-per-visit enforced, weights for 15+ new settlement actions.
+- **Mobile status bar:** Tightened 768/420/360px breakpoints, hides segment-progress at 360px.
 
 ---
 
-## 2. Open Issues (New — Logged to GitHub)
+## 2. Sprint Status
+
+| Sprint | Scope | Status |
+|--------|-------|--------|
+| 1 | Fix & Stabilize | ✅ Complete |
+| 2 | Core Redesign | ✅ Complete |
+| 3 | Settlements & Economy | ✅ Complete |
+| 4 | Visual Unification | ✅ Complete |
+| 5 | Consolidation & Overhaul | ✅ Complete |
+| 6/7 | Gameplay Polish (Phases A+B+C) | ✅ Complete |
+| 8 | Content Expansion & Polish | ⬜ Not started |
+
+---
+
+## 3. Open Issues (Remaining)
 
 | # | Title | Labels |
 |---|-------|--------|
-| #78 | Replace camp-art CSS gradient with actual campfire image | enhancement |
-| #79 | Settlement and camp actions don't show outcome feedback to player | bug |
-| #80 | Blessing should provide a roll buff for the next few days | enhancement |
-| #81 | Limit to one action per camp or settlement visit | enhancement |
-| #82 | Add more settlement/fort-specific events from primary sources | enhancement |
-| #83 | Too many scrolling areas — full view lost on desktop and mobile | bug |
-| #89 | Journal entries should group all events for the day in one collapsible entry | enhancement |
-| #90 | Gossip events lack flavor text in journal entries | enhancement |
-
----
-
-## 3. Closed Issues
-
-| # | Title | Resolution |
-|---|-------|------------|
-| #74 | Light-on-light text contrast | Darkened 5 CSS custom properties for WCAG AA |
-| #76 | Rest unavailable at settlements | All settlement types now offer rest |
-| #77 | Player doesn't start with trade goods | Removed `clearTradeGoods()` from confirm handler |
+| #73 | Hall of Fame does not load | bug |
+| #63 | Audit Response Sprint Plan — P0/P1/P2/P3 issues from design audit | documentation |
+| #62 | P3 — Add recommended action highlight in settlement UI | enhancement |
+| #60 | P2 — Create Web Audio ambient engine | enhancement |
+| #59 | P1 — Create haptics module (partially done — module exists, wiring incomplete) | enhancement |
+| #42 | Reformat secondary sources from Wikipedia-style to period voices | enhancement |
+| #40 | Party name instead of user name | enhancement |
+| #25 | Full cultural review of the project and story elements | |
+| #6 | Review content for AI writing trends | |
 
 ---
 
 ## 4. Known Issues & Pitfalls
 
-- **Sim test outdated**: `tests/simulate-entry.js` uses old settlement action string IDs. Needs update for new action system and one-action-per-visit mechanic.
-- **Camp art**: Still uses CSS gradient simulation. Real image pending (issue #78).
-- **Settlement outcome feedback**: Actions log to journal but don't show immediate overlay feedback (issue #79).
-- **Blessing mechanic**: Currently flat morale +10 only. Needs roll buff (issue #80).
-- **Multi-action visits**: Players can still perform unlimited actions per camp/settlement visit (issue #81).
+- **Sim test:** Some tests use old settlement action patterns. Weights updated but full coverage not verified. 62/63 pass (1 pre-existing repair availability failure).
+- **Settlement action `beforeJournal` pitfall:** If adding new settlement action sub-buttons, ensure all variables are defined in scope. An undefined reference silently kills the entire click handler — no overlay appears, no error shown.
+- **Score display:** `safeNum()` is defensive but doesn't fix root cause if `getEndgameScore()` returns unexpected structure. Always verify engine returns full breakdown for both win and loss.
+- **Engine API methods must exist before UI calls them:** A missing method causes a JS error that silently kills the entire render function. See AGENTS.md.
+- **`performedAction` flag:** Must be reset when leaving settlement (`settlementAction('continue')`). If flag persists, next settlement visit will have all buttons disabled.
 
 ---
 
-## 5. How to Test
+## 5. File Map
+
+| File | Role |
+|------|------|
+| `src/main.js` | Bootstrap, UI handlers, showSettlement/camp/event/shop/end overlays |
+| `src/systems/engine.js` | Core game state, travel, settlement actions, scoring, blessings |
+| `src/ui/renderer.js` | Status bar, journal (day-grouped), map rendering |
+| `src/template.html` | HTML structure + CSS (100dvh, sticky bars, mobile breakpoints) |
+| `src/ui/theme.js` | CSS custom properties for all color tokens |
+| `tests/simulate-entry.js` | Headless playtesting harness (50-run sims) |
+| `docs/audit-metis-trail-v2.html` | Design audit report with v10 addendum |
+
+---
+
+## 6. How to Test
 
 ```bash
-cd /home/bayarddevries/metis-trail-v2-repo
+cd /home/bayard_devries/projects/metis-trail-v2
 bun scripts/build.mjs
-python3 -m http.server 8081 --directory dist
-# Open http://100.108.183.33:8081/index.html
+python3 -m http.server 8080 --directory dist
+# Open http://localhost:8080
 ```
+
+**Test checklist (verify in browser):**
+1. Start game → pre-departure → confirm loadout
+2. Travel to first settlement (St. Boniface) → click a settlement action → verify dice roll display → result card with flavor text → Continue West
+3. Travel → Make Camp → click an action → verify dice → result → Continue West
+4. In camp: click Push On → verify overlay auto-closes (no Continue West button)
+5. Check journal panel: entries grouped under day headers, collapsible
+6. Play to end → verify score breakdown shows real numbers (not all 0s)
+7. Check roll label/total text is readable (dark text on gold pill)
 
 **Debug shortcuts** (add `?debug=1` to URL):
 - `window.__METIS_DEBUG__.travel()` — travel one day
 - `window.__METIS_DEBUG__.camp()` — make camp
 - `window.__METIS_DEBUG__.reroll('seed')` — restart with seed
-- Read state: `window.__METIS_DEBUG__.state`, `.__METIS_DEBUG__.cart`
 
 ---
 
-## 6. What to Prioritize Next
+## 7. What to Prioritize Next
 
-1. **Fix settlement/camp outcome feedback** (issue #79) — P0, players can't see what actions do
-2. **One action per visit** (issue #81) — P0, fundamental mechanic change
-3. **Blessing roll buff** (issue #80) — P1, makes missions strategically interesting
-4. **Camp art image** (issue #78) — P1, visual polish
-5. **Scrolling consolidation** (issue #83) — P1, UX improvement
-6. **Journal day grouping** (issue #89) — P2, journal polish
-7. **Gossip flavor text** (issue #90) — P2, content improvement
-8. **Settlement-specific events** (issue #82) — P2, content expansion
+**Bug fix first:**
+- #73 Hall of Fame does not load — only remaining bug
 
----
+**From audit (remaining P2/P3):**
+- #60 Web Audio ambient engine
+- #62 Settlement "recommended action" highlight
+- #42 Secondary source reformat to period voices
 
-## 7. Repo Reference
-
-- Repo path: `/home/bayarddevries/metis-trail-v2-repo`
-- Test server: `http://100.108.183.33:8081/index.html`
-- DESIGN.md: source of truth for mechanics
-- VISION.md: long-term goals and aspirational features
-- AGENTS.md: commit conventions, known pitfalls, first actions
+**Content expansion:**
+- Settlement-specific events from primary sources
+- Seasonal event variation
+- Gossip → Event connections (medium-term)
