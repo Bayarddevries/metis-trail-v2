@@ -8,8 +8,9 @@ This file is the contract for any agent or contributor working on `metis-trail-v
 
 ## First actions
 1. Read `README.md`, `TODO.md`, `ISSUES.md`, and `CHANGELOG.md` before editing code.
-2. Run `bun scripts/build.mjs` and confirm `dist/` contents before attempting to open URL.
-3. Run `git status` to check for uncommitted changes before starting work.
+2. **Check GitHub issues**: Run `gh issue list --state open` to see all open bugs and features. These are the authoritative source for what needs to be worked on. Issues labeled `bug` take priority over `enhancement`.
+3. Run `bun scripts/build.mjs` and confirm `dist/` contents before attempting to open URL.
+4. Run `git status` to check for uncommitted changes before starting work.
 
 ## Code rules
 - Keep changes minimal and contained to `src/`.
@@ -76,7 +77,9 @@ balance(constants): DAILY_FOOD 1.2 → 1.35 for win rate normalization
 - **Engine API methods must exist before UI calls them**: If `main.js` calls `game.someMethod()`, that method MUST be defined on the engine's return object. A missing method causes a JS error that silently kills the entire render function — no overlay appears, no error shown to player. Always verify the full chain: engine method exists → UI calls it → overlay renders in browser.
 - **HBC crafting recipe unreachable**: Recipe `finished_hides` is defined with `settlement: 'hbc'` but HBC's `availableSettlementActions()` does NOT include `'craft'`. Either add `'craft'` to HBC actions or reassign the recipe. This is a dangling feature — data exists but is unreachable.
 - **Item field name is `wt` not `weight`**: Items in `src/data/items.js` use `wt` for weight. Using `weight` returns undefined and silently breaks calculations.
-- **`generateGossip` may be tree-shaken**: Not grep-able in esbuild bundle but works at runtime. If gossip stops working, check esbuild tree-shaking config.
+- **GitHub issues are the authoritative backlog**: Always check `gh issue list --state open` before starting work. The local ISSUES.md is outdated. GitHub issues are the source of truth for bugs and features. Bugs take priority over enhancements.
+- **Do NOT overwrite `src/template.html`**: Use `patch` for targeted edits only. The build script reads from it. Never use `write_file` to replace the entire template.
+- **Build script does NOT inject into template**: The build script only injects `__METIS_ASSETS__` into `dist/index.html`. The template is the source of truth and should never contain duplicate script blocks.
 - **Weather wear multipliers stack with terrain**: Weather wear multipliers (rain ×1.25, storm ×1.5) multiply the base terrain wear chance, not add to it. A plains day in storm = 0.10 × 1.5 = 0.15 wear chance. Don't accidentally add instead of multiply.
 - **Season gating in `advanceWeather()`**: When a Markov transition picks a weather state impossible for the current season (snow in summer), the fallback is `overcast`. This is intentional — the `SEASON_BASE_WEATHER` weights naturally prevent impossible states on new-season transitions, but the safety net catches edge cases.
 - **Headless testing: engine import path**: `src/systems/engine.js` uses relative imports (`../data/...`). You can't `import` it directly from Node/bun. Bundle a test entry point with esbuild instead, or use the dist bundle. See HANDOFF.md Phase 6 for details.
