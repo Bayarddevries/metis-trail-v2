@@ -1054,19 +1054,19 @@ function renderSettlementActionCard(container, action, game, before, beforeCart,
           const subRow = document.createElement('div');
           subRow.className = 'settlement-trade-sub';
           subRow.style.cssText = 'display:flex;align-items:center;justify-content:space-between;gap:8px;margin:4px 0;padding:6px;background:rgba(255,255,255,0.5);border-radius:4px;font-size:12px;';
-          subRow.innerHTML = `${getItemIcon(item.name)} ${item.name} ×${item.count} <span style="color:var(--clr-accent);">→ ${mbVal} MB each</span>`;
+          subRow.innerHTML = `${getItemIcon(item.name)} ${item.name} ×${item.count} <span style="color:var(--clr-accent);">${mbVal} MB each</span>`;
           const subBtn = document.createElement('button');
           subBtn.className = 'ctrl-btn';
           subBtn.style.cssText = 'padding:2px 8px;font-size:10px;white-space:nowrap;';
           subBtn.textContent = `Trade 1`;
           subBtn.onclick = () => {
-            hideOverlays();
             const beforeMB = game.getState().mbValue;
             game.settlementAction('trade');
-            const afterMB = game.getState().mbValue;
+            const after = game.getState();
             const gained = (item.mbValue || 1);
-            publishResult(`Traded 1 ${item.name} → +${gained.toFixed(2)} MB credit.`);
-            window.__METIS_RENDER__();
+            const afterCart = game.getCart();
+            // Show result in settlement overlay
+            showSettlementResult(container, action, node, beforeJournal, after, beforeCart, afterCart, `Traded 1 ${item.name} → +${gained.toFixed(2)} MB credit.`, game);
           };
           subRow.appendChild(subBtn);
           card.appendChild(subRow);
@@ -1082,31 +1082,14 @@ function renderSettlementActionCard(container, action, game, before, beforeCart,
   } else {
     btn.onclick = () => {
       if (!canDo) return;
-      if (needsHide) hideOverlays();
       const st = game.getState().pendingSettlement;
       const beforeJournal = game.getState();
+      const beforeCart = game.getCart();
       const result = game.settlementAction(action.id);
       const after = game.getState();
       const afterCart = game.getCart();
-      const outcome = buildSettlementOutcome(action.id, beforeJournal, after, beforeCart, afterCart);
-      if (outcome) publishResult(outcome);
-      // Log settlement action to journal
-      if (st) {
-        const mechParts = [];
-        if (after.food !== beforeJournal.food) mechParts.push(`${after.food - beforeJournal.food >= 0 ? '+' : ''}${(after.food - beforeJournal.food).toFixed(1)} Food`);
-        if (after.wear !== beforeJournal.wear) mechParts.push(`Wear ${after.wear - beforeJournal.wear >= 0 ? '+' : ''}${after.wear - beforeJournal.wear}`);
-        if (after.morale !== beforeJournal.morale) mechParts.push(`Morale ${after.morale - beforeJournal.morale >= 0 ? '+' : ''}${after.morale - beforeJournal.morale}`);
-        if (after.crew !== beforeJournal.crew) mechParts.push(`Crew: ${beforeJournal.crew} → ${after.crew}`);
-        journalLog({
-          day: after.day,
-          date: monthName(after.month) + ' ' + after.day,
-          title: `${action.label} at ${st.name}`,
-          text: buildSettlementJournalText(action.id, st),
-          mech: mechParts.join(' · '),
-          collapsed: true,
-        });
-      }
-      window.__METIS_RENDER__();
+      // Show result in-place in the settlement overlay
+      showSettlementResult(container, action, node, beforeJournal, after, beforeCart, afterCart, null, game);
     };
   }
 
@@ -1117,6 +1100,72 @@ function renderSettlementActionCard(container, action, game, before, beforeCart,
   card.appendChild(btn);
 
   container.appendChild(card);
+}
+
+// Show settlement action result in-place (replaces action cards)
+function showSettlementResult(container, action, node, before, after, beforeCart, afterCart, overrideOutcome, game) {
+  // Hide all action cards
+  container.querySelectorAll('.settlement-action-card').forEach(c => { c.style.display = 'none'; });
+
+  const outcome = overrideOutcome || buildSettlementOutcome(action.id, before, after, beforeCart, afterCart);
+  const flavor = buildSettlementJournalText(action.id, node);
+
+  // Build mechanical summary
+  const mechParts = [];
+  if (after.food !== before.food) mechParts.push(`${after.food - before.food >= 0 ? '+' : ''}${(after.food - before.food).toFixed(1)} Food`);
+  if (after.wear !== before.wear) mechParts.push(`Wear ${after.wear - before.wear >= 0 ? '+' : ''}${after.wear - before.wear}`);
+  if (after.morale !== before.morale) mechParts.push(`Morale ${after.morale - before.morale >= 0 ? '+' : ''}${after.morale - before.morale}`);
+  if (after.crew !== before.crew) mechParts.push(`Crew: ${before.crew} → ${after.crew}`);
+  if (after.day !== before.day) mechParts.push(`${after.day - before.day} Day(s)`);
+
+  const resultCard = document.createElement('div');
+  resultCard.className = 'settlement-action-card';
+  resultCard.style.borderColor = 'var(--clr-accent)';
+
+  const nameRow = document.createElement('div');
+  nameRow.className = 'settlement-action-card-name';
+  nameRow.textContent = action.label;
+  resultCard.appendChild(nameRow);
+
+  const flavorRow = document.createElement('div');
+  flavorRow.className = 'settlement-action-card-flavor';
+  flavorRow.textContent = flavor;
+  resultCard.appendChild(flavorRow);
+
+  if (mechParts.length) {
+    const mechRow = document.createElement('div');
+    mechRow.className = 'settlement-action-card-cost';
+    mechRow.textContent = mechParts.join(' · ');
+    resultCard.appendChild(mechRow);
+  }
+
+  if (outcome && outcome !== flavor) {
+    const outcomeRow = document.createElement('div');
+    outcomeRow.className = 'settlement-action-card-risk';
+    outcomeRow.textContent = outcome;
+    resultCard.appendChild(outcomeRow);
+  }
+
+  const continueBtn = document.createElement('button');
+  continueBtn.className = 'settlement-action-card-btn';
+  continueBtn.textContent = 'Continue';
+  continueBtn.onclick = () => {
+    // Log to journal
+    journalLog({
+      day: after.day,
+      date: monthName(after.month) + ' ' + after.day,
+      title: `${action.label} at ${node.name}`,
+      text: flavor,
+      mech: mechParts.join(' · '),
+      collapsed: true,
+    });
+    // Close overlay and re-render
+    document.getElementById('settlement-overlay')?.classList.remove('active');
+    window.__METIS_RENDER__();
+  };
+  resultCard.appendChild(continueBtn);
+
+  container.appendChild(resultCard);
 }
 
 function buildSettlementOutcome(action, before, after, beforeCart, afterCart) {
@@ -1480,6 +1529,20 @@ const CAMP_FLAVOR = {
       'The rest does its work. Two days of recovery, and the crew is noticeably improved.',
     ],
   },
+  push_on: {
+    high: [
+      'You drive on through the evening light. The cart groans but holds. Every mile gained is a mile closer.',
+      'No rest, no respite. The oxen strain but the trail yields. You make camp after dark, exhausted but ahead.',
+    ],
+    low: [
+      'The push costs dearly. The cart takes a beating, the crew is spent, and the food runs lower. But the trail does not wait.',
+      'A hard push. The oxen are done, the crew is grumbling, and the cart axle groans louder than ever. But you gained ground.',
+    ],
+    mid: [
+      'You press on without rest. The food runs lower, the cart takes wear, but the miles add up.',
+      'No camp tonight. The trail stretches on, and so do you. Tomorrow will be harder, but today you gained ground.',
+    ],
+  },
 };
 
 function getCampFlavorText(type, rollTotal, effects) {
@@ -1502,6 +1565,8 @@ function getCampFlavorText(type, rollTotal, effects) {
     tier = rollTotal >= 12 ? 'high' : rollTotal >= 7 ? 'mid' : 'low';
   } else if (type === 'deeprest') {
     tier = rollTotal >= 10 ? 'high' : rollTotal >= 5 ? 'mid' : 'low';
+  } else if (type === 'push_on') {
+    tier = 'mid';
   } else {
     tier = 'mid';
   }
@@ -1682,6 +1747,9 @@ function showCamp(game) {
           // Hide all cards, show result
           document.querySelectorAll('.camp-card').forEach(c => { c.style.display = 'none'; });
 
+          // Build rich flavor text for the result
+          const flavorText = getCampFlavorText(a.type, result.rollTotal, result.effects);
+
           // Show dice roll if this action used one
           if (a.needRoll && result.roll !== null && rollEl) {
             const DC = {
@@ -1713,7 +1781,7 @@ function showCamp(game) {
                   if (result.critical) {
                     html += `<div class="camp-critical">⚠ Critical Failure</div>`;
                   }
-                  html += result.effects.join('<br>');
+                  html += flavorText;
                   errEl.innerHTML = html;
                 }
                 const continueEl = document.getElementById('camp-continue');
@@ -1728,7 +1796,7 @@ function showCamp(game) {
               if (result.critical) {
                 html += `<div class="camp-critical">⚠ Critical Failure</div>`;
               }
-              html += (result?.effects || []).join('<br>');
+              html += flavorText;
               errEl.innerHTML = html;
             }
             const continueEl = document.getElementById('camp-continue');
@@ -1807,18 +1875,18 @@ function showEnd(game) {
     }
   }
 
-  // Detailed scoring breakdown — use engine's getEndgameScore (DESIGN.md §10: base = 500)
+  // Detailed scoring breakdown — use engine's getEndgameScore
   const breakdown = game.getEndgameScore();
   const scoreLines = [
-    { label: 'Base score', value: breakdown.base },
-    { label: `MB value (${Math.round(state.mbValue || 0)} × 80)`, value: breakdown.mbValue },
-    { label: `Food bonus (${Math.min(state.food, 25)} × 12)`, value: breakdown.foodBonus },
-    { label: `Crew condition (${state.crew})`, value: breakdown.crewCondition },
-    { label: `Days on trail (${state.day} × -8)`, value: breakdown.daysPenalty },
-    { label: `Cart wear (${state.wear}² × -40)`, value: breakdown.wearPenalty },
+    { label: 'Base score', value: Math.round(breakdown.base) },
+    { label: `MB value (${Math.round(state.mbValue || 0)} × 80)`, value: Math.round(breakdown.mbValue) },
+    { label: `Food bonus (${Math.min(state.food, 25)} × 12)`, value: Math.round(breakdown.foodBonus) },
+    { label: `Crew condition (${state.crew})`, value: Math.round(breakdown.crewCondition) },
+    { label: `Days on trail (${state.day} × -8)`, value: Math.round(breakdown.daysPenalty) },
+    { label: `Cart wear (${state.wear}² × -40)`, value: Math.round(breakdown.wearPenalty) },
   ];
 
-  const totalScore = breakdown.score;
+  const totalScore = Math.round(breakdown.score);
 
   const scoreHtml = scoreLines.map((l) => `
     <div class="stat-row">
@@ -1855,8 +1923,7 @@ function showEnd(game) {
   if (endCard && !document.getElementById('end-leaderboard-btn')) {
     const lbBtn = document.createElement('button');
     lbBtn.id = 'end-leaderboard-btn';
-    lbBtn.className = 'restart-btn';
-    lbBtn.style.marginTop = '10px';
+    lbBtn.className = 'restart-btn end-btn';
     lbBtn.textContent = '🏆 View Hall of Fame';
     lbBtn.onclick = () => showLeaderboard();
     endCard.appendChild(lbBtn);
@@ -1915,6 +1982,9 @@ function loadMyScores() {
       return;
     }
     renderMyScoresSorted();
+  }).catch((err) => {
+    console.warn('[Metis] My Scores load failed:', err);
+    document.getElementById('lb-my-list').innerHTML = '<div class="lb-error">Unable to load personal scores — playing offline</div>';
   });
 }
 

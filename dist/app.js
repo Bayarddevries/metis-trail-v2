@@ -19248,19 +19248,18 @@ function renderSettlementActionCard(container, action, game, before, beforeCart,
           const subRow = document.createElement("div");
           subRow.className = "settlement-trade-sub";
           subRow.style.cssText = "display:flex;align-items:center;justify-content:space-between;gap:8px;margin:4px 0;padding:6px;background:rgba(255,255,255,0.5);border-radius:4px;font-size:12px;";
-          subRow.innerHTML = `${getItemIcon(item.name)} ${item.name} \xD7${item.count} <span style="color:var(--clr-accent);">\u2192 ${mbVal} MB each</span>`;
+          subRow.innerHTML = `${getItemIcon(item.name)} ${item.name} \xD7${item.count} <span style="color:var(--clr-accent);">${mbVal} MB each</span>`;
           const subBtn = document.createElement("button");
           subBtn.className = "ctrl-btn";
           subBtn.style.cssText = "padding:2px 8px;font-size:10px;white-space:nowrap;";
           subBtn.textContent = `Trade 1`;
           subBtn.onclick = () => {
-            hideOverlays();
             const beforeMB = game.getState().mbValue;
             game.settlementAction("trade");
-            const afterMB = game.getState().mbValue;
+            const after = game.getState();
             const gained = item.mbValue || 1;
-            publishResult(`Traded 1 ${item.name} \u2192 +${gained.toFixed(2)} MB credit.`);
-            window.__METIS_RENDER__();
+            const afterCart = game.getCart();
+            showSettlementResult(container, action, node, beforeJournal, after, beforeCart, afterCart, `Traded 1 ${item.name} \u2192 +${gained.toFixed(2)} MB credit.`, game);
           };
           subRow.appendChild(subBtn);
           card.appendChild(subRow);
@@ -19277,30 +19276,13 @@ function renderSettlementActionCard(container, action, game, before, beforeCart,
   } else {
     btn.onclick = () => {
       if (!canDo) return;
-      if (needsHide) hideOverlays();
       const st2 = game.getState().pendingSettlement;
-      const beforeJournal = game.getState();
+      const beforeJournal2 = game.getState();
+      const beforeCart2 = game.getCart();
       const result = game.settlementAction(action.id);
       const after = game.getState();
       const afterCart = game.getCart();
-      const outcome = buildSettlementOutcome(action.id, beforeJournal, after, beforeCart, afterCart);
-      if (outcome) publishResult(outcome);
-      if (st2) {
-        const mechParts = [];
-        if (after.food !== beforeJournal.food) mechParts.push(`${after.food - beforeJournal.food >= 0 ? "+" : ""}${(after.food - beforeJournal.food).toFixed(1)} Food`);
-        if (after.wear !== beforeJournal.wear) mechParts.push(`Wear ${after.wear - beforeJournal.wear >= 0 ? "+" : ""}${after.wear - beforeJournal.wear}`);
-        if (after.morale !== beforeJournal.morale) mechParts.push(`Morale ${after.morale - beforeJournal.morale >= 0 ? "+" : ""}${after.morale - beforeJournal.morale}`);
-        if (after.crew !== beforeJournal.crew) mechParts.push(`Crew: ${beforeJournal.crew} \u2192 ${after.crew}`);
-        journalLog({
-          day: after.day,
-          date: monthName(after.month) + " " + after.day,
-          title: `${action.label} at ${st2.name}`,
-          text: buildSettlementJournalText(action.id, st2),
-          mech: mechParts.join(" \xB7 "),
-          collapsed: true
-        });
-      }
-      window.__METIS_RENDER__();
+      showSettlementResult(container, action, node, beforeJournal2, after, beforeCart2, afterCart, null, game);
     };
   }
   card.appendChild(nameRow);
@@ -19311,6 +19293,60 @@ function renderSettlementActionCard(container, action, game, before, beforeCart,
   container.appendChild(card);
 }
 __name(renderSettlementActionCard, "renderSettlementActionCard");
+function showSettlementResult(container, action, node, before, after, beforeCart, afterCart, overrideOutcome, game) {
+  container.querySelectorAll(".settlement-action-card").forEach((c) => {
+    c.style.display = "none";
+  });
+  const outcome = overrideOutcome || buildSettlementOutcome(action.id, before, after, beforeCart, afterCart);
+  const flavor = buildSettlementJournalText(action.id, node);
+  const mechParts = [];
+  if (after.food !== before.food) mechParts.push(`${after.food - before.food >= 0 ? "+" : ""}${(after.food - before.food).toFixed(1)} Food`);
+  if (after.wear !== before.wear) mechParts.push(`Wear ${after.wear - before.wear >= 0 ? "+" : ""}${after.wear - before.wear}`);
+  if (after.morale !== before.morale) mechParts.push(`Morale ${after.morale - before.morale >= 0 ? "+" : ""}${after.morale - before.morale}`);
+  if (after.crew !== before.crew) mechParts.push(`Crew: ${before.crew} \u2192 ${after.crew}`);
+  if (after.day !== before.day) mechParts.push(`${after.day - before.day} Day(s)`);
+  const resultCard = document.createElement("div");
+  resultCard.className = "settlement-action-card";
+  resultCard.style.borderColor = "var(--clr-accent)";
+  const nameRow = document.createElement("div");
+  nameRow.className = "settlement-action-card-name";
+  nameRow.textContent = action.label;
+  resultCard.appendChild(nameRow);
+  const flavorRow = document.createElement("div");
+  flavorRow.className = "settlement-action-card-flavor";
+  flavorRow.textContent = flavor;
+  resultCard.appendChild(flavorRow);
+  if (mechParts.length) {
+    const mechRow = document.createElement("div");
+    mechRow.className = "settlement-action-card-cost";
+    mechRow.textContent = mechParts.join(" \xB7 ");
+    resultCard.appendChild(mechRow);
+  }
+  if (outcome && outcome !== flavor) {
+    const outcomeRow = document.createElement("div");
+    outcomeRow.className = "settlement-action-card-risk";
+    outcomeRow.textContent = outcome;
+    resultCard.appendChild(outcomeRow);
+  }
+  const continueBtn = document.createElement("button");
+  continueBtn.className = "settlement-action-card-btn";
+  continueBtn.textContent = "Continue";
+  continueBtn.onclick = () => {
+    journalLog({
+      day: after.day,
+      date: monthName(after.month) + " " + after.day,
+      title: `${action.label} at ${node.name}`,
+      text: flavor,
+      mech: mechParts.join(" \xB7 "),
+      collapsed: true
+    });
+    document.getElementById("settlement-overlay")?.classList.remove("active");
+    window.__METIS_RENDER__();
+  };
+  resultCard.appendChild(continueBtn);
+  container.appendChild(resultCard);
+}
+__name(showSettlementResult, "showSettlementResult");
 function buildSettlementOutcome(action, before, after, beforeCart, afterCart) {
   const msgs = [];
   if (after.food !== before.food) msgs.push(`${after.food - before.food >= 0 ? "+" : ""}${after.food - before.food} Food`);
@@ -19525,6 +19561,175 @@ function showCrew(game) {
   document.getElementById("crew-overlay")?.classList.add("active");
 }
 __name(showCrew, "showCrew");
+var CAMP_FLAVOR = {
+  rest: {
+    high: [
+      "The crew sleeps deeply under a sky full of stars. Morning comes with fresh energy and quiet purpose.",
+      "A perfect night by the fire. The oxen rest well, the crew wakes restored \u2014 tomorrow feels full of promise.",
+      "The camp is peaceful, the fire burns steady, and sleep comes easy. You wake before dawn, rested and ready."
+    ],
+    mid: [
+      "The night is adequate. Sleep comes in fits, but the crew wakes functional if not truly refreshed.",
+      "A serviceable rest. The ground is hard but the fire holds. Morning finds the crew ready to move on.",
+      "You sleep light and wake stiff, but the crew is rested enough. The trail waits."
+    ],
+    low: [
+      "A rough night. The fire dies and the cold creeps in. The crew wakes tired, and the day ahead feels long.",
+      "Sleep is fitful and short. The crew rises grumbling, and morale suffers for it.",
+      "The camp offers little comfort. The crew wakes cold and irritable, and the morning is slow to start."
+    ]
+  },
+  forage: {
+    high: [
+      "Berry bushes heavy with saskatoon fruit, and a patch of wild turnips beside a creek. The land provides generously.",
+      "You find a meadow thick with edible roots and early berries. The foraging is excellent \u2014 the crew eats well tonight.",
+      "A stroke of luck: a patch of wild onions, gooseberries, and a patch of camas root. The foraging bucket is full."
+    ],
+    mid: [
+      "A modest haul \u2014 some wild onions, a few berries, and some edible greens. Enough to supplement the rations.",
+      "You forage enough to keep the pot boiling. Not a feast, but not a famine either.",
+      "The land yields enough to keep the crew fed. Unspectacular but welcome."
+    ],
+    low: [
+      "The prairie offers little today. A few bitter roots and not much else. The foraging was lean.",
+      "You find almost nothing edible. A handful of bitter roots. The crew goes to bed hungry.",
+      "A wasted afternoon. The forage comes back nearly empty-handed, and the rations remain thin."
+    ]
+  },
+  hunt: {
+    high: [
+      "A young bull, separated from the herd. The shot is clean and the butchering efficient. The crew feasts tonight.",
+      "A prairie grouse covey flushes at your feet. The hunt is quick and the meat is tender. A good day.",
+      "A deer at the creek crossing. One shot, one kill. The crew will eat well for days."
+    ],
+    mid: [
+      "You take a shot but the hit is poor. Some food, but not a clean kill. The crew makes do.",
+      "A close call \u2014 you wound it but it runs. You track it down eventually, but the meat is less than hoped.",
+      "A jackrabbit and a grouse. Not a feast, but the pot will boil tonight."
+    ],
+    low: [
+      "The shot goes wide. The game scatters and you return to camp empty-handed.",
+      "You track a deer for hours but never get a clean shot. The ammunition is wasted.",
+      "No game today. The prairie is empty and the hunt returns nothing."
+    ]
+  },
+  pemmican_process: {
+    high: [
+      "The women work fast \u2014 slicing the lean meat into thin sheets, setting them on drying racks over the fire. By evening the flails are pounding, the kettles are rendering tallow, and the pemmican bags are being stitched shut with sinew. The crew will eat well for weeks.",
+      "A full day of processing. The women move through the steps like a dance \u2014 slice, dry, pound, render, pack. The smell of boiling fat and dried meat fills the camp. Tomorrow the pemmican bags rest heavy in the cart."
+    ],
+    mid: [
+      "The work is steady but the yield is modest. Some meat dried well, some did not. The tallow is rendered but the bags are only half full. Enough to keep the crew fed.",
+      "A few hours of slicing and drying. The sun is hot and the work is slow, but the pemmican takes shape. The women Knead and pack while the crew tends the fire."
+    ],
+    low: [
+      "The meat is lean and the drying is slow. A wasted afternoon \u2014 the forage returns nearly empty-handed, and the rations remain thin.",
+      "The work drags. The heat spoils more than it preserves. The women do what they can, but the yield is poor."
+    ]
+  },
+  scout: {
+    high: [
+      "The scout returns with detailed news: the next stretch is clear, with good water and firm ground. You map the way forward with confidence.",
+      "A successful reconnaissance. The scout finds the best path and marks it. Tomorrow's travel will be smoother.",
+      "The scout spots a shortcut through a coul\xE9e that saves half a day. The trail ahead looks favorable."
+    ],
+    low: [
+      "The scout comes back with nothing. The trail ahead remains a mystery.",
+      "The scouting party finds no clear path. You will have to feel your way forward tomorrow.",
+      "The scout returns empty-handed. No shortcuts, no intelligence \u2014 just more trail."
+    ],
+    mid: [
+      "The scout brings back some useful information. Not a breakthrough, but enough to plan tomorrow's leg."
+    ]
+  },
+  repair: {
+    high: [
+      "The repair is sound. The shaganappi binds tight and the cart rolls smoother by morning. Good work.",
+      "A clean repair job. The cartwright would be proud. The wear comes off and the cart feels solid again."
+    ],
+    mid: [
+      "A decent repair. The cart is sounder than before, and the shaganappi was well-used.",
+      "The work holds. Not pretty, but the cart will make it to the next settlement."
+    ],
+    low: [
+      "The repair is rough but it holds. The shaganappi is well-spent, even if the work is ugly.",
+      "The fix is imperfect. Some wear comes off, but the cart still groans. It will do until the next settlement."
+    ]
+  },
+  dance: {
+    high: [
+      "The fiddle starts and the crew dances until the fire burns low. Someone's boots throw sparks. A Red River jig, then a reel. Nobody talks about tomorrow.",
+      "A night of song and dance. The old tunes from Red River ring out across the dark.",
+      "The dancing is spirited and the stories are long. The crew goes to bed smiling."
+    ],
+    low: [
+      "A quiet night. A few songs, some half-hearted dancing. The mood lifts, but only a little.",
+      "The crew is too tired for much revelry. A few tunes around the fire, then early sleep."
+    ],
+    mid: [
+      "A few songs. Some half-hearted dancing. Nobody's heart's in it, but the fire's warm and the night passes.",
+      "A decent evening by the fire. Not the best night, but the spirits are lifted."
+    ]
+  },
+  deeprest: {
+    high: [
+      "Two days of proper rest. The crew emerges refreshed, the oxen are strong, and the cart feels lighter. The trail ahead looks better.",
+      "A full deep rest. Hot food, long sleep, and time to mend what is broken. The crew is ready for whatever comes."
+    ],
+    low: [
+      "Two days lost to rest. The crew needed it, but the trail does not wait. Still, you leave camp stronger than you arrived.",
+      "The deep rest costs time and food, but the crew needed it. Tomorrow you push forward with renewed strength."
+    ],
+    mid: [
+      "The rest does its work. Two days of recovery, and the crew is noticeably improved."
+    ]
+  },
+  push_on: {
+    high: [
+      "You drive on through the evening light. The cart groans but holds. Every mile gained is a mile closer.",
+      "No rest, no respite. The oxen strain but the trail yields. You make camp after dark, exhausted but ahead."
+    ],
+    low: [
+      "The push costs dearly. The cart takes a beating, the crew is spent, and the food runs lower. But the trail does not wait.",
+      "A hard push. The oxen are done, the crew is grumbling, and the cart axle groans louder than ever. But you gained ground."
+    ],
+    mid: [
+      "You press on without rest. The food runs lower, the cart takes wear, but the miles add up.",
+      "No camp tonight. The trail stretches on, and so do you. Tomorrow will be harder, but today you gained ground."
+    ]
+  }
+};
+function getCampFlavorText(type, rollTotal, effects) {
+  const pool = CAMP_FLAVOR[type];
+  if (!pool) return (effects || []).join("\n");
+  let tier;
+  if (type === "rest") {
+    tier = rollTotal >= 15 ? "high" : rollTotal >= 8 ? "mid" : "low";
+  } else if (type === "forage") {
+    tier = rollTotal >= 12 ? "high" : rollTotal >= 8 ? "mid" : "low";
+  } else if (type === "hunt") {
+    tier = rollTotal >= 10 ? "high" : rollTotal >= 6 ? "mid" : "low";
+  } else if (type === "scout") {
+    tier = rollTotal >= 12 ? "high" : rollTotal >= 8 ? "mid" : "low";
+  } else if (type === "repair") {
+    tier = rollTotal >= 9 ? "high" : rollTotal >= 5 ? "mid" : "low";
+  } else if (type === "dance") {
+    tier = rollTotal >= 10 ? "high" : rollTotal >= 6 ? "mid" : "low";
+  } else if (type === "pemmican_process") {
+    tier = rollTotal >= 12 ? "high" : rollTotal >= 7 ? "mid" : "low";
+  } else if (type === "deeprest") {
+    tier = rollTotal >= 10 ? "high" : rollTotal >= 5 ? "mid" : "low";
+  } else if (type === "push_on") {
+    tier = "mid";
+  } else {
+    tier = "mid";
+  }
+  const options = pool[tier] || pool.mid || [];
+  if (!options.length) return (effects || []).join("\n");
+  const flavor = options[Math.floor(Math.random() * options.length)];
+  return flavor + "\n" + (effects || []).join("\n");
+}
+__name(getCampFlavorText, "getCampFlavorText");
 function showCamp(game) {
   const state = game.getState();
   if (state.over || state.pendingEvent || state.pendingSettlement) return;
@@ -19708,6 +19913,7 @@ function showCamp(game) {
           document.querySelectorAll(".camp-card").forEach((c) => {
             c.style.display = "none";
           });
+          const flavorText = getCampFlavorText(a.type, result.rollTotal, result.effects);
           if (a.needRoll && result.roll !== null && rollEl) {
             const DC = {
               rest: 12,
@@ -19742,7 +19948,7 @@ function showCamp(game) {
                   if (result.critical) {
                     html += `<div class="camp-critical">\u26A0 Critical Failure</div>`;
                   }
-                  html += result.effects.join("<br>");
+                  html += flavorText;
                   errEl.innerHTML = html;
                 }
                 const continueEl = document.getElementById("camp-continue");
@@ -19756,7 +19962,7 @@ function showCamp(game) {
               if (result.critical) {
                 html += `<div class="camp-critical">\u26A0 Critical Failure</div>`;
               }
-              html += (result?.effects || []).join("<br>");
+              html += flavorText;
               errEl.innerHTML = html;
             }
             const continueEl = document.getElementById("camp-continue");
@@ -19830,14 +20036,14 @@ function showEnd(game) {
   }
   const breakdown = game.getEndgameScore();
   const scoreLines = [
-    { label: "Base score", value: breakdown.base },
-    { label: `MB value (${Math.round(state.mbValue || 0)} \xD7 80)`, value: breakdown.mbValue },
-    { label: `Food bonus (${Math.min(state.food, 25)} \xD7 12)`, value: breakdown.foodBonus },
-    { label: `Crew condition (${state.crew})`, value: breakdown.crewCondition },
-    { label: `Days on trail (${state.day} \xD7 -8)`, value: breakdown.daysPenalty },
-    { label: `Cart wear (${state.wear}\xB2 \xD7 -40)`, value: breakdown.wearPenalty }
+    { label: "Base score", value: Math.round(breakdown.base) },
+    { label: `MB value (${Math.round(state.mbValue || 0)} \xD7 80)`, value: Math.round(breakdown.mbValue) },
+    { label: `Food bonus (${Math.min(state.food, 25)} \xD7 12)`, value: Math.round(breakdown.foodBonus) },
+    { label: `Crew condition (${state.crew})`, value: Math.round(breakdown.crewCondition) },
+    { label: `Days on trail (${state.day} \xD7 -8)`, value: Math.round(breakdown.daysPenalty) },
+    { label: `Cart wear (${state.wear}\xB2 \xD7 -40)`, value: Math.round(breakdown.wearPenalty) }
   ];
-  const totalScore = breakdown.score;
+  const totalScore = Math.round(breakdown.score);
   const scoreHtml = scoreLines.map((l) => `
     <div class="stat-row">
       <span class="label">${l.label}</span>
@@ -19868,8 +20074,7 @@ function showEnd(game) {
   if (endCard && !document.getElementById("end-leaderboard-btn")) {
     const lbBtn = document.createElement("button");
     lbBtn.id = "end-leaderboard-btn";
-    lbBtn.className = "restart-btn";
-    lbBtn.style.marginTop = "10px";
+    lbBtn.className = "restart-btn end-btn";
     lbBtn.textContent = "\u{1F3C6} View Hall of Fame";
     lbBtn.onclick = () => showLeaderboard();
     endCard.appendChild(lbBtn);
@@ -19922,6 +20127,9 @@ function loadMyScores() {
       return;
     }
     renderMyScoresSorted();
+  }).catch((err) => {
+    console.warn("[Metis] My Scores load failed:", err);
+    document.getElementById("lb-my-list").innerHTML = '<div class="lb-error">Unable to load personal scores \u2014 playing offline</div>';
   });
 }
 __name(loadMyScores, "loadMyScores");
@@ -20021,24 +20229,6 @@ export {
   bootstrap
 };
 /*! Bundled license information:
-
-@firebase/util/dist/postinstall.mjs:
-  (**
-   * @license
-   * Copyright 2025 Google LLC
-   *
-   * Licensed under the Apache License, Version 2.0 (the "License");
-   * you may not use this file except in compliance with the License.
-   * You may obtain a copy of the License at
-   *
-   *   http://www.apache.org/licenses/LICENSE-2.0
-   *
-   * Unless required by applicable law or agreed to in writing, software
-   * distributed under the License is distributed on an "AS IS" BASIS,
-   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   * See the License for the specific language governing permissions and
-   * limitations under the License.
-   *)
 
 @firebase/util/dist/index.esm.js:
   (**
