@@ -38,6 +38,18 @@ export function bootstrap(seed = null) {
     return;
   }
 
+  // Journal click handler — toggle collapsed/expanded on header click
+  var journal = document.getElementById('journal');
+  if (journal) {
+    journal.addEventListener('click', (e) => {
+      var header = e.target.closest('.journal-header');
+      if (header) {
+        var entry = header.closest('.journal-entry');
+        if (entry) entry.classList.toggle('collapsed');
+      }
+    });
+  }
+
   // Apply theme CSS custom properties
   applyTheme(rootEl);
 
@@ -823,321 +835,264 @@ function buildEventChoiceOutcome(stepLog, before, after) {
 
 function showSettlement(game) {
   Haptics.arrive();
-  const next = game.getCurrentNode();
+  const state = game.getState();
+  const node = game.getCurrentNode();
   const before = game.getState();
   const beforeCart = game.getCart();
+
   const nameEl = document.getElementById('settlement-name');
+  const badgeEl = document.getElementById('settlement-badge');
+  const distanceEl = document.getElementById('settlement-distance');
   const descEl = document.getElementById('settlement-desc');
   const actionsEl = document.getElementById('settlement-actions');
-  if (!nameEl || !descEl || !actionsEl) return;
+  if (!nameEl || !badgeEl || !distanceEl || !descEl || !actionsEl) return;
 
-  nameEl.textContent = next.name;
-  descEl.textContent = next.desc;
+  // Settlement header
+  nameEl.textContent = node.name;
+  
+  // Type badge
+  const typeLabels = { hbc: 'HBC Fort', metis: 'Métis Camp', nwmp: 'NWMP Post', mission: 'Mission', trading: 'Trading Post' };
+  badgeEl.textContent = typeLabels[node.type] || node.type.toUpperCase();
+  badgeEl.className = 'settlement-badge ' + (node.type || 'hbc');
+  
+  // Distance from Fort Garry
+  const distKm = Math.round((node.dist || 0) * 50); // approximate km per segment
+  distanceEl.textContent = `${distKm} km from Fort Garry`;
+  
+  // Description
+  descEl.textContent = node.desc || '';
+
+  // Clear actions
   actionsEl.innerHTML = '';
 
-  // Crafting discoverability hint (#33)
-  const recipes = game.getAvailableRecipes();
-  let craftHintEl = document.getElementById('settlement-craft-hint');
-  if (!craftHintEl) {
-    craftHintEl = document.createElement('div');
-    craftHintEl.id = 'settlement-craft-hint';
-    craftHintEl.className = 'settlement-craft-hint';
-    descEl.parentNode.insertBefore(craftHintEl, descEl.nextSibling);
-  }
-  if (recipes.length > 0) {
-    const summary = recipes.length === 1
-      ? `⚗️ Crafting: ${recipes[0].name} — ${recipes[0].inputs.map(i => `${i.count}×${i.name}`).join(' + ')}`
-      : `⚗️ Crafting available (${recipes.length} recipe${recipes.length > 1 ? 's' : ''})`;
-    craftHintEl.textContent = summary;
-    craftHintEl.style.display = 'block';
-  } else {
-    craftHintEl.style.display = 'none';
-  }
-
-  const available = game.getAvailableActions();
-  const primaryActions = [];
-  const secondaryActions = [];
-  (available.actions || []).forEach((action) => {
-    if (['craft', 'buy_food', 'buy_repair', 'buy_heal', 'buy_info'].includes(action)) {
-      // Only add craft to secondary if there are usable recipes
-      if (action === 'craft') {
-        const recipes = game.getAvailableRecipes();
-        if (recipes.length > 0) secondaryActions.push(action);
-      } else {
-        // Buy actions: only show if player has enough credit
-        const state = game.getState();
-        const settleType = state.pendingSettlement?.type || 'hbc';
-        const credit = state.credit?.[settleType] || 0;
-        const costs = { buy_food: CONSTANTS.MB_FOOD_COST, buy_repair: CONSTANTS.MB_REPAIR_COST, buy_heal: CONSTANTS.MB_HEAL_COST, buy_info: CONSTANTS.MB_INFO_COST };
-        if (credit >= (costs[action] || 0)) secondaryActions.push(action);
-      }
-    } else {
-      primaryActions.push(action);
-    }
+  // Get settlement-specific actions from engine
+  const actions = game.getSettlementActions ? game.getSettlementActions(node.type) : getDefaultSettlementActions(node.type);
+  
+  // Render each action as a card (matching camp card pattern)
+  actions.forEach((action) => {
+    renderSettlementActionCard(actionsEl, action, game, before, beforeCart, node);
   });
-
-  // Render primary actions (always visible)
-  primaryActions.forEach((action) => {
-    renderSettlementAction(actionsEl, action, game, before, beforeCart);
-  });
-
-  // Render secondary actions behind collapsible toggle
-  if (secondaryActions.length > 0) {
-    const toggleBtn = document.createElement('button');
-    toggleBtn.className = 'settlement-more-toggle';
-    toggleBtn.textContent = 'More actions ▶';
-
-    const secondaryEl = document.createElement('div');
-    secondaryEl.className = 'settlement-secondary-actions';
-
-    toggleBtn.addEventListener('click', () => {
-      const isExpanded = secondaryEl.classList.toggle('expanded');
-      toggleBtn.textContent = isExpanded ? 'Less ▲' : 'More actions ▶';
-      // Scroll the overlay card so expanded content is visible
-      if (isExpanded) {
-        const card = document.querySelector('#settlement-overlay .overlay-card');
-        if (card) {
-          secondaryEl.scrollIntoView({behavior: 'smooth', block: 'end'});
-        }
-      }
-    });
-
-    secondaryActions.forEach((action) => {
-      renderSettlementAction(secondaryEl, action, game, before, beforeCart);
-    });
-
-    actionsEl.appendChild(toggleBtn);
-    actionsEl.appendChild(secondaryEl);
-  }
 
   document.getElementById('settlement-overlay')?.classList.add('active');
 }
 
-function renderSettlementAction(container, action, game, before, beforeCart) {
-  // Special handling for craft: show recipe panel instead of a simple button
-  if (action === 'craft') {
-    const recipes = game.getAvailableRecipes();
-    if (recipes.length === 0) {
-      const btn = document.createElement('button');
-      btn.className = 'ctrl-btn settlement-action-btn secondary-action';
-      btn.style.opacity = '0.5';
-      btn.style.cursor = 'not-allowed';
-      btn.textContent = 'Craft — No recipes available';
-      container.appendChild(btn);
-      return;
-    }
-    const recipePanel = document.createElement('div');
-    recipePanel.style.cssText = 'width:100%;margin-top:8px;padding:10px;background:rgba(46,90,62,0.08);border:1px solid rgba(46,90,62,0.3);border-radius:6px;';
-    const panelTitle = document.createElement('div');
-    panelTitle.style.cssText = 'font-family:var(--font-heading);font-size:12px;font-weight:600;color:var(--clr-accent);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px;';
-    panelTitle.textContent = 'Crafting';
-    recipePanel.appendChild(panelTitle);
-    recipes.forEach((r) => {
-      const row = document.createElement('div');
-      row.style.cssText = 'display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px;padding:6px;background:rgba(255,255,255,0.5);border-radius:4px;';
-      const inputs = r.inputs.map((inp) => `${inp.name}×${inp.count} (${inp.have}/${inp.count})`).join(' + ');
-      const info = document.createElement('div');
-      info.style.cssText = 'flex:1;font-size:12px;';
-      info.innerHTML = `<strong>${getItemIcon(r.output.name || r.name)} ${r.name}</strong> — ${inputs}`;
-      const craftBtn = document.createElement('button');
-      craftBtn.className = 'ctrl-btn';
-      craftBtn.style.cssText = 'padding:3px 10px;font-size:11px;white-space:nowrap;';
-      craftBtn.textContent = 'Craft';
-      craftBtn.disabled = !r.inputs.every((inp) => inp.have >= inp.count);
-      if (craftBtn.disabled) craftBtn.style.opacity = '0.4';
-      craftBtn.onclick = () => {
-        hideOverlays();
-        game.craftRecipe(r.id);
-        publishResult(`Crafted ${r.name}.`);
-        window.__METIS_RENDER__();
-      };
-      row.appendChild(info);
-      row.appendChild(craftBtn);
-      recipePanel.appendChild(row);
-    });
-    container.appendChild(recipePanel);
-    return;
+function getDefaultSettlementActions(type) {
+  const base = [];
+  switch (type) {
+    case 'hbc':
+      return [
+        { id: 'trade', label: 'Trade Goods for ₥', cost: '1 trade good', risk: 'Best rates for pelts/hides', flavor: 'The Company factors weigh your furs in silence. The ledger decides your worth.' },
+        { id: 'buy_supplies', label: 'Buy Supplies', cost: '₥ varies', risk: 'Full inventory available', flavor: 'Pemmican, axes, shaganappi, tools — everything a carter needs for the long trail.' },
+        { id: 'rest', label: 'Rest at the Fort', cost: '1 food', risk: 'Crew rested, morale +15', flavor: 'A warm fire in the mess hall, dry blankets, and a night without the wind.' },
+        { id: 'get_intel', label: 'Get Trail Intel', cost: '1 ₥', risk: 'Reveals next 2 nodes', flavor: 'The clerk unfolds a map stained with ink and tea. He marks the hazards ahead.' },
+      ];
+    case 'metis':
+      return [
+        { id: 'trade_gossip', label: 'Trade Gossip', cost: 'Free', risk: 'Reveals 1 gossip entry', flavor: 'News travels faster than carts on the prairie. The women know everything.' },
+        { id: 'recruit_crew', label: 'Recruit Crew', cost: '2 ₥ + 1 food', risk: '+1 crew member (max 6)', flavor: 'A young hand looking for work. Strong back, willing heart — if you can feed him.' },
+        { id: 'dance', label: 'Dance', cost: '1 food', risk: 'Morale +10, no day advance', flavor: 'The fiddle starts. A Red River jig. Boots on hard ground. Nobody thinks about tomorrow.' },
+        { id: 'share_food', label: 'Share Food', cost: 'Give 2+ food', risk: 'Morale +5 per food', flavor: 'Generosity on the trail is its own currency. What you give returns in loyalty.' },
+        { id: 'craft_hides', label: 'Craft Finished Hides', cost: '3 raw hides + 1 shaganappi', risk: 'Creates finished_hide (worth 2× ₥)', flavor: 'The women scrape, stretch, and smoke the hides. Patience turns rawhide into profit.' },
+      ];
+    case 'nwmp':
+      return [
+        { id: 'pay_fines', label: 'Pay Fines', cost: '₥ varies', risk: 'Clears fines if any', flavor: 'The sergeant reads your name from the ledger. The amount is not negotiable.' },
+        { id: 'get_permits', label: 'Get Permits', cost: '2 ₥', risk: 'Required for river crossings', flavor: 'A stamp, a signature, and the Queen\'s law lets you cross the water legal.' },
+        { id: 'report_duty', label: 'Report for Duty', cost: '1 day', risk: '₥ reward, morale −5', flavor: 'Red coats, drill, and the weight of Ottawa\'s authority. The pay is fair but the pride costs.' },
+        { id: 'buy_ammo', label: 'Buy Ammo', cost: '1.5 ₥ per Belt', risk: 'Cheaper than HBC', flavor: 'Ball and powder, measured honest. The Mounties don\'t cheat a carter on shot.' },
+        { id: 'rest', label: 'Rest', cost: '1 food', risk: 'Crew rested (no morale bonus)', flavor: 'A cot in the barracks. Clean, quiet, and the sentry paces all night.' },
+      ];
+    case 'mission':
+      return [
+        { id: 'heal_crew', label: 'Heal Crew', cost: '1 Medicine Pouch or 2 ₥', risk: 'Clears injury/illness, morale +10', flavor: 'The Grey Nuns tend the sick without asking who you are or where you come from.' },
+        { id: 'rest', label: 'Free Rest + Blessing', cost: 'Free', risk: 'Crew rested, morale +15', flavor: 'A chapel bell at evening. You sleep on straw but wake with a lighter spirit.' },
+        { id: 'get_blessing', label: 'Get Blessing', cost: '1 food', risk: 'Morale +10, next event DC −1', flavor: 'The priest\'s hand on your brow. The trail feels less hostile after prayer.' },
+        { id: 'trade_limited', label: 'Trade (Limited)', cost: 'Buy pemmican 0.5 ₥, sell blankets 1.5 ₥', risk: 'Charity rates', flavor: 'The mission garden feeds the body. The trade feeds the journey.' },
+      ];
+    case 'trading':
+      return [
+        { id: 'trade', label: 'Trade Goods', cost: '1 trade good', risk: 'Standard rates', flavor: 'A free trader with no Company badge. His prices are his own.' },
+        { id: 'buy_supplies', label: 'Buy Supplies', cost: '₥ varies', risk: 'Basic inventory', flavor: 'What the Company posts run out of, the free traders sometimes have.' },
+        { id: 'rest', label: 'Rest', cost: '1 food', risk: 'Crew rested, morale +10', flavor: 'A lean-to by the fire. Simple shelter, honest company.' },
+        { id: 'get_intel', label: 'Get Trail Intel', cost: '1 ₥', risk: 'Reveals next node', flavor: 'He rides the trail weekly. His news is fresh and his memory long.' },
+      ];
+    default:
+      return [
+        { id: 'trade', label: 'Trade Goods', cost: '1 trade good', risk: 'Standard rates', flavor: 'The factor weighs your furs. The ledger is final.' },
+        { id: 'rest', label: 'Rest', cost: '1 food', risk: 'Crew rested, morale +10', flavor: 'A night under roof and beam. The trail waits for morning.' },
+      ];
   }
+}
 
-  // Special handling for trade: show MB yield per trade good
-  if (action === 'trade') {
-    const cart = game.getCart();
-    const tradeItems = cart.filter((i) => i.type === 'trade' && i.count > 0);
-    if (tradeItems.length === 0) {
-      const btn = document.createElement('button');
-      btn.className = 'ctrl-btn settlement-action-btn primary-action';
-      btn.style.opacity = '0.5';
-      btn.style.cursor = 'not-allowed';
-      btn.textContent = 'Trade — No trade goods';
-      container.appendChild(btn);
-      return;
-    }
-    const tradePanel = document.createElement('div');
-    tradePanel.style.cssText = 'width:100%;margin-top:8px;padding:10px;background:rgba(46,90,62,0.08);border:1px solid rgba(46,90,62,0.3);border-radius:6px;';
-    const panelTitle = document.createElement('div');
-    panelTitle.style.cssText = 'font-family:var(--font-heading);font-size:12px;font-weight:600;color:var(--clr-accent);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px;';
-    panelTitle.textContent = 'Trade Goods for MB Credit';
-    tradePanel.appendChild(panelTitle);
-    tradeItems.forEach((item) => {
-      const mbVal = item.mbValue || 1;
-      const row = document.createElement('div');
-      row.style.cssText = 'display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px;padding:6px;background:rgba(255,255,255,0.5);border-radius:4px;';
-      const info = document.createElement('div');
-      info.style.cssText = 'flex:1;font-size:12px;';
-      info.innerHTML = `${getItemIcon(item.name)} ${item.name} ×${item.count} <span style="color:var(--clr-accent);">→ ${mbVal} MB</span>`;
-      const tradeBtn = document.createElement('button');
-      tradeBtn.className = 'ctrl-btn';
-      tradeBtn.style.cssText = 'padding:3px 10px;font-size:11px;white-space:nowrap;';
-      tradeBtn.textContent = `Trade ${item.name}`;
-      tradeBtn.onclick = () => {
-        hideOverlays();
-        const beforeMB = game.getState().mbValue;
-        game.settlementAction('trade');
-        const afterMB = game.getState().mbValue;
-        const gained = afterMB < beforeMB ? (item.mbValue || 1) : (item.mbValue || 1);
-        publishResult(`Traded 1 ${item.name} → +${gained.toFixed(2)} MB credit.`);
-        window.__METIS_RENDER__();
-      };
-      row.appendChild(info);
-      row.appendChild(tradeBtn);
-      tradePanel.appendChild(row);
-    });
-    container.appendChild(tradePanel);
-    return;
-  }
+function renderSettlementActionCard(container, action, game, before, beforeCart, node) {
+  const card = document.createElement('div');
+  card.className = 'settlement-action-card';
 
-  // MB spending actions
-  if (action === 'buy_food') {
-    const state = game.getState();
-    const settleType = state.pendingSettlement?.type || 'hbc';
-    const credit = state.credit?.[settleType] || 0;
-    const cost = CONSTANTS.MB_FOOD_COST;
-    const foodGain = Math.floor(1 / cost);
-    const btn = document.createElement('button');
-    btn.className = 'ctrl-btn settlement-action-btn secondary-action';
-    btn.textContent = `Buy Food (${cost} MB → +${foodGain} food)`;
-    if (credit < cost) {
-      btn.style.opacity = '0.5';
-      btn.style.cursor = 'not-allowed';
-      btn.title = `Need ${cost} MB credit. You have ${credit.toFixed(1)} MB.`;
-    }
-    btn.onclick = () => {
-      if (credit < cost) return;
-      hideOverlays();
-      game.settlementAction('buy_food');
-      publishResult(`Bought ${foodGain} food for ${cost} MB.`);
-      window.__METIS_RENDER__();
-    };
-    container.appendChild(btn);
-    return;
-  }
+  const nameRow = document.createElement('div');
+  nameRow.className = 'settlement-action-card-name';
+  nameRow.textContent = action.label;
 
-  if (action === 'buy_repair') {
-    const state = game.getState();
-    const settleType = state.pendingSettlement?.type || 'hbc';
-    const credit = state.credit?.[settleType] || 0;
-    const cost = CONSTANTS.MB_REPAIR_COST;
-    const btn = document.createElement('button');
-    btn.className = 'ctrl-btn settlement-action-btn secondary-action';
-    btn.textContent = `Repair Cart (${cost} MB → −2 wear)`;
-    if (credit < cost || state.wear <= 0) {
-      btn.style.opacity = '0.5';
-      btn.style.cursor = 'not-allowed';
-      btn.title = credit < cost ? `Need ${cost} MB credit. You have ${credit.toFixed(1)} MB.` : 'Cart does not need repair.';
-    }
-    btn.onclick = () => {
-      if (credit < cost || state.wear <= 0) return;
-      hideOverlays();
-      game.settlementAction('buy_repair');
-      publishResult(`Cart repaired for ${cost} MB.`);
-      window.__METIS_RENDER__();
-    };
-    container.appendChild(btn);
-    return;
-  }
+  const costRow = document.createElement('div');
+  costRow.className = 'settlement-action-card-cost';
+  costRow.textContent = `Cost: ${action.cost}`;
 
-  if (action === 'buy_heal') {
-    const state = game.getState();
-    const settleType = state.pendingSettlement?.type || 'hbc';
-    const credit = state.credit?.[settleType] || 0;
-    const cost = CONSTANTS.MB_HEAL_COST;
-    const btn = document.createElement('button');
-    btn.className = 'ctrl-btn settlement-action-btn secondary-action';
-    btn.textContent = `Heal Crew (${cost} MB → +20 morale)`;
-    if (credit < cost) {
-      btn.style.opacity = '0.5';
-      btn.style.cursor = 'not-allowed';
-      btn.title = `Need ${cost} MB credit. You have ${credit.toFixed(1)} MB.`;
-    }
-    btn.onclick = () => {
-      if (credit < cost) return;
-      hideOverlays();
-      game.settlementAction('buy_heal');
-      publishResult(`Crew healed for ${cost} MB.`);
-      window.__METIS_RENDER__();
-    };
-    container.appendChild(btn);
-    return;
-  }
+  const riskRow = document.createElement('div');
+  riskRow.className = 'settlement-action-card-risk';
+  riskRow.textContent = `Risk: ${action.risk}`;
 
-  if (action === 'buy_info') {
-    const state = game.getState();
-    const settleType = state.pendingSettlement?.type || 'hbc';
-    const credit = state.credit?.[settleType] || 0;
-    const cost = CONSTANTS.MB_INFO_COST;
-    const btn = document.createElement('button');
-    btn.className = 'ctrl-btn settlement-action-btn secondary-action';
-    btn.textContent = `Gather Intel (${cost} MB → trail info)`;
-    if (credit < cost) {
-      btn.style.opacity = '0.5';
-      btn.style.cursor = 'not-allowed';
-      btn.title = `Need ${cost} MB credit. You have ${credit.toFixed(1)} MB.`;
-    }
-    btn.onclick = () => {
-      if (credit < cost) return;
-      hideOverlays();
-      game.settlementAction('buy_info');
-      publishResult(`Gathered trail intelligence for ${cost} MB.`);
-      window.__METIS_RENDER__();
-    };
-    container.appendChild(btn);
-    return;
-  }
+  const flavorRow = document.createElement('div');
+  flavorRow.className = 'settlement-action-card-flavor';
+  flavorRow.textContent = action.flavor;
 
-  // Generic action button (rest, repair, heal)
   const btn = document.createElement('button');
-  btn.className = 'ctrl-btn settlement-action-btn';
-  if (['rest', 'repair', 'heal'].includes(action)) btn.classList.add('primary-action');
-  else btn.classList.add('secondary-action');
-  btn.textContent = actionLabel(action);
-  btn.onclick = () => {
-    hideOverlays();
-    const st = game.getState().pendingSettlement;
-    const beforeJournal = game.getState();
-    game.settlementAction(action);
-    const after = game.getState();
-    const afterCart = game.getCart();
-    const outcome = buildSettlementOutcome(action, before, after, beforeCart, afterCart);
-    if (outcome) publishResult(outcome);
-    // Log settlement action to journal
-    if (st) {
-      const mechParts = [];
-      if (after.food !== beforeJournal.food) mechParts.push(`${after.food - beforeJournal.food >= 0 ? '+' : ''}${(after.food - beforeJournal.food).toFixed(1)} Food`);
-      if (after.wear !== beforeJournal.wear) mechParts.push(`Wear ${after.wear - beforeJournal.wear >= 0 ? '+' : ''}${after.wear - beforeJournal.wear}`);
-      if (after.morale !== beforeJournal.morale) mechParts.push(`Morale ${after.morale - beforeJournal.morale >= 0 ? '+' : ''}${after.morale - beforeJournal.morale}`);
-      if (after.crew !== beforeJournal.crew) mechParts.push(`Crew: ${beforeJournal.crew} → ${after.crew}`);
-      journalLog({
-        day: after.day,
-        date: monthName(after.month) + ' ' + after.day,
-        title: `${actionLabel(action)} at ${st.name}`,
-        text: buildSettlementJournalText(action, st),
-        mech: mechParts.join(' · '),
-        collapsed: true,
-      });
+  btn.className = 'settlement-action-card-btn';
+  btn.textContent = 'Do It';
+
+  // Determine if action can be performed
+  const state = game.getState();
+  const cart = game.getCart();
+  const credit = state.credit?.[node.type] || 0;
+  let canDo = true;
+  let needsHide = true;
+
+  // Check preconditions for each action
+  switch (action.id) {
+    case 'trade':
+      canDo = cart.some(i => i.type === 'trade' && i.count > 0);
+      break;
+    case 'buy_supplies':
+      canDo = credit > 0;
+      break;
+    case 'rest':
+      canDo = state.food >= 1;
+      break;
+    case 'get_intel':
+      canDo = credit >= 1;
+      break;
+    case 'trade_gossip':
+      canDo = true;
+      break;
+    case 'recruit_crew':
+      canDo = credit >= 2 && state.food >= 1 && (state.crewCount || 3) < 6;
+      break;
+    case 'dance':
+      canDo = state.food >= 1;
+      break;
+    case 'share_food':
+      canDo = state.food >= 2;
+      break;
+    case 'craft_hides':
+      const hides = cart.find(i => i.name === 'Bison Hide' || i.name === 'Beaver Pelts' || i.name === 'Elk Hide' || i.name === 'Deer Hide');
+      const shag = cart.find(i => i.name === 'Shaganappi');
+      canDo = (hides?.count || 0) >= 3 && (shag?.count || 0) >= 1;
+      break;
+    case 'pay_fines':
+      canDo = (state.fines || 0) > 0 && credit >= (state.fines || 0);
+      break;
+    case 'get_permits':
+      canDo = credit >= 2;
+      break;
+    case 'report_duty':
+      canDo = true;
+      break;
+    case 'buy_ammo':
+      canDo = credit >= 1.5;
+      break;
+    case 'heal_crew':
+      const med = cart.find(i => i.name === 'Medicine Pouch');
+      canDo = credit >= 2 || (med?.count || 0) >= 1;
+      break;
+    case 'get_blessing':
+      canDo = state.food >= 1;
+      break;
+    case 'trade_limited':
+      canDo = true;
+      break;
+  }
+
+  if (!canDo) {
+    btn.disabled = true;
+    btn.classList.add('disabled');
+  }
+
+  // Special handling for trade: show sub-options for each trade good
+  if (action.id === 'trade') {
+    const tradeItems = cart.filter(i => i.type === 'trade' && i.count > 0);
+    if (tradeItems.length === 0) {
+      btn.disabled = true;
+      btn.classList.add('disabled');
+    } else {
+      btn.onclick = () => {
+        // Expand to show individual trade goods
+        card.querySelectorAll('.settlement-trade-sub').forEach(el => el.remove());
+        tradeItems.forEach(item => {
+          const mbVal = item.mbValue || 1;
+          const subRow = document.createElement('div');
+          subRow.className = 'settlement-trade-sub';
+          subRow.style.cssText = 'display:flex;align-items:center;justify-content:space-between;gap:8px;margin:4px 0;padding:6px;background:rgba(255,255,255,0.5);border-radius:4px;font-size:12px;';
+          subRow.innerHTML = `${getItemIcon(item.name)} ${item.name} ×${item.count} <span style="color:var(--clr-accent);">→ ${mbVal} MB each</span>`;
+          const subBtn = document.createElement('button');
+          subBtn.className = 'ctrl-btn';
+          subBtn.style.cssText = 'padding:2px 8px;font-size:10px;white-space:nowrap;';
+          subBtn.textContent = `Trade 1`;
+          subBtn.onclick = () => {
+            hideOverlays();
+            const beforeMB = game.getState().mbValue;
+            game.settlementAction('trade');
+            const afterMB = game.getState().mbValue;
+            const gained = (item.mbValue || 1);
+            publishResult(`Traded 1 ${item.name} → +${gained.toFixed(2)} MB credit.`);
+            window.__METIS_RENDER__();
+          };
+          subRow.appendChild(subBtn);
+          card.appendChild(subRow);
+        });
+        btn.textContent = 'Hide';
+        btn.onclick = () => {
+          card.querySelectorAll('.settlement-trade-sub').forEach(el => el.remove());
+          btn.textContent = 'Trade';
+          btn.onclick = () => {};
+        };
+      };
     }
-    window.__METIS_RENDER__();
-  };
-  container.appendChild(btn);
+  } else {
+    btn.onclick = () => {
+      if (!canDo) return;
+      if (needsHide) hideOverlays();
+      const st = game.getState().pendingSettlement;
+      const beforeJournal = game.getState();
+      const result = game.settlementAction(action.id);
+      const after = game.getState();
+      const afterCart = game.getCart();
+      const outcome = buildSettlementOutcome(action.id, beforeJournal, after, beforeCart, afterCart);
+      if (outcome) publishResult(outcome);
+      // Log settlement action to journal
+      if (st) {
+        const mechParts = [];
+        if (after.food !== beforeJournal.food) mechParts.push(`${after.food - beforeJournal.food >= 0 ? '+' : ''}${(after.food - beforeJournal.food).toFixed(1)} Food`);
+        if (after.wear !== beforeJournal.wear) mechParts.push(`Wear ${after.wear - beforeJournal.wear >= 0 ? '+' : ''}${after.wear - beforeJournal.wear}`);
+        if (after.morale !== beforeJournal.morale) mechParts.push(`Morale ${after.morale - beforeJournal.morale >= 0 ? '+' : ''}${after.morale - beforeJournal.morale}`);
+        if (after.crew !== beforeJournal.crew) mechParts.push(`Crew: ${beforeJournal.crew} → ${after.crew}`);
+        journalLog({
+          day: after.day,
+          date: monthName(after.month) + ' ' + after.day,
+          title: `${action.label} at ${st.name}`,
+          text: buildSettlementJournalText(action.id, st),
+          mech: mechParts.join(' · '),
+          collapsed: true,
+        });
+      }
+      window.__METIS_RENDER__();
+    };
+  }
+
+  card.appendChild(nameRow);
+  card.appendChild(costRow);
+  card.appendChild(riskRow);
+  card.appendChild(flavorRow);
+  card.appendChild(btn);
+
+  container.appendChild(card);
 }
 
 function buildSettlementOutcome(action, before, after, beforeCart, afterCart) {

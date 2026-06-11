@@ -26,53 +26,55 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 8px 18px;
-    background: var(--clr-status-bar-bg);
-    color: var(--clr-status-text);
-    font-size: 13px;
+    padding: 6px 18px;
+    background: var(--clr-bg);
+    color: var(--clr-ink-light);
+    font-size: 12px;
     flex-shrink: 0;
     border-bottom: 2px solid var(--clr-accent);
     white-space: nowrap;
     overflow: hidden;
+    height: 36px;
   }
   .stat {
-    padding: 0 6px;
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
+    padding: 0 4px;
   }
   .stat-label {
-    color: var(--clr-status-accent);
-    font-size: 11px;
+    color: var(--clr-accent);
+    font-size: 10px;
     text-transform: uppercase;
-    letter-spacing: 0.6px;
+    letter-spacing: 0.5px;
     font-family: var(--font-heading);
   }
-  .stat-value { font-weight: 800; }
-  .stat-value.food-low { color: #e63946; }
-  .stat-value.wear-high { color: #f4a261; }
-  .stat-value.crew-rested { color: #8ab17d; }
-  .stat-value.crew-tired { color: #f4a261; }
-  .stat-value.crew-exhausted { color: #e63946; }
-  .stat-value.weather-clear { color: #C99A3B; }
-  .stat-value.weather-overcast { color: #8ab17d; }
+  .stat-value { font-weight: 800; font-size: 13px; }
+  .stat-value.food-low { color: var(--clr-danger); }
+  .stat-value.wear-high { color: var(--clr-warn); }
+  .stat-value.crew-rested { color: var(--clr-success); }
+  .stat-value.crew-tired { color: var(--clr-warn); }
+  .stat-value.crew-exhausted { color: var(--clr-danger); }
+  .stat-value.weather-clear { color: var(--clr-warn); }
+  .stat-value.weather-overcast { color: var(--clr-success); }
   .stat-value.weather-rain { color: #6B8E9B; }
-  .stat-value.weather-storm { color: #8B2500; }
+  .stat-value.weather-storm { color: var(--clr-danger); }
   .stat-value.weather-snow { color: #B8C4D0; }
-  .stat-value.mb-ok { color: #C99A3B; }
-  .stat-value.mb-low { color: #e63946; }
-  .stat-group { display: flex; align-items: center; gap: 10px; }
-  .stat-group + .stat-group { padding-left: 14px; border-left: 1px solid rgba(184,134,11,0.25); }
+  .stat-value.mb-ok { color: var(--clr-accent); }
+  .stat-value.mb-low { color: var(--clr-danger); }
+  .stat-group { display: flex; align-items: center; gap: 8px; }
+  .stat-group + .stat-group { padding-left: 12px; border-left: 1px solid var(--clr-accent); }
   .segment-progress {
     flex: 1;
     text-align: center;
-    font-size: 13px;
+    font-size: 12px;
     color: var(--clr-accent);
-    padding: 0 10px;
+    padding: 0 8px;
     overflow: hidden;
     text-overflow: ellipsis;
     font-family: var(--font-heading);
     letter-spacing: 0.3px;
+    white-space: nowrap;
   }
 
   #map-panel {
@@ -91,6 +93,30 @@
   }
   .leaflet-control-attribution {
     display: none;
+  }
+  /* Trail line - dotted brass */
+  .leaflet-container .trail-line {
+    stroke: var(--clr-accent);
+    stroke-width: 2;
+    stroke-dasharray: 6, 6;
+    fill: none;
+  }
+  /* Settlement markers - circles with type colors */
+  .leaflet-container .settlement-marker {
+    border-radius: 50%;
+    border: 2px solid var(--clr-accent);
+  }
+  .settlement-marker.hbc { background: #8b2500; }
+  .settlement-marker.metis { background: #2a5c8a; }
+  .settlement-marker.nwmp { background: #1a6b3a; }
+  .settlement-marker.mission { background: #8b6914; }
+  .settlement-marker.trading { background: #8b6914; }
+  /* Cart marker - custom SVG */
+  .leaflet-container .cart-marker {
+    width: 24px;
+    height: 24px;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M4 20h16l-2-8h-12z' fill='none' stroke='%238b6914' stroke-width='2'/%3E%3Ccircle cx='6' cy='20' r='2' fill='%238b6914'/%3E%3Ccircle cx='18' cy='20' r='2' fill='%238b6914'/%3E%3C/svg%3E");
+    background-size: contain;
   }
   #map .node-tooltip {
     background: var(--clr-tooltip-bg);
@@ -122,24 +148,28 @@
     display: flex;
     flex-direction: column;
     border-top: 3px solid var(--clr-accent);
-    background: var(--clr-bg-dark);
+    background: var(--clr-bg);
   }
   #journal {
-    flex: 1;
+    height: 28vh;
+    min-height: 160px;
+    max-height: 28vh;
     padding: 10px 18px 10px 28px;
     overflow-y: auto;
     font-family: var(--font-body);
     font-size: 13px;
     line-height: 1.6;
-    background: #f5e6c8;
+    background: var(--clr-journal-bg);
     border-top: 1px solid rgba(139,105,20,0.2);
     border-left: 3px solid rgba(139,105,20,0.15);
-    color: #3a2f1f;
+    color: var(--clr-ink-dark);
   }
   .journal-entry {
     margin-bottom: 8px;
     padding-bottom: 8px;
     border-bottom: 1px solid rgba(139,105,20,0.1);
+    border-left: 3px solid var(--clr-accent);
+    padding-left: 10px;
   }
   .journal-entry:last-child {
     border-bottom: none;
@@ -148,11 +178,22 @@
     font-family: var(--font-heading);
     font-size: 11px;
     font-weight: 600;
-    color: #8b6914;
+    color: var(--clr-accent);
     text-transform: uppercase;
     letter-spacing: 0.05em;
     margin-bottom: 4px;
     cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .journal-header::before {
+    content: '▼';
+    font-size: 8px;
+    transition: transform 0.2s;
+  }
+  .journal-entry.collapsed .journal-header::before {
+    transform: rotate(-90deg);
   }
   .journal-header:hover {
     color: #6b4f0a;
@@ -161,17 +202,19 @@
     font-size: 13px;
     line-height: 1.6;
   }
-  .journal-entry.collapsed .journal-text {
+  .journal-entry.collapsed .journal-text,
+  .journal-entry.collapsed .journal-dice,
+  .journal-entry.collapsed .journal-mechanical {
     display: none;
   }
   .journal-dice {
     font-family: var(--font-heading);
     font-size: 12px;
-    color: #8b6914;
+    color: var(--clr-accent);
     margin-top: 4px;
   }
-  .journal-dice .pass { color: #4a7a3a; }
-  .journal-dice .fail { color: #8b2500; }
+  .journal-dice .pass { color: var(--clr-success); }
+  .journal-dice .fail { color: var(--clr-danger); }
   .journal-mechanical {
     font-size: 11px;
     color: #6b5c4a;
@@ -187,37 +230,41 @@
     background: var(--clr-bg-dark);
     flex-shrink: 0;
   }
+  /* Button hierarchy - unified across all overlays */
+  .action-primary {
+    background: var(--clr-accent);
+    color: var(--clr-bg);
+    border: none;
+  }
+  .action-primary:hover { filter: brightness(1.1); }
+  
+  .action-secondary {
+    background: transparent;
+    color: var(--clr-accent);
+    border: 2px solid var(--clr-accent);
+  }
+  .action-secondary:hover { 
+    background: var(--clr-accent); 
+    color: var(--clr-bg); 
+  }
+  
+  .action-ghost {
+    background: transparent;
+    color: var(--clr-ink-light);
+    border: none;
+  }
+  .action-ghost:hover { color: var(--clr-accent); }
+
   .ctrl-btn {
     padding: 10px 14px;
-    background: var(--clr-btn-bg);
-    color: var(--clr-btn-text);
-    border: none;
-    border-radius: 0;
     font-family: var(--font-heading);
     font-size: 13px;
     font-weight: 600;
     cursor: pointer;
     min-height: 44px;
+    border-radius: 0;
   }
-  .ctrl-btn.primary {
-    background: var(--clr-ink);
-    color: var(--clr-bg);
-  }
-  .ctrl-btn.primary:hover { background: var(--clr-btn-hover); }
-  .ctrl-btn.secondary {
-    background: var(--clr-bg-dark);
-    color: var(--clr-ink);
-    border: 2px solid var(--clr-accent);
-  }
-  .ctrl-btn.secondary:hover { background: #C7B898; }
-  .ctrl-btn.ghost {
-    background: rgba(255,255,255,0.75);
-    color: var(--clr-ink);
-    border: 2px solid rgba(26,20,16,0.35);
-  }
-  .ctrl-btn.ghost:hover { background: rgba(255,255,255,0.95); }
-  .ctrl-btn:hover { background: var(--clr-btn-hover); color: var(--clr-btn-text); }
-  .ctrl-btn:disabled { background: #8a9a7a; cursor: not-allowed; }
+  .ctrl-btn:disabled { opacity: 0.4; cursor: not-allowed; }
   .secondary-btns {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -241,7 +288,35 @@
   .overlay.active { display: flex; }
 
   .overlay-card {
-    background: var(--clr-card-bg);
+    background: var(--clr-panel-bg);
+    border: 2px solid var(--clr-accent);
+    border-radius: 0;
+    box-shadow: none;
+    max-width: 580px;
+    width: 92%;
+    max-height: 85%;
+    overflow-y: auto;
+    padding: 22px;
+    position: relative;
+  }
+
+  /* Unified overlay panel - shared base for all overlays */
+  .overlay-panel {
+    background: var(--clr-panel-bg);
+    border: 2px solid var(--clr-accent);
+    border-radius: 0;
+    box-shadow: none;
+    max-width: 580px;
+    width: 92%;
+    max-height: 85%;
+    overflow-y: auto;
+    padding: 22px;
+    position: relative;
+  }
+
+  /* Apply to all overlay cards */
+  .overlay-card, .overlay-panel {
+    background: var(--clr-panel-bg);
     border: 2px solid var(--clr-accent);
     border-radius: 0;
     box-shadow: none;
@@ -552,6 +627,45 @@
     font-style: italic;
     color: var(--clr-ink);
   }
+  .settlement-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+  .settlement-header h2 {
+    font-family: var(--font-heading);
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--clr-ink);
+    margin: 0;
+  }
+  .settlement-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 8px;
+    font-family: var(--font-heading);
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    border: 2px solid var(--clr-accent);
+    border-radius: 0;
+    color: var(--clr-accent);
+    background: var(--clr-card-bg);
+  }
+  .settlement-badge.hbc { border-color: #8b2500; color: #8b2500; }
+  .settlement-badge.metis { border-color: #2a5c8a; color: #2a5c8a; }
+  .settlement-badge.nwmp { border-color: #1a6b3a; color: #1a6b3a; }
+  .settlement-badge.mission { border-color: #8b6914; color: #8b6914; }
+  .settlement-distance {
+    font-family: var(--font-body);
+    font-size: 12px;
+    color: var(--clr-muted);
+    font-style: italic;
+    margin-left: auto;
+  }
   .settlement-craft-hint {
     font-size: 11px;
     line-height: 1.4;
@@ -653,6 +767,63 @@
   }
   .settlement-secondary-actions.expanded {
     display: grid;
+  }
+
+  /* Settlement action cards — match camp card pattern */
+  .settlement-action-card {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 10px 12px;
+    background: rgba(26,20,16,0.04);
+    border: 1px solid rgba(139,105,20,0.3);
+    border-radius: 0;
+    margin-bottom: 6px;
+  }
+  .settlement-action-card-name {
+    font-family: var(--font-heading);
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--clr-ink);
+  }
+  .settlement-action-card-cost {
+    font-size: 11px;
+    color: var(--clr-accent);
+    font-family: var(--font-heading);
+    letter-spacing: 0.03em;
+  }
+  .settlement-action-card-risk {
+    font-size: 11px;
+    color: #8b2500;
+    line-height: 1.3;
+  }
+  .settlement-action-card-flavor {
+    font-size: 12px;
+    color: #5a4a3a;
+    font-style: italic;
+    line-height: 1.4;
+    margin-top: 2px;
+  }
+  .settlement-action-card-btn {
+    align-self: flex-end;
+    padding: 6px 18px;
+    background: var(--clr-ink);
+    color: var(--clr-bg);
+    border: 2px solid var(--clr-ink);
+    border-radius: 0;
+    font-family: var(--font-heading);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 4px;
+  }
+  .settlement-action-card-btn:hover:not(:disabled) {
+    background: var(--clr-bg);
+    color: var(--clr-ink);
+  }
+  .settlement-action-card-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
   }
 
   .event-text {
@@ -1393,7 +1564,11 @@
       <div class="overlay" id="settlement-overlay">
         <div class="overlay-card">
           <button class="close-btn" id="settlement-close">✕</button>
-          <h2 id="settlement-name"></h2>
+          <div class="settlement-header">
+            <h2 id="settlement-name"></h2>
+            <span class="settlement-badge" id="settlement-badge"></span>
+            <div class="settlement-distance" id="settlement-distance"></div>
+          </div>
           <div class="settlement-desc" id="settlement-desc"></div>
           <div class="settlement-actions" id="settlement-actions"></div>
           <button class="ctrl-btn" id="settlement-continue" style="margin-top:10px">Continue West</button>
@@ -1421,7 +1596,7 @@
 
     <div id="bottom-panel">
       <div id="journal">
-        <div class="journal-entry" data-day="0">
+        <div class="journal-entry collapsed" data-day="0">
           <div class="journal-header">Before the Journey</div>
           <div class="journal-text">Welcome to the Métis Trail. Click Begin Journey to start.</div>
         </div>
@@ -1568,7 +1743,31 @@
     </div>
   </div>
 </div>
-  <script type="module" src="app.js?v=120"></script>
+  <script type="module" src="app.js?v=128"></script>
+<script>window.__METIS_ASSETS__={
+  "assets": []
+};</script>
+<script>window.__METIS_ASSETS__={
+  "assets": []
+};</script>
+<script>window.__METIS_ASSETS__={
+  "assets": []
+};</script>
+<script>window.__METIS_ASSETS__={
+  "assets": []
+};</script>
+<script>window.__METIS_ASSETS__={
+  "assets": []
+};</script>
+<script>window.__METIS_ASSETS__={
+  "assets": []
+};</script>
+<script>window.__METIS_ASSETS__={
+  "assets": []
+};</script>
+<script>window.__METIS_ASSETS__={
+  "assets": []
+};</script>
 <script>window.__METIS_ASSETS__={
   "assets": []
 };</script>

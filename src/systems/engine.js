@@ -470,7 +470,6 @@ export function createGame(seed = null) {
     makeCamp,
     pushOn,
     chooseEventChoice,
-    settlementAction,
     getState() {
       return {
         day: S.day,
@@ -509,24 +508,22 @@ export function createGame(seed = null) {
       recalcMB();
       return true;
     },
-    getTradeEstimate(itemName) {
-      const item = cart.find((i) => i.name === itemName);
+    getTradeEstimate(itemId, quantity, settlementType) {
+      const item = cart.find(i => i.name === itemId);
       if (!item) return null;
-      const n = NODES[S.node];
-      // Base food yield: 4-8
-      const baseMin = 4;
-      const baseMax = 8;
-      // Settlement type multiplier
-      const settleMult = { hbc: 1.3, nwmp: 1.1, metis: 1.0, trading: 1.2, mission: 0.8 }[n.type] || 1.0;
-      // Item category bonus
-      const catMult = { furs: 1.4, trade: 1.2, ammo: 1.1, repair: 0.9, food: 0.7, shelter: 0.8, fuel: 0.6, medical: 1.0, tool: 0.9, hunting: 1.0 }[item.type] || 1.0;
-      // Trail position bonus (further = more valuable)
-      const trailMult = 1.0 + (S.node / NODES.length) * 0.3;
-      const mult = settleMult * catMult * trailMult;
+      const basePrice = item.mbValue || 1;
+      const mult = getSettlementPriceMultiplier(settlementType, item.category);
+      const distanceFactor = S.node / (NODES.length - 1);
+      const buyPrice = Math.round(basePrice * mult.buy * (1 + distanceFactor * 0.15) * 100) / 100;
+      const sellPrice = Math.round(basePrice * mult.sell * (1 - distanceFactor * 0.1) * 100) / 100;
       return {
-        min: Math.round(baseMin * mult),
-        max: Math.round(baseMax * mult),
-        mult: Math.round(mult * 100) / 100,
+        item: itemId,
+        quantity,
+        buyPrice: buyPrice * quantity,
+        sellPrice: sellPrice * quantity,
+        buyPriceEach: buyPrice,
+        sellPriceEach: sellPrice,
+        multiplier: mult,
       };
     },
     tradeItem(itemName) {
@@ -539,6 +536,72 @@ export function createGame(seed = null) {
       S.tradesMade++;
       return { item: itemName, foodGain };
     },
+
+    // ── NEW Engine API for Sprint 3 ───────────────────────────────────
+    getSettlementActions(settlementType) {
+      const actions = getSettlementActionsByType(settlementType);
+      return actions.map(a => ({
+        id: a.id,
+        label: a.label,
+        cost: a.cost,
+        risk: a.risk,
+        flavor: a.flavor,
+      }));
+    },
+
+    settlementAction(actionId, params = {}) {
+      if (!S.pendingSettlement) return { error: 'No settlement pending' };
+      const type = S.pendingSettlement.type;
+      const state = S;
+      const result = executeSettlementAction(actionId, type, state, cart, params);
+      checkGameOver();
+      return result || {};
+    },
+
+    getEndgameScore() {
+      if (!S.won) return { score: 0, breakdown: {} };
+      const mbVal = S.mbValue || 0;
+      const foodBonus = Math.min(S.food, 25);
+      const crewBonus = S.crew === 'rested' ? 30 : S.crew === 'tired' ? 10 : 0;
+      const daysPenalty = S.day * 8;
+      const wearPenalty = S.wear * S.wear * 40;
+      const baseScore = 500;
+      const mbScore = Math.round(mbVal * 80);
+      const foodScore = foodBonus * 12;
+      const total = baseScore + mbScore + foodScore + crewBonus - daysPenalty - wearPenalty;
+      let tier;
+      if (total < 500) tier = 'Barely Survived';
+      else if (total < 1200) tier = 'Solid Profit';
+      else tier = 'Legendary Haul';
+      return {
+        score: Math.max(0, Math.round(total)),
+        breakdown: {
+          base: baseScore,
+          mbValue: mbScore,
+          foodBonus: foodScore,
+          crewCondition: crewBonus,
+          daysPenalty: -daysPenalty,
+          wearPenalty: -wearPenalty,
+        },
+        tier,
+      };
+    },
+
+    getSettlementData(nodeId) {
+      const idx = NODES.findIndex(n => n.id === nodeId);
+      if (idx === -1) return null;
+      const node = NODES[idx];
+      return {
+        id: node.id,
+        name: node.name,
+        type: node.type,
+        terrain: node.terrain,
+        desc: node.desc,
+        dist: node.dist,
+        priceMultiplier: getSettlementPriceMultiplier(node.type),
+      };
+    },
+
     getAvailableRecipes() {
       const recipes = [
         {
@@ -934,6 +997,312 @@ export function createGame(seed = null) {
       recalcMB();
     },
   };
+}
+
+function getSettlementPriceMultiplier(type, category) {
+  const multipliers = {
+    hbc: { buy: 1.0, sell: 1.0, categories: { furs: { buy: 1.0, sell: 1.0 }, provisions: { buy: 1.0, sell: 1.0 }, repair: { buy: 1.0, sell: 1.0 }, medical: { buy: 1.0, sell: 1.0 }, shelter: { buy: 1.0, sell: 1.0 }, fuel: { buy: 1.0, sell: 1.0 }, tool: { buy: 1.0, sell: 1.0 }, hunting: { buy: 1.0, sell: 1.0 } } },
+    metis: { buy: 0.9, sell: 1.1, categories: { furs: { buy: 0.9, sell: 1.1 }, provisions: { buy: 0.95, sell: 1.05 }, repair: { buy: 1.0, sell: 1.0 }, medical: { buy: 1.0, sell: 1.0 }, shelter: { buy: 1.0, sell: 1.0 }, fuel: { buy: 1.0, sell: 1.0 }, tool: { buy: 1.0, sell: 1.0 }, hunting: { buy: 1.0, sell: 1.0 } } },
+    nwmp: { buy: 1.2, sell: 0.8, categories: { furs: { buy: 1.1, sell: 0.9 }, provisions: { buy: 1.2, sell: 0.8 }, repair: { buy: 1.2, sell: 0.8 }, medical: { buy: 1.0, sell: 1.0 }, shelter: { buy: 1.0, sell: 1.0 }, fuel: { buy: 1.0, sell: 1.0 }, tool: { buy: 1.0, sell: 1.0 }, hunting: { buy: 0.8, sell: 1.2 } } }, // ammo cheaper
+    mission: { buy: 0.8, sell: 1.5, categories: { furs: { buy: 0.8, sell: 1.5 }, provisions: { buy: 0.7, sell: 1.3 }, repair: { buy: 1.0, sell: 1.0 }, medical: { buy: 0.8, sell: 1.2 }, shelter: { buy: 1.0, sell: 1.0 }, fuel: { buy: 1.0, sell: 1.0 }, tool: { buy: 1.0, sell: 1.0 }, hunting: { buy: 1.0, sell: 1.0 } } },
+    trading: { buy: 1.1, sell: 0.9, categories: { furs: { buy: 1.1, sell: 0.9 }, provisions: { buy: 1.1, sell: 0.9 }, repair: { buy: 1.1, sell: 0.9 }, medical: { buy: 1.0, sell: 1.0 }, shelter: { buy: 1.0, sell: 1.0 }, fuel: { buy: 1.0, sell: 1.0 }, tool: { buy: 1.0, sell: 1.0 }, hunting: { buy: 1.0, sell: 1.0 } } },
+  };
+  const m = multipliers[type] || multipliers.hbc;
+  const cat = m.categories[category] || { buy: m.buy, sell: m.sell };
+  return { buy: cat.buy, sell: cat.sell };
+}
+
+function getSettlementActionsByType(type) {
+  switch (type) {
+    case 'hbc':
+      return [
+        { id: 'trade', label: 'Trade Goods for ₥', cost: '1 trade good', risk: 'Best rates for pelts/hides', flavor: 'The Company factors weigh your furs in silence. The ledger decides your worth.' },
+        { id: 'buy_supplies', label: 'Buy Supplies', cost: '₥ varies', risk: 'Full inventory available', flavor: 'Pemmican, axes, shaganappi, tools — everything a carter needs for the long trail.' },
+        { id: 'rest', label: 'Rest at the Fort', cost: '1 food', risk: 'Crew rested, morale +15', flavor: 'A warm fire in the mess hall, dry blankets, and a night without the wind.' },
+        { id: 'get_intel', label: 'Get Trail Intel', cost: '1 ₥', risk: 'Reveals next 2 nodes', flavor: 'The clerk unfolds a map stained with ink and tea. He marks the hazards ahead.' },
+      ];
+    case 'metis':
+      return [
+        { id: 'trade_gossip', label: 'Trade Gossip', cost: 'Free', risk: 'Reveals 1 gossip entry', flavor: 'News travels faster than carts on the prairie. The women know everything.' },
+        { id: 'recruit_crew', label: 'Recruit Crew', cost: '2 ₥ + 1 food', risk: '+1 crew member (max 6)', flavor: 'A young hand looking for work. Strong back, willing heart — if you can feed him.' },
+        { id: 'dance', label: 'Dance', cost: '1 food', risk: 'Morale +10, no day advance', flavor: 'The fiddle starts. A Red River jig. Boots on hard ground. Nobody thinks about tomorrow.' },
+        { id: 'share_food', label: 'Share Food', cost: 'Give 2+ food', risk: 'Morale +5 per food', flavor: 'Generosity on the trail is its own currency. What you give returns in loyalty.' },
+        { id: 'craft_hides', label: 'Craft Finished Hides', cost: '3 raw hides + 1 shaganappi', risk: 'Creates finished_hide (worth 2× ₥)', flavor: 'The women scrape, stretch, and smoke the hides. Patience turns rawhide into profit.' },
+      ];
+    case 'nwmp':
+      return [
+        { id: 'pay_fines', label: 'Pay Fines', cost: '₥ varies', risk: 'Clears fines if any', flavor: 'The sergeant reads your name from the ledger. The amount is not negotiable.' },
+        { id: 'get_permits', label: 'Get Permits', cost: '2 ₥', risk: 'Required for river crossings', flavor: 'A stamp, a signature, and the Queen\'s law lets you cross the water legal.' },
+        { id: 'report_duty', label: 'Report for Duty', cost: '1 day', risk: '₥ reward, morale −5', flavor: 'Red coats, drill, and the weight of Ottawa\'s authority. The pay is fair but the pride costs.' },
+        { id: 'buy_ammo', label: 'Buy Ammo', cost: '1.5 ₥ per Belt', risk: 'Cheaper than HBC', flavor: 'Ball and powder, measured honest. The Mounties don\'t cheat a carter on shot.' },
+        { id: 'rest', label: 'Rest', cost: '1 food', risk: 'Crew rested (no morale bonus)', flavor: 'A cot in the barracks. Clean, quiet, and the sentry paces all night.' },
+      ];
+    case 'mission':
+      return [
+        { id: 'heal_crew', label: 'Heal Crew', cost: '1 Medicine Pouch or 2 ₥', risk: 'Clears injury/illness, morale +10', flavor: 'The Grey Nuns tend the sick without asking who you are or where you come from.' },
+        { id: 'rest', label: 'Free Rest + Blessing', cost: 'Free', risk: 'Crew rested, morale +15', flavor: 'A chapel bell at evening. You sleep on straw but wake with a lighter spirit.' },
+        { id: 'get_blessing', label: 'Get Blessing', cost: '1 food', risk: 'Morale +10, next event DC −1', flavor: 'The priest\'s hand on your brow. The trail feels less hostile after prayer.' },
+        { id: 'trade_limited', label: 'Trade (Limited)', cost: 'Buy pemmican 0.5 ₥, sell blankets 1.5 ₥', risk: 'Charity rates', flavor: 'The mission garden feeds the body. The trade feeds the journey.' },
+      ];
+    case 'trading':
+      return [
+        { id: 'trade', label: 'Trade Goods', cost: '1 trade good', risk: 'Standard rates', flavor: 'A free trader with no Company badge. His prices are his own.' },
+        { id: 'buy_supplies', label: 'Buy Supplies', cost: '₥ varies', risk: 'Basic inventory', flavor: 'What the Company posts run out of, the free traders sometimes have.' },
+        { id: 'rest', label: 'Rest', cost: '1 food', risk: 'Crew rested, morale +10', flavor: 'A lean-to by the fire. Simple shelter, honest company.' },
+        { id: 'get_intel', label: 'Get Trail Intel', cost: '1 ₥', risk: 'Reveals next node', flavor: 'He rides the trail weekly. His news is fresh and his memory long.' },
+      ];
+    default:
+      return [
+        { id: 'trade', label: 'Trade Goods', cost: '1 trade good', risk: 'Standard rates', flavor: 'The factor weighs your furs. The ledger is final.' },
+        { id: 'rest', label: 'Rest', cost: '1 food', risk: 'Crew rested, morale +10', flavor: 'A night under roof and beam. The trail waits for morning.' },
+      ];
+  }
+}
+
+function executeSettlementAction(actionId, type, state, cart, params) {
+  const credit = state.credit?.[type] || 0;
+
+  // HBC Actions
+  if (actionId === 'trade') {
+    const tradeItems = cart.filter(i => i.type === 'trade' && i.count > 0);
+    if (tradeItems.length === 0) return { error: 'No trade goods to trade' };
+    // Trade the first trade good (UI handles selection)
+    const item = tradeItems[0];
+    item.count--;
+    const mbGain = item.mbValue || 1;
+    state.credit[type] = (state.credit[type] || 0) + mbGain;
+    state.tradesMade++;
+    return { traded: item.name, mbGain, credit: state.credit[type] };
+  }
+
+  if (actionId === 'buy_supplies') {
+    // Open shop-like interface - for now just return info
+    return { action: 'buy_supplies', message: 'Opens supply purchase interface', credit: state.credit[type] };
+  }
+
+  if (actionId === 'rest') {
+    if (state.food < 1) return { error: 'Need 1 food to rest' };
+    state.food -= 1;
+    state.crew = 'rested';
+    state.travelDaysWithoutRest = 0;
+    state.morale = Math.min(100, state.morale + (type === 'hbc' ? 15 : type === 'mission' ? 15 : 10));
+    return { rested: true, moraleGain: type === 'hbc' ? 15 : type === 'mission' ? 15 : 10 };
+  }
+
+  if (actionId === 'get_intel') {
+    if ((state.credit[type] || 0) < 1) return { error: 'Need 1 ₥ for intelligence' };
+    state.credit[type] -= 1;
+    // Add trail intel for next 1-2 nodes
+    const nextNode1 = NODES[state.node + 1];
+    const nextNode2 = NODES[state.node + 2];
+    state.trailIntel = state.trailIntel || [];
+    if (nextNode1) {
+      state.trailIntel.push({
+        fromDay: state.day,
+        text: `${nextNode1.name}: ${nextNode1.terrain.replace(/_/g, ' ')} terrain. ${nextNode1.desc?.substring(0, 80)}...`,
+        bonus: { dcBonus: 1 },
+      });
+    }
+    if (nextNode2 && type === 'hbc') {
+      state.trailIntel.push({
+        fromDay: state.day,
+        text: `${nextNode2.name}: ${nextNode2.terrain.replace(/_/g, ' ')} terrain.`,
+        bonus: { dcBonus: 1 },
+      });
+    }
+    state.morale = Math.min(100, state.morale + 5);
+    return { intelGathered: true, moraleGain: 5, credit: state.credit[type] };
+  }
+
+  // Métis Actions
+  if (actionId === 'trade_gossip') {
+    state.trailIntel = state.trailIntel || [];
+    const nextNode = NODES[state.node + 1];
+    if (nextNode) {
+      state.trailIntel.push({
+        fromDay: state.day,
+        text: `Gossip from ${state.pendingSettlement?.name}: ${nextNode.name} has ${nextNode.terrain.replace(/_/g, ' ')} ahead.`,
+        bonus: { dcBonus: 1 },
+      });
+    }
+    state.morale = Math.min(100, state.morale + 3);
+    return { gossipGathered: true, moraleGain: 3 };
+  }
+
+  if (actionId === 'recruit_crew') {
+    if ((state.credit[type] || 0) < 2) return { error: 'Need 2 ₥ to recruit' };
+    if (state.food < 1) return { error: 'Need 1 food to recruit' };
+    if ((state.crewCount || 3) >= 6) return { error: 'Maximum crew (6) reached' };
+    state.credit[type] -= 2;
+    state.food -= 1;
+    state.crewCount = (state.crewCount || 3) + 1;
+    state.morale = Math.min(100, state.morale + 5);
+    return { recruited: true, crewCount: state.crewCount, moraleGain: 5, credit: state.credit[type] };
+  }
+
+  if (actionId === 'dance') {
+    if (state.food < 1) return { error: 'Need 1 food to dance' };
+    state.food -= 1;
+    state.morale = Math.min(100, state.morale + 10);
+    return { danced: true, moraleGain: 10 };
+  }
+
+  if (actionId === 'share_food') {
+    const foodToGive = params.food || 2;
+    if (state.food < foodToGive) return { error: `Need ${foodToGive} food to share` };
+    state.food -= foodToGive;
+    const moraleGain = foodToGive * 5;
+    state.morale = Math.min(100, state.morale + moraleGain);
+    state.reputation.metis = (state.reputation.metis || 0) + 1;
+    return { shared: true, foodGiven: foodToGive, moraleGain, reputationGain: 1 };
+  }
+
+  if (actionId === 'craft_hides') {
+    const hides = cart.find(i => ['Bison Hide', 'Beaver Pelts', 'Elk Hide', 'Deer Hide'].includes(i.name));
+    const shag = cart.find(i => i.name === 'Shaganappi');
+    if (!hides || hides.count < 3) return { error: 'Need 3 raw hides' };
+    if (!shag || shag.count < 1) return { error: 'Need 1 shaganappi' };
+    hides.count -= 3;
+    shag.count -= 1;
+    const finished = cart.find(i => i.name === 'Finished Hides');
+    if (finished) finished.count++;
+    else cart.push({ name: 'Finished Hides', wt: 3, count: 1, type: 'trade', category: 'furs', mbValue: 3.5, desc: 'Expertly prepared hides. Worth double at market.', perishable: false });
+    // Recalculate MB value
+    state.mbValue = cart.filter(i => i.type === 'trade' || i.category === 'furs').reduce((s, i) => s + (i.mbValue || 0) * i.count, 0);
+    return { crafted: 'Finished Hides', mbValue: state.mbValue };
+  }
+
+  // NWMP Actions
+  if (actionId === 'pay_fines') {
+    const fines = state.fines || 0;
+    if (fines === 0) return { error: 'No fines to pay' };
+    if ((state.credit[type] || 0) < fines) return { error: `Need ${fines} ₥ to pay fines` };
+    state.credit[type] -= fines;
+    state.fines = 0;
+    return { finesPaid: fines, credit: state.credit[type] };
+  }
+
+  if (actionId === 'get_permits') {
+    if ((state.credit[type] || 0) < 2) return { error: 'Need 2 ₥ for permit' };
+    state.credit[type] -= 2;
+    state.hasPermit = true;
+    return { permitObtained: true, credit: state.credit[type] };
+  }
+
+  if (actionId === 'report_duty') {
+    // Reward scales with distance
+    const reward = Math.round((state.node / NODES.length) * 10) + 2;
+    state.credit[type] = (state.credit[type] || 0) + reward;
+    state.morale = Math.max(0, state.morale - 5);
+    // Advance time by 1 day using imported advanceDate
+    const nextDate = advanceDate(state.date.month, state.date.day, state.year);
+    state.date = nextDate;
+    state.month = nextDate.month;
+    state.day++;
+    state.segmentDay = 0;
+    return { dutyDone: true, reward, moraleLoss: 5, credit: state.credit[type] };
+  }
+
+  if (actionId === 'buy_ammo') {
+    if ((state.credit[type] || 0) < 1.5) return { error: 'Need 1.5 ₥ for ammunition' };
+    state.credit[type] -= 1.5;
+    const ammo = cart.find(i => i.name === 'Ammunition Belt');
+    if (ammo) ammo.count++;
+    else cart.push({ name: 'Ammunition Belt', wt: 2, count: 1, type: 'ammo', category: 'hunting', mbValue: 0.9, desc: 'Shot and ball. For hunting and defence.', perishable: false });
+    return { bought: 'Ammunition Belt', credit: state.credit[type] };
+  }
+
+  // Mission Actions
+  if (actionId === 'heal_crew') {
+    const med = cart.find(i => i.name === 'Medicine Pouch');
+    if ((state.credit[type] || 0) >= 2) {
+      state.credit[type] -= 2;
+    } else if (med && med.count > 0) {
+      med.count--;
+    } else {
+      return { error: 'Need 2 ₥ or 1 Medicine Pouch' };
+    }
+    state.crew = 'rested';
+    state.morale = Math.min(100, state.morale + 10);
+    // Clear any illness/injury flags
+    state.flags.injured = false;
+    state.flags.ill = false;
+    return { healed: true, moraleGain: 10, credit: state.credit[type] };
+  }
+
+  if (actionId === 'get_blessing') {
+    if (state.food < 1) return { error: 'Need 1 food for blessing' };
+    state.food -= 1;
+    state.morale = Math.min(100, state.morale + 10);
+    state.flags.blessed = true; // Next event DC -1
+    return { blessed: true, moraleGain: 10 };
+  }
+
+  if (actionId === 'trade_limited') {
+    // Limited trade: buy pemmican at 0.5 ₥, sell blankets at 1.5 ₥
+    return { action: 'trade_limited', message: 'Limited trade available: buy pemmican (0.5 ₥), sell blankets (1.5 ₥)', credit: state.credit[type] };
+  }
+
+  // Legacy actions (for backward compatibility)
+  if (actionId === 'buy_food') {
+    const cost = 0.5;
+    if ((state.credit[type] || 0) < cost) return { error: 'Need 0.5 ₥ credit' };
+    state.credit[type] -= cost;
+    state.food += 2;
+    return { bought: 'food', amount: 2, credit: state.credit[type] };
+  }
+
+  if (actionId === 'buy_repair') {
+    const cost = 2;
+    if ((state.credit[type] || 0) < cost) return { error: 'Need 2 ₥ credit' };
+    if (state.wear <= 0) return { error: 'Cart does not need repair' };
+    state.credit[type] -= cost;
+    state.wear = Math.max(0, state.wear - 2);
+    return { repaired: true, wearReduced: 2, credit: state.credit[type] };
+  }
+
+  if (actionId === 'buy_heal') {
+    const cost = 1;
+    if ((state.credit[type] || 0) < cost) return { error: 'Need 1 ₥ credit' };
+    state.credit[type] -= cost;
+    state.morale = Math.min(100, state.morale + 20);
+    state.crew = 'rested';
+    return { healed: true, moraleGain: 20, credit: state.credit[type] };
+  }
+
+  if (actionId === 'buy_info') {
+    const cost = 0.5;
+    if ((state.credit[type] || 0) < cost) return { error: 'Need 0.5 ₥ credit' };
+    state.credit[type] -= cost;
+    state.morale = Math.min(100, state.morale + 5);
+    state.flags['trail_intel_' + state.node] = true;
+    return { intel: true, moraleGain: 5, credit: state.credit[type] };
+  }
+
+  if (actionId === 'repair') {
+    const shag = cart.find(i => i.name === 'Shaganappi');
+    if (state.wear > 0 && shag && shag.count > 0) {
+      shag.count--;
+      state.wear = Math.max(0, state.wear - 2);
+      state.mbValue = cart.filter(i => i.type === 'trade' || i.category === 'furs').reduce((s, i) => s + (i.mbValue || 0) * i.count, 0);
+    } else if (state.wear > 0) {
+      state.wear = Math.max(0, state.wear - 2);
+    }
+    return { repaired: true };
+  }
+
+  if (actionId === 'heal') {
+    state.crew = 'rested';
+    state.morale = Math.min(100, state.morale + 20);
+    return { healed: true };
+  }
+
+  if (actionId === 'continue') {
+    state.pendingSettlement = null;
+    return { continued: true };
+  }
+
+  return { error: `Unknown action: ${actionId}` };
 }
 
 function availableSettlementActions(type) {

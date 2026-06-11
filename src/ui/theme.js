@@ -1,99 +1,93 @@
 export function applyTheme(root) {
-  // Base palette — all colors defined here as CSS custom properties
+  // Sprint 4: Gritty period-accurate palette
   // Semantic naming: --clr-<role>[-<variant>]
-  root.style.setProperty('--clr-bg', '#CFC1A4');
-  root.style.setProperty('--clr-bg-dark', '#B8AA8A');
-  root.style.setProperty('--clr-ink', '#1A1A18');
-  root.style.setProperty('--clr-accent', '#8C6A2A');
-  root.style.setProperty('--clr-border', '#4A5D55');
-  root.style.setProperty('--clr-status-bg', '#243B32');
-  root.style.setProperty('--clr-status-text', '#F2E9D8');
-  root.style.setProperty('--clr-status-accent', '#C99A3B');
-  root.style.setProperty('--clr-status-bar-bg', '#1a2922');
-  root.style.setProperty('--clr-overlay-bg', 'rgba(22,28,24,0.94)');
-  root.style.setProperty('--clr-card-bg', '#E6DBC4');
-  root.style.setProperty('--clr-btn-bg', '#2D4A3E');
-  root.style.setProperty('--clr-btn-text', '#F2E9D8');
-  root.style.setProperty('--clr-btn-hover', '#1E2B26');
-
+  
+  // Base palette
+  root.style.setProperty('--clr-bg', '#1a1208');           // Dark bg - body, status bar, overlays
+  root.style.setProperty('--clr-panel-bg', '#2a1f10');     // Panel bg - all overlay backgrounds
+  root.style.setProperty('--clr-journal-bg', '#f5e6c8');   // Journal bg - #journal only
+  root.style.setProperty('--clr-ink-dark', '#3a2f1f');     // Ink dark - text on cream
+  root.style.setProperty('--clr-ink-light', '#c4b69a');    // Ink light - text on dark
+  root.style.setProperty('--clr-accent', '#8b6914');       // Accent brass - borders, headers, highlights
+  root.style.setProperty('--clr-success', '#4a7a3a');      // Success - muted green
+  root.style.setProperty('--clr-danger', '#8b2500');       // Danger - muted red
+  
+  // Legacy mappings (for backward compatibility during transition)
+  root.style.setProperty('--clr-ink', 'var(--clr-ink-dark)');
+  root.style.setProperty('--clr-bg-dark', '#1a1208');
+  root.style.setProperty('--clr-card-bg', 'var(--clr-panel-bg)');
+  root.style.setProperty('--clr-btn-bg', 'var(--clr-accent)');
+  root.style.setProperty('--clr-btn-text', '#1a1208');
+  root.style.setProperty('--clr-btn-hover', '#7a5a20');
+  root.style.setProperty('--clr-status-bar-bg', 'var(--clr-bg)');
+  root.style.setProperty('--clr-status-text', 'var(--clr-ink-light)');
+  root.style.setProperty('--clr-status-accent', 'var(--clr-accent)');
+  root.style.setProperty('--clr-overlay-bg', 'rgba(26,18,8,0.96)');
+  root.style.setProperty('--clr-border', 'var(--clr-accent)');
+  root.style.setProperty('--clr-map-bg', '#1a1208');
+  root.style.setProperty('--clr-tooltip-bg', 'rgba(26,18,8,0.9)');
+  root.style.setProperty('--clr-tooltip-text', 'var(--clr-ink-light)');
+  root.style.setProperty('--clr-tooltip-border', 'var(--clr-accent)');
+  root.style.setProperty('--clr-map-frame-shadow', 'rgba(0,0,0,0.3)');
+  root.style.setProperty('--clr-narrative-text', 'var(--clr-ink-dark)');
+  root.style.setProperty('--clr-ruled-line', 'rgba(139,105,20,0.15)');
+  root.style.setProperty('--clr-ledger-border', 'rgba(139,105,20,0.2)');
+  root.style.setProperty('--clr-ledger-margin', 'var(--clr-accent)');
+  root.style.setProperty('--clr-paper-texture', 'none');  // Remove noise texture
+  root.style.setProperty('--clr-event-border', 'var(--clr-accent)');
+  root.style.setProperty('--clr-event-accent-bar', 'var(--clr-accent)');
+  
   // Status-state colors
-  root.style.setProperty('--clr-food-low', '#e63946');
-  root.style.setProperty('--clr-warn', '#f4a261');
-  root.style.setProperty('--clr-ok', '#8ab17d');
-  root.style.setProperty('--clr-weather-rain', '#6B8E9B');
-  root.style.setProperty('--clr-danger', '#8B2500');
-  root.style.setProperty('--clr-weather-snow', '#B8C4D0');
-  root.style.setProperty('--clr-success', '#2e7d32');
-
-  // Map
-  root.style.setProperty('--clr-map-bg', '#BFB195');
-  root.style.setProperty('--clr-tooltip-bg', 'rgba(26,20,16,0.85)');
-  root.style.setProperty('--clr-tooltip-text', '#E8DCC8');
-  root.style.setProperty('--clr-tooltip-border', 'rgba(232,220,200,0.3)');
-  root.style.setProperty('--clr-map-frame-shadow', 'rgba(26,20,16,0.12)');
-
-  // Narrative paper texture
-  root.style.setProperty('--clr-narrative-text', '#3a3025');
-  root.style.setProperty('--clr-ruled-line', 'rgba(26,20,16,0.08)');
-  root.style.setProperty('--clr-ledger-border', 'rgba(26,20,16,0.15)');
-  root.style.setProperty('--clr-ledger-margin', '#8C6A2A');
-  // Subtle paper noise texture as base64 SVG
-  root.style.setProperty('--clr-paper-texture', "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E\")");
-
-  // Event overlay
-  root.style.setProperty('--clr-event-border', '#7a5a32');
-  root.style.setProperty('--clr-event-accent-bar', '#6e4524');
-  root.style.setProperty('--clr-overlay-pattern-1', 'rgba(60,40,10,0.08)');
-  root.style.setProperty('--clr-overlay-pattern-2', 'rgba(60,40,10,0.10)');
-  root.style.setProperty('--clr-overlay-pattern-3', 'rgba(60,40,10,0.07)');
-  root.style.setProperty('--clr-overlay-pattern-4', 'rgba(80,60,20,0.12)');
-  root.style.setProperty('--clr-overlay-pattern-5', 'rgba(80,60,20,0.09)');
-
+  root.style.setProperty('--clr-food-low', 'var(--clr-danger)');
+  root.style.setProperty('--clr-warn', '#b8860b');
+  root.style.setProperty('--clr-ok', 'var(--clr-success)');
+  root.style.setProperty('--clr-weather-rain', '#6b8e9b');
+  root.style.setProperty('--clr-weather-snow', '#b8c4d0');
+  
   // Pre-departure weight states
-  root.style.setProperty('--clr-over-bg', 'rgba(180,60,60,0.15)');
-  root.style.setProperty('--clr-over-border', 'rgba(180,60,60,0.4)');
-  root.style.setProperty('--clr-over-text', '#8B0000');
+  root.style.setProperty('--clr-over-bg', 'rgba(139,37,0,0.15)');
+  root.style.setProperty('--clr-over-border', 'var(--clr-danger)');
+  root.style.setProperty('--clr-over-text', 'var(--clr-danger)');
   root.style.setProperty('--clr-warn-bg', 'rgba(184,134,11,0.15)');
-  root.style.setProperty('--clr-warn-border', 'rgba(184,134,11,0.4)');
+  root.style.setProperty('--clr-warn-border', 'var(--clr-warn)');
   root.style.setProperty('--clr-gold', '#B8860B');
-  root.style.setProperty('--clr-ok-bg', 'rgba(46,90,62,0.12)');
-  root.style.setProperty('--clr-ok-border', 'rgba(46,90,62,0.3)');
-  root.style.setProperty('--clr-ok-text', '#2D4A3E');
-
+  root.style.setProperty('--clr-ok-bg', 'rgba(74,122,58,0.15)');
+  root.style.setProperty('--clr-ok-border', 'var(--clr-success)');
+  root.style.setProperty('--clr-ok-text', 'var(--clr-success)');
+  
   // Category legend / item rows
-  root.style.setProperty('--clr-catitem-bg', 'rgba(255,255,255,0.6)');
-  root.style.setProperty('--clr-catitem-border', 'rgba(0,0,0,0.06)');
-  root.style.setProperty('--clr-muted', '#6b5c4a');
-  root.style.setProperty('--clr-pdrow-bg', 'rgba(255,255,255,0.5)');
-  root.style.setProperty('--clr-pdrow-border', 'rgba(0,0,0,0.06)');
-
-  // Camp overlay
-  root.style.setProperty('--clr-camp-border', '#4a6741');
-  root.style.setProperty('--clr-camp-pill-bg', 'rgba(255,255,255,0.65)');
-  root.style.setProperty('--clr-camp-pill-border', 'rgba(0,0,0,0.08)');
-  root.style.setProperty('--clr-camp-btn-hover', '#e3d6bc');
-  // Campfire evening background — warm glow + ember noise
-  root.style.setProperty('--clr-campfire-glow', 'radial-gradient(ellipse at 50% 100%, rgba(210,120,40,0.35) 0%, rgba(180,90,30,0.22) 35%, transparent 70%)');
+  root.style.setProperty('--clr-catitem-bg', 'rgba(255,255,255,0.05)');
+  root.style.setProperty('--clr-catitem-border', 'rgba(139,105,20,0.15)');
+  root.style.setProperty('--clr-muted', '#8a7a6a');
+  root.style.setProperty('--clr-pdrow-bg', 'rgba(255,255,255,0.03)');
+  root.style.setProperty('--clr-pdrow-border', 'rgba(139,105,20,0.1)');
+  
+  // Camp overlay - evening campfire
+  root.style.setProperty('--clr-camp-border', 'var(--clr-accent)');
+  root.style.setProperty('--clr-camp-pill-bg', 'rgba(255,255,255,0.05)');
+  root.style.setProperty('--clr-camp-pill-border', 'rgba(139,105,20,0.15)');
+  root.style.setProperty('--clr-camp-btn-hover', '#3a2f1f');
+  root.style.setProperty('--clr-campfire-glow', 'radial-gradient(ellipse at 50% 100%, rgba(180,110,20,0.35) 0%, rgba(139,105,20,0.22) 35%, transparent 70%)');
   root.style.setProperty('--clr-campfire-embers', "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 300 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='campNoise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.025' numOctaves='5' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23campNoise)' opacity='0.08'/%3E%3C/svg%3E\")");
-  root.style.setProperty('--clr-campfire-flicker', 'radial-gradient(circle at 45% 75%, rgba(255,180,80,0.15) 0%, transparent 40%), radial-gradient(circle at 55% 65%, rgba(255,140,60,0.12) 0%, transparent 35%), radial-gradient(circle at 60% 80%, rgba(255,100,40,0.1) 0%, transparent 30%)');
-
+  root.style.setProperty('--clr-campfire-flicker', 'radial-gradient(circle at 45% 75%, rgba(255,140,40,0.15) 0%, transparent 40%), radial-gradient(circle at 55% 65%, rgba(255,110,30,0.12) 0%, transparent 35%), radial-gradient(circle at 60% 80%, rgba(255,80,20,0.1) 0%, transparent 30%)');
+  
   // Dice / outcome colors
-  root.style.setProperty('--clr-success-glow', 'rgba(46,125,50,0.3)');
+  root.style.setProperty('--clr-success-glow', 'rgba(74,122,58,0.3)');
   root.style.setProperty('--clr-danger-glow', 'rgba(139,37,0,0.3)');
-  root.style.setProperty('--clr-choice-cost', '#5e4b35');
-  root.style.setProperty('--clr-source-text', '#5a4a3a');
-  root.style.setProperty('--clr-source-context', '#8a7a6a');
-  root.style.setProperty('--clr-placeholder', '#9a8a7a');
-  root.style.setProperty('--clr-input-bg', 'rgba(255,255,255,0.7)');
-  root.style.setProperty('--clr-input-bg-focus', 'rgba(255,255,255,0.9)');
-
+  root.style.setProperty('--clr-choice-cost', '#8a7a6a');
+  root.style.setProperty('--clr-source-text', '#8a7a6a');
+  root.style.setProperty('--clr-source-context', '#9a8a7a');
+  root.style.setProperty('--clr-placeholder', '#6a5a4a');
+  root.style.setProperty('--clr-input-bg', 'rgba(255,255,255,0.05)');
+  root.style.setProperty('--clr-input-bg-focus', 'rgba(255,255,255,0.1)');
+  
   // Leaderboard
   root.style.setProperty('--clr-silver', '#8a8a8a');
   root.style.setProperty('--clr-bronze', '#8B5E3C');
-  root.style.setProperty('--clr-gold-faint', 'rgba(184,134,11,0.08)');
-  root.style.setProperty('--clr-gold-light', 'rgba(184,134,11,0.2)');
-  root.style.setProperty('--clr-intel-border', 'rgba(0,0,0,0.08)');
-
+  root.style.setProperty('--clr-gold-faint', 'rgba(139,105,20,0.08)');
+  root.style.setProperty('--clr-gold-light', 'rgba(139,105,20,0.15)');
+  root.style.setProperty('--clr-intel-border', 'rgba(139,105,20,0.1)');
+  
   // Typography
   root.style.setProperty('--font-heading', "'Playfair Display', 'Georgia', serif");
   root.style.setProperty('--font-body', "'Crimson Text', 'Georgia', serif");

@@ -114,6 +114,10 @@ var NODES = [
     lat: 49.89,
     lon: -97.14,
     type: "hbc",
+    settlementType: "hbc",
+    settlementName: "Fort Garry",
+    settlementDescription: "The Red River Settlement. HBC headquarters. The palisade walls rise from the mud \u2014 your journey begins here, where the Assiniboine meets the Red. Families load their carts for the long trail west.",
+    priceMultiplier: { buy: 1, sell: 1, categories: { furs: { buy: 1, sell: 1 }, provisions: { buy: 1, sell: 1 }, repair: { buy: 1, sell: 1 }, medical: { buy: 1, sell: 1 }, shelter: { buy: 1, sell: 1 }, fuel: { buy: 1, sell: 1 }, tool: { buy: 1, sell: 1 }, hunting: { buy: 1, sell: 1 } } },
     terrain: "river_valley",
     dist: 0,
     desc: "The Red River Settlement. HBC headquarters. The palisade walls rise from the mud \u2014 your journey begins here, where the Assiniboine meets the Red. Families load their carts for the long trail west.",
@@ -131,6 +135,10 @@ var NODES = [
     lat: 49.88,
     lon: -97.11,
     type: "mission",
+    settlementType: "mission",
+    settlementName: "St. Boniface Mission",
+    settlementDescription: "Cathedral spires above the river landing. The Grey Nuns offer healing to all travellers. Free pottage and prayers.",
+    priceMultiplier: { buy: 0.8, sell: 1.5, categories: { furs: { buy: 0.8, sell: 1.5 }, provisions: { buy: 0.7, sell: 1.3 }, repair: { buy: 1, sell: 1 }, medical: { buy: 0.8, sell: 1.2 }, shelter: { buy: 1, sell: 1 }, fuel: { buy: 1, sell: 1 }, tool: { buy: 1, sell: 1 }, hunting: { buy: 1, sell: 1 } } },
     terrain: "river_valley",
     dist: 1,
     desc: "Cathedral spires above the river landing. The Grey Nuns offer healing to all travellers. Free pottage and prayers.",
@@ -148,6 +156,10 @@ var NODES = [
     lat: 49.77,
     lon: -97.15,
     type: "metis",
+    settlementType: "metis",
+    settlementName: "St. Norbert M\xE9tis Parish",
+    settlementDescription: "A M\xE9tis parish straddling the ox-cart trail. Smoke rises from the churchyard. Families welcome you with bannock and Saskatoon preserve. The women here are known for their flower beadwork.",
+    priceMultiplier: { buy: 0.9, sell: 1.1, categories: { furs: { buy: 0.9, sell: 1.1 }, provisions: { buy: 0.95, sell: 1.05 }, repair: { buy: 1, sell: 1 }, medical: { buy: 1, sell: 1 }, shelter: { buy: 1, sell: 1 }, fuel: { buy: 1, sell: 1 }, tool: { buy: 1, sell: 1 }, hunting: { buy: 1, sell: 1 } } },
     terrain: "river_valley",
     dist: 1,
     desc: "A M\xE9tis parish straddling the ox-cart trail. Smoke rises from the churchyard. Families welcome you with bannock and Saskatoon preserve. The women here are known for their flower beadwork.",
@@ -164,6 +176,10 @@ var NODES = [
     lat: 49.92,
     lon: -97.55,
     type: "metis",
+    settlementType: "metis",
+    settlementName: "St. Fran\xE7ois Xavier",
+    settlementDescription: "Long lots stretching back from the river. Well-known ford across the Assiniboine. The M\xE9tis here remember the Sayer trial \u2014 free trade is their pride.",
+    priceMultiplier: { buy: 0.9, sell: 1.1, categories: { furs: { buy: 0.9, sell: 1.1 }, provisions: { buy: 0.95, sell: 1.05 }, repair: { buy: 1, sell: 1 }, medical: { buy: 1, sell: 1 }, shelter: { buy: 1, sell: 1 }, fuel: { buy: 1, sell: 1 }, tool: { buy: 1, sell: 1 }, hunting: { buy: 1, sell: 1 } } },
     terrain: "plains",
     dist: 2,
     desc: "Long lots stretching back from the river. Well-known ford across the Assiniboine. The M\xE9tis here remember the Sayer trial \u2014 free trade is their pride.",
@@ -180,6 +196,10 @@ var NODES = [
     lat: 49.97,
     lon: -98.29,
     type: "trading",
+    settlementType: "trading",
+    settlementName: "Portage la Prairie Trading Post",
+    settlementDescription: "Trading post at the old lake crossing. Full barter available. The HBC fort is decaying \u2014 the wood is grey, the palisade leaning \u2014 but trade continues.",
+    priceMultiplier: { buy: 1.1, sell: 0.9, categories: { furs: { buy: 1.1, sell: 0.9 }, provisions: { buy: 1.1, sell: 0.9 }, repair: { buy: 1.1, sell: 0.9 }, medical: { buy: 1, sell: 1 }, shelter: { buy: 1, sell: 1 }, fuel: { buy: 1, sell: 1 }, tool: { buy: 1, sell: 1 }, hunting: { buy: 1, sell: 1 } } },
     terrain: "river_valley",
     dist: 2,
     desc: "Trading post at the old lake crossing. Full barter available. The HBC fort is decaying \u2014 the wood is grey, the palisade leaning \u2014 but trade continues.",
@@ -197,6 +217,10 @@ var NODES = [
     lat: 50.4,
     lon: -101.3,
     type: "hbc",
+    settlementType: "hbc",
+    settlementName: "Fort Ellice",
+    settlementDescription: "Midpoint resupply where the Assiniboine meets the Qu'Appelle. The trail splits here \u2014 south to Qu'Appelle, west to the Touchwood Hills.",
+    priceMultiplier: { buy: 1, sell: 1, categories: { furs: { buy: 1, sell: 1 }, provisions: { buy: 1, sell: 1 }, repair: { buy: 1, sell: 1 }, medical: { buy: 1, sell: 1 }, shelter: { buy: 1, sell: 1 }, fuel: { buy: 1, sell: 1 }, tool: { buy: 1, sell: 1 }, hunting: { buy: 1, sell: 1 } } },
     terrain: "river_valley",
     dist: 4,
     desc: "Midpoint resupply where the Assiniboine meets the Qu'Appelle. The trail splits here \u2014 south to Qu'Appelle, west to the Touchwood Hills.",
@@ -214,6 +238,10 @@ var NODES = [
     lat: 50.55,
     lon: -103.85,
     type: "nwmp",
+    settlementType: "nwmp",
+    settlementName: "Fort Qu'Appelle NWMP Post",
+    settlementDescription: "NWMP post. The red coats scrutinize every cart and cargo. Papers are checked. Duty collected. You keep your gaze steady.",
+    priceMultiplier: { buy: 1.2, sell: 0.8, categories: { furs: { buy: 1.1, sell: 0.9 }, provisions: { buy: 1.2, sell: 0.8 }, repair: { buy: 1.2, sell: 0.8 }, medical: { buy: 1, sell: 1 }, shelter: { buy: 1, sell: 1 }, fuel: { buy: 1, sell: 1 }, tool: { buy: 1, sell: 1 }, hunting: { buy: 0.8, sell: 1.2 } } },
     terrain: "river_valley",
     dist: 3,
     desc: "NWMP post. The red coats scrutinize every cart and cargo. Papers are checked. Duty collected. You keep your gaze steady.",
@@ -230,6 +258,10 @@ var NODES = [
     lat: 51.2,
     lon: -104.2,
     type: "trading",
+    settlementType: "trading",
+    settlementName: "Touchwood Hills Trading Post",
+    settlementDescription: "The last trees for a hundred miles. A Cree trader speaks Michif and knows the northern route. Elm and poplar break the prairie monotony.",
+    priceMultiplier: { buy: 1.1, sell: 0.9, categories: { furs: { buy: 1.1, sell: 0.9 }, provisions: { buy: 1.1, sell: 0.9 }, repair: { buy: 1.1, sell: 0.9 }, medical: { buy: 1, sell: 1 }, shelter: { buy: 1, sell: 1 }, fuel: { buy: 1, sell: 1 }, tool: { buy: 1, sell: 1 }, hunting: { buy: 1, sell: 1 } } },
     terrain: "wooded",
     dist: 3,
     desc: "The last trees for a hundred miles. A Cree trader speaks Michif and knows the northern route. Elm and poplar break the prairie monotony.",
@@ -246,6 +278,10 @@ var NODES = [
     lat: 52.2,
     lon: -105.12,
     type: "mission",
+    settlementType: "mission",
+    settlementName: "Humboldt Mission",
+    settlementDescription: "Only reliable healing for a lonely stretch of prairie. The mission garden grows against all odds. A welcome sight.",
+    priceMultiplier: { buy: 0.8, sell: 1.5, categories: { furs: { buy: 0.8, sell: 1.5 }, provisions: { buy: 0.7, sell: 1.3 }, repair: { buy: 1, sell: 1 }, medical: { buy: 0.8, sell: 1.2 }, shelter: { buy: 1, sell: 1 }, fuel: { buy: 1, sell: 1 }, tool: { buy: 1, sell: 1 }, hunting: { buy: 1, sell: 1 } } },
     terrain: "plains",
     dist: 3,
     desc: "Only reliable healing for a lonely stretch of prairie. The mission garden grows against all odds. A welcome sight.",
@@ -262,6 +298,10 @@ var NODES = [
     lat: 52.75,
     lon: -106.1,
     type: "metis",
+    settlementType: "metis",
+    settlementName: "Batoche",
+    settlementDescription: "Spiritual centre of the Saskatchewan M\xE9tis. The church bell rings across the river valley. The river-lot farms are prosperous, but Ottawa's surveyors have been making promises they don't keep.",
+    priceMultiplier: { buy: 0.9, sell: 1.1, categories: { furs: { buy: 0.9, sell: 1.1 }, provisions: { buy: 0.95, sell: 1.05 }, repair: { buy: 1, sell: 1 }, medical: { buy: 1, sell: 1 }, shelter: { buy: 1, sell: 1 }, fuel: { buy: 1, sell: 1 }, tool: { buy: 1, sell: 1 }, hunting: { buy: 1, sell: 1 } } },
     terrain: "river_valley",
     dist: 2,
     desc: "Spiritual centre of the Saskatchewan M\xE9tis. The church bell rings across the river valley. The river-lot farms are prosperous, but Ottawa's surveyors have been making promises they don't keep.",
@@ -278,6 +318,10 @@ var NODES = [
     lat: 52.7,
     lon: -105.75,
     type: "river",
+    settlementType: "river",
+    settlementName: "Gabriel's Crossing",
+    settlementDescription: "Gabriel Dumont operates the ferry across the South Saskatchewan. His fee is fair. The current is deceptive \u2014 do not try to ford it.",
+    priceMultiplier: { buy: 1, sell: 1, categories: { furs: { buy: 1, sell: 1 }, provisions: { buy: 1, sell: 1 }, repair: { buy: 1, sell: 1 }, medical: { buy: 1, sell: 1 }, shelter: { buy: 1, sell: 1 }, fuel: { buy: 1, sell: 1 }, tool: { buy: 1, sell: 1 }, hunting: { buy: 1, sell: 1 } } },
     terrain: "river_valley",
     dist: 1,
     desc: "Gabriel Dumont operates the ferry across the South Saskatchewan. His fee is fair. The current is deceptive \u2014 do not try to ford it.",
@@ -294,6 +338,10 @@ var NODES = [
     lat: 52.8,
     lon: -106.5,
     type: "hbc",
+    settlementType: "hbc",
+    settlementName: "Fort Carlton",
+    settlementDescription: "Major HBC depot on the North Saskatchewan. Full trade, full repair. The pemmican stores are declining \u2014 the Company feels the pressure.",
+    priceMultiplier: { buy: 1, sell: 1, categories: { furs: { buy: 1, sell: 1 }, provisions: { buy: 1, sell: 1 }, repair: { buy: 1, sell: 1 }, medical: { buy: 1, sell: 1 }, shelter: { buy: 1, sell: 1 }, fuel: { buy: 1, sell: 1 }, tool: { buy: 1, sell: 1 }, hunting: { buy: 1, sell: 1 } } },
     terrain: "river_valley",
     dist: 2,
     desc: "Major HBC depot on the North Saskatchewan. Full trade, full repair. The pemmican stores are declining \u2014 the Company feels the pressure.",
@@ -310,6 +358,10 @@ var NODES = [
     lat: 53.65,
     lon: -109.75,
     type: "hbc",
+    settlementType: "hbc",
+    settlementName: "Fort Pitt",
+    settlementDescription: "Edge of the boreal forest. Small, isolated. The last HBC post before Edmonton. Pine and spruce replace poplar.",
+    priceMultiplier: { buy: 1, sell: 1, categories: { furs: { buy: 1, sell: 1 }, provisions: { buy: 1, sell: 1 }, repair: { buy: 1, sell: 1 }, medical: { buy: 1, sell: 1 }, shelter: { buy: 1, sell: 1 }, fuel: { buy: 1, sell: 1 }, tool: { buy: 1, sell: 1 }, hunting: { buy: 1, sell: 1 } } },
     terrain: "river_valley",
     dist: 4,
     desc: "Edge of the boreal forest. Small, isolated. The last HBC post before Edmonton. Pine and spruce replace poplar.",
@@ -327,6 +379,10 @@ var NODES = [
     lat: 53.54,
     lon: -113.5,
     type: "hbc",
+    settlementType: "hbc",
+    settlementName: "Fort Edmonton",
+    settlementDescription: "Western terminus. Gateway to the Athabasca. The palisade walls of Fort Edmonton rise from the riverbank. The end of the Carlton Trail.",
+    priceMultiplier: { buy: 1, sell: 1, categories: { furs: { buy: 1, sell: 1 }, provisions: { buy: 1, sell: 1 }, repair: { buy: 1, sell: 1 }, medical: { buy: 1, sell: 1 }, shelter: { buy: 1, sell: 1 }, fuel: { buy: 1, sell: 1 }, tool: { buy: 1, sell: 1 }, hunting: { buy: 1, sell: 1 } } },
     terrain: "river_valley",
     dist: 5,
     desc: "Western terminus. Gateway to the Athabasca. The palisade walls of Fort Edmonton rise from the riverbank. The end of the Carlton Trail.",
@@ -1959,7 +2015,6 @@ function createGame(seed = null) {
     makeCamp,
     pushOn: pushOn2,
     chooseEventChoice,
-    settlementAction,
     getState() {
       return {
         day: S2.day,
@@ -1998,20 +2053,22 @@ function createGame(seed = null) {
       recalcMB();
       return true;
     },
-    getTradeEstimate(itemName) {
-      const item = cart.find((i) => i.name === itemName);
+    getTradeEstimate(itemId, quantity, settlementType) {
+      const item = cart.find((i) => i.name === itemId);
       if (!item) return null;
-      const n = NODES[S2.node];
-      const baseMin = 4;
-      const baseMax = 8;
-      const settleMult = { hbc: 1.3, nwmp: 1.1, metis: 1, trading: 1.2, mission: 0.8 }[n.type] || 1;
-      const catMult = { furs: 1.4, trade: 1.2, ammo: 1.1, repair: 0.9, food: 0.7, shelter: 0.8, fuel: 0.6, medical: 1, tool: 0.9, hunting: 1 }[item.type] || 1;
-      const trailMult = 1 + S2.node / NODES.length * 0.3;
-      const mult = settleMult * catMult * trailMult;
+      const basePrice = item.mbValue || 1;
+      const mult = getSettlementPriceMultiplier(settlementType, item.category);
+      const distanceFactor = S2.node / (NODES.length - 1);
+      const buyPrice = Math.round(basePrice * mult.buy * (1 + distanceFactor * 0.15) * 100) / 100;
+      const sellPrice = Math.round(basePrice * mult.sell * (1 - distanceFactor * 0.1) * 100) / 100;
       return {
-        min: Math.round(baseMin * mult),
-        max: Math.round(baseMax * mult),
-        mult: Math.round(mult * 100) / 100
+        item: itemId,
+        quantity,
+        buyPrice: buyPrice * quantity,
+        sellPrice: sellPrice * quantity,
+        buyPriceEach: buyPrice,
+        sellPriceEach: sellPrice,
+        multiplier: mult
       };
     },
     tradeItem(itemName) {
@@ -2023,6 +2080,67 @@ function createGame(seed = null) {
       S2.food += foodGain;
       S2.tradesMade++;
       return { item: itemName, foodGain };
+    },
+    // ── NEW Engine API for Sprint 3 ───────────────────────────────────
+    getSettlementActions(settlementType) {
+      const actions = getSettlementActionsByType(settlementType);
+      return actions.map((a) => ({
+        id: a.id,
+        label: a.label,
+        cost: a.cost,
+        risk: a.risk,
+        flavor: a.flavor
+      }));
+    },
+    settlementAction(actionId, params = {}) {
+      if (!S2.pendingSettlement) return { error: "No settlement pending" };
+      const type = S2.pendingSettlement.type;
+      const state = S2;
+      const result = executeSettlementAction(actionId, type, state, cart, params);
+      checkGameOver();
+      return result || {};
+    },
+    getEndgameScore() {
+      if (!S2.won) return { score: 0, breakdown: {} };
+      const mbVal = S2.mbValue || 0;
+      const foodBonus = Math.min(S2.food, 25);
+      const crewBonus = S2.crew === "rested" ? 30 : S2.crew === "tired" ? 10 : 0;
+      const daysPenalty = S2.day * 8;
+      const wearPenalty = S2.wear * S2.wear * 40;
+      const baseScore = 500;
+      const mbScore = Math.round(mbVal * 80);
+      const foodScore = foodBonus * 12;
+      const total = baseScore + mbScore + foodScore + crewBonus - daysPenalty - wearPenalty;
+      let tier;
+      if (total < 500) tier = "Barely Survived";
+      else if (total < 1200) tier = "Solid Profit";
+      else tier = "Legendary Haul";
+      return {
+        score: Math.max(0, Math.round(total)),
+        breakdown: {
+          base: baseScore,
+          mbValue: mbScore,
+          foodBonus: foodScore,
+          crewCondition: crewBonus,
+          daysPenalty: -daysPenalty,
+          wearPenalty: -wearPenalty
+        },
+        tier
+      };
+    },
+    getSettlementData(nodeId) {
+      const idx = NODES.findIndex((n) => n.id === nodeId);
+      if (idx === -1) return null;
+      const node = NODES[idx];
+      return {
+        id: node.id,
+        name: node.name,
+        type: node.type,
+        terrain: node.terrain,
+        desc: node.desc,
+        dist: node.dist,
+        priceMultiplier: getSettlementPriceMultiplier(node.type)
+      };
     },
     getAvailableRecipes() {
       const recipes = [
@@ -2409,6 +2527,276 @@ function createGame(seed = null) {
   };
 }
 __name(createGame, "createGame");
+function getSettlementPriceMultiplier(type, category) {
+  const multipliers = {
+    hbc: { buy: 1, sell: 1, categories: { furs: { buy: 1, sell: 1 }, provisions: { buy: 1, sell: 1 }, repair: { buy: 1, sell: 1 }, medical: { buy: 1, sell: 1 }, shelter: { buy: 1, sell: 1 }, fuel: { buy: 1, sell: 1 }, tool: { buy: 1, sell: 1 }, hunting: { buy: 1, sell: 1 } } },
+    metis: { buy: 0.9, sell: 1.1, categories: { furs: { buy: 0.9, sell: 1.1 }, provisions: { buy: 0.95, sell: 1.05 }, repair: { buy: 1, sell: 1 }, medical: { buy: 1, sell: 1 }, shelter: { buy: 1, sell: 1 }, fuel: { buy: 1, sell: 1 }, tool: { buy: 1, sell: 1 }, hunting: { buy: 1, sell: 1 } } },
+    nwmp: { buy: 1.2, sell: 0.8, categories: { furs: { buy: 1.1, sell: 0.9 }, provisions: { buy: 1.2, sell: 0.8 }, repair: { buy: 1.2, sell: 0.8 }, medical: { buy: 1, sell: 1 }, shelter: { buy: 1, sell: 1 }, fuel: { buy: 1, sell: 1 }, tool: { buy: 1, sell: 1 }, hunting: { buy: 0.8, sell: 1.2 } } },
+    // ammo cheaper
+    mission: { buy: 0.8, sell: 1.5, categories: { furs: { buy: 0.8, sell: 1.5 }, provisions: { buy: 0.7, sell: 1.3 }, repair: { buy: 1, sell: 1 }, medical: { buy: 0.8, sell: 1.2 }, shelter: { buy: 1, sell: 1 }, fuel: { buy: 1, sell: 1 }, tool: { buy: 1, sell: 1 }, hunting: { buy: 1, sell: 1 } } },
+    trading: { buy: 1.1, sell: 0.9, categories: { furs: { buy: 1.1, sell: 0.9 }, provisions: { buy: 1.1, sell: 0.9 }, repair: { buy: 1.1, sell: 0.9 }, medical: { buy: 1, sell: 1 }, shelter: { buy: 1, sell: 1 }, fuel: { buy: 1, sell: 1 }, tool: { buy: 1, sell: 1 }, hunting: { buy: 1, sell: 1 } } }
+  };
+  const m = multipliers[type] || multipliers.hbc;
+  const cat = m.categories[category] || { buy: m.buy, sell: m.sell };
+  return { buy: cat.buy, sell: cat.sell };
+}
+__name(getSettlementPriceMultiplier, "getSettlementPriceMultiplier");
+function getSettlementActionsByType(type) {
+  switch (type) {
+    case "hbc":
+      return [
+        { id: "trade", label: "Trade Goods for \u20A5", cost: "1 trade good", risk: "Best rates for pelts/hides", flavor: "The Company factors weigh your furs in silence. The ledger decides your worth." },
+        { id: "buy_supplies", label: "Buy Supplies", cost: "\u20A5 varies", risk: "Full inventory available", flavor: "Pemmican, axes, shaganappi, tools \u2014 everything a carter needs for the long trail." },
+        { id: "rest", label: "Rest at the Fort", cost: "1 food", risk: "Crew rested, morale +15", flavor: "A warm fire in the mess hall, dry blankets, and a night without the wind." },
+        { id: "get_intel", label: "Get Trail Intel", cost: "1 \u20A5", risk: "Reveals next 2 nodes", flavor: "The clerk unfolds a map stained with ink and tea. He marks the hazards ahead." }
+      ];
+    case "metis":
+      return [
+        { id: "trade_gossip", label: "Trade Gossip", cost: "Free", risk: "Reveals 1 gossip entry", flavor: "News travels faster than carts on the prairie. The women know everything." },
+        { id: "recruit_crew", label: "Recruit Crew", cost: "2 \u20A5 + 1 food", risk: "+1 crew member (max 6)", flavor: "A young hand looking for work. Strong back, willing heart \u2014 if you can feed him." },
+        { id: "dance", label: "Dance", cost: "1 food", risk: "Morale +10, no day advance", flavor: "The fiddle starts. A Red River jig. Boots on hard ground. Nobody thinks about tomorrow." },
+        { id: "share_food", label: "Share Food", cost: "Give 2+ food", risk: "Morale +5 per food", flavor: "Generosity on the trail is its own currency. What you give returns in loyalty." },
+        { id: "craft_hides", label: "Craft Finished Hides", cost: "3 raw hides + 1 shaganappi", risk: "Creates finished_hide (worth 2\xD7 \u20A5)", flavor: "The women scrape, stretch, and smoke the hides. Patience turns rawhide into profit." }
+      ];
+    case "nwmp":
+      return [
+        { id: "pay_fines", label: "Pay Fines", cost: "\u20A5 varies", risk: "Clears fines if any", flavor: "The sergeant reads your name from the ledger. The amount is not negotiable." },
+        { id: "get_permits", label: "Get Permits", cost: "2 \u20A5", risk: "Required for river crossings", flavor: "A stamp, a signature, and the Queen's law lets you cross the water legal." },
+        { id: "report_duty", label: "Report for Duty", cost: "1 day", risk: "\u20A5 reward, morale \u22125", flavor: "Red coats, drill, and the weight of Ottawa's authority. The pay is fair but the pride costs." },
+        { id: "buy_ammo", label: "Buy Ammo", cost: "1.5 \u20A5 per Belt", risk: "Cheaper than HBC", flavor: "Ball and powder, measured honest. The Mounties don't cheat a carter on shot." },
+        { id: "rest", label: "Rest", cost: "1 food", risk: "Crew rested (no morale bonus)", flavor: "A cot in the barracks. Clean, quiet, and the sentry paces all night." }
+      ];
+    case "mission":
+      return [
+        { id: "heal_crew", label: "Heal Crew", cost: "1 Medicine Pouch or 2 \u20A5", risk: "Clears injury/illness, morale +10", flavor: "The Grey Nuns tend the sick without asking who you are or where you come from." },
+        { id: "rest", label: "Free Rest + Blessing", cost: "Free", risk: "Crew rested, morale +15", flavor: "A chapel bell at evening. You sleep on straw but wake with a lighter spirit." },
+        { id: "get_blessing", label: "Get Blessing", cost: "1 food", risk: "Morale +10, next event DC \u22121", flavor: "The priest's hand on your brow. The trail feels less hostile after prayer." },
+        { id: "trade_limited", label: "Trade (Limited)", cost: "Buy pemmican 0.5 \u20A5, sell blankets 1.5 \u20A5", risk: "Charity rates", flavor: "The mission garden feeds the body. The trade feeds the journey." }
+      ];
+    case "trading":
+      return [
+        { id: "trade", label: "Trade Goods", cost: "1 trade good", risk: "Standard rates", flavor: "A free trader with no Company badge. His prices are his own." },
+        { id: "buy_supplies", label: "Buy Supplies", cost: "\u20A5 varies", risk: "Basic inventory", flavor: "What the Company posts run out of, the free traders sometimes have." },
+        { id: "rest", label: "Rest", cost: "1 food", risk: "Crew rested, morale +10", flavor: "A lean-to by the fire. Simple shelter, honest company." },
+        { id: "get_intel", label: "Get Trail Intel", cost: "1 \u20A5", risk: "Reveals next node", flavor: "He rides the trail weekly. His news is fresh and his memory long." }
+      ];
+    default:
+      return [
+        { id: "trade", label: "Trade Goods", cost: "1 trade good", risk: "Standard rates", flavor: "The factor weighs your furs. The ledger is final." },
+        { id: "rest", label: "Rest", cost: "1 food", risk: "Crew rested, morale +10", flavor: "A night under roof and beam. The trail waits for morning." }
+      ];
+  }
+}
+__name(getSettlementActionsByType, "getSettlementActionsByType");
+function executeSettlementAction(actionId, type, state, cart, params) {
+  const credit = state.credit?.[type] || 0;
+  if (actionId === "trade") {
+    const tradeItems = cart.filter((i) => i.type === "trade" && i.count > 0);
+    if (tradeItems.length === 0) return { error: "No trade goods to trade" };
+    const item = tradeItems[0];
+    item.count--;
+    const mbGain = item.mbValue || 1;
+    state.credit[type] = (state.credit[type] || 0) + mbGain;
+    state.tradesMade++;
+    return { traded: item.name, mbGain, credit: state.credit[type] };
+  }
+  if (actionId === "buy_supplies") {
+    return { action: "buy_supplies", message: "Opens supply purchase interface", credit: state.credit[type] };
+  }
+  if (actionId === "rest") {
+    if (state.food < 1) return { error: "Need 1 food to rest" };
+    state.food -= 1;
+    state.crew = "rested";
+    state.travelDaysWithoutRest = 0;
+    state.morale = Math.min(100, state.morale + (type === "hbc" ? 15 : type === "mission" ? 15 : 10));
+    return { rested: true, moraleGain: type === "hbc" ? 15 : type === "mission" ? 15 : 10 };
+  }
+  if (actionId === "get_intel") {
+    if ((state.credit[type] || 0) < 1) return { error: "Need 1 \u20A5 for intelligence" };
+    state.credit[type] -= 1;
+    const nextNode1 = NODES[state.node + 1];
+    const nextNode2 = NODES[state.node + 2];
+    state.trailIntel = state.trailIntel || [];
+    if (nextNode1) {
+      state.trailIntel.push({
+        fromDay: state.day,
+        text: `${nextNode1.name}: ${nextNode1.terrain.replace(/_/g, " ")} terrain. ${nextNode1.desc?.substring(0, 80)}...`,
+        bonus: { dcBonus: 1 }
+      });
+    }
+    if (nextNode2 && type === "hbc") {
+      state.trailIntel.push({
+        fromDay: state.day,
+        text: `${nextNode2.name}: ${nextNode2.terrain.replace(/_/g, " ")} terrain.`,
+        bonus: { dcBonus: 1 }
+      });
+    }
+    state.morale = Math.min(100, state.morale + 5);
+    return { intelGathered: true, moraleGain: 5, credit: state.credit[type] };
+  }
+  if (actionId === "trade_gossip") {
+    state.trailIntel = state.trailIntel || [];
+    const nextNode = NODES[state.node + 1];
+    if (nextNode) {
+      state.trailIntel.push({
+        fromDay: state.day,
+        text: `Gossip from ${state.pendingSettlement?.name}: ${nextNode.name} has ${nextNode.terrain.replace(/_/g, " ")} ahead.`,
+        bonus: { dcBonus: 1 }
+      });
+    }
+    state.morale = Math.min(100, state.morale + 3);
+    return { gossipGathered: true, moraleGain: 3 };
+  }
+  if (actionId === "recruit_crew") {
+    if ((state.credit[type] || 0) < 2) return { error: "Need 2 \u20A5 to recruit" };
+    if (state.food < 1) return { error: "Need 1 food to recruit" };
+    if ((state.crewCount || 3) >= 6) return { error: "Maximum crew (6) reached" };
+    state.credit[type] -= 2;
+    state.food -= 1;
+    state.crewCount = (state.crewCount || 3) + 1;
+    state.morale = Math.min(100, state.morale + 5);
+    return { recruited: true, crewCount: state.crewCount, moraleGain: 5, credit: state.credit[type] };
+  }
+  if (actionId === "dance") {
+    if (state.food < 1) return { error: "Need 1 food to dance" };
+    state.food -= 1;
+    state.morale = Math.min(100, state.morale + 10);
+    return { danced: true, moraleGain: 10 };
+  }
+  if (actionId === "share_food") {
+    const foodToGive = params.food || 2;
+    if (state.food < foodToGive) return { error: `Need ${foodToGive} food to share` };
+    state.food -= foodToGive;
+    const moraleGain = foodToGive * 5;
+    state.morale = Math.min(100, state.morale + moraleGain);
+    state.reputation.metis = (state.reputation.metis || 0) + 1;
+    return { shared: true, foodGiven: foodToGive, moraleGain, reputationGain: 1 };
+  }
+  if (actionId === "craft_hides") {
+    const hides = cart.find((i) => ["Bison Hide", "Beaver Pelts", "Elk Hide", "Deer Hide"].includes(i.name));
+    const shag = cart.find((i) => i.name === "Shaganappi");
+    if (!hides || hides.count < 3) return { error: "Need 3 raw hides" };
+    if (!shag || shag.count < 1) return { error: "Need 1 shaganappi" };
+    hides.count -= 3;
+    shag.count -= 1;
+    const finished = cart.find((i) => i.name === "Finished Hides");
+    if (finished) finished.count++;
+    else cart.push({ name: "Finished Hides", wt: 3, count: 1, type: "trade", category: "furs", mbValue: 3.5, desc: "Expertly prepared hides. Worth double at market.", perishable: false });
+    state.mbValue = cart.filter((i) => i.type === "trade" || i.category === "furs").reduce((s, i) => s + (i.mbValue || 0) * i.count, 0);
+    return { crafted: "Finished Hides", mbValue: state.mbValue };
+  }
+  if (actionId === "pay_fines") {
+    const fines = state.fines || 0;
+    if (fines === 0) return { error: "No fines to pay" };
+    if ((state.credit[type] || 0) < fines) return { error: `Need ${fines} \u20A5 to pay fines` };
+    state.credit[type] -= fines;
+    state.fines = 0;
+    return { finesPaid: fines, credit: state.credit[type] };
+  }
+  if (actionId === "get_permits") {
+    if ((state.credit[type] || 0) < 2) return { error: "Need 2 \u20A5 for permit" };
+    state.credit[type] -= 2;
+    state.hasPermit = true;
+    return { permitObtained: true, credit: state.credit[type] };
+  }
+  if (actionId === "report_duty") {
+    const reward = Math.round(state.node / NODES.length * 10) + 2;
+    state.credit[type] = (state.credit[type] || 0) + reward;
+    state.morale = Math.max(0, state.morale - 5);
+    const nextDate = advanceDate(state.date.month, state.date.day, state.year);
+    state.date = nextDate;
+    state.month = nextDate.month;
+    state.day++;
+    state.segmentDay = 0;
+    return { dutyDone: true, reward, moraleLoss: 5, credit: state.credit[type] };
+  }
+  if (actionId === "buy_ammo") {
+    if ((state.credit[type] || 0) < 1.5) return { error: "Need 1.5 \u20A5 for ammunition" };
+    state.credit[type] -= 1.5;
+    const ammo = cart.find((i) => i.name === "Ammunition Belt");
+    if (ammo) ammo.count++;
+    else cart.push({ name: "Ammunition Belt", wt: 2, count: 1, type: "ammo", category: "hunting", mbValue: 0.9, desc: "Shot and ball. For hunting and defence.", perishable: false });
+    return { bought: "Ammunition Belt", credit: state.credit[type] };
+  }
+  if (actionId === "heal_crew") {
+    const med = cart.find((i) => i.name === "Medicine Pouch");
+    if ((state.credit[type] || 0) >= 2) {
+      state.credit[type] -= 2;
+    } else if (med && med.count > 0) {
+      med.count--;
+    } else {
+      return { error: "Need 2 \u20A5 or 1 Medicine Pouch" };
+    }
+    state.crew = "rested";
+    state.morale = Math.min(100, state.morale + 10);
+    state.flags.injured = false;
+    state.flags.ill = false;
+    return { healed: true, moraleGain: 10, credit: state.credit[type] };
+  }
+  if (actionId === "get_blessing") {
+    if (state.food < 1) return { error: "Need 1 food for blessing" };
+    state.food -= 1;
+    state.morale = Math.min(100, state.morale + 10);
+    state.flags.blessed = true;
+    return { blessed: true, moraleGain: 10 };
+  }
+  if (actionId === "trade_limited") {
+    return { action: "trade_limited", message: "Limited trade available: buy pemmican (0.5 \u20A5), sell blankets (1.5 \u20A5)", credit: state.credit[type] };
+  }
+  if (actionId === "buy_food") {
+    const cost = 0.5;
+    if ((state.credit[type] || 0) < cost) return { error: "Need 0.5 \u20A5 credit" };
+    state.credit[type] -= cost;
+    state.food += 2;
+    return { bought: "food", amount: 2, credit: state.credit[type] };
+  }
+  if (actionId === "buy_repair") {
+    const cost = 2;
+    if ((state.credit[type] || 0) < cost) return { error: "Need 2 \u20A5 credit" };
+    if (state.wear <= 0) return { error: "Cart does not need repair" };
+    state.credit[type] -= cost;
+    state.wear = Math.max(0, state.wear - 2);
+    return { repaired: true, wearReduced: 2, credit: state.credit[type] };
+  }
+  if (actionId === "buy_heal") {
+    const cost = 1;
+    if ((state.credit[type] || 0) < cost) return { error: "Need 1 \u20A5 credit" };
+    state.credit[type] -= cost;
+    state.morale = Math.min(100, state.morale + 20);
+    state.crew = "rested";
+    return { healed: true, moraleGain: 20, credit: state.credit[type] };
+  }
+  if (actionId === "buy_info") {
+    const cost = 0.5;
+    if ((state.credit[type] || 0) < cost) return { error: "Need 0.5 \u20A5 credit" };
+    state.credit[type] -= cost;
+    state.morale = Math.min(100, state.morale + 5);
+    state.flags["trail_intel_" + state.node] = true;
+    return { intel: true, moraleGain: 5, credit: state.credit[type] };
+  }
+  if (actionId === "repair") {
+    const shag = cart.find((i) => i.name === "Shaganappi");
+    if (state.wear > 0 && shag && shag.count > 0) {
+      shag.count--;
+      state.wear = Math.max(0, state.wear - 2);
+      state.mbValue = cart.filter((i) => i.type === "trade" || i.category === "furs").reduce((s, i) => s + (i.mbValue || 0) * i.count, 0);
+    } else if (state.wear > 0) {
+      state.wear = Math.max(0, state.wear - 2);
+    }
+    return { repaired: true };
+  }
+  if (actionId === "heal") {
+    state.crew = "rested";
+    state.morale = Math.min(100, state.morale + 20);
+    return { healed: true };
+  }
+  if (actionId === "continue") {
+    state.pendingSettlement = null;
+    return { continued: true };
+  }
+  return { error: `Unknown action: ${actionId}` };
+}
+__name(executeSettlementAction, "executeSettlementAction");
 function availableSettlementActions(type) {
   const base = ["rest", "trade", "buy_food"];
   if (type === "hbc") return [...base, "buy_repair", "craft", "buy_info"];
@@ -2456,78 +2844,76 @@ __name(getSquealEvent, "getSquealEvent");
 
 // src/ui/theme.js
 function applyTheme(root) {
-  root.style.setProperty("--clr-bg", "#CFC1A4");
-  root.style.setProperty("--clr-bg-dark", "#B8AA8A");
-  root.style.setProperty("--clr-ink", "#1A1A18");
-  root.style.setProperty("--clr-accent", "#8C6A2A");
-  root.style.setProperty("--clr-border", "#4A5D55");
-  root.style.setProperty("--clr-status-bg", "#243B32");
-  root.style.setProperty("--clr-status-text", "#F2E9D8");
-  root.style.setProperty("--clr-status-accent", "#C99A3B");
-  root.style.setProperty("--clr-status-bar-bg", "#1a2922");
-  root.style.setProperty("--clr-overlay-bg", "rgba(22,28,24,0.94)");
-  root.style.setProperty("--clr-card-bg", "#E6DBC4");
-  root.style.setProperty("--clr-btn-bg", "#2D4A3E");
-  root.style.setProperty("--clr-btn-text", "#F2E9D8");
-  root.style.setProperty("--clr-btn-hover", "#1E2B26");
-  root.style.setProperty("--clr-food-low", "#e63946");
-  root.style.setProperty("--clr-warn", "#f4a261");
-  root.style.setProperty("--clr-ok", "#8ab17d");
-  root.style.setProperty("--clr-weather-rain", "#6B8E9B");
-  root.style.setProperty("--clr-danger", "#8B2500");
-  root.style.setProperty("--clr-weather-snow", "#B8C4D0");
-  root.style.setProperty("--clr-success", "#2e7d32");
-  root.style.setProperty("--clr-map-bg", "#BFB195");
-  root.style.setProperty("--clr-tooltip-bg", "rgba(26,20,16,0.85)");
-  root.style.setProperty("--clr-tooltip-text", "#E8DCC8");
-  root.style.setProperty("--clr-tooltip-border", "rgba(232,220,200,0.3)");
-  root.style.setProperty("--clr-map-frame-shadow", "rgba(26,20,16,0.12)");
-  root.style.setProperty("--clr-narrative-text", "#3a3025");
-  root.style.setProperty("--clr-ruled-line", "rgba(26,20,16,0.08)");
-  root.style.setProperty("--clr-ledger-border", "rgba(26,20,16,0.15)");
-  root.style.setProperty("--clr-ledger-margin", "#8C6A2A");
-  root.style.setProperty("--clr-paper-texture", `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E")`);
-  root.style.setProperty("--clr-event-border", "#7a5a32");
-  root.style.setProperty("--clr-event-accent-bar", "#6e4524");
-  root.style.setProperty("--clr-overlay-pattern-1", "rgba(60,40,10,0.08)");
-  root.style.setProperty("--clr-overlay-pattern-2", "rgba(60,40,10,0.10)");
-  root.style.setProperty("--clr-overlay-pattern-3", "rgba(60,40,10,0.07)");
-  root.style.setProperty("--clr-overlay-pattern-4", "rgba(80,60,20,0.12)");
-  root.style.setProperty("--clr-overlay-pattern-5", "rgba(80,60,20,0.09)");
-  root.style.setProperty("--clr-over-bg", "rgba(180,60,60,0.15)");
-  root.style.setProperty("--clr-over-border", "rgba(180,60,60,0.4)");
-  root.style.setProperty("--clr-over-text", "#8B0000");
+  root.style.setProperty("--clr-bg", "#1a1208");
+  root.style.setProperty("--clr-panel-bg", "#2a1f10");
+  root.style.setProperty("--clr-journal-bg", "#f5e6c8");
+  root.style.setProperty("--clr-ink-dark", "#3a2f1f");
+  root.style.setProperty("--clr-ink-light", "#c4b69a");
+  root.style.setProperty("--clr-accent", "#8b6914");
+  root.style.setProperty("--clr-success", "#4a7a3a");
+  root.style.setProperty("--clr-danger", "#8b2500");
+  root.style.setProperty("--clr-ink", "var(--clr-ink-dark)");
+  root.style.setProperty("--clr-bg-dark", "#1a1208");
+  root.style.setProperty("--clr-card-bg", "var(--clr-panel-bg)");
+  root.style.setProperty("--clr-btn-bg", "var(--clr-accent)");
+  root.style.setProperty("--clr-btn-text", "#1a1208");
+  root.style.setProperty("--clr-btn-hover", "#7a5a20");
+  root.style.setProperty("--clr-status-bar-bg", "var(--clr-bg)");
+  root.style.setProperty("--clr-status-text", "var(--clr-ink-light)");
+  root.style.setProperty("--clr-status-accent", "var(--clr-accent)");
+  root.style.setProperty("--clr-overlay-bg", "rgba(26,18,8,0.96)");
+  root.style.setProperty("--clr-border", "var(--clr-accent)");
+  root.style.setProperty("--clr-map-bg", "#1a1208");
+  root.style.setProperty("--clr-tooltip-bg", "rgba(26,18,8,0.9)");
+  root.style.setProperty("--clr-tooltip-text", "var(--clr-ink-light)");
+  root.style.setProperty("--clr-tooltip-border", "var(--clr-accent)");
+  root.style.setProperty("--clr-map-frame-shadow", "rgba(0,0,0,0.3)");
+  root.style.setProperty("--clr-narrative-text", "var(--clr-ink-dark)");
+  root.style.setProperty("--clr-ruled-line", "rgba(139,105,20,0.15)");
+  root.style.setProperty("--clr-ledger-border", "rgba(139,105,20,0.2)");
+  root.style.setProperty("--clr-ledger-margin", "var(--clr-accent)");
+  root.style.setProperty("--clr-paper-texture", "none");
+  root.style.setProperty("--clr-event-border", "var(--clr-accent)");
+  root.style.setProperty("--clr-event-accent-bar", "var(--clr-accent)");
+  root.style.setProperty("--clr-food-low", "var(--clr-danger)");
+  root.style.setProperty("--clr-warn", "#b8860b");
+  root.style.setProperty("--clr-ok", "var(--clr-success)");
+  root.style.setProperty("--clr-weather-rain", "#6b8e9b");
+  root.style.setProperty("--clr-weather-snow", "#b8c4d0");
+  root.style.setProperty("--clr-over-bg", "rgba(139,37,0,0.15)");
+  root.style.setProperty("--clr-over-border", "var(--clr-danger)");
+  root.style.setProperty("--clr-over-text", "var(--clr-danger)");
   root.style.setProperty("--clr-warn-bg", "rgba(184,134,11,0.15)");
-  root.style.setProperty("--clr-warn-border", "rgba(184,134,11,0.4)");
+  root.style.setProperty("--clr-warn-border", "var(--clr-warn)");
   root.style.setProperty("--clr-gold", "#B8860B");
-  root.style.setProperty("--clr-ok-bg", "rgba(46,90,62,0.12)");
-  root.style.setProperty("--clr-ok-border", "rgba(46,90,62,0.3)");
-  root.style.setProperty("--clr-ok-text", "#2D4A3E");
-  root.style.setProperty("--clr-catitem-bg", "rgba(255,255,255,0.6)");
-  root.style.setProperty("--clr-catitem-border", "rgba(0,0,0,0.06)");
-  root.style.setProperty("--clr-muted", "#6b5c4a");
-  root.style.setProperty("--clr-pdrow-bg", "rgba(255,255,255,0.5)");
-  root.style.setProperty("--clr-pdrow-border", "rgba(0,0,0,0.06)");
-  root.style.setProperty("--clr-camp-border", "#4a6741");
-  root.style.setProperty("--clr-camp-pill-bg", "rgba(255,255,255,0.65)");
-  root.style.setProperty("--clr-camp-pill-border", "rgba(0,0,0,0.08)");
-  root.style.setProperty("--clr-camp-btn-hover", "#e3d6bc");
-  root.style.setProperty("--clr-campfire-glow", "radial-gradient(ellipse at 50% 100%, rgba(210,120,40,0.35) 0%, rgba(180,90,30,0.22) 35%, transparent 70%)");
+  root.style.setProperty("--clr-ok-bg", "rgba(74,122,58,0.15)");
+  root.style.setProperty("--clr-ok-border", "var(--clr-success)");
+  root.style.setProperty("--clr-ok-text", "var(--clr-success)");
+  root.style.setProperty("--clr-catitem-bg", "rgba(255,255,255,0.05)");
+  root.style.setProperty("--clr-catitem-border", "rgba(139,105,20,0.15)");
+  root.style.setProperty("--clr-muted", "#8a7a6a");
+  root.style.setProperty("--clr-pdrow-bg", "rgba(255,255,255,0.03)");
+  root.style.setProperty("--clr-pdrow-border", "rgba(139,105,20,0.1)");
+  root.style.setProperty("--clr-camp-border", "var(--clr-accent)");
+  root.style.setProperty("--clr-camp-pill-bg", "rgba(255,255,255,0.05)");
+  root.style.setProperty("--clr-camp-pill-border", "rgba(139,105,20,0.15)");
+  root.style.setProperty("--clr-camp-btn-hover", "#3a2f1f");
+  root.style.setProperty("--clr-campfire-glow", "radial-gradient(ellipse at 50% 100%, rgba(180,110,20,0.35) 0%, rgba(139,105,20,0.22) 35%, transparent 70%)");
   root.style.setProperty("--clr-campfire-embers", `url("data:image/svg+xml,%3Csvg viewBox='0 0 300 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='campNoise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.025' numOctaves='5' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23campNoise)' opacity='0.08'/%3E%3C/svg%3E")`);
-  root.style.setProperty("--clr-campfire-flicker", "radial-gradient(circle at 45% 75%, rgba(255,180,80,0.15) 0%, transparent 40%), radial-gradient(circle at 55% 65%, rgba(255,140,60,0.12) 0%, transparent 35%), radial-gradient(circle at 60% 80%, rgba(255,100,40,0.1) 0%, transparent 30%)");
-  root.style.setProperty("--clr-success-glow", "rgba(46,125,50,0.3)");
+  root.style.setProperty("--clr-campfire-flicker", "radial-gradient(circle at 45% 75%, rgba(255,140,40,0.15) 0%, transparent 40%), radial-gradient(circle at 55% 65%, rgba(255,110,30,0.12) 0%, transparent 35%), radial-gradient(circle at 60% 80%, rgba(255,80,20,0.1) 0%, transparent 30%)");
+  root.style.setProperty("--clr-success-glow", "rgba(74,122,58,0.3)");
   root.style.setProperty("--clr-danger-glow", "rgba(139,37,0,0.3)");
-  root.style.setProperty("--clr-choice-cost", "#5e4b35");
-  root.style.setProperty("--clr-source-text", "#5a4a3a");
-  root.style.setProperty("--clr-source-context", "#8a7a6a");
-  root.style.setProperty("--clr-placeholder", "#9a8a7a");
-  root.style.setProperty("--clr-input-bg", "rgba(255,255,255,0.7)");
-  root.style.setProperty("--clr-input-bg-focus", "rgba(255,255,255,0.9)");
+  root.style.setProperty("--clr-choice-cost", "#8a7a6a");
+  root.style.setProperty("--clr-source-text", "#8a7a6a");
+  root.style.setProperty("--clr-source-context", "#9a8a7a");
+  root.style.setProperty("--clr-placeholder", "#6a5a4a");
+  root.style.setProperty("--clr-input-bg", "rgba(255,255,255,0.05)");
+  root.style.setProperty("--clr-input-bg-focus", "rgba(255,255,255,0.1)");
   root.style.setProperty("--clr-silver", "#8a8a8a");
   root.style.setProperty("--clr-bronze", "#8B5E3C");
-  root.style.setProperty("--clr-gold-faint", "rgba(184,134,11,0.08)");
-  root.style.setProperty("--clr-gold-light", "rgba(184,134,11,0.2)");
-  root.style.setProperty("--clr-intel-border", "rgba(0,0,0,0.08)");
+  root.style.setProperty("--clr-gold-faint", "rgba(139,105,20,0.08)");
+  root.style.setProperty("--clr-gold-light", "rgba(139,105,20,0.15)");
+  root.style.setProperty("--clr-intel-border", "rgba(139,105,20,0.1)");
   root.style.setProperty("--font-heading", "'Playfair Display', 'Georgia', serif");
   root.style.setProperty("--font-body", "'Crimson Text', 'Georgia', serif");
 }
@@ -18470,6 +18856,16 @@ function bootstrap(seed = null) {
     console.error("Metis bootstrap aborted: #game-root is missing.");
     return;
   }
+  var journal = document.getElementById("journal");
+  if (journal) {
+    journal.addEventListener("click", (e) => {
+      var header = e.target.closest(".journal-header");
+      if (header) {
+        var entry = header.closest(".journal-entry");
+        if (entry) entry.classList.toggle("collapsed");
+      }
+    });
+  }
   applyTheme(rootEl);
   const state = game.getState();
   renderNarrative(["Welcome to the M\xE9tis Trail. Click Begin Journey to start."]);
@@ -18933,294 +19329,235 @@ function buildEventChoiceOutcome(stepLog, before, after) {
 __name(buildEventChoiceOutcome, "buildEventChoiceOutcome");
 function showSettlement(game) {
   haptics_default.arrive();
-  const next = game.getCurrentNode();
+  const state = game.getState();
+  const node = game.getCurrentNode();
   const before = game.getState();
   const beforeCart = game.getCart();
   const nameEl = document.getElementById("settlement-name");
+  const badgeEl = document.getElementById("settlement-badge");
+  const distanceEl = document.getElementById("settlement-distance");
   const descEl = document.getElementById("settlement-desc");
   const actionsEl = document.getElementById("settlement-actions");
-  if (!nameEl || !descEl || !actionsEl) return;
-  nameEl.textContent = next.name;
-  descEl.textContent = next.desc;
+  if (!nameEl || !badgeEl || !distanceEl || !descEl || !actionsEl) return;
+  nameEl.textContent = node.name;
+  const typeLabels = { hbc: "HBC Fort", metis: "M\xE9tis Camp", nwmp: "NWMP Post", mission: "Mission", trading: "Trading Post" };
+  badgeEl.textContent = typeLabels[node.type] || node.type.toUpperCase();
+  badgeEl.className = "settlement-badge " + (node.type || "hbc");
+  const distKm = Math.round((node.dist || 0) * 50);
+  distanceEl.textContent = `${distKm} km from Fort Garry`;
+  descEl.textContent = node.desc || "";
   actionsEl.innerHTML = "";
-  const recipes = game.getAvailableRecipes();
-  let craftHintEl = document.getElementById("settlement-craft-hint");
-  if (!craftHintEl) {
-    craftHintEl = document.createElement("div");
-    craftHintEl.id = "settlement-craft-hint";
-    craftHintEl.className = "settlement-craft-hint";
-    descEl.parentNode.insertBefore(craftHintEl, descEl.nextSibling);
-  }
-  if (recipes.length > 0) {
-    const summary = recipes.length === 1 ? `\u2697\uFE0F Crafting: ${recipes[0].name} \u2014 ${recipes[0].inputs.map((i) => `${i.count}\xD7${i.name}`).join(" + ")}` : `\u2697\uFE0F Crafting available (${recipes.length} recipe${recipes.length > 1 ? "s" : ""})`;
-    craftHintEl.textContent = summary;
-    craftHintEl.style.display = "block";
-  } else {
-    craftHintEl.style.display = "none";
-  }
-  const available = game.getAvailableActions();
-  const primaryActions = [];
-  const secondaryActions = [];
-  (available.actions || []).forEach((action) => {
-    if (["craft", "buy_food", "buy_repair", "buy_heal", "buy_info"].includes(action)) {
-      if (action === "craft") {
-        const recipes2 = game.getAvailableRecipes();
-        if (recipes2.length > 0) secondaryActions.push(action);
-      } else {
-        const state = game.getState();
-        const settleType = state.pendingSettlement?.type || "hbc";
-        const credit = state.credit?.[settleType] || 0;
-        const costs = { buy_food: CONSTANTS.MB_FOOD_COST, buy_repair: CONSTANTS.MB_REPAIR_COST, buy_heal: CONSTANTS.MB_HEAL_COST, buy_info: CONSTANTS.MB_INFO_COST };
-        if (credit >= (costs[action] || 0)) secondaryActions.push(action);
-      }
-    } else {
-      primaryActions.push(action);
-    }
+  const actions = game.getSettlementActions ? game.getSettlementActions(node.type) : getDefaultSettlementActions(node.type);
+  actions.forEach((action) => {
+    renderSettlementActionCard(actionsEl, action, game, before, beforeCart, node);
   });
-  primaryActions.forEach((action) => {
-    renderSettlementAction(actionsEl, action, game, before, beforeCart);
-  });
-  if (secondaryActions.length > 0) {
-    const toggleBtn = document.createElement("button");
-    toggleBtn.className = "settlement-more-toggle";
-    toggleBtn.textContent = "More actions \u25B6";
-    const secondaryEl = document.createElement("div");
-    secondaryEl.className = "settlement-secondary-actions";
-    toggleBtn.addEventListener("click", () => {
-      const isExpanded = secondaryEl.classList.toggle("expanded");
-      toggleBtn.textContent = isExpanded ? "Less \u25B2" : "More actions \u25B6";
-      if (isExpanded) {
-        const card = document.querySelector("#settlement-overlay .overlay-card");
-        if (card) {
-          secondaryEl.scrollIntoView({ behavior: "smooth", block: "end" });
-        }
-      }
-    });
-    secondaryActions.forEach((action) => {
-      renderSettlementAction(secondaryEl, action, game, before, beforeCart);
-    });
-    actionsEl.appendChild(toggleBtn);
-    actionsEl.appendChild(secondaryEl);
-  }
   document.getElementById("settlement-overlay")?.classList.add("active");
 }
 __name(showSettlement, "showSettlement");
-function renderSettlementAction(container, action, game, before, beforeCart) {
-  if (action === "craft") {
-    const recipes = game.getAvailableRecipes();
-    if (recipes.length === 0) {
-      const btn2 = document.createElement("button");
-      btn2.className = "ctrl-btn settlement-action-btn secondary-action";
-      btn2.style.opacity = "0.5";
-      btn2.style.cursor = "not-allowed";
-      btn2.textContent = "Craft \u2014 No recipes available";
-      container.appendChild(btn2);
-      return;
-    }
-    const recipePanel = document.createElement("div");
-    recipePanel.style.cssText = "width:100%;margin-top:8px;padding:10px;background:rgba(46,90,62,0.08);border:1px solid rgba(46,90,62,0.3);border-radius:6px;";
-    const panelTitle = document.createElement("div");
-    panelTitle.style.cssText = "font-family:var(--font-heading);font-size:12px;font-weight:600;color:var(--clr-accent);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px;";
-    panelTitle.textContent = "Crafting";
-    recipePanel.appendChild(panelTitle);
-    recipes.forEach((r) => {
-      const row = document.createElement("div");
-      row.style.cssText = "display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px;padding:6px;background:rgba(255,255,255,0.5);border-radius:4px;";
-      const inputs = r.inputs.map((inp) => `${inp.name}\xD7${inp.count} (${inp.have}/${inp.count})`).join(" + ");
-      const info = document.createElement("div");
-      info.style.cssText = "flex:1;font-size:12px;";
-      info.innerHTML = `<strong>${getItemIcon(r.output.name || r.name)} ${r.name}</strong> \u2014 ${inputs}`;
-      const craftBtn = document.createElement("button");
-      craftBtn.className = "ctrl-btn";
-      craftBtn.style.cssText = "padding:3px 10px;font-size:11px;white-space:nowrap;";
-      craftBtn.textContent = "Craft";
-      craftBtn.disabled = !r.inputs.every((inp) => inp.have >= inp.count);
-      if (craftBtn.disabled) craftBtn.style.opacity = "0.4";
-      craftBtn.onclick = () => {
-        hideOverlays();
-        game.craftRecipe(r.id);
-        publishResult(`Crafted ${r.name}.`);
-        window.__METIS_RENDER__();
-      };
-      row.appendChild(info);
-      row.appendChild(craftBtn);
-      recipePanel.appendChild(row);
-    });
-    container.appendChild(recipePanel);
-    return;
+function getDefaultSettlementActions(type) {
+  const base = [];
+  switch (type) {
+    case "hbc":
+      return [
+        { id: "trade", label: "Trade Goods for \u20A5", cost: "1 trade good", risk: "Best rates for pelts/hides", flavor: "The Company factors weigh your furs in silence. The ledger decides your worth." },
+        { id: "buy_supplies", label: "Buy Supplies", cost: "\u20A5 varies", risk: "Full inventory available", flavor: "Pemmican, axes, shaganappi, tools \u2014 everything a carter needs for the long trail." },
+        { id: "rest", label: "Rest at the Fort", cost: "1 food", risk: "Crew rested, morale +15", flavor: "A warm fire in the mess hall, dry blankets, and a night without the wind." },
+        { id: "get_intel", label: "Get Trail Intel", cost: "1 \u20A5", risk: "Reveals next 2 nodes", flavor: "The clerk unfolds a map stained with ink and tea. He marks the hazards ahead." }
+      ];
+    case "metis":
+      return [
+        { id: "trade_gossip", label: "Trade Gossip", cost: "Free", risk: "Reveals 1 gossip entry", flavor: "News travels faster than carts on the prairie. The women know everything." },
+        { id: "recruit_crew", label: "Recruit Crew", cost: "2 \u20A5 + 1 food", risk: "+1 crew member (max 6)", flavor: "A young hand looking for work. Strong back, willing heart \u2014 if you can feed him." },
+        { id: "dance", label: "Dance", cost: "1 food", risk: "Morale +10, no day advance", flavor: "The fiddle starts. A Red River jig. Boots on hard ground. Nobody thinks about tomorrow." },
+        { id: "share_food", label: "Share Food", cost: "Give 2+ food", risk: "Morale +5 per food", flavor: "Generosity on the trail is its own currency. What you give returns in loyalty." },
+        { id: "craft_hides", label: "Craft Finished Hides", cost: "3 raw hides + 1 shaganappi", risk: "Creates finished_hide (worth 2\xD7 \u20A5)", flavor: "The women scrape, stretch, and smoke the hides. Patience turns rawhide into profit." }
+      ];
+    case "nwmp":
+      return [
+        { id: "pay_fines", label: "Pay Fines", cost: "\u20A5 varies", risk: "Clears fines if any", flavor: "The sergeant reads your name from the ledger. The amount is not negotiable." },
+        { id: "get_permits", label: "Get Permits", cost: "2 \u20A5", risk: "Required for river crossings", flavor: "A stamp, a signature, and the Queen's law lets you cross the water legal." },
+        { id: "report_duty", label: "Report for Duty", cost: "1 day", risk: "\u20A5 reward, morale \u22125", flavor: "Red coats, drill, and the weight of Ottawa's authority. The pay is fair but the pride costs." },
+        { id: "buy_ammo", label: "Buy Ammo", cost: "1.5 \u20A5 per Belt", risk: "Cheaper than HBC", flavor: "Ball and powder, measured honest. The Mounties don't cheat a carter on shot." },
+        { id: "rest", label: "Rest", cost: "1 food", risk: "Crew rested (no morale bonus)", flavor: "A cot in the barracks. Clean, quiet, and the sentry paces all night." }
+      ];
+    case "mission":
+      return [
+        { id: "heal_crew", label: "Heal Crew", cost: "1 Medicine Pouch or 2 \u20A5", risk: "Clears injury/illness, morale +10", flavor: "The Grey Nuns tend the sick without asking who you are or where you come from." },
+        { id: "rest", label: "Free Rest + Blessing", cost: "Free", risk: "Crew rested, morale +15", flavor: "A chapel bell at evening. You sleep on straw but wake with a lighter spirit." },
+        { id: "get_blessing", label: "Get Blessing", cost: "1 food", risk: "Morale +10, next event DC \u22121", flavor: "The priest's hand on your brow. The trail feels less hostile after prayer." },
+        { id: "trade_limited", label: "Trade (Limited)", cost: "Buy pemmican 0.5 \u20A5, sell blankets 1.5 \u20A5", risk: "Charity rates", flavor: "The mission garden feeds the body. The trade feeds the journey." }
+      ];
+    case "trading":
+      return [
+        { id: "trade", label: "Trade Goods", cost: "1 trade good", risk: "Standard rates", flavor: "A free trader with no Company badge. His prices are his own." },
+        { id: "buy_supplies", label: "Buy Supplies", cost: "\u20A5 varies", risk: "Basic inventory", flavor: "What the Company posts run out of, the free traders sometimes have." },
+        { id: "rest", label: "Rest", cost: "1 food", risk: "Crew rested, morale +10", flavor: "A lean-to by the fire. Simple shelter, honest company." },
+        { id: "get_intel", label: "Get Trail Intel", cost: "1 \u20A5", risk: "Reveals next node", flavor: "He rides the trail weekly. His news is fresh and his memory long." }
+      ];
+    default:
+      return [
+        { id: "trade", label: "Trade Goods", cost: "1 trade good", risk: "Standard rates", flavor: "The factor weighs your furs. The ledger is final." },
+        { id: "rest", label: "Rest", cost: "1 food", risk: "Crew rested, morale +10", flavor: "A night under roof and beam. The trail waits for morning." }
+      ];
   }
-  if (action === "trade") {
-    const cart = game.getCart();
+}
+__name(getDefaultSettlementActions, "getDefaultSettlementActions");
+function renderSettlementActionCard(container, action, game, before, beforeCart, node) {
+  const card = document.createElement("div");
+  card.className = "settlement-action-card";
+  const nameRow = document.createElement("div");
+  nameRow.className = "settlement-action-card-name";
+  nameRow.textContent = action.label;
+  const costRow = document.createElement("div");
+  costRow.className = "settlement-action-card-cost";
+  costRow.textContent = `Cost: ${action.cost}`;
+  const riskRow = document.createElement("div");
+  riskRow.className = "settlement-action-card-risk";
+  riskRow.textContent = `Risk: ${action.risk}`;
+  const flavorRow = document.createElement("div");
+  flavorRow.className = "settlement-action-card-flavor";
+  flavorRow.textContent = action.flavor;
+  const btn = document.createElement("button");
+  btn.className = "settlement-action-card-btn";
+  btn.textContent = "Do It";
+  const state = game.getState();
+  const cart = game.getCart();
+  const credit = state.credit?.[node.type] || 0;
+  let canDo = true;
+  let needsHide = true;
+  switch (action.id) {
+    case "trade":
+      canDo = cart.some((i) => i.type === "trade" && i.count > 0);
+      break;
+    case "buy_supplies":
+      canDo = credit > 0;
+      break;
+    case "rest":
+      canDo = state.food >= 1;
+      break;
+    case "get_intel":
+      canDo = credit >= 1;
+      break;
+    case "trade_gossip":
+      canDo = true;
+      break;
+    case "recruit_crew":
+      canDo = credit >= 2 && state.food >= 1 && (state.crewCount || 3) < 6;
+      break;
+    case "dance":
+      canDo = state.food >= 1;
+      break;
+    case "share_food":
+      canDo = state.food >= 2;
+      break;
+    case "craft_hides":
+      const hides = cart.find((i) => i.name === "Bison Hide" || i.name === "Beaver Pelts" || i.name === "Elk Hide" || i.name === "Deer Hide");
+      const shag = cart.find((i) => i.name === "Shaganappi");
+      canDo = (hides?.count || 0) >= 3 && (shag?.count || 0) >= 1;
+      break;
+    case "pay_fines":
+      canDo = (state.fines || 0) > 0 && credit >= (state.fines || 0);
+      break;
+    case "get_permits":
+      canDo = credit >= 2;
+      break;
+    case "report_duty":
+      canDo = true;
+      break;
+    case "buy_ammo":
+      canDo = credit >= 1.5;
+      break;
+    case "heal_crew":
+      const med = cart.find((i) => i.name === "Medicine Pouch");
+      canDo = credit >= 2 || (med?.count || 0) >= 1;
+      break;
+    case "get_blessing":
+      canDo = state.food >= 1;
+      break;
+    case "trade_limited":
+      canDo = true;
+      break;
+  }
+  if (!canDo) {
+    btn.disabled = true;
+    btn.classList.add("disabled");
+  }
+  if (action.id === "trade") {
     const tradeItems = cart.filter((i) => i.type === "trade" && i.count > 0);
     if (tradeItems.length === 0) {
-      const btn2 = document.createElement("button");
-      btn2.className = "ctrl-btn settlement-action-btn primary-action";
-      btn2.style.opacity = "0.5";
-      btn2.style.cursor = "not-allowed";
-      btn2.textContent = "Trade \u2014 No trade goods";
-      container.appendChild(btn2);
-      return;
-    }
-    const tradePanel = document.createElement("div");
-    tradePanel.style.cssText = "width:100%;margin-top:8px;padding:10px;background:rgba(46,90,62,0.08);border:1px solid rgba(46,90,62,0.3);border-radius:6px;";
-    const panelTitle = document.createElement("div");
-    panelTitle.style.cssText = "font-family:var(--font-heading);font-size:12px;font-weight:600;color:var(--clr-accent);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px;";
-    panelTitle.textContent = "Trade Goods for MB Credit";
-    tradePanel.appendChild(panelTitle);
-    tradeItems.forEach((item) => {
-      const mbVal = item.mbValue || 1;
-      const row = document.createElement("div");
-      row.style.cssText = "display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px;padding:6px;background:rgba(255,255,255,0.5);border-radius:4px;";
-      const info = document.createElement("div");
-      info.style.cssText = "flex:1;font-size:12px;";
-      info.innerHTML = `${getItemIcon(item.name)} ${item.name} \xD7${item.count} <span style="color:var(--clr-accent);">\u2192 ${mbVal} MB</span>`;
-      const tradeBtn = document.createElement("button");
-      tradeBtn.className = "ctrl-btn";
-      tradeBtn.style.cssText = "padding:3px 10px;font-size:11px;white-space:nowrap;";
-      tradeBtn.textContent = `Trade ${item.name}`;
-      tradeBtn.onclick = () => {
-        hideOverlays();
-        const beforeMB = game.getState().mbValue;
-        game.settlementAction("trade");
-        const afterMB = game.getState().mbValue;
-        const gained = afterMB < beforeMB ? item.mbValue || 1 : item.mbValue || 1;
-        publishResult(`Traded 1 ${item.name} \u2192 +${gained.toFixed(2)} MB credit.`);
-        window.__METIS_RENDER__();
+      btn.disabled = true;
+      btn.classList.add("disabled");
+    } else {
+      btn.onclick = () => {
+        card.querySelectorAll(".settlement-trade-sub").forEach((el) => el.remove());
+        tradeItems.forEach((item) => {
+          const mbVal = item.mbValue || 1;
+          const subRow = document.createElement("div");
+          subRow.className = "settlement-trade-sub";
+          subRow.style.cssText = "display:flex;align-items:center;justify-content:space-between;gap:8px;margin:4px 0;padding:6px;background:rgba(255,255,255,0.5);border-radius:4px;font-size:12px;";
+          subRow.innerHTML = `${getItemIcon(item.name)} ${item.name} \xD7${item.count} <span style="color:var(--clr-accent);">\u2192 ${mbVal} MB each</span>`;
+          const subBtn = document.createElement("button");
+          subBtn.className = "ctrl-btn";
+          subBtn.style.cssText = "padding:2px 8px;font-size:10px;white-space:nowrap;";
+          subBtn.textContent = `Trade 1`;
+          subBtn.onclick = () => {
+            hideOverlays();
+            const beforeMB = game.getState().mbValue;
+            game.settlementAction("trade");
+            const afterMB = game.getState().mbValue;
+            const gained = item.mbValue || 1;
+            publishResult(`Traded 1 ${item.name} \u2192 +${gained.toFixed(2)} MB credit.`);
+            window.__METIS_RENDER__();
+          };
+          subRow.appendChild(subBtn);
+          card.appendChild(subRow);
+        });
+        btn.textContent = "Hide";
+        btn.onclick = () => {
+          card.querySelectorAll(".settlement-trade-sub").forEach((el) => el.remove());
+          btn.textContent = "Trade";
+          btn.onclick = () => {
+          };
+        };
       };
-      row.appendChild(info);
-      row.appendChild(tradeBtn);
-      tradePanel.appendChild(row);
-    });
-    container.appendChild(tradePanel);
-    return;
-  }
-  if (action === "buy_food") {
-    const state = game.getState();
-    const settleType = state.pendingSettlement?.type || "hbc";
-    const credit = state.credit?.[settleType] || 0;
-    const cost = CONSTANTS.MB_FOOD_COST;
-    const foodGain = Math.floor(1 / cost);
-    const btn2 = document.createElement("button");
-    btn2.className = "ctrl-btn settlement-action-btn secondary-action";
-    btn2.textContent = `Buy Food (${cost} MB \u2192 +${foodGain} food)`;
-    if (credit < cost) {
-      btn2.style.opacity = "0.5";
-      btn2.style.cursor = "not-allowed";
-      btn2.title = `Need ${cost} MB credit. You have ${credit.toFixed(1)} MB.`;
     }
-    btn2.onclick = () => {
-      if (credit < cost) return;
-      hideOverlays();
-      game.settlementAction("buy_food");
-      publishResult(`Bought ${foodGain} food for ${cost} MB.`);
+  } else {
+    btn.onclick = () => {
+      if (!canDo) return;
+      if (needsHide) hideOverlays();
+      const st2 = game.getState().pendingSettlement;
+      const beforeJournal = game.getState();
+      const result = game.settlementAction(action.id);
+      const after = game.getState();
+      const afterCart = game.getCart();
+      const outcome = buildSettlementOutcome(action.id, beforeJournal, after, beforeCart, afterCart);
+      if (outcome) publishResult(outcome);
+      if (st2) {
+        const mechParts = [];
+        if (after.food !== beforeJournal.food) mechParts.push(`${after.food - beforeJournal.food >= 0 ? "+" : ""}${(after.food - beforeJournal.food).toFixed(1)} Food`);
+        if (after.wear !== beforeJournal.wear) mechParts.push(`Wear ${after.wear - beforeJournal.wear >= 0 ? "+" : ""}${after.wear - beforeJournal.wear}`);
+        if (after.morale !== beforeJournal.morale) mechParts.push(`Morale ${after.morale - beforeJournal.morale >= 0 ? "+" : ""}${after.morale - beforeJournal.morale}`);
+        if (after.crew !== beforeJournal.crew) mechParts.push(`Crew: ${beforeJournal.crew} \u2192 ${after.crew}`);
+        journalLog({
+          day: after.day,
+          date: monthName(after.month) + " " + after.day,
+          title: `${action.label} at ${st2.name}`,
+          text: buildSettlementJournalText(action.id, st2),
+          mech: mechParts.join(" \xB7 "),
+          collapsed: true
+        });
+      }
       window.__METIS_RENDER__();
     };
-    container.appendChild(btn2);
-    return;
   }
-  if (action === "buy_repair") {
-    const state = game.getState();
-    const settleType = state.pendingSettlement?.type || "hbc";
-    const credit = state.credit?.[settleType] || 0;
-    const cost = CONSTANTS.MB_REPAIR_COST;
-    const btn2 = document.createElement("button");
-    btn2.className = "ctrl-btn settlement-action-btn secondary-action";
-    btn2.textContent = `Repair Cart (${cost} MB \u2192 \u22122 wear)`;
-    if (credit < cost || state.wear <= 0) {
-      btn2.style.opacity = "0.5";
-      btn2.style.cursor = "not-allowed";
-      btn2.title = credit < cost ? `Need ${cost} MB credit. You have ${credit.toFixed(1)} MB.` : "Cart does not need repair.";
-    }
-    btn2.onclick = () => {
-      if (credit < cost || state.wear <= 0) return;
-      hideOverlays();
-      game.settlementAction("buy_repair");
-      publishResult(`Cart repaired for ${cost} MB.`);
-      window.__METIS_RENDER__();
-    };
-    container.appendChild(btn2);
-    return;
-  }
-  if (action === "buy_heal") {
-    const state = game.getState();
-    const settleType = state.pendingSettlement?.type || "hbc";
-    const credit = state.credit?.[settleType] || 0;
-    const cost = CONSTANTS.MB_HEAL_COST;
-    const btn2 = document.createElement("button");
-    btn2.className = "ctrl-btn settlement-action-btn secondary-action";
-    btn2.textContent = `Heal Crew (${cost} MB \u2192 +20 morale)`;
-    if (credit < cost) {
-      btn2.style.opacity = "0.5";
-      btn2.style.cursor = "not-allowed";
-      btn2.title = `Need ${cost} MB credit. You have ${credit.toFixed(1)} MB.`;
-    }
-    btn2.onclick = () => {
-      if (credit < cost) return;
-      hideOverlays();
-      game.settlementAction("buy_heal");
-      publishResult(`Crew healed for ${cost} MB.`);
-      window.__METIS_RENDER__();
-    };
-    container.appendChild(btn2);
-    return;
-  }
-  if (action === "buy_info") {
-    const state = game.getState();
-    const settleType = state.pendingSettlement?.type || "hbc";
-    const credit = state.credit?.[settleType] || 0;
-    const cost = CONSTANTS.MB_INFO_COST;
-    const btn2 = document.createElement("button");
-    btn2.className = "ctrl-btn settlement-action-btn secondary-action";
-    btn2.textContent = `Gather Intel (${cost} MB \u2192 trail info)`;
-    if (credit < cost) {
-      btn2.style.opacity = "0.5";
-      btn2.style.cursor = "not-allowed";
-      btn2.title = `Need ${cost} MB credit. You have ${credit.toFixed(1)} MB.`;
-    }
-    btn2.onclick = () => {
-      if (credit < cost) return;
-      hideOverlays();
-      game.settlementAction("buy_info");
-      publishResult(`Gathered trail intelligence for ${cost} MB.`);
-      window.__METIS_RENDER__();
-    };
-    container.appendChild(btn2);
-    return;
-  }
-  const btn = document.createElement("button");
-  btn.className = "ctrl-btn settlement-action-btn";
-  if (["rest", "repair", "heal"].includes(action)) btn.classList.add("primary-action");
-  else btn.classList.add("secondary-action");
-  btn.textContent = actionLabel(action);
-  btn.onclick = () => {
-    hideOverlays();
-    const st2 = game.getState().pendingSettlement;
-    const beforeJournal = game.getState();
-    game.settlementAction(action);
-    const after = game.getState();
-    const afterCart = game.getCart();
-    const outcome = buildSettlementOutcome(action, before, after, beforeCart, afterCart);
-    if (outcome) publishResult(outcome);
-    if (st2) {
-      const mechParts = [];
-      if (after.food !== beforeJournal.food) mechParts.push(`${after.food - beforeJournal.food >= 0 ? "+" : ""}${(after.food - beforeJournal.food).toFixed(1)} Food`);
-      if (after.wear !== beforeJournal.wear) mechParts.push(`Wear ${after.wear - beforeJournal.wear >= 0 ? "+" : ""}${after.wear - beforeJournal.wear}`);
-      if (after.morale !== beforeJournal.morale) mechParts.push(`Morale ${after.morale - beforeJournal.morale >= 0 ? "+" : ""}${after.morale - beforeJournal.morale}`);
-      if (after.crew !== beforeJournal.crew) mechParts.push(`Crew: ${beforeJournal.crew} \u2192 ${after.crew}`);
-      journalLog({
-        day: after.day,
-        date: monthName(after.month) + " " + after.day,
-        title: `${actionLabel(action)} at ${st2.name}`,
-        text: buildSettlementJournalText(action, st2),
-        mech: mechParts.join(" \xB7 "),
-        collapsed: true
-      });
-    }
-    window.__METIS_RENDER__();
-  };
-  container.appendChild(btn);
+  card.appendChild(nameRow);
+  card.appendChild(costRow);
+  card.appendChild(riskRow);
+  card.appendChild(flavorRow);
+  card.appendChild(btn);
+  container.appendChild(card);
 }
-__name(renderSettlementAction, "renderSettlementAction");
+__name(renderSettlementActionCard, "renderSettlementActionCard");
 function buildSettlementOutcome(action, before, after, beforeCart, afterCart) {
   const msgs = [];
   if (after.food !== before.food) msgs.push(`${after.food - before.food >= 0 ? "+" : ""}${after.food - before.food} Food`);
@@ -19909,21 +20246,6 @@ function escapeHtml(str) {
   return div.innerHTML;
 }
 __name(escapeHtml, "escapeHtml");
-function actionLabel(a) {
-  const map2 = {
-    rest: "Rest \xB7 1 day \xB7 +2 food \xB7 +25 morale",
-    trade: "Trade Goods \u2192 MB Credit",
-    repair: "Repair \xB7 \u22122 wear",
-    heal: "Heal \xB7 +20 morale",
-    craft: "Craft",
-    buy_food: "Buy Food (0.5 MB)",
-    buy_repair: "Repair (2 MB)",
-    buy_heal: "Heal (1 MB)",
-    buy_info: "Intel (0.5 MB)"
-  };
-  return map2[a] || a;
-}
-__name(actionLabel, "actionLabel");
 function buildSettlementJournalText(action, st2) {
   const stName = st2?.name || "the settlement";
   const texts = {
