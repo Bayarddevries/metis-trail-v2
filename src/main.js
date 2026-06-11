@@ -14,6 +14,44 @@ import { getItemIcon } from './ui/icons.js';
 // Sync any locally-saved scores on page load
 syncLocalScores();
 
+// First-person travel journal entry generator
+function buildTravelJournalEntry(prevNode, node, after, prevWear) {
+  if (!prevNode || !node) {
+    return 'Another day on the Carlton Trail. The prairie stretches on, dry and endless.';
+  }
+
+  const openings = [
+    `We pushed west from ${prevNode.name}, heading toward ${node.name}.`,
+    `The cart rolled out of ${prevNode.name} at first light. ${node.name} lies ahead.`,
+    `Left ${prevNode.name} behind. The road to ${node.name} beckons.`,
+    `We broke camp and set our faces west — ${node.name} was the day's goal.`,
+    `Dawn found us loading up and moving on. ${prevNode.name} gave way to open trail.`,
+  ];
+
+  const middles = [
+    `The wheels creak beneath our load. The oxen plod on, patient as the grass.`,
+    `A long day under a wide sky. Not a tree for miles, just the big empty.`,
+    `The trail winds through grass taller than a man on horseback.`,
+    `Clouds built in the west but held their rain. We counted the oxen at midday — all present.`,
+    `The jingle of harness, the groan of the cart. The rhythm of the trail.`,
+  ];
+
+  const wear = after.wear > prevWear
+    ? ' The cart took a beating on the rough trail — the axle groans louder now.'
+    : '';
+
+  const weather = after.weather && after.weather !== 'clear'
+    ? ` ${({ overcast: 'A grey ceiling of cloud followed us all day.', rain: 'A cold rain came on by noon — we huddled under canvas.', storm: 'Thunder rolled across the prairie. We pressed on regardless.', snow: 'Snow fell fine as powder, dusting the oxen\'s backs.' })[after.weather] || ''}`
+    : '';
+
+  // Pick varied fragments based on day number to avoid repetition
+  const day = after.day || 1;
+  const opening = openings[day % openings.length];
+  const middle = middles[(day * 3) % middles.length];
+
+  return `${opening}${wear}${weather} ${middle}`;
+}
+
 export function bootstrap(seed = null) {
   const game = createGame(seed);
   window._metisGame = game;
@@ -160,10 +198,8 @@ export function bootstrap(seed = null) {
       journalLog({
         day: after.day,
         date: monthName(after.month) + ' ' + after.day,
-        title: 'Travel',
-        text: prevNode && node
-          ? `Traveled west from ${prevNode.name} toward ${node.name}.`
-          : `Traveled west along the Carlton Trail.`,
+        title: 'On the Trail',
+        text: buildTravelJournalEntry(prevNode, node, after, prevWear),
         mech: after.wear > prevWear ? 'Wear +1' : '',
         collapsed: true
       });
