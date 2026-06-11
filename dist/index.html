@@ -478,7 +478,7 @@
   .intro-card h1 {
     font-family: var(--font-heading);
     font-size: 38px;
-    color: var(--clr-ink);
+    color: var(--clr-ink-on-light);
     margin-bottom: 6px;
     font-weight: 700;
   }
@@ -496,7 +496,7 @@
     text-align: left;
   }
   .intro-card .tutorial-text {
-    font-size: 12px;
+    font-size: 13px;
     line-height: 1.6;
     margin-bottom: 18px;
     text-align: left;
@@ -504,8 +504,9 @@
     border: 1px solid var(--clr-accent);
     border-radius: 0;
     padding: 12px;
+    color: var(--clr-ink-on-dark);
   }
-  .intro-card .tutorial-text strong { color: var(--clr-ink); }
+  .intro-card .tutorial-text strong { color: var(--clr-ink-on-dark); font-weight: 700; }
   .intro-card .start-btn {
     padding: 10px 32px;
     background: var(--clr-btn-bg);
@@ -852,18 +853,18 @@
     line-height: 1.7;
     margin-bottom: 10px;
     white-space: pre-line;
-    color: var(--clr-ink-on-dark);
+    color: var(--clr-ink-on-light);
   }
 
   .event-source, .end-source {
-    font-size: 11px;
+    font-size: 12px;
     font-style: italic;
     line-height: 1.5;
     margin-bottom: 12px;
     padding: 8px 12px;
     border-left: 2px solid var(--clr-accent);
-    background: var(--clr-gold-faint);
-    color: var(--clr-source-text);
+    background: var(--clr-bg-dark);
+    color: var(--clr-ink-on-dark);
   }
   .event-source .src-quote {
     display: block;
