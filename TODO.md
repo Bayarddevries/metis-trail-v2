@@ -99,16 +99,16 @@ Legend: `pending` | `in_progress` | `blocked` | `done`
 - [x] Fix build script (stop injecting __METIS_ASSETS__ into template)
 - [x] Clean up 66 duplicate script blocks in template
 
-## Sprint 6: Gameplay Polish — IN PROGRESS
-- [ ] Fix settlement/camp outcome feedback (issue #79)
-- [ ] One action per camp/settlement visit (issue #81)
-- [ ] Blessing roll buff (issue #80)
-- [ ] Camp art image (issue #78)
-- [ ] Scrolling consolidation (issue #83)
-- [ ] Journal day grouping (issue #89)
-- [ ] Gossip flavor text (issue #90)
-- [ ] Settlement-specific events from sources (issue #82)
-- [ ] Update sim test for new mechanics
+## Sprint 6: Gameplay Polish — COMPLETE
+- [x] Fix settlement/camp outcome feedback (issue #79)
+- [x] One action per camp/settlement visit (issue #81)
+- [x] Blessing roll buff (issue #80)
+- [x] Camp art image (issue #78)
+- [x] Scrolling consolidation (issue #83)
+- [x] Journal day grouping (issue #89)
+- [x] Gossip flavor text (issue #90 → #88)
+- [x] Settlement-specific events from sources (issue #82)
+- [x] Update sim test for new mechanics (#86)
 - [ ] Audit all 55 events for source coverage gaps
 - [ ] Add missing events: smallpox, HBC officers, buffalo hunt, river ferry
 - [ ] Expand women/children presence (currently 4 events)

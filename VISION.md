@@ -86,3 +86,15 @@ On alternating weeks, run an AI-writing audit:
 2. **One journey must be perfect before we add more.** No campaign mode until single-journey is excellent.
 3. **Historical accuracy is a feature, not a constraint.** When in doubt, cite a real source. The game's authority comes from its grounding in real voices.
 4. **Silent failures are the worst bugs.** A feature that doesn't work but doesn't crash is worse than one that crashes visibly. Test everything in the browser.
+
+## Sprint Status
+
+| Sprint | Scope | Status |
+|--------|-------|--------|
+| 1 | Fix & Stabilize | ✅ Complete |
+| 2 | Core Redesign | ✅ Complete |
+| 3 | Settlements & Economy | ✅ Complete |
+| 4 | Visual Unification | ✅ Complete |
+| 5 | Consolidation & Overhaul | ✅ Complete |
+| 6/7 | Gameplay Polish (Phases A+B+C) | ✅ Complete |
+| 8 | Content Expansion & Polish | ⬜ Not started |

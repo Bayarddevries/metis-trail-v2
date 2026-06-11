@@ -2,6 +2,85 @@
 
 All notable changes are documented here. Format loosely follows Keep a Changelog.
 
+## [v10] — 2026-06-11
+
+### Sprint 6/7 — Gameplay Polish (Phase A + B + C)
+
+**Settlement Actions Rewrite (#79, #88)**
+- Replaced broken `renderSettlementActionCard()` / `showSettlementResult()` with inline rendering in `showSettlement()`
+- Root cause of "nothing happens" bug: trade sub-button handler referenced undefined `beforeJournal` variable, causing silent JS error that killed entire click handler
+- Settlement action cards now match camp card style: icon, name, cost, risk, flavor text in grid layout
+- Added `settlement-roll-display` and `settlement-result` overlay areas (matching camp pattern) for dice roll animation + flavor text
+- Settlement result shows in-place with flavor text + effects + Continue West button (no modal)
+- Gossip flavor text now includes settlement-type-specific voices (hbc, metis, mission, nwmp, trading) with actual intel text from `trailIntel`
+
+**Camp Push On (#81)**
+- After clicking Push On, camp overlay now closes automatically and returns to travel loop
+- No more redundant "Continue West" button after Push On (since push_on already advanced the day)
+- Journal entry logged immediately on Push On
+
+**Dice Roll Visibility (#83)**
+- Roll label and roll total text color changed from `--clr-ink-on-dark` (faint parchment) to `--clr-ink-on-light` (dark green `#1a3a1a`)
+- Now clearly visible against the faint gold `--clr-camp-pill-bg` background
+- Applied to both camp and settlement roll displays
+
+**Blessing Roll Buff (#80)**
+- Added `blessingDays: 0` to game state
+- `get_blessing` settlement action sets `blessingDays = 3`
+- `travelOneDay()` decrements `blessingDays` after `advance()`
+- `resolveChoice` and `totalMod` add +1 to all dice rolls when `blessingDays > 0`
+- ✝ indicator shown in status bar via `#s-blessing` element
+- `--clr-blessing` CSS variable added
+
+**One Action Per Visit (#81)**
+- `performedAction` flag in settlement overlay disables all action buttons after first click
+- Settlement action buttons call `onActionPerformed()` callback
+- Camp overlay already hid cards; now also prevents multiple clicks via flag
+
+**Shop Buy/Remove Clarity (#75)**
+- Redesigned `showShop()` renderList to show trade goods section with ₥ value
+- Color-coded buttons: green Buy, red Remove/Swapped button order (Remove left, Buy right)
+
+**Scrolling Consolidation (#83)**
+- 100vh → 100dvh for proper mobile viewport
+- Sticky status bar (top:0) and bottom panel (bottom:0)
+- Journal reduced 28vh → 22vh
+- Removed inner shop scroll
+- overflow:hidden on html/body
+- Status bar: flex-start with 12px gap (was space-between) for mobile scrolling
+- Status bar height: 44px desktop, 40px mobile
+- Tightened 768px/420px/360px breakpoints
+
+**End Screen Score Fix (#70)**
+- `getEndgameScore()`: removed early return for `!S.won` that returned empty breakdown `{}`, causing NaN
+- Added `safeNum()` helper in `showEnd()` using `Number.isFinite()` check
+- Optional chaining `breakdown?.base` prevents crashes
+- Added loading timeout and `.catch()` to `getMyScores()`
+- `Math.round()` on all score line items; unified button classes
+
+**Journal Day Grouping (#89)**
+- `journalLog()` now groups entries under collapsible `.journal-day-group` headers
+- Each day shows "Day N — Month Day" with ▼/▶ toggle
+- Sub-entries show type labels (Travel, Event, Camp, Settlement)
+- Event delegation handles toggle clicks
+- Initial "Before the Journey" entry in template.html
+
+**Sim Test Update (#86)**
+- Settlement action handling uses action objects (`.id` property) instead of strings
+- Enforces one action per settlement visit (removed 2-action loop)
+- Added weights for all 15+ new settlement actions
+- Added tracking counters for new mechanics
+
+**Mobile Status Bar Polish**
+- Tightened 768px/420px/360px breakpoints
+- Reduced padding, gap, separator borders
+- Hides segment-progress at 360px
+- Confirmed `#controls` has `position: sticky; bottom: 0` on mobile
+
+**Test Suite:** 62 pass, 1 fail (pre-existing test bug in repair availability test — not caused by changes)
+
+Files modified: `src/main.js`, `src/systems/engine.js`, `src/ui/renderer.js`, `src/template.html`, `src/style.css`, `tests/simulate-entry.js`
+
 ## [v84] — 2026-06-11
 
 ### Sprint 3 + 4 Closeout — Settlements, Economy, Visual Unification

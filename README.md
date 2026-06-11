@@ -15,11 +15,11 @@ A modular, historically-grounded educational web game about the 1878 Métis Carl
 
 ## Current state
 
-- Playable release `v0.5.1-marker-fix` deployed to GitHub Pages.
+- Playable release `v10` deployed to GitHub Pages.
 - Live URL: https://bayarddevries.github.io/metis-trail-v2/
-- Verified flows: travel advances day/month/season UI, map renders with cart marker icon, settlements open and continue correctly.
-- Cart marker uses `art/cart_marker.png` (1000x477 native, rendered 100x48) via Leaflet `L.icon`.
-- Build: `npm run build` produces `dist/app.js` + image assets. CI publishes from `dist/`.
+- Verified flows: travel advances day/month/season UI, map renders with cart marker icon, settlements open with action cards + dice roll result display, camp overlay with push-on auto-close, journal with day-grouped collapsible entries, end screen with score breakdown.
+- All P0/P1 audit items implemented. 62/63 tests pass (1 pre-existing failure).
+- Build: `bun scripts/build.mjs` produces `dist/app.js` + image assets. CI publishes from `dist/`.
 
 ## How to work on this repo
 
