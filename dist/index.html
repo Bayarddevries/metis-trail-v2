@@ -730,10 +730,23 @@
     display: none;
   }
   .settlement-actions {
-    display: flex;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: 1fr;
     gap: 6px;
   }
+  .settlement-roll-display { display:flex; align-items:center; justify-content:center; gap:10px; padding:10px; margin-top:10px; background:var(--clr-camp-pill-bg); border:2px solid var(--clr-accent); border-radius:0; font-family:var(--font-heading); position: relative; z-index: 1; }
+  .settlement-roll-display .die { width:44px; height:44px; border-radius:0; background:var(--clr-bg); border:2px solid var(--clr-accent); display:flex; align-items:center; justify-content:center; font-size:18px; font-weight:700; color:var(--clr-ink-on-dark); box-shadow:none; }
+  .settlement-roll-display .die.settled { animation: dice-settle 0.45s ease-out both; }
+  .settlement-roll-display .die.pass { border-color:var(--clr-success); color:var(--clr-success); box-shadow:none; }
+  .settlement-roll-display .die.fail { border-color:var(--clr-danger); color:var(--clr-danger); box-shadow:none; }
+  .camp-roll-display .roll-label { font-size:11px; color:var(--clr-ink-on-light); letter-spacing:0.05em; font-weight:600; }
+  .camp-roll-display .roll-total { font-size:12px; color:var(--clr-ink-on-light); font-weight:700; }
+  .settlement-roll-display .roll-label { font-size:11px; color:var(--clr-ink-on-light); letter-spacing:0.05em; font-weight:600; }
+  .settlement-roll-display .roll-total { font-size:12px; color:var(--clr-ink-on-light); font-weight:700; }
+  .settlement-result { margin-top:12px; padding:10px; background:var(--clr-camp-pill-bg); border:1px solid var(--clr-camp-pill-border); border-radius:0; font-size:13px; line-height:1.5; position: relative; z-index: 1; }
+  .settlement-close-row { display: flex; justify-content: flex-end; margin-top: 10px; }
+  .camp-close-row { display: flex; justify-content: flex-end; margin-top: 10px; position: relative; z-index: 1; }
+  .camp-art { width: 100%; height: 80px; margin-bottom: 8px; background: var(--clr-campfire-glow), var(--clr-campfire-embers), var(--clr-campfire-flicker), var(--clr-paper-texture); background-blend-mode: overlay, overlay, overlay, normal; border: 2px solid var(--clr-camp-border); border-radius: 0; position: relative; z-index: 1; }
   .settlement-actions .ctrl-btn {
     min-height: 44px;
   }
@@ -1209,10 +1222,8 @@
   .camp-roll-display .die.settled { animation: dice-settle 0.45s ease-out both; }
   .camp-roll-display .die.pass { border-color:var(--clr-success); color:var(--clr-success); box-shadow:none; }
   .camp-roll-display .die.fail { border-color:var(--clr-danger); color:var(--clr-danger); box-shadow:none; }
-  .camp-roll-display .roll-label { font-size:11px; color:var(--clr-ink-on-dark); letter-spacing:0.05em; }
-  .camp-roll-display .roll-total { font-size:12px; color:var(--clr-ink-on-dark); font-weight:700; }
-  .camp-close-row { display: flex; justify-content: flex-end; margin-top: 10px; position: relative; z-index: 1; }
-  .camp-art { width: 100%; height: 80px; margin-bottom: 8px; background: var(--clr-campfire-glow), var(--clr-campfire-embers), var(--clr-campfire-flicker), var(--clr-paper-texture); background-blend-mode: overlay, overlay, overlay, normal; border: 2px solid var(--clr-camp-border); border-radius: 0; position: relative; z-index: 1; }
+  .camp-roll-display .roll-label { font-size:11px; color:var(--clr-ink-on-light); letter-spacing:0.05em; font-weight:600; }
+  .camp-roll-display .roll-total { font-size:12px; color:var(--clr-ink-on-light); font-weight:700; }
   .camp-header { font-family: var(--font-heading); font-size: 24px; font-weight: 700; color: var(--clr-ink-panel); margin-bottom: 4px; position: relative; z-index: 1; text-align: center; text-transform: uppercase; letter-spacing: 0.08em; }
   .camp-action-btn.has-req { opacity: 0.7; }
   .camp-req-badge { display: inline-block; margin-left: 6px; padding: 1px 5px; font-size: 10px; font-weight: 600; color: var(--clr-warn); background: rgba(244,162,97,0.15); border: 1px solid var(--clr-warn); border-radius: 0; vertical-align: middle; }
@@ -1648,7 +1659,11 @@
           </div>
           <div class="settlement-desc" id="settlement-desc"></div>
           <div class="settlement-actions" id="settlement-actions"></div>
-          <button class="ctrl-btn" id="settlement-continue" style="margin-top:10px">Continue West</button>
+          <div class="settlement-roll-display" id="settlement-roll-display" style="display:none;"></div>
+          <div class="settlement-result" id="settlement-result" style="display:none;"></div>
+          <div class="settlement-close-row">
+            <button class="ctrl-btn primary" id="settlement-continue" style="display:none;margin-top:10px">Continue West</button>
+          </div>
         </div>
       </div>
 
@@ -1824,7 +1839,7 @@
     </div>
   </div>
 </div>
-  <script type="module" src="app.js?v=9"></script>
+  <script type="module" src="app.js?v=10"></script>
 <script>window.__METIS_ASSETS__={
   "assets": []
 };</script>
