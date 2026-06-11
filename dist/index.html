@@ -175,39 +175,56 @@
     color: var(--clr-ink-on-light);
     flex-shrink: 0;
   }
+  .journal-day-group {
+    margin-bottom: 6px;
+  }
+  .journal-day-header {
+    font-family: var(--font-heading);
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--clr-accent);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding: 4px 0;
+    cursor: pointer;
+    user-select: none;
+    border-bottom: 1px solid rgba(139,105,20,0.15);
+    margin-bottom: 4px;
+  }
+  .journal-day-header:hover {
+    color: var(--clr-btn-hover);
+  }
+  .journal-day-toggle {
+    font-size: 9px;
+    margin-right: 6px;
+    display: inline-block;
+    transition: transform 0.2s;
+  }
+  .journal-day-group.collapsed .journal-day-content {
+    display: none;
+  }
+  .journal-day-content {
+    padding-left: 4px;
+  }
   .journal-entry {
-    margin-bottom: 8px;
-    padding-bottom: 8px;
-    border-bottom: 1px solid rgba(139,105,20,0.1);
-    border-left: 3px solid var(--clr-accent);
-    padding-left: 10px;
+    margin-bottom: 6px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid rgba(139,105,20,0.08);
+    border-left: 2px solid rgba(139,105,20,0.15);
+    padding-left: 8px;
   }
   .journal-entry:last-child {
     border-bottom: none;
   }
-  .journal-header {
+  .journal-entry-type {
     font-family: var(--font-heading);
-    font-size: 11px;
+    font-size: 10px;
     font-weight: 600;
     color: var(--clr-accent);
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    margin-bottom: 4px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-  .journal-header::before {
-    content: '▼';
-    font-size: 8px;
-    transition: transform 0.2s;
-  }
-  .journal-entry.collapsed .journal-header::before {
-    transform: rotate(-90deg);
-  }
-  .journal-header:hover {
-    color: var(--clr-btn-hover);
+    margin-bottom: 2px;
+    opacity: 0.8;
   }
   .journal-text {
     font-size: 13px;
@@ -1279,16 +1296,23 @@
     #game-container { height: 100dvh; }
     #status-bar {
       flex-wrap: nowrap;
-      padding: 6px 10px;
+      padding: 6px 8px;
       font-size: 11px;
       overflow-x: auto;
       overflow-y: hidden;
       scrollbar-width: none;
       height: 40px;
+      gap: 8px;
     }
     #status-bar .stat {
-      padding: 0 4px;
+      padding: 0 2px;
       flex-shrink: 0;
+    }
+    #status-bar .stat-group {
+      gap: 4px;
+    }
+    #status-bar .stat-group + .stat-group {
+      padding-left: 6px;
     }
     #status-bar .stat-label {
       font-size: 9px;
@@ -1333,7 +1357,9 @@
 
   /* 420px breakpoint — smaller phones */
   @media (max-width: 420px) {
-    #status-bar { padding: 3px 6px; font-size: 10px; }
+    #status-bar { padding: 3px 4px; font-size: 10px; gap: 4px; }
+    #status-bar .stat-group { gap: 2px; }
+    #status-bar .stat-group + .stat-group { padding-left: 4px; }
     #status-bar .stat-label { font-size: 8px; }
     #status-bar .stat-value { font-size: 12px; }
     #status-bar .segment-progress { font-size: 9px; padding: 0 2px; }
@@ -1353,7 +1379,16 @@
     .lb-tab { padding: 6px 8px; font-size: 11px; }
   }
 
-  /* Landscape orientation on mobile — short viewport */
+  /* 360px breakpoint — very small Android phones */
+  @media (max-width: 360px) {
+    #status-bar { padding: 2px 3px; gap: 2px; height: 36px; }
+    #status-bar .stat-group { gap: 1px; }
+    #status-bar .stat-group + .stat-group { padding-left: 3px; border-left: none; }
+    #status-bar .stat-label { font-size: 7px; }
+    #status-bar .stat-value { font-size: 11px; }
+    #status-bar .segment-progress { display: none; }
+  }
+
   @media (max-height: 500px) and (orientation: landscape) {
     #game-container { height: 100dvh; }
     #status-bar { padding: 2px 8px; font-size: 10px; flex-wrap: nowrap; }
@@ -1638,9 +1673,13 @@
 
     <div id="bottom-panel">
       <div id="journal">
-        <div class="journal-entry collapsed" data-day="0">
-          <div class="journal-header">Before the Journey</div>
-          <div class="journal-text">Welcome to the Métis Trail. Click Begin Journey to start.</div>
+        <div class="journal-day-group" data-day="0">
+          <div class="journal-day-header"><span class="journal-day-toggle">▼</span> Before the Journey</div>
+          <div class="journal-day-content">
+            <div class="journal-entry">
+              <div class="journal-text">Welcome to the Métis Trail. Click Begin Journey to start.</div>
+            </div>
+          </div>
         </div>
       </div>
       <div id="trail-intel" style="display:none;padding:6px 10px;background:var(--clr-gold-faint);border-top:1px solid var(--clr-accent);font-size:0.85em;color:var(--clr-accent);"></div>

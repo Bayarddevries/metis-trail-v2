@@ -252,14 +252,57 @@ export function journalLog(entry) {
       : `<div class="journal-dice ${dice.success ? 'pass' : 'fail'}">${dice.text}</div>`)
     : '';
 
-  const html = `
-    <div class="journal-entry ${collapsed}" data-day="${day}">
-      <div class="journal-header">${title}${date ? ' — ' + date : ''}</div>
-      <div class="journal-text">${text}</div>
-      ${diceHtml}
-      ${mech ? `<div class="journal-mechanical">${mech}</div>` : ''}
-    </div>`;
+  // Check if a day group already exists for this day
+  let dayGroup = journal.querySelector(`.journal-day-group[data-day="${day}"]`);
 
-  journal.insertAdjacentHTML('beforeend', html);
+  if (!dayGroup) {
+    // Create new day group
+    dayGroup = document.createElement('div');
+    dayGroup.className = 'journal-day-group';
+    dayGroup.dataset.day = day;
+
+    const dayHeader = document.createElement('div');
+    dayHeader.className = 'journal-day-header';
+    dayHeader.innerHTML = `<span class="journal-day-toggle">▼</span> Day ${day}${date ? ' — ' + date : ''}`;
+    dayHeader.onclick = () => {
+      dayGroup.classList.toggle('collapsed');
+      const toggle = dayHeader.querySelector('.journal-day-toggle');
+      toggle.textContent = dayGroup.classList.contains('collapsed') ? '▶' : '▼';
+    };
+    dayGroup.appendChild(dayHeader);
+
+    const dayContent = document.createElement('div');
+    dayContent.className = 'journal-day-content';
+    dayGroup.appendChild(dayContent);
+
+    journal.appendChild(dayGroup);
+  }
+
+  const dayContent = dayGroup.querySelector('.journal-day-content');
+
+  // Create the entry sub-item
+  const entryEl = document.createElement('div');
+  entryEl.className = `journal-entry ${collapsed}`;
+  entryEl.innerHTML = `
+    <div class="journal-entry-type">${title}</div>
+    <div class="journal-text">${text}</div>
+    ${diceHtml}
+    ${mech ? `<div class="journal-mechanical">${mech}</div>` : ''}
+  `;
+  dayContent.appendChild(entryEl);
+
   journal.scrollTop = journal.scrollHeight;
 }
+
+// Event delegation for journal day-header toggling
+document.addEventListener('click', (e) => {
+  const dayHeader = e.target.closest('.journal-day-header');
+  if (!dayHeader) return;
+  const dayGroup = dayHeader.closest('.journal-day-group');
+  if (!dayGroup) return;
+  // Don't toggle if clicking the journal-entry inside (let entry-level toggle work)
+  if (e.target.closest('.journal-entry-type')) return;
+  dayGroup.classList.toggle('collapsed');
+  const toggle = dayHeader.querySelector('.journal-day-toggle');
+  if (toggle) toggle.textContent = dayGroup.classList.contains('collapsed') ? '▶' : '▼';
+});

@@ -505,6 +505,7 @@ export function createGame(seed = null) {
         mbValue: S.mbValue,
         credit: { ...S.credit },
         blessingDays: S.blessingDays,
+        trailIntel: S.trailIntel ? [...S.trailIntel] : [],
       };
     },
     getCart() {
@@ -587,12 +588,12 @@ export function createGame(seed = null) {
       return {
         score: Math.max(0, Math.round(total)),
         breakdown: {
-          base: Number(baseScore) || 0,
-          mbValue: Number(mbScore) || 0,
-          foodBonus: Number(foodScore) || 0,
-          crewCondition: Number(crewBonus) || 0,
-          daysPenalty: Number(-daysPenalty) || 0,
-          wearPenalty: Number(-wearPenalty) || 0,
+          base: Math.round(baseScore),
+          mbValue: Math.round(mbScore),
+          foodBonus: Math.round(foodScore),
+          crewCondition: Math.round(crewBonus),
+          daysPenalty: Math.round(-daysPenalty),
+          wearPenalty: Math.round(-wearPenalty),
         },
         tier,
       };

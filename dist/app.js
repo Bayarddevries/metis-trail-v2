@@ -2047,7 +2047,8 @@ function createGame(seed = null) {
         travelDaysWithoutRest: S2.travelDaysWithoutRest,
         mbValue: S2.mbValue,
         credit: { ...S2.credit },
-        blessingDays: S2.blessingDays
+        blessingDays: S2.blessingDays,
+        trailIntel: S2.trailIntel ? [...S2.trailIntel] : []
       };
     },
     getCart() {
@@ -2125,12 +2126,12 @@ function createGame(seed = null) {
       return {
         score: Math.max(0, Math.round(total)),
         breakdown: {
-          base: Number(baseScore) || 0,
-          mbValue: Number(mbScore) || 0,
-          foodBonus: Number(foodScore) || 0,
-          crewCondition: Number(crewBonus) || 0,
-          daysPenalty: Number(-daysPenalty) || 0,
-          wearPenalty: Number(-wearPenalty) || 0
+          base: Math.round(baseScore),
+          mbValue: Math.round(mbScore),
+          foodBonus: Math.round(foodScore),
+          crewCondition: Math.round(crewBonus),
+          daysPenalty: Math.round(-daysPenalty),
+          wearPenalty: Math.round(-wearPenalty)
         },
         tier
       };
@@ -2577,7 +2578,7 @@ function getSettlementActionsByType(type) {
       return [
         { id: "heal_crew", label: "Heal Crew", cost: "1 Medicine Pouch or 2 \u20A5", risk: "Clears injury/illness, morale +10", flavor: "The Grey Nuns tend the sick without asking who you are or where you come from." },
         { id: "rest", label: "Free Rest + Blessing", cost: "Free", risk: "Crew rested, morale +15", flavor: "A chapel bell at evening. You sleep on straw but wake with a lighter spirit." },
-        { id: "get_blessing", label: "Get Blessing", cost: "1 food", risk: "Morale +10, next event DC \u22121", flavor: "The priest's hand on your brow. The trail feels less hostile after prayer." },
+        { id: "get_blessing", label: "Get Blessing", cost: "1 food", risk: "Morale +10, +1 to dice rolls for 3 days", flavor: "The priest's hand on your brow. The trail feels less hostile after prayer." },
         { id: "trade_limited", label: "Trade (Limited)", cost: "Buy pemmican 0.5 \u20A5, sell blankets 1.5 \u20A5", risk: "Charity rates", flavor: "The mission garden feeds the body. The trade feeds the journey." }
       ];
     case "trading":
@@ -3154,17 +3155,48 @@ function journalLog(entry) {
   const mech = entry.mech || "";
   const collapsed = entry.collapsed ? "collapsed" : "";
   const diceHtml = dice ? typeof dice === "string" ? `<div class="journal-dice">${dice}</div>` : `<div class="journal-dice ${dice.success ? "pass" : "fail"}">${dice.text}</div>` : "";
-  const html = `
-    <div class="journal-entry ${collapsed}" data-day="${day}">
-      <div class="journal-header">${title}${date ? " \u2014 " + date : ""}</div>
-      <div class="journal-text">${text}</div>
-      ${diceHtml}
-      ${mech ? `<div class="journal-mechanical">${mech}</div>` : ""}
-    </div>`;
-  journal.insertAdjacentHTML("beforeend", html);
+  let dayGroup = journal.querySelector(`.journal-day-group[data-day="${day}"]`);
+  if (!dayGroup) {
+    dayGroup = document.createElement("div");
+    dayGroup.className = "journal-day-group";
+    dayGroup.dataset.day = day;
+    const dayHeader = document.createElement("div");
+    dayHeader.className = "journal-day-header";
+    dayHeader.innerHTML = `<span class="journal-day-toggle">\u25BC</span> Day ${day}${date ? " \u2014 " + date : ""}`;
+    dayHeader.onclick = () => {
+      dayGroup.classList.toggle("collapsed");
+      const toggle = dayHeader.querySelector(".journal-day-toggle");
+      toggle.textContent = dayGroup.classList.contains("collapsed") ? "\u25B6" : "\u25BC";
+    };
+    dayGroup.appendChild(dayHeader);
+    const dayContent2 = document.createElement("div");
+    dayContent2.className = "journal-day-content";
+    dayGroup.appendChild(dayContent2);
+    journal.appendChild(dayGroup);
+  }
+  const dayContent = dayGroup.querySelector(".journal-day-content");
+  const entryEl = document.createElement("div");
+  entryEl.className = `journal-entry ${collapsed}`;
+  entryEl.innerHTML = `
+    <div class="journal-entry-type">${title}</div>
+    <div class="journal-text">${text}</div>
+    ${diceHtml}
+    ${mech ? `<div class="journal-mechanical">${mech}</div>` : ""}
+  `;
+  dayContent.appendChild(entryEl);
   journal.scrollTop = journal.scrollHeight;
 }
 __name(journalLog, "journalLog");
+document.addEventListener("click", (e) => {
+  const dayHeader = e.target.closest(".journal-day-header");
+  if (!dayHeader) return;
+  const dayGroup = dayHeader.closest(".journal-day-group");
+  if (!dayGroup) return;
+  if (e.target.closest(".journal-entry-type")) return;
+  dayGroup.classList.toggle("collapsed");
+  const toggle = dayHeader.querySelector(".journal-day-toggle");
+  if (toggle) toggle.textContent = dayGroup.classList.contains("collapsed") ? "\u25B6" : "\u25BC";
+});
 
 // src/ui/persistence.js
 var STORAGE_KEY = "metis-trail-v2.save";
@@ -19328,7 +19360,12 @@ function showSettlementResult(container2, action, node, before, after, beforeCar
     c.style.display = "none";
   });
   const outcome = overrideOutcome || buildSettlementOutcome(action.id, before, after, beforeCart, afterCart);
-  const flavor = buildSettlementJournalText(action.id, node);
+  let intelText = null;
+  if (action.id === "trade_gossip" || action.id === "get_intel" || action.id === "gossip" || action.id === "buy_info" || action.id === "rumours") {
+    const intel = after.trailIntel || [];
+    if (intel.length > 0) intelText = intel[intel.length - 1].text;
+  }
+  const flavor = buildSettlementJournalText(action.id, node, intelText);
   const mechParts = [];
   if (after.food !== before.food) mechParts.push(`${after.food - before.food >= 0 ? "+" : ""}${(after.food - before.food).toFixed(1)} Food`);
   if (after.wear !== before.wear) mechParts.push(`Wear ${after.wear - before.wear >= 0 ? "+" : ""}${after.wear - before.wear}`);
@@ -20107,13 +20144,17 @@ function showEnd(game) {
   let scoreLines;
   try {
     const breakdown = game.getEndgameScore();
+    const safeNum = /* @__PURE__ */ __name((v2) => {
+      const n = Number(v2);
+      return Number.isFinite(n) ? Math.round(n) : 0;
+    }, "safeNum");
     scoreLines = [
-      { label: "Base score", value: Math.round(breakdown.base) || 0 },
-      { label: `MB value (${Math.round(state.mbValue || 0)} \xD7 80)`, value: Math.round(breakdown.mbValue) || 0 },
-      { label: `Food bonus (${Math.min(state.food, 25)} \xD7 12)`, value: Math.round(breakdown.foodBonus) || 0 },
-      { label: `Crew condition (${state.crew})`, value: Math.round(breakdown.crewCondition) || 0 },
-      { label: `Days on trail (${state.day} \xD7 -8)`, value: Math.round(breakdown.daysPenalty) || 0 },
-      { label: `Cart wear (${state.wear}\xB2 \xD7 -40)`, value: Math.round(breakdown.wearPenalty) || 0 }
+      { label: "Base score", value: safeNum(breakdown?.base) },
+      { label: `MB value (${safeNum(state.mbValue)} \xD7 80)`, value: safeNum(breakdown?.mbValue) },
+      { label: `Food bonus (${Math.min(safeNum(state.food), 25)} \xD7 12)`, value: safeNum(breakdown?.foodBonus) },
+      { label: `Crew condition (${state.crew || "unknown"})`, value: safeNum(breakdown?.crewCondition) },
+      { label: `Days on trail (${safeNum(state.day)} \xD7 -8)`, value: safeNum(breakdown?.daysPenalty) },
+      { label: `Cart wear (${safeNum(state.wear)}\xB2 \xD7 -40)`, value: safeNum(breakdown?.wearPenalty) }
     ];
   } catch (e) {
     console.warn("[Metis] Score calc error:", e);
@@ -20126,7 +20167,13 @@ function showEnd(game) {
       { label: "Cart wear", value: 0 }
     ];
   }
-  const totalScore = Math.round(game.getEndgameScore().score) || 0;
+  const totalScore = (() => {
+    try {
+      return Math.max(0, Math.round(Number(game.getEndgameScore()?.score) || 0));
+    } catch (e) {
+      return 0;
+    }
+  })();
   const scoreHtml = scoreLines.map((l) => `
     <div class="stat-row">
       <span class="label">${l.label}</span>
@@ -20269,8 +20316,22 @@ function escapeHtml(str) {
   return div.innerHTML;
 }
 __name(escapeHtml, "escapeHtml");
-function buildSettlementJournalText(action, st2) {
+function buildSettlementJournalText(action, st2, intelText) {
   const stName = st2?.name || "the settlement";
+  const stType = st2?.type || "unknown";
+  if (intelText && (action === "trade_gossip" || action === "get_intel" || action === "gossip" || action === "buy_info" || action === "rumours")) {
+    return `At ${stName}, a traveller tells you: "${intelText}"`;
+  }
+  if (action === "trade_gossip" || action === "gossip" || action === "rumours") {
+    const gossipByType = {
+      hbc: `At ${stName}, a clerk leans in: "The Company keeps its ledgers tight, but the trail keeps its own accounts. I've heard tell of what lies ahead."`,
+      metis: `At ${stName}, the women gather and talk. News passes between camps faster than the wind across the prairie. "${stName} knows all the trails."`,
+      mission: `At ${stName}, the sisters share what they've learned from travellers. "God watches over the road," they say, "but the road has its own ways."`,
+      nwmp: `At ${stName}, a constable shares the latest reports. "The law rides slow, but word rides faster. Here's what we know."`,
+      trading: `At ${stName}, traders swap stories with their wares. "Every cart that passes carries news. Sit, and you'll hear it all."`
+    };
+    return gossipByType[stType] || gossipByType.trading;
+  }
   const texts = {
     rest: `A day of rest at ${stName}. The crew recovers, the oxen graze. The weight of the trail lifts, if only for a day.`,
     trade: `Trade goods exchanged at ${stName}. The ledgers are updated, the cart a little lighter, the credit a little heavier.`,
@@ -20282,9 +20343,18 @@ function buildSettlementJournalText(action, st2) {
     buy_info: `News gathered at ${stName}. The trail ahead becomes a little less uncertain.`,
     craft: `Work done at ${stName}. Raw materials become something more useful.`,
     forage: `Foraging around ${stName}. The land yields what it can.`,
-    gossip: `Talk at ${stName}. News from other travellers, rumours from the trail.`,
     recruit: `New hands found at ${stName}. The crew grows by one.`,
-    rumours: `Stories traded at ${stName}. Every traveller has one.`
+    get_intel: `Intelligence gathered at ${stName}. The map of the trail ahead grows clearer.`,
+    get_blessing: `A blessing received at ${stName}. The journey ahead feels lighter, the burden shared.`,
+    share_food: `Food shared with the community at ${stName}. Generosity on the trail builds its own credit.`,
+    dance: `An evening of music and dance at ${stName}. The fiddle plays and the trail's weight lifts, if only for a night.`,
+    pay_fines: `Fines settled at ${stName}. The ledger balanced, the road open again.`,
+    get_permits: `Permits obtained at ${stName}. The paperwork of empire, but it keeps the cart moving.`,
+    report_duty: `Duty reported at ${stName}. The forms filled, the wait endured.`,
+    buy_ammo: `Ammunition purchased at ${stName}. The belt heavier, the hunt more certain.`,
+    heal_crew: `The crew tended at ${stName}. Wounds dressed, strength returned.`,
+    craft_hides: `Hides worked at ${stName}. The women's hands turn raw pelts into trade goods.`,
+    trade_limited: `A cautious trade at ${stName}. Not everything is for sale, but something can be found.`
   };
   return texts[action] || `Time spent at ${stName}.`;
 }

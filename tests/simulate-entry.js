@@ -26,25 +26,27 @@ function weightedChoiceIndex(choices, rand) {
 
 // ─── Settlement action weighting ───────────────────────────────────
 // MB-based economy: trade goods → MB credit → spend on food/repair/heal
+// Actions are now objects with {id, label, cost, risk, flavor}
 function pickSettlementAction(actions, state, rand) {
-  const weights = actions.map(a => {
+  // actions is array of {id, label, cost, risk, flavor}
+  const actionIds = actions.map(a => typeof a === 'string' ? a : a.id);
+  const weights = actionIds.map(a => {
     if (a === 'continue') return 15;
     if (a === 'rest' && (state.crew !== 'rested' || state.morale < 50)) return 30;
     if (a === 'rest') {
-      // If we have credit and food is low, prefer buying food over resting
       const credit = state.credit?.[state.pendingSettlementType || 'hbc'] || 0;
       if (credit >= 0.5 && state.food < 10) return 5;
       return 10;
     }
-    // Trade: convert goods to MB credit. Only trade when food is adequate.
-    if (a === 'trade') {
+    // Trade: convert goods to MB credit
+    if (a === 'trade' || a === 'trade_limited') {
       const mb = state.mbValue || 0;
-      if (mb >= 8) return 2;  // already at win threshold, rarely trade more
-      if (state.food > 15) return 20;  // food surplus, safe to trade
+      if (mb >= 8) return 2;
+      if (state.food > 15) return 20;
       if (state.food > 10) return 12;
-      return 2;  // low food, don't trade — buy food instead
+      return 2;
     }
-    // Buy food with MB credit — CRITICAL priority when food is low
+    // Buy food with MB credit
     if (a === 'buy_food') {
       const credit = state.credit?.[state.pendingSettlementType || 'hbc'] || 0;
       if (credit < 0.5) return 0;
@@ -63,25 +65,77 @@ function pickSettlementAction(actions, state, rand) {
       return 5;
     }
     // Buy heal with MB credit
-    if (a === 'buy_heal') {
+    if (a === 'buy_heal' || a === 'heal_crew') {
       const credit = state.credit?.[state.pendingSettlementType || 'hbc'] || 0;
       if (credit < 1) return 0;
       if (state.morale < 30) return 30;
       if (state.morale < 50) return 15;
       return 3;
     }
-    // Buy info with MB credit
-    if (a === 'buy_info') {
+    // Buy info / get intel with MB credit
+    if (a === 'buy_info' || a === 'get_intel') {
       const credit = state.credit?.[state.pendingSettlementType || 'hbc'] || 0;
       if (credit < 0.5) return 0;
       return 5;
     }
+    // Trade gossip (free, gives intel + morale)
+    if (a === 'trade_gossip') {
+      return 12;
+    }
+    // Recruit crew (costs 2 credit + 1 food)
+    if (a === 'recruit_crew') {
+      const credit = state.credit?.[state.pendingSettlementType || 'hbc'] || 0;
+      if (credit < 2 || state.food < 1) return 0;
+      if (state.crew === 'exhausted') return 25;
+      if (state.crew === 'tired') return 15;
+      return 5;
+    }
+    // Dance (costs 1 food, boosts morale)
+    if (a === 'dance') {
+      if (state.food < 1) return 0;
+      if (state.morale < 30) return 20;
+      if (state.morale < 50) return 12;
+      return 5;
+    }
+    // Share food (costs 2+ food, boosts morale + reputation)
+    if (a === 'share_food') {
+      if (state.food < 4) return 0;
+      if (state.morale < 40) return 15;
+      return 5;
+    }
+    // Get blessing (costs 1 food, gives roll buff)
+    if (a === 'get_blessing') {
+      if (state.food < 1) return 0;
+      if (state.blessingDays > 0) return 2; // already blessed
+      return 10;
+    }
+    // Craft hides
+    if (a === 'craft' || a === 'craft_hides') return 12;
+    // Pay fines
+    if (a === 'pay_fines') {
+      if ((state.fines || 0) <= 0) return 0;
+      return 30;
+    }
+    // Get permits
+    if (a === 'get_permits') {
+      const credit = state.credit?.[state.pendingSettlementType || 'hbc'] || 0;
+      if (credit < 2) return 0;
+      return 8;
+    }
+    // Report duty (free, gives credit but costs time)
+    if (a === 'report_duty') return 6;
+    // Buy ammo
+    if (a === 'buy_ammo') {
+      const credit = state.credit?.[state.pendingSettlementType || 'hbc'] || 0;
+      if (credit < 1.5) return 0;
+      return 8;
+    }
+    // Legacy repair/heal (free)
     if (a === 'repair' && state.wear >= 3) return 30;
     if (a === 'repair' && state.wear >= 1) return 15;
     if (a === 'repair') return 3;
     if (a === 'heal' && (state.crew !== 'rested' || state.morale < 60)) return 20;
     if (a === 'heal') return 5;
-    if (a === 'craft') return 12;
     return 10;
   });
   const total = weights.reduce((s, w) => s + w, 0);
@@ -217,6 +271,19 @@ function runSim(seed) {
   let deepRestCount = 0;
   let squealCount = 0;
   let sundayRestCount = 0;
+  // New settlement action trackers
+  let gossipCount = 0;
+  let getIntelCount = 0;
+  let recruitCount = 0;
+  let shareFoodCount = 0;
+  let blessingCount = 0;
+  let payFinesCount = 0;
+  let getPermitsCount = 0;
+  let reportDutyCount = 0;
+  let buyAmmoCount = 0;
+  let healCrewCount = 0;
+  let craftCount = 0;
+  let tradeLimitedCount = 0;
 
   const foodHistory = [];
   const wearHistory = [];
@@ -244,25 +311,38 @@ function runSim(seed) {
     } else if (s.pendingSettlement) {
       const actions = game.getAvailableActions();
       if (actions.type === 'settlement') {
-        // Allow multiple actions per settlement visit (up to 3)
+        // #81 — One action per settlement visit
         const settleType = s.pendingSettlement?.type || 'hbc';
         const stateForWeights = { ...s, pendingSettlementType: settleType };
-        for (let actionSlot = 0; actionSlot < 2; actionSlot++) {
-          const availableNow = game.getAvailableActions();
-          if (availableNow.type !== 'settlement') break;
-          const action = pickSettlementAction(availableNow.actions, game.getState(), Math.random);
-          if (action === 'continue') { continueCount++; break; }
-          if (action === 'rest') { restCount++; game.settlementAction(action); continue; }
-          if (action === 'trade') { tradeCount++; game.settlementAction(action); continue; }
-          if (action === 'buy_food') { buyFoodCount++; game.settlementAction(action); continue; }
-          if (action === 'buy_repair') { buyRepairCount++; game.settlementAction(action); continue; }
-          if (action === 'buy_heal') { buyHealCount++; game.settlementAction(action); continue; }
-          if (action === 'buy_info') { buyInfoCount++; game.settlementAction(action); continue; }
-          if (action === 'repair') { repairCount++; game.settlementAction(action); continue; }
-          if (action === 'craft') { game.settlementAction(action); continue; }
-          break; // unknown action, leave
+        // pickSettlementAction now receives action objects and returns an action ID string
+        const actionId = pickSettlementAction(actions.actions, game.getState(), Math.random);
+        if (actionId === 'continue') {
+          continueCount++;
+        } else if (actionId) {
+          // Track the action type
+          if (actionId === 'rest') restCount++;
+          else if (actionId === 'trade') tradeCount++;
+          else if (actionId === 'buy_food') buyFoodCount++;
+          else if (actionId === 'buy_repair') buyRepairCount++;
+          else if (actionId === 'buy_heal') buyHealCount++;
+          else if (actionId === 'buy_info') buyInfoCount++;
+          else if (actionId === 'repair') repairCount++;
+          else if (actionId === 'craft' || actionId === 'craft_hides') craftCount++;
+          else if (actionId === 'trade_gossip') gossipCount++;
+          else if (actionId === 'get_intel') getIntelCount++;
+          else if (actionId === 'recruit_crew') recruitCount++;
+          else if (actionId === 'dance') danceCount++;
+          else if (actionId === 'share_food') shareFoodCount++;
+          else if (actionId === 'get_blessing') blessingCount++;
+          else if (actionId === 'pay_fines') payFinesCount++;
+          else if (actionId === 'get_permits') getPermitsCount++;
+          else if (actionId === 'report_duty') reportDutyCount++;
+          else if (actionId === 'buy_ammo') buyAmmoCount++;
+          else if (actionId === 'heal_crew') healCrewCount++;
+          else if (actionId === 'trade_limited') tradeLimitedCount++;
+          game.settlementAction(actionId);
         }
-        // After actions, continue west
+        // Continue west after one action
         game.settlementAction('continue');
       }
     } else {
@@ -364,7 +444,19 @@ function runSim(seed) {
     repairCount,
     squealCount,
     sundayRestCount,
-    totalActions: eventCount + tradeCount + forageCount + huntCount + scoutCount + danceCount + pemmicanCount + deepRestCount + restCount + continueCount + travelCount + campCount,
+    gossipCount,
+    getIntelCount,
+    recruitCount,
+    shareFoodCount,
+    blessingCount,
+    payFinesCount,
+    getPermitsCount,
+    reportDutyCount,
+    buyAmmoCount,
+    healCrewCount,
+    craftCount,
+    tradeLimitedCount,
+    totalActions: eventCount + tradeCount + forageCount + huntCount + scoutCount + danceCount + pemmicanCount + deepRestCount + restCount + continueCount + travelCount + campCount + gossipCount + getIntelCount + recruitCount + shareFoodCount + blessingCount + payFinesCount + getPermitsCount + reportDutyCount + buyAmmoCount + healCrewCount + craftCount + tradeLimitedCount,
     foodHistory,
   };
 }
@@ -476,6 +568,18 @@ function aggregate(results) {
     continueThrough: avg('continueCount'),
     squealEvents: avg('squealCount'),
     sundayRests: avg('sundayRestCount'),
+    gossip: avg('gossipCount'),
+    getIntel: avg('getIntelCount'),
+    recruit: avg('recruitCount'),
+    shareFood: avg('shareFoodCount'),
+    blessing: avg('blessingCount'),
+    payFines: avg('payFinesCount'),
+    getPermits: avg('getPermitsCount'),
+    reportDuty: avg('reportDutyCount'),
+    buyAmmo: avg('buyAmmoCount'),
+    healCrew: avg('healCrewCount'),
+    craft: avg('craftCount'),
+    tradeLimited: avg('tradeLimitedCount'),
   };
 
   return {

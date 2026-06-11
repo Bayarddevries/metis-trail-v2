@@ -1124,7 +1124,13 @@ function showSettlementResult(container, action, node, before, after, beforeCart
   container.querySelectorAll('.settlement-action-card').forEach(c => { c.style.display = 'none'; });
 
   const outcome = overrideOutcome || buildSettlementOutcome(action.id, before, after, beforeCart, afterCart);
-  const flavor = buildSettlementJournalText(action.id, node);
+  // Get intel text from the latest trail intel entry (if gossip/intel action)
+  let intelText = null;
+  if (action.id === 'trade_gossip' || action.id === 'get_intel' || action.id === 'gossip' || action.id === 'buy_info' || action.id === 'rumours') {
+    const intel = (after.trailIntel || []);
+    if (intel.length > 0) intelText = intel[intel.length - 1].text;
+  }
+  const flavor = buildSettlementJournalText(action.id, node, intelText);
 
   // Build mechanical summary
   const mechParts = [];
@@ -1949,13 +1955,17 @@ function showEnd(game) {
   let scoreLines;
   try {
     const breakdown = game.getEndgameScore();
+    const safeNum = (v) => {
+      const n = Number(v);
+      return Number.isFinite(n) ? Math.round(n) : 0;
+    };
     scoreLines = [
-      { label: 'Base score', value: Math.round(breakdown.base) || 0 },
-      { label: `MB value (${Math.round(state.mbValue || 0)} × 80)`, value: Math.round(breakdown.mbValue) || 0 },
-      { label: `Food bonus (${Math.min(state.food, 25)} × 12)`, value: Math.round(breakdown.foodBonus) || 0 },
-      { label: `Crew condition (${state.crew})`, value: Math.round(breakdown.crewCondition) || 0 },
-      { label: `Days on trail (${state.day} × -8)`, value: Math.round(breakdown.daysPenalty) || 0 },
-      { label: `Cart wear (${state.wear}² × -40)`, value: Math.round(breakdown.wearPenalty) || 0 },
+      { label: 'Base score', value: safeNum(breakdown?.base) },
+      { label: `MB value (${safeNum(state.mbValue)} × 80)`, value: safeNum(breakdown?.mbValue) },
+      { label: `Food bonus (${Math.min(safeNum(state.food), 25)} × 12)`, value: safeNum(breakdown?.foodBonus) },
+      { label: `Crew condition (${state.crew || 'unknown'})`, value: safeNum(breakdown?.crewCondition) },
+      { label: `Days on trail (${safeNum(state.day)} × -8)`, value: safeNum(breakdown?.daysPenalty) },
+      { label: `Cart wear (${safeNum(state.wear)}² × -40)`, value: safeNum(breakdown?.wearPenalty) },
     ];
   } catch(e) {
     console.warn('[Metis] Score calc error:', e);
@@ -1968,7 +1978,10 @@ function showEnd(game) {
       { label: 'Cart wear', value: 0 },
     ];
   }
-  const totalScore = Math.round(game.getEndgameScore().score) || 0;
+  const totalScore = (() => {
+    try { return Math.max(0, Math.round(Number(game.getEndgameScore()?.score) || 0)); }
+    catch(e) { return 0; }
+  })();
 
   const scoreHtml = scoreLines.map((l) => `
     <div class="stat-row">
@@ -2133,8 +2146,27 @@ function actionSubtitle(a) {
 }
 
 // Narrative journal text for settlement actions
-function buildSettlementJournalText(action, st) {
+function buildSettlementJournalText(action, st, intelText) {
   const stName = st?.name || 'the settlement';
+  const stType = st?.type || 'unknown';
+
+  // If we have actual intel text from gossip/intel actions, use it
+  if (intelText && (action === 'trade_gossip' || action === 'get_intel' || action === 'gossip' || action === 'buy_info' || action === 'rumours')) {
+    return `At ${stName}, a traveller tells you: "${intelText}"`;
+  }
+
+  // Settlement-type-specific gossip
+  if (action === 'trade_gossip' || action === 'gossip' || action === 'rumours') {
+    const gossipByType = {
+      hbc: `At ${stName}, a clerk leans in: "The Company keeps its ledgers tight, but the trail keeps its own accounts. I've heard tell of what lies ahead."`,
+      metis: `At ${stName}, the women gather and talk. News passes between camps faster than the wind across the prairie. "${stName} knows all the trails."`,
+      mission: `At ${stName}, the sisters share what they've learned from travellers. "God watches over the road," they say, "but the road has its own ways."`,
+      nwmp: `At ${stName}, a constable shares the latest reports. "The law rides slow, but word rides faster. Here's what we know."`,
+      trading: `At ${stName}, traders swap stories with their wares. "Every cart that passes carries news. Sit, and you'll hear it all."`,
+    };
+    return gossipByType[stType] || gossipByType.trading;
+  }
+
   const texts = {
     rest: `A day of rest at ${stName}. The crew recovers, the oxen graze. The weight of the trail lifts, if only for a day.`,
     trade: `Trade goods exchanged at ${stName}. The ledgers are updated, the cart a little lighter, the credit a little heavier.`,
@@ -2146,9 +2178,18 @@ function buildSettlementJournalText(action, st) {
     buy_info: `News gathered at ${stName}. The trail ahead becomes a little less uncertain.`,
     craft: `Work done at ${stName}. Raw materials become something more useful.`,
     forage: `Foraging around ${stName}. The land yields what it can.`,
-    gossip: `Talk at ${stName}. News from other travellers, rumours from the trail.`,
     recruit: `New hands found at ${stName}. The crew grows by one.`,
-    rumours: `Stories traded at ${stName}. Every traveller has one.`,
+    get_intel: `Intelligence gathered at ${stName}. The map of the trail ahead grows clearer.`,
+    get_blessing: `A blessing received at ${stName}. The journey ahead feels lighter, the burden shared.`,
+    share_food: `Food shared with the community at ${stName}. Generosity on the trail builds its own credit.`,
+    dance: `An evening of music and dance at ${stName}. The fiddle plays and the trail's weight lifts, if only for a night.`,
+    pay_fines: `Fines settled at ${stName}. The ledger balanced, the road open again.`,
+    get_permits: `Permits obtained at ${stName}. The paperwork of empire, but it keeps the cart moving.`,
+    report_duty: `Duty reported at ${stName}. The forms filled, the wait endured.`,
+    buy_ammo: `Ammunition purchased at ${stName}. The belt heavier, the hunt more certain.`,
+    heal_crew: `The crew tended at ${stName}. Wounds dressed, strength returned.`,
+    craft_hides: `Hides worked at ${stName}. The women's hands turn raw pelts into trade goods.`,
+    trade_limited: `A cautious trade at ${stName}. Not everything is for sale, but something can be found.`,
   };
   return texts[action] || `Time spent at ${stName}.`;
 }
