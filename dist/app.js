@@ -19113,61 +19113,13 @@ function showSettlement(game) {
   distanceEl.textContent = `${distKm} km from Fort Garry`;
   descEl.textContent = node.desc || "";
   actionsEl.innerHTML = "";
-  const actions = game.getSettlementActions ? game.getSettlementActions(node.type) : getDefaultSettlementActions(node.type);
+  const actions = game.getSettlementActions(node.type);
   actions.forEach((action) => {
     renderSettlementActionCard(actionsEl, action, game, before, beforeCart, node);
   });
   document.getElementById("settlement-overlay")?.classList.add("active");
 }
 __name(showSettlement, "showSettlement");
-function getDefaultSettlementActions(type) {
-  const base = [];
-  switch (type) {
-    case "hbc":
-      return [
-        { id: "trade", label: "Trade Goods for \u20A5", cost: "1 trade good", risk: "Best rates for pelts/hides", flavor: "The Company factors weigh your furs in silence. The ledger decides your worth." },
-        { id: "buy_supplies", label: "Buy Supplies", cost: "\u20A5 varies", risk: "Full inventory available", flavor: "Pemmican, axes, shaganappi, tools \u2014 everything a carter needs for the long trail." },
-        { id: "rest", label: "Rest at the Fort", cost: "1 food", risk: "Crew rested, morale +15", flavor: "A warm fire in the mess hall, dry blankets, and a night without the wind." },
-        { id: "get_intel", label: "Get Trail Intel", cost: "1 \u20A5", risk: "Reveals next 2 nodes", flavor: "The clerk unfolds a map stained with ink and tea. He marks the hazards ahead." }
-      ];
-    case "metis":
-      return [
-        { id: "trade_gossip", label: "Trade Gossip", cost: "Free", risk: "Reveals 1 gossip entry", flavor: "News travels faster than carts on the prairie. The women know everything." },
-        { id: "recruit_crew", label: "Recruit Crew", cost: "2 \u20A5 + 1 food", risk: "+1 crew member (max 6)", flavor: "A young hand looking for work. Strong back, willing heart \u2014 if you can feed him." },
-        { id: "dance", label: "Dance", cost: "1 food", risk: "Morale +10, no day advance", flavor: "The fiddle starts. A Red River jig. Boots on hard ground. Nobody thinks about tomorrow." },
-        { id: "share_food", label: "Share Food", cost: "Give 2+ food", risk: "Morale +5 per food", flavor: "Generosity on the trail is its own currency. What you give returns in loyalty." },
-        { id: "craft_hides", label: "Craft Finished Hides", cost: "3 raw hides + 1 shaganappi", risk: "Creates finished_hide (worth 2\xD7 \u20A5)", flavor: "The women scrape, stretch, and smoke the hides. Patience turns rawhide into profit." }
-      ];
-    case "nwmp":
-      return [
-        { id: "pay_fines", label: "Pay Fines", cost: "\u20A5 varies", risk: "Clears fines if any", flavor: "The sergeant reads your name from the ledger. The amount is not negotiable." },
-        { id: "get_permits", label: "Get Permits", cost: "2 \u20A5", risk: "Required for river crossings", flavor: "A stamp, a signature, and the Queen's law lets you cross the water legal." },
-        { id: "report_duty", label: "Report for Duty", cost: "1 day", risk: "\u20A5 reward, morale \u22125", flavor: "Red coats, drill, and the weight of Ottawa's authority. The pay is fair but the pride costs." },
-        { id: "buy_ammo", label: "Buy Ammo", cost: "1.5 \u20A5 per Belt", risk: "Cheaper than HBC", flavor: "Ball and powder, measured honest. The Mounties don't cheat a carter on shot." },
-        { id: "rest", label: "Rest", cost: "1 food", risk: "Crew rested (no morale bonus)", flavor: "A cot in the barracks. Clean, quiet, and the sentry paces all night." }
-      ];
-    case "mission":
-      return [
-        { id: "heal_crew", label: "Heal Crew", cost: "1 Medicine Pouch or 2 \u20A5", risk: "Clears injury/illness, morale +10", flavor: "The Grey Nuns tend the sick without asking who you are or where you come from." },
-        { id: "rest", label: "Free Rest + Blessing", cost: "Free", risk: "Crew rested, morale +15", flavor: "A chapel bell at evening. You sleep on straw but wake with a lighter spirit." },
-        { id: "get_blessing", label: "Get Blessing", cost: "1 food", risk: "Morale +10, next event DC \u22121", flavor: "The priest's hand on your brow. The trail feels less hostile after prayer." },
-        { id: "trade_limited", label: "Trade (Limited)", cost: "Buy pemmican 0.5 \u20A5, sell blankets 1.5 \u20A5", risk: "Charity rates", flavor: "The mission garden feeds the body. The trade feeds the journey." }
-      ];
-    case "trading":
-      return [
-        { id: "trade", label: "Trade Goods", cost: "1 trade good", risk: "Standard rates", flavor: "A free trader with no Company badge. His prices are his own." },
-        { id: "buy_supplies", label: "Buy Supplies", cost: "\u20A5 varies", risk: "Basic inventory", flavor: "What the Company posts run out of, the free traders sometimes have." },
-        { id: "rest", label: "Rest", cost: "1 food", risk: "Crew rested, morale +10", flavor: "A lean-to by the fire. Simple shelter, honest company." },
-        { id: "get_intel", label: "Get Trail Intel", cost: "1 \u20A5", risk: "Reveals next node", flavor: "He rides the trail weekly. His news is fresh and his memory long." }
-      ];
-    default:
-      return [
-        { id: "trade", label: "Trade Goods", cost: "1 trade good", risk: "Standard rates", flavor: "The factor weighs your furs. The ledger is final." },
-        { id: "rest", label: "Rest", cost: "1 food", risk: "Crew rested, morale +10", flavor: "A night under roof and beam. The trail waits for morning." }
-      ];
-  }
-}
-__name(getDefaultSettlementActions, "getDefaultSettlementActions");
 function renderSettlementActionCard(container, action, game, before, beforeCart, node) {
   const card = document.createElement("div");
   card.className = "settlement-action-card";
