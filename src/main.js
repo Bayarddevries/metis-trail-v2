@@ -9,7 +9,6 @@ import { ENDINGS } from './data/endings.js';
 import { CONSTANTS } from './core/constants.js';
 import { saveScore, getTopScores, getMyScores, syncLocalScores } from './firebase.js';
 import Haptics from './ui/haptics.js';
-import Audio from './ui/audio.js';
 import { getItemIcon } from './ui/icons.js';
 
 // Sync any locally-saved scores on page load
@@ -101,7 +100,6 @@ export function bootstrap(seed = null) {
         if (introOverlay) {
           introOverlay.classList.remove('active');
           introOverlay.setAttribute('hidden', '');
-          Audio.startAmbient();
         }
         // If pre-departure is enabled, show it now
         const currentState = game.getState();
@@ -599,7 +597,6 @@ function animateDicePill(result, fullDiceResult) {
   const el = document.getElementById('die');
   if (!el) return;
   el.className = 'die small font-spectral spin';
-  Audio.sfxDiceRoll();
 
   let ticks = 0;
   const maxTicks = 8 + Math.floor(Math.random() * 5);
@@ -1849,8 +1846,6 @@ function showEnd(game) {
 
   statsEl.innerHTML = scoreHtml;
   document.getElementById('end-overlay')?.classList.add('active');
-  Audio.sfxGameOver();
-  Audio.stopAmbient();
 
   // Auto-save score to Firebase
   const playerName = localStorage.getItem('metisPlayerName') || '';

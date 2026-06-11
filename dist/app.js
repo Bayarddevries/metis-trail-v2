@@ -2847,79 +2847,81 @@ function applyTheme(root) {
   root.style.setProperty("--clr-bg", "#0d2b0d");
   root.style.setProperty("--clr-panel-bg", "#f5e6c8");
   root.style.setProperty("--clr-journal-bg", "#f5e6c8");
-  root.style.setProperty("--clr-ink-on-dark", "#f5e6c8");
+  root.style.setProperty("--clr-ink-on-dark", "#e8d5a8");
   root.style.setProperty("--clr-ink-on-light", "#1a3a1a");
-  root.style.setProperty("--clr-accent", "#c8a81a");
-  root.style.setProperty("--clr-success", "#4a7a3a");
-  root.style.setProperty("--clr-danger", "#8b2500");
+  root.style.setProperty("--clr-ink-light", "#c4b080");
+  root.style.setProperty("--clr-ink-dark", "#2c1a0a");
+  root.style.setProperty("--clr-accent", "#d4a820");
+  root.style.setProperty("--clr-success", "#5a9a4a");
+  root.style.setProperty("--clr-danger", "#b83030");
   root.style.setProperty("--clr-ink", "var(--clr-ink-on-dark)");
   root.style.setProperty("--clr-ink-panel", "var(--clr-ink-on-light)");
-  root.style.setProperty("--clr-bg-dark", "#0d2b0d");
+  root.style.setProperty("--clr-bg-dark", "#0a1f0a");
   root.style.setProperty("--clr-card-bg", "var(--clr-panel-bg)");
   root.style.setProperty("--clr-btn-bg", "var(--clr-accent)");
   root.style.setProperty("--clr-btn-text", "#0d2b0d");
-  root.style.setProperty("--clr-btn-hover", "#a68814");
+  root.style.setProperty("--clr-btn-hover", "#e0b830");
   root.style.setProperty("--clr-status-bar-bg", "var(--clr-bg)");
   root.style.setProperty("--clr-status-text", "var(--clr-ink-on-dark)");
   root.style.setProperty("--clr-status-accent", "var(--clr-accent)");
-  root.style.setProperty("--clr-overlay-bg", "rgba(13,43,13,0.96)");
+  root.style.setProperty("--clr-overlay-bg", "rgba(10,25,10,0.92)");
   root.style.setProperty("--clr-border", "var(--clr-accent)");
   root.style.setProperty("--clr-map-bg", "#0d2b0d");
-  root.style.setProperty("--clr-tooltip-bg", "rgba(13,43,13,0.9)");
+  root.style.setProperty("--clr-tooltip-bg", "rgba(10,25,10,0.92)");
   root.style.setProperty("--clr-tooltip-text", "var(--clr-ink-on-dark)");
   root.style.setProperty("--clr-tooltip-border", "var(--clr-accent)");
   root.style.setProperty("--clr-map-frame-shadow", "rgba(0,0,0,0.4)");
   root.style.setProperty("--clr-narrative-text", "var(--clr-ink-on-dark)");
-  root.style.setProperty("--clr-ruled-line", "rgba(200,168,26,0.15)");
-  root.style.setProperty("--clr-ledger-border", "rgba(200,168,26,0.2)");
+  root.style.setProperty("--clr-ruled-line", "rgba(212,168,32,0.12)");
+  root.style.setProperty("--clr-ledger-border", "rgba(212,168,32,0.15)");
   root.style.setProperty("--clr-ledger-margin", "var(--clr-accent)");
   root.style.setProperty("--clr-paper-texture", "none");
   root.style.setProperty("--clr-event-border", "var(--clr-accent)");
   root.style.setProperty("--clr-event-accent-bar", "var(--clr-accent)");
-  root.style.setProperty("--clr-settlement-hbc", "#8b2500");
-  root.style.setProperty("--clr-settlement-metis", "#2a5c8a");
-  root.style.setProperty("--clr-settlement-nwmp", "#1a6b3a");
-  root.style.setProperty("--clr-settlement-mission", "#8b6914");
-  root.style.setProperty("--clr-settlement-trading", "#8b6914");
+  root.style.setProperty("--clr-settlement-hbc", "#c84040");
+  root.style.setProperty("--clr-settlement-metis", "#4a8cc8");
+  root.style.setProperty("--clr-settlement-nwmp", "#3a9a5a");
+  root.style.setProperty("--clr-settlement-mission", "#c8a030");
+  root.style.setProperty("--clr-settlement-trading", "#c8a030");
   root.style.setProperty("--clr-food-low", "var(--clr-danger)");
-  root.style.setProperty("--clr-warn", "#d4a012");
+  root.style.setProperty("--clr-warn", "#e0b830");
   root.style.setProperty("--clr-ok", "var(--clr-success)");
-  root.style.setProperty("--clr-weather-rain", "#8aadbd");
-  root.style.setProperty("--clr-weather-snow", "#c8d4e0");
-  root.style.setProperty("--clr-over-bg", "rgba(139,37,0,0.15)");
-  root.style.setProperty("--clr-over-border", "var(--clr-danger)");
-  root.style.setProperty("--clr-over-text", "var(--clr-danger)");
-  root.style.setProperty("--clr-warn-bg", "rgba(212,160,18,0.15)");
-  root.style.setProperty("--clr-warn-border", "var(--clr-warn)");
-  root.style.setProperty("--clr-gold", "#D4A012");
-  root.style.setProperty("--clr-ok-bg", "rgba(74,122,58,0.15)");
-  root.style.setProperty("--clr-ok-border", "var(--clr-success)");
-  root.style.setProperty("--clr-ok-text", "var(--clr-success)");
-  root.style.setProperty("--clr-catitem-bg", "rgba(26,58,26,0.05)");
-  root.style.setProperty("--clr-catitem-border", "rgba(200,168,26,0.15)");
-  root.style.setProperty("--clr-muted", "#6a8a5a");
-  root.style.setProperty("--clr-pdrow-bg", "rgba(26,58,26,0.03)");
-  root.style.setProperty("--clr-pdrow-border", "rgba(200,168,26,0.1)");
+  root.style.setProperty("--clr-weather-rain", "#7ab0d0");
+  root.style.setProperty("--clr-weather-snow", "#d0dce8");
+  root.style.setProperty("--clr-over-bg", "rgba(184,48,48,0.12)");
+  root.style.setProperty("--clr-over-border", "#c84040");
+  root.style.setProperty("--clr-over-text", "#e06060");
+  root.style.setProperty("--clr-warn-bg", "rgba(224,184,48,0.12)");
+  root.style.setProperty("--clr-warn-border", "#e0b830");
+  root.style.setProperty("--clr-gold", "#e0b830");
+  root.style.setProperty("--clr-ok-bg", "rgba(90,154,74,0.12)");
+  root.style.setProperty("--clr-ok-border", "#5a9a4a");
+  root.style.setProperty("--clr-ok-text", "#5a9a4a");
+  root.style.setProperty("--clr-catitem-bg", "rgba(212,168,32,0.06)");
+  root.style.setProperty("--clr-catitem-border", "rgba(212,168,32,0.15)");
+  root.style.setProperty("--clr-muted", "#9a8a6a");
+  root.style.setProperty("--clr-pdrow-bg", "rgba(212,168,32,0.04)");
+  root.style.setProperty("--clr-pdrow-border", "rgba(212,168,32,0.1)");
   root.style.setProperty("--clr-camp-border", "var(--clr-accent)");
-  root.style.setProperty("--clr-camp-pill-bg", "rgba(26,58,26,0.05)");
-  root.style.setProperty("--clr-camp-pill-border", "rgba(200,168,26,0.15)");
+  root.style.setProperty("--clr-camp-pill-bg", "rgba(212,168,32,0.08)");
+  root.style.setProperty("--clr-camp-pill-border", "rgba(212,168,32,0.2)");
   root.style.setProperty("--clr-camp-btn-hover", "#1a3a1a");
   root.style.setProperty("--clr-campfire-glow", "radial-gradient(ellipse at 50% 100%, rgba(190,130,20,0.35) 0%, rgba(200,168,26,0.22) 35%, transparent 70%)");
   root.style.setProperty("--clr-campfire-embers", `url("data:image/svg+xml,%3Csvg viewBox='0 0 300 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='campNoise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.025' numOctaves='5' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23campNoise)' opacity='0.08'/%3E%3C/svg%3E")`);
   root.style.setProperty("--clr-campfire-flicker", "radial-gradient(circle at 45% 75%, rgba(255,140,40,0.15) 0%, transparent 40%), radial-gradient(circle at 55% 65%, rgba(255,110,30,0.12) 0%, transparent 35%), radial-gradient(circle at 60% 80%, rgba(255,80,20,0.1) 0%, transparent 30%)");
-  root.style.setProperty("--clr-success-glow", "rgba(74,122,58,0.3)");
-  root.style.setProperty("--clr-danger-glow", "rgba(139,37,0,0.3)");
-  root.style.setProperty("--clr-choice-cost", "#6a8a5a");
-  root.style.setProperty("--clr-source-text", "#6a8a5a");
-  root.style.setProperty("--clr-source-context", "#8a9a7a");
-  root.style.setProperty("--clr-placeholder", "#5a7a4a");
-  root.style.setProperty("--clr-input-bg", "rgba(26,58,26,0.1)");
-  root.style.setProperty("--clr-input-bg-focus", "rgba(26,58,26,0.15)");
-  root.style.setProperty("--clr-silver", "#9a9a9a");
-  root.style.setProperty("--clr-bronze", "#A6784C");
-  root.style.setProperty("--clr-gold-faint", "rgba(200,168,26,0.08)");
-  root.style.setProperty("--clr-gold-light", "rgba(200,168,26,0.15)");
-  root.style.setProperty("--clr-intel-border", "rgba(200,168,26,0.1)");
+  root.style.setProperty("--clr-success-glow", "rgba(90,154,74,0.3)");
+  root.style.setProperty("--clr-danger-glow", "rgba(184,48,48,0.3)");
+  root.style.setProperty("--clr-choice-cost", "#b0a080");
+  root.style.setProperty("--clr-source-text", "#a09070");
+  root.style.setProperty("--clr-source-context", "#8a7a5a");
+  root.style.setProperty("--clr-placeholder", "#7a6a4a");
+  root.style.setProperty("--clr-input-bg", "rgba(255,245,230,0.08)");
+  root.style.setProperty("--clr-input-bg-focus", "rgba(255,245,230,0.12)");
+  root.style.setProperty("--clr-silver", "#b0b0b0");
+  root.style.setProperty("--clr-bronze", "#c89050");
+  root.style.setProperty("--clr-gold-faint", "rgba(212,168,32,0.08)");
+  root.style.setProperty("--clr-gold-light", "rgba(212,168,32,0.15)");
+  root.style.setProperty("--clr-intel-border", "rgba(212,168,32,0.12)");
   root.style.setProperty("--font-heading", "'Playfair Display', 'Georgia', serif");
   root.style.setProperty("--font-body", "'Crimson Text', 'Georgia', serif");
 }
@@ -18561,249 +18563,6 @@ var Haptics = (() => {
 })();
 var haptics_default = Haptics;
 
-// src/ui/audio.js
-var ctx = null;
-var masterGain = null;
-var ambientNodes = [];
-function ensureCtx() {
-  if (!ctx) {
-    try {
-      ctx = new (window.AudioContext || window.webkitAudioContext)();
-      masterGain = ctx.createGain();
-      masterGain.gain.value = 0.3;
-      masterGain.connect(ctx.destination);
-    } catch (_) {
-      return null;
-    }
-  }
-  return { ctx, masterGain };
-}
-__name(ensureCtx, "ensureCtx");
-async function startAmbient() {
-  const audio = ensureCtx();
-  if (!audio) return;
-  const { ctx: c, master } = audio;
-  if (c.state === "suspended") {
-    try {
-      await c.resume();
-    } catch (_) {
-      return;
-    }
-  }
-  const windBufferSize = c.sampleRate * 2;
-  const windBuffer = c.createBuffer(1, windBufferSize, c.sampleRate);
-  const windData = windBuffer.getChannelData(0);
-  for (let i = 0; i < windBufferSize; i++) {
-    windData[i] = Math.random() * 2 - 1;
-  }
-  const windSource = c.createBufferSource();
-  windSource.buffer = windBuffer;
-  windSource.loop = true;
-  const windFilter = c.createBiquadFilter();
-  windFilter.type = "lowpass";
-  windFilter.frequency.value = 400;
-  const windGain = c.createGain();
-  windGain.gain.value = 0.12;
-  const windLFO = c.createOscillator();
-  windLFO.type = "sine";
-  windLFO.frequency.value = 0.15;
-  const windLFOGain = c.createGain();
-  windLFOGain.gain.value = 0.06;
-  windLFO.connect(windLFOGain);
-  windLFOGain.connect(windGain.gain);
-  windLFO.start();
-  windSource.connect(windFilter);
-  windFilter.connect(windGain);
-  windGain.connect(master);
-  windSource.start();
-  ambientNodes.push(windSource, windLFO);
-  const hoofOsc = c.createOscillator();
-  hoofOsc.type = "sine";
-  hoofOsc.frequency.value = 80;
-  const hoofGain = c.createGain();
-  hoofGain.gain.value = 0;
-  const hoofLFO = c.createOscillator();
-  hoofLFO.type = "square";
-  hoofLFO.frequency.value = 1;
-  const hoofLFOGain = c.createGain();
-  hoofLFOGain.gain.value = 0.04;
-  hoofLFO.connect(hoofLFOGain);
-  hoofLFOGain.connect(hoofGain.gain);
-  hoofLFO.start();
-  hoofOsc.connect(hoofGain);
-  hoofGain.connect(master);
-  hoofOsc.start();
-  ambientNodes.push(hoofOsc, hoofLFO);
-  function scheduleBirdChirp() {
-    if (!ctx || ctx.state === "closed") return;
-    const delay = 5e3 + Math.random() * 1e4;
-    setTimeout(() => {
-      if (!ctx || ctx.state === "closed") return;
-      try {
-        const now = c.currentTime;
-        const chirpOsc = c.createOscillator();
-        chirpOsc.type = "sine";
-        chirpOsc.frequency.setValueAtTime(2200, now);
-        chirpOsc.frequency.linearRampToValueAtTime(2800, now + 0.1);
-        chirpOsc.frequency.linearRampToValueAtTime(1800, now + 0.2);
-        const chirpGain = c.createGain();
-        chirpGain.gain.setValueAtTime(0.08, now);
-        chirpGain.gain.linearRampToValueAtTime(0, now + 0.2);
-        chirpOsc.connect(chirpGain);
-        chirpGain.connect(master);
-        chirpOsc.start(now);
-        chirpOsc.stop(now + 0.25);
-      } catch (_) {
-      }
-      scheduleBirdChirp();
-    }, delay);
-  }
-  __name(scheduleBirdChirp, "scheduleBirdChirp");
-  scheduleBirdChirp();
-}
-__name(startAmbient, "startAmbient");
-function stopAmbient() {
-  ambientNodes.forEach((node) => {
-    try {
-      node.stop();
-    } catch (_) {
-    }
-  });
-  ambientNodes.length = 0;
-  if (ctx) {
-    try {
-      ctx.close();
-    } catch (_) {
-    }
-    ctx = null;
-    masterGain = null;
-  }
-}
-__name(stopAmbient, "stopAmbient");
-function playTone(freq, type, duration, volume = 0.3, endFreq = null) {
-  const audio = ensureCtx();
-  if (!audio) return;
-  const { ctx: c, master } = audio;
-  if (c.state === "suspended") return;
-  try {
-    const now = c.currentTime;
-    const osc = c.createOscillator();
-    osc.type = type;
-    osc.frequency.setValueAtTime(freq, now);
-    if (endFreq !== null) {
-      osc.frequency.linearRampToValueAtTime(endFreq, now + duration);
-    }
-    const g = c.createGain();
-    g.gain.setValueAtTime(volume, now);
-    g.gain.exponentialRampToValueAtTime(1e-3, now + duration);
-    osc.connect(g);
-    g.connect(master);
-    osc.start(now);
-    osc.stop(now + duration + 0.05);
-  } catch (_) {
-  }
-}
-__name(playTone, "playTone");
-function sfxDiceRoll() {
-  const audio = ensureCtx();
-  if (!audio) return;
-  const { ctx: c, master } = audio;
-  if (c.state === "suspended") return;
-  try {
-    const now = c.currentTime;
-    const count = 8 + Math.floor(Math.random() * 5);
-    let t = now;
-    for (let i = 0; i < count; i++) {
-      const freq = 300 + Math.random() * 200;
-      const dur = 0.03 + Math.random() * 0.05;
-      const osc = c.createOscillator();
-      osc.type = "square";
-      osc.frequency.value = freq;
-      const g = c.createGain();
-      g.gain.setValueAtTime(0.25, t);
-      g.gain.exponentialRampToValueAtTime(1e-3, t + dur);
-      osc.connect(g);
-      g.connect(master);
-      osc.start(t);
-      osc.stop(t + dur + 0.01);
-      t += 0.03 + Math.random() * 0.05;
-    }
-  } catch (_) {
-  }
-}
-__name(sfxDiceRoll, "sfxDiceRoll");
-function sfxWearDamage() {
-  playTone(120, "sawtooth", 0.3, 0.25);
-}
-__name(sfxWearDamage, "sfxWearDamage");
-function sfxStamp() {
-  playTone(600, "sine", 0.1, 0.3);
-}
-__name(sfxStamp, "sfxStamp");
-function sfxGameOver() {
-  const audio = ensureCtx();
-  if (!audio) return;
-  const { ctx: c, master } = audio;
-  if (c.state === "suspended") return;
-  try {
-    const now = c.currentTime;
-    const crackLen = 0.15;
-    const crackBuf = c.createBuffer(1, c.sampleRate * crackLen, c.sampleRate);
-    const crackData = crackBuf.getChannelData(0);
-    for (let i = 0; i < crackData.length; i++) {
-      crackData[i] = (Math.random() * 2 - 1) * Math.exp(-i / (c.sampleRate * 0.03));
-    }
-    const crackSrc = c.createBufferSource();
-    crackSrc.buffer = crackBuf;
-    const crackGain = c.createGain();
-    crackGain.gain.value = 0.4;
-    crackSrc.connect(crackGain);
-    crackGain.connect(master);
-    crackSrc.start(now);
-    const thump = c.createOscillator();
-    thump.type = "sine";
-    thump.frequency.setValueAtTime(80, now);
-    thump.frequency.exponentialRampToValueAtTime(30, now + 0.3);
-    const thumpGain = c.createGain();
-    thumpGain.gain.setValueAtTime(0.35, now);
-    thumpGain.gain.exponentialRampToValueAtTime(1e-3, now + 0.3);
-    thump.connect(thumpGain);
-    thumpGain.connect(master);
-    thump.start(now);
-    thump.stop(now + 0.35);
-    const fadeLen = 3;
-    const fadeBuf = c.createBuffer(1, c.sampleRate * fadeLen, c.sampleRate);
-    const fadeData = fadeBuf.getChannelData(0);
-    for (let i = 0; i < fadeData.length; i++) {
-      fadeData[i] = Math.random() * 2 - 1;
-    }
-    const fadeSrc = c.createBufferSource();
-    fadeSrc.buffer = fadeBuf;
-    const fadeGain = c.createGain();
-    fadeGain.gain.setValueAtTime(0.2, now);
-    fadeGain.gain.linearRampToValueAtTime(0, now + fadeLen);
-    const fadeFilter = c.createBiquadFilter();
-    fadeFilter.type = "lowpass";
-    fadeFilter.frequency.setValueAtTime(800, now);
-    fadeFilter.frequency.linearRampToValueAtTime(100, now + fadeLen);
-    fadeSrc.connect(fadeFilter);
-    fadeFilter.connect(fadeGain);
-    fadeGain.connect(master);
-    fadeSrc.start(now);
-    fadeSrc.stop(now + fadeLen + 0.1);
-  } catch (_) {
-  }
-}
-__name(sfxGameOver, "sfxGameOver");
-var audio_default = {
-  startAmbient,
-  stopAmbient,
-  sfxDiceRoll,
-  sfxWearDamage,
-  sfxStamp,
-  sfxGameOver
-};
-
 // src/ui/icons.js
 var ICONS = {
   "Pemmican Rations": "\u{1F969}",
@@ -18907,7 +18666,6 @@ function bootstrap(seed = null) {
         if (introOverlay) {
           introOverlay.classList.remove("active");
           introOverlay.setAttribute("hidden", "");
-          audio_default.startAmbient();
         }
         const currentState = game.getState();
         if (currentState.preDeparture) {
@@ -19136,7 +18894,6 @@ function animateDicePill(result, fullDiceResult) {
   const el = document.getElementById("die");
   if (!el) return;
   el.className = "die small font-spectral spin";
-  audio_default.sfxDiceRoll();
   let ticks = 0;
   const maxTicks = 8 + Math.floor(Math.random() * 5);
   const id = setInterval(() => {
@@ -20139,8 +19896,6 @@ function showEnd(game) {
   `;
   statsEl.innerHTML = scoreHtml;
   document.getElementById("end-overlay")?.classList.add("active");
-  audio_default.sfxGameOver();
-  audio_default.stopAmbient();
   const playerName = localStorage.getItem("metisPlayerName") || "";
   const scoreData = game.getScoreData();
   saveScore(scoreData, playerName).then((result) => {
