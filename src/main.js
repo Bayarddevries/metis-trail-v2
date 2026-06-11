@@ -52,6 +52,18 @@ function buildTravelJournalEntry(prevNode, node, after, prevWear) {
   return `${opening}${wear}${weather} ${middle}`;
 }
 
+// First-person event journal entry generator
+function buildEventJournalEntry(eventData, result) {
+  const desc = eventData.text || 'Something happened on the trail.';
+  if (!result || result.roll === null) {
+    return desc;
+  }
+  const outcome = result.text || (result.success ? 'It went well enough.' : 'That did not go as hoped.');
+  // Strip "Success. " / "Failure. " prefix for cleaner prose
+  const clean = outcome.replace(/^(Success|Failure)\.\s*/, '');
+  return `${desc} ${clean}`;
+}
+
 export function bootstrap(seed = null) {
   const game = createGame(seed);
   window._metisGame = game;
@@ -778,7 +790,7 @@ function showEvent(game) {
           day: after.day,
           date: monthName(after.month) + ' ' + after.day,
           title: eventData.classification || 'Event',
-          text: eventData.text || '',
+          text: buildEventJournalEntry(eventData, res),
           dice: res && res.roll !== null ? `Rolled ${res.roll} — need ${res.dc}+ — ${res.success ? '✓ Success' : '✗ Failure'}` : null,
           mech: mechParts.join(' · '),
           collapsed: true,

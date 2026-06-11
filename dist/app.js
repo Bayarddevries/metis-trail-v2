@@ -18593,6 +18593,16 @@ function buildTravelJournalEntry(prevNode, node, after, prevWear) {
   return `${opening}${wear}${weather} ${middle}`;
 }
 __name(buildTravelJournalEntry, "buildTravelJournalEntry");
+function buildEventJournalEntry(eventData, result) {
+  const desc = eventData.text || "Something happened on the trail.";
+  if (!result || result.roll === null) {
+    return desc;
+  }
+  const outcome = result.text || (result.success ? "It went well enough." : "That did not go as hoped.");
+  const clean = outcome.replace(/^(Success|Failure)\.\s*/, "");
+  return `${desc} ${clean}`;
+}
+__name(buildEventJournalEntry, "buildEventJournalEntry");
 function bootstrap(seed = null) {
   const game = createGame(seed);
   window._metisGame = game;
@@ -19013,7 +19023,7 @@ function showEvent(game) {
           day: after.day,
           date: monthName(after.month) + " " + after.day,
           title: eventData.classification || "Event",
-          text: eventData.text || "",
+          text: buildEventJournalEntry(eventData, res),
           dice: res && res.roll !== null ? `Rolled ${res.roll} \u2014 need ${res.dc}+ \u2014 ${res.success ? "\u2713 Success" : "\u2717 Failure"}` : null,
           mech: mechParts.join(" \xB7 "),
           collapsed: true
