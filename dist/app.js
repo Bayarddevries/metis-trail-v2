@@ -18647,7 +18647,6 @@ function bootstrap(seed = null) {
   }
   applyTheme(rootEl);
   const state = game.getState();
-  renderNarrative(["Welcome to the M\xE9tis Trail. Click Begin Journey to start."]);
   document.getElementById("intro-overlay")?.classList.add("active");
   document.getElementById("predeparture-overlay")?.classList.remove("active");
   initMap();

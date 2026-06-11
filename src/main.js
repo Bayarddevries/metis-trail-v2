@@ -105,7 +105,6 @@ export function bootstrap(seed = null) {
   const state = game.getState();
 
   // Always show intro first — pre-departure activates after "Begin Journey" click
-  renderNarrative(['Welcome to the Métis Trail. Click Begin Journey to start.']);
   document.getElementById('intro-overlay')?.classList.add('active');
   document.getElementById('predeparture-overlay')?.classList.remove('active');
 
