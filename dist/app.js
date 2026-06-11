@@ -2861,6 +2861,7 @@ function applyTheme(root) {
   root.style.setProperty("--clr-accent", "#d4a820");
   root.style.setProperty("--clr-success", "#5a9a4a");
   root.style.setProperty("--clr-danger", "#b83030");
+  root.style.setProperty("--clr-blessing", "#B8860B");
   root.style.setProperty("--clr-ink", "var(--clr-ink-on-dark)");
   root.style.setProperty("--clr-ink-panel", "var(--clr-ink-on-light)");
   root.style.setProperty("--clr-bg-dark", "#0a1f0a");
@@ -19532,7 +19533,30 @@ function showShop(game) {
   }
   __name(recalc, "recalc");
   function renderList() {
-    listEl.innerHTML = shopItems.map((item) => {
+    const cart = game.getCart();
+    const tradeGoods = cart.filter((i) => i.type === "trade" || i.category === "furs");
+    let html = "";
+    if (tradeGoods.length > 0) {
+      html += `<div style="font-family:var(--font-heading);font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:var(--clr-accent);margin:10px 0 6px;">Your Trade Goods</div>`;
+      tradeGoods.forEach((item) => {
+        const mbVal = item.mbValue || 1;
+        const itemWeight = (item.wt * item.count).toFixed(1);
+        html += `
+    <div class="pd-row" data-trade-item="${item.name}">
+      <div class="pd-item-info">
+        <span class="pd-icon">${getItemIcon(item.name)}</span>
+        <span class="pd-name">${item.name} \xD7${item.count}</span>
+        <div style="font-size:0.75em;color:var(--clr-accent);margin-top:2px;">${mbVal} \u20A5 each \xB7 ${itemWeight} kg total</div>
+      </div>
+      <div class="pd-controls">
+        <button class="pd-sell" data-item="${item.name}" style="padding:4px 12px;font-size:0.85em;background:var(--clr-danger);color:#fff;border:2px solid var(--clr-danger);font-family:var(--font-heading);font-weight:600;cursor:pointer;">Sell 1</button>
+        <span class="pd-weight" style="color:var(--clr-muted);">${item.wt} kg ea</span>
+      </div>
+    </div>`;
+      });
+    }
+    html += `<div style="font-family:var(--font-heading);font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:var(--clr-accent);margin:14px 0 6px;">Buy Supplies</div>`;
+    html += shopItems.map((item) => {
       const canBuy = balance >= item.price;
       const itemWeight = (item.wt * item.count).toFixed(1);
       const qty = purchased[item.name];
@@ -19545,12 +19569,25 @@ function showShop(game) {
       </div>
       <div class="pd-controls">
         <span class="pd-count">${qty > 0 ? "\xD7" + qty : "\u2014"}</span>
-        <button class="pd-buy" data-item="${item.name}" ${canBuy ? "" : "disabled"}>Buy (${item.price} \u20A5)</button>
-        ${qty > 0 ? `<button class="pd-remove" data-item="${item.name}">Remove</button>` : ""}
+        ${qty > 0 ? `<button class="pd-remove" data-item="${item.name}" style="padding:4px 12px;font-size:0.85em;background:transparent;color:var(--clr-danger);border:2px solid var(--clr-danger);font-family:var(--font-heading);font-weight:600;cursor:pointer;">Remove</button>` : ""}
+        <button class="pd-buy" data-item="${item.name}" ${canBuy ? "" : "disabled"} style="padding:4px 12px;font-size:0.85em;background:var(--clr-success);color:#fff;border:2px solid var(--clr-success);font-family:var(--font-heading);font-weight:600;cursor:pointer;">+ Buy (${item.price} \u20A5)</button>
         <span class="pd-weight">${itemWeight} kg</span>
       </div>
     </div>`;
     }).join("");
+    listEl.innerHTML = html;
+    listEl.querySelectorAll(".pd-sell").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const name3 = btn.dataset.item;
+        const item = cart.find((i) => i.name === name3);
+        if (item && item.count > 0) {
+          game.offloadItem(name3);
+          balance += item.mbValue || 1;
+          recalc();
+          renderList();
+        }
+      });
+    });
     listEl.querySelectorAll(".pd-buy").forEach((btn) => {
       btn.addEventListener("click", () => {
         const name3 = btn.dataset.item;

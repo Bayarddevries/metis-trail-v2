@@ -1052,7 +1052,7 @@ function getSettlementActionsByType(type) {
       return [
         { id: 'heal_crew', label: 'Heal Crew', cost: '1 Medicine Pouch or 2 ₥', risk: 'Clears injury/illness, morale +10', flavor: 'The Grey Nuns tend the sick without asking who you are or where you come from.' },
         { id: 'rest', label: 'Free Rest + Blessing', cost: 'Free', risk: 'Crew rested, morale +15', flavor: 'A chapel bell at evening. You sleep on straw but wake with a lighter spirit.' },
-        { id: 'get_blessing', label: 'Get Blessing', cost: '1 food', risk: 'Morale +10, next event DC −1', flavor: 'The priest\'s hand on your brow. The trail feels less hostile after prayer.' },
+        { id: 'get_blessing', label: 'Get Blessing', cost: '1 food', risk: 'Morale +10, +1 to dice rolls for 3 days', flavor: 'The priest\'s hand on your brow. The trail feels less hostile after prayer.' },
         { id: 'trade_limited', label: 'Trade (Limited)', cost: 'Buy pemmican 0.5 ₥, sell blankets 1.5 ₥', risk: 'Charity rates', flavor: 'The mission garden feeds the body. The trade feeds the journey.' },
       ];
     case 'trading':

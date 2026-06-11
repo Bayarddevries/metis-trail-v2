@@ -13,6 +13,7 @@ export function applyTheme(root) {
   root.style.setProperty('--clr-accent', '#d4a820');          // Gold/brass — borders, headers, highlights
   root.style.setProperty('--clr-success', '#5a9a4a');         // Readable green — success states
   root.style.setProperty('--clr-danger', '#b83030');          // Brighter red — danger states
+  root.style.setProperty('--clr-blessing', '#B8860B');        // Brass gold — blessing active
 
   // Legacy mappings (for backward compatibility)
   root.style.setProperty('--clr-ink', 'var(--clr-ink-on-dark)');         // Body text on dark green

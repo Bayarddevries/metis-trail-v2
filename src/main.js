@@ -1362,7 +1362,36 @@ function showShop(game) {
   }
 
   function renderList() {
-    listEl.innerHTML = shopItems.map(item => {
+    // Build combined list: trade goods from cart + shop items
+    const cart = game.getCart();
+    const tradeGoods = cart.filter(i => i.type === 'trade' || i.category === 'furs');
+
+    let html = '';
+
+    // Section: Your Trade Goods (can sell back)
+    if (tradeGoods.length > 0) {
+      html += `<div style="font-family:var(--font-heading);font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:var(--clr-accent);margin:10px 0 6px;">Your Trade Goods</div>`;
+      tradeGoods.forEach(item => {
+        const mbVal = item.mbValue || 1;
+        const itemWeight = (item.wt * item.count).toFixed(1);
+        html += `
+    <div class="pd-row" data-trade-item="${item.name}">
+      <div class="pd-item-info">
+        <span class="pd-icon">${getItemIcon(item.name)}</span>
+        <span class="pd-name">${item.name} ×${item.count}</span>
+        <div style="font-size:0.75em;color:var(--clr-accent);margin-top:2px;">${mbVal} ₥ each · ${itemWeight} kg total</div>
+      </div>
+      <div class="pd-controls">
+        <button class="pd-sell" data-item="${item.name}" style="padding:4px 12px;font-size:0.85em;background:var(--clr-danger);color:#fff;border:2px solid var(--clr-danger);font-family:var(--font-heading);font-weight:600;cursor:pointer;">Sell 1</button>
+        <span class="pd-weight" style="color:var(--clr-muted);">${item.wt} kg ea</span>
+      </div>
+    </div>`;
+      });
+    }
+
+    // Section: Buy Supplies
+    html += `<div style="font-family:var(--font-heading);font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:var(--clr-accent);margin:14px 0 6px;">Buy Supplies</div>`;
+    html += shopItems.map(item => {
       const canBuy = balance >= item.price;
       const itemWeight = (item.wt * item.count).toFixed(1);
       const qty = purchased[item.name];
@@ -1375,13 +1404,31 @@ function showShop(game) {
       </div>
       <div class="pd-controls">
         <span class="pd-count">${qty > 0 ? '×' + qty : '—'}</span>
-        <button class="pd-buy" data-item="${item.name}" ${canBuy ? '' : 'disabled'}>Buy (${item.price} ₥)</button>
-        ${qty > 0 ? `<button class="pd-remove" data-item="${item.name}">Remove</button>` : ''}
+        ${qty > 0 ? `<button class="pd-remove" data-item="${item.name}" style="padding:4px 12px;font-size:0.85em;background:transparent;color:var(--clr-danger);border:2px solid var(--clr-danger);font-family:var(--font-heading);font-weight:600;cursor:pointer;">Remove</button>` : ''}
+        <button class="pd-buy" data-item="${item.name}" ${canBuy ? '' : 'disabled'} style="padding:4px 12px;font-size:0.85em;background:var(--clr-success);color:#fff;border:2px solid var(--clr-success);font-family:var(--font-heading);font-weight:600;cursor:pointer;">+ Buy (${item.price} ₥)</button>
         <span class="pd-weight">${itemWeight} kg</span>
       </div>
     </div>`;
     }).join('');
 
+    listEl.innerHTML = html;
+
+    // Trade good sell buttons
+    listEl.querySelectorAll('.pd-sell').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const name = btn.dataset.item;
+        const item = cart.find(i => i.name === name);
+        if (item && item.count > 0) {
+          // Sell: remove from cart, add ₥ to balance
+          game.offloadItem(name);
+          balance += (item.mbValue || 1);
+          recalc();
+          renderList();
+        }
+      });
+    });
+
+    // Buy buttons
     listEl.querySelectorAll('.pd-buy').forEach(btn => {
       btn.addEventListener('click', () => {
         const name = btn.dataset.item;
@@ -1395,6 +1442,7 @@ function showShop(game) {
       });
     });
 
+    // Remove buttons
     listEl.querySelectorAll('.pd-remove').forEach(btn => {
       btn.addEventListener('click', () => {
         const name = btn.dataset.item;
