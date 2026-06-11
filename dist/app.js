@@ -2899,7 +2899,7 @@ function applyTheme(root) {
   root.style.setProperty("--clr-ok-text", "#5a9a4a");
   root.style.setProperty("--clr-catitem-bg", "rgba(212,168,32,0.06)");
   root.style.setProperty("--clr-catitem-border", "rgba(212,168,32,0.15)");
-  root.style.setProperty("--clr-muted", "#9a8a6a");
+  root.style.setProperty("--clr-muted", "#6b5740");
   root.style.setProperty("--clr-pdrow-bg", "rgba(212,168,32,0.04)");
   root.style.setProperty("--clr-pdrow-border", "rgba(212,168,32,0.1)");
   root.style.setProperty("--clr-camp-border", "var(--clr-accent)");
@@ -2911,10 +2911,10 @@ function applyTheme(root) {
   root.style.setProperty("--clr-campfire-flicker", "radial-gradient(circle at 45% 75%, rgba(255,140,40,0.15) 0%, transparent 40%), radial-gradient(circle at 55% 65%, rgba(255,110,30,0.12) 0%, transparent 35%), radial-gradient(circle at 60% 80%, rgba(255,80,20,0.1) 0%, transparent 30%)");
   root.style.setProperty("--clr-success-glow", "rgba(90,154,74,0.3)");
   root.style.setProperty("--clr-danger-glow", "rgba(184,48,48,0.3)");
-  root.style.setProperty("--clr-choice-cost", "#b0a080");
-  root.style.setProperty("--clr-source-text", "#a09070");
-  root.style.setProperty("--clr-source-context", "#8a7a5a");
-  root.style.setProperty("--clr-placeholder", "#7a6a4a");
+  root.style.setProperty("--clr-choice-cost", "#7a6a50");
+  root.style.setProperty("--clr-source-text", "#5a4a35");
+  root.style.setProperty("--clr-source-context", "#6b5740");
+  root.style.setProperty("--clr-placeholder", "#5a4a35");
   root.style.setProperty("--clr-input-bg", "rgba(255,245,230,0.08)");
   root.style.setProperty("--clr-input-bg-focus", "rgba(255,245,230,0.12)");
   root.style.setProperty("--clr-silver", "#b0b0b0");

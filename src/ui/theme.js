@@ -68,7 +68,7 @@ export function applyTheme(root) {
   // Category legend / item rows
   root.style.setProperty('--clr-catitem-bg', 'rgba(212,168,32,0.06)');
   root.style.setProperty('--clr-catitem-border', 'rgba(212,168,32,0.15)');
-  root.style.setProperty('--clr-muted', '#9a8a6a');
+  root.style.setProperty('--clr-muted', '#6b5740');
   root.style.setProperty('--clr-pdrow-bg', 'rgba(212,168,32,0.04)');
   root.style.setProperty('--clr-pdrow-border', 'rgba(212,168,32,0.1)');
 
@@ -84,10 +84,10 @@ export function applyTheme(root) {
   // Dice / outcome colors
   root.style.setProperty('--clr-success-glow', 'rgba(90,154,74,0.3)');
   root.style.setProperty('--clr-danger-glow', 'rgba(184,48,48,0.3)');
-  root.style.setProperty('--clr-choice-cost', '#b0a080');
-  root.style.setProperty('--clr-source-text', '#a09070');
-  root.style.setProperty('--clr-source-context', '#8a7a5a');
-  root.style.setProperty('--clr-placeholder', '#7a6a4a');
+  root.style.setProperty('--clr-choice-cost', '#7a6a50');
+  root.style.setProperty('--clr-source-text', '#5a4a35');
+  root.style.setProperty('--clr-source-context', '#6b5740');
+  root.style.setProperty('--clr-placeholder', '#5a4a35');
   root.style.setProperty('--clr-input-bg', 'rgba(255,245,230,0.08)');
   root.style.setProperty('--clr-input-bg-focus', 'rgba(255,245,230,0.12)');
 
