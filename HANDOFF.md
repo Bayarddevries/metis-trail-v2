@@ -7,11 +7,40 @@
 
 ---
 
+## 🚀 Next Agent — Start Here
+
+**All code changes are committed and pushed. Working tree is clean.**
+
+### Immediate priorities (in order):
+
+1. **Fix #73 — Hall of Fame does not load** — This is the only remaining bug. Check `showEnd()` leaderboard loading code in `src/main.js`. Likely a Firebase auth or fetch issue.
+
+2. **Verify v10 deployed** — Open https://bayarddevries.github.io/metis-trail-v2/ and run through the test checklist below. Confirm settlement actions show result cards with flavor text, camp Push On auto-closes, journal has day-grouped entries, scores aren't all 0s.
+
+3. **Then pick from open issues:**
+   - #60 Web Audio ambient engine (code snippet already in audit report Snippet 5)
+   - #59 Haptics module wiring (Haptics utility exists in main.js, needs wiring to game events)
+   - #62 Settlement "recommended action" highlight
+   - #42 Secondary source reformat to period voices
+   - #40 Party name instead of user name
+
+### Build & test commands:
+```bash
+cd /home/bayard_devries/projects/metis-trail-v2
+bun scripts/build.mjs          # build dist/
+python3 -m http.server 8080 --directory dist  # local test server
+```
+
+### Critical pitfalls to avoid:
+- **Never use `write_file` on `src/template.html`** — use `patch` for targeted edits only
+- **Always run build + verify in browser before pushing** — CI deploys from `dist/`
+- **Engine API: add method to engine.js before calling from main.js** — missing method silently kills render functions
+- **`performedAction` flag must reset** when leaving settlement or all buttons stay disabled on next visit
+- **Settlement undefined variable references** — any new sub-button handler must have all variables in scope. An undefined reference silently kills the entire click handler (lesson from #73 root cause)
+
+---
+
 ## 1. What Just Happened
-
-Sprint 6/7 Gameplay Polish — Phases A, B, and C completed and deployed.
-
-### Phase A — Critical Bug Fixes
 - **#79 Settlement actions broken:** Rewrote `showSettlement()`. Root cause: `beforeJournal` undefined variable in trade sub-button handler caused silent JS error. Settlement action cards now match camp card style (icon/name/cost/risk/flavor in grid). Added `settlement-roll-display` and `settlement-result` overlay areas for dice animation + flavor text + Continue West.
 - **#70 End screen all zeros:** `getEndgameScore()` returned empty `{}` for losses → NaN. Fixed with `safeNum()` helper (`Number.isFinite()`), optional chaining, `Math.round()` on all score lines.
 - **#80 Blessing roll buff:** `blessingDays` counter in state, decremented in `travelOneDay()`, +1 to all dice rolls via `totalMod` when >0. ✝ indicator in status bar.
