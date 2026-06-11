@@ -1870,7 +1870,7 @@ function createGame(seed = null) {
         }
         return stepLog;
       }
-      if (n.type !== "river" && S2.node > 1) S2.pendingSettlement = n;
+      if (n.type !== "river" && S2.node >= 1) S2.pendingSettlement = n;
       return stepLog;
     }
     const weatherEventMod = CONSTANTS.WEATHER_EVENT_MOD[S2.weather] || 0;
@@ -2844,76 +2844,82 @@ __name(getSquealEvent, "getSquealEvent");
 
 // src/ui/theme.js
 function applyTheme(root) {
-  root.style.setProperty("--clr-bg", "#1a1208");
-  root.style.setProperty("--clr-panel-bg", "#2a1f10");
+  root.style.setProperty("--clr-bg", "#0d2b0d");
+  root.style.setProperty("--clr-panel-bg", "#f5e6c8");
   root.style.setProperty("--clr-journal-bg", "#f5e6c8");
-  root.style.setProperty("--clr-ink-dark", "#3a2f1f");
-  root.style.setProperty("--clr-ink-light", "#c4b69a");
-  root.style.setProperty("--clr-accent", "#8b6914");
+  root.style.setProperty("--clr-ink-on-dark", "#f5e6c8");
+  root.style.setProperty("--clr-ink-on-light", "#1a3a1a");
+  root.style.setProperty("--clr-accent", "#c8a81a");
   root.style.setProperty("--clr-success", "#4a7a3a");
   root.style.setProperty("--clr-danger", "#8b2500");
-  root.style.setProperty("--clr-ink", "var(--clr-ink-dark)");
-  root.style.setProperty("--clr-bg-dark", "#1a1208");
+  root.style.setProperty("--clr-ink", "var(--clr-ink-on-dark)");
+  root.style.setProperty("--clr-ink-panel", "var(--clr-ink-on-light)");
+  root.style.setProperty("--clr-bg-dark", "#0d2b0d");
   root.style.setProperty("--clr-card-bg", "var(--clr-panel-bg)");
   root.style.setProperty("--clr-btn-bg", "var(--clr-accent)");
-  root.style.setProperty("--clr-btn-text", "#1a1208");
-  root.style.setProperty("--clr-btn-hover", "#7a5a20");
+  root.style.setProperty("--clr-btn-text", "#0d2b0d");
+  root.style.setProperty("--clr-btn-hover", "#a68814");
   root.style.setProperty("--clr-status-bar-bg", "var(--clr-bg)");
-  root.style.setProperty("--clr-status-text", "var(--clr-ink-light)");
+  root.style.setProperty("--clr-status-text", "var(--clr-ink-on-dark)");
   root.style.setProperty("--clr-status-accent", "var(--clr-accent)");
-  root.style.setProperty("--clr-overlay-bg", "rgba(26,18,8,0.96)");
+  root.style.setProperty("--clr-overlay-bg", "rgba(13,43,13,0.96)");
   root.style.setProperty("--clr-border", "var(--clr-accent)");
-  root.style.setProperty("--clr-map-bg", "#1a1208");
-  root.style.setProperty("--clr-tooltip-bg", "rgba(26,18,8,0.9)");
-  root.style.setProperty("--clr-tooltip-text", "var(--clr-ink-light)");
+  root.style.setProperty("--clr-map-bg", "#0d2b0d");
+  root.style.setProperty("--clr-tooltip-bg", "rgba(13,43,13,0.9)");
+  root.style.setProperty("--clr-tooltip-text", "var(--clr-ink-on-dark)");
   root.style.setProperty("--clr-tooltip-border", "var(--clr-accent)");
-  root.style.setProperty("--clr-map-frame-shadow", "rgba(0,0,0,0.3)");
-  root.style.setProperty("--clr-narrative-text", "var(--clr-ink-dark)");
-  root.style.setProperty("--clr-ruled-line", "rgba(139,105,20,0.15)");
-  root.style.setProperty("--clr-ledger-border", "rgba(139,105,20,0.2)");
+  root.style.setProperty("--clr-map-frame-shadow", "rgba(0,0,0,0.4)");
+  root.style.setProperty("--clr-narrative-text", "var(--clr-ink-on-dark)");
+  root.style.setProperty("--clr-ruled-line", "rgba(200,168,26,0.15)");
+  root.style.setProperty("--clr-ledger-border", "rgba(200,168,26,0.2)");
   root.style.setProperty("--clr-ledger-margin", "var(--clr-accent)");
   root.style.setProperty("--clr-paper-texture", "none");
   root.style.setProperty("--clr-event-border", "var(--clr-accent)");
   root.style.setProperty("--clr-event-accent-bar", "var(--clr-accent)");
+  root.style.setProperty("--clr-settlement-hbc", "#8b2500");
+  root.style.setProperty("--clr-settlement-metis", "#2a5c8a");
+  root.style.setProperty("--clr-settlement-nwmp", "#1a6b3a");
+  root.style.setProperty("--clr-settlement-mission", "#8b6914");
+  root.style.setProperty("--clr-settlement-trading", "#8b6914");
   root.style.setProperty("--clr-food-low", "var(--clr-danger)");
-  root.style.setProperty("--clr-warn", "#b8860b");
+  root.style.setProperty("--clr-warn", "#d4a012");
   root.style.setProperty("--clr-ok", "var(--clr-success)");
-  root.style.setProperty("--clr-weather-rain", "#6b8e9b");
-  root.style.setProperty("--clr-weather-snow", "#b8c4d0");
+  root.style.setProperty("--clr-weather-rain", "#8aadbd");
+  root.style.setProperty("--clr-weather-snow", "#c8d4e0");
   root.style.setProperty("--clr-over-bg", "rgba(139,37,0,0.15)");
   root.style.setProperty("--clr-over-border", "var(--clr-danger)");
   root.style.setProperty("--clr-over-text", "var(--clr-danger)");
-  root.style.setProperty("--clr-warn-bg", "rgba(184,134,11,0.15)");
+  root.style.setProperty("--clr-warn-bg", "rgba(212,160,18,0.15)");
   root.style.setProperty("--clr-warn-border", "var(--clr-warn)");
-  root.style.setProperty("--clr-gold", "#B8860B");
+  root.style.setProperty("--clr-gold", "#D4A012");
   root.style.setProperty("--clr-ok-bg", "rgba(74,122,58,0.15)");
   root.style.setProperty("--clr-ok-border", "var(--clr-success)");
   root.style.setProperty("--clr-ok-text", "var(--clr-success)");
-  root.style.setProperty("--clr-catitem-bg", "rgba(255,255,255,0.05)");
-  root.style.setProperty("--clr-catitem-border", "rgba(139,105,20,0.15)");
-  root.style.setProperty("--clr-muted", "#8a7a6a");
-  root.style.setProperty("--clr-pdrow-bg", "rgba(255,255,255,0.03)");
-  root.style.setProperty("--clr-pdrow-border", "rgba(139,105,20,0.1)");
+  root.style.setProperty("--clr-catitem-bg", "rgba(26,58,26,0.05)");
+  root.style.setProperty("--clr-catitem-border", "rgba(200,168,26,0.15)");
+  root.style.setProperty("--clr-muted", "#6a8a5a");
+  root.style.setProperty("--clr-pdrow-bg", "rgba(26,58,26,0.03)");
+  root.style.setProperty("--clr-pdrow-border", "rgba(200,168,26,0.1)");
   root.style.setProperty("--clr-camp-border", "var(--clr-accent)");
-  root.style.setProperty("--clr-camp-pill-bg", "rgba(255,255,255,0.05)");
-  root.style.setProperty("--clr-camp-pill-border", "rgba(139,105,20,0.15)");
-  root.style.setProperty("--clr-camp-btn-hover", "#3a2f1f");
-  root.style.setProperty("--clr-campfire-glow", "radial-gradient(ellipse at 50% 100%, rgba(180,110,20,0.35) 0%, rgba(139,105,20,0.22) 35%, transparent 70%)");
+  root.style.setProperty("--clr-camp-pill-bg", "rgba(26,58,26,0.05)");
+  root.style.setProperty("--clr-camp-pill-border", "rgba(200,168,26,0.15)");
+  root.style.setProperty("--clr-camp-btn-hover", "#1a3a1a");
+  root.style.setProperty("--clr-campfire-glow", "radial-gradient(ellipse at 50% 100%, rgba(190,130,20,0.35) 0%, rgba(200,168,26,0.22) 35%, transparent 70%)");
   root.style.setProperty("--clr-campfire-embers", `url("data:image/svg+xml,%3Csvg viewBox='0 0 300 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='campNoise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.025' numOctaves='5' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23campNoise)' opacity='0.08'/%3E%3C/svg%3E")`);
   root.style.setProperty("--clr-campfire-flicker", "radial-gradient(circle at 45% 75%, rgba(255,140,40,0.15) 0%, transparent 40%), radial-gradient(circle at 55% 65%, rgba(255,110,30,0.12) 0%, transparent 35%), radial-gradient(circle at 60% 80%, rgba(255,80,20,0.1) 0%, transparent 30%)");
   root.style.setProperty("--clr-success-glow", "rgba(74,122,58,0.3)");
   root.style.setProperty("--clr-danger-glow", "rgba(139,37,0,0.3)");
-  root.style.setProperty("--clr-choice-cost", "#8a7a6a");
-  root.style.setProperty("--clr-source-text", "#8a7a6a");
-  root.style.setProperty("--clr-source-context", "#9a8a7a");
-  root.style.setProperty("--clr-placeholder", "#6a5a4a");
-  root.style.setProperty("--clr-input-bg", "rgba(255,255,255,0.05)");
-  root.style.setProperty("--clr-input-bg-focus", "rgba(255,255,255,0.1)");
-  root.style.setProperty("--clr-silver", "#8a8a8a");
-  root.style.setProperty("--clr-bronze", "#8B5E3C");
-  root.style.setProperty("--clr-gold-faint", "rgba(139,105,20,0.08)");
-  root.style.setProperty("--clr-gold-light", "rgba(139,105,20,0.15)");
-  root.style.setProperty("--clr-intel-border", "rgba(139,105,20,0.1)");
+  root.style.setProperty("--clr-choice-cost", "#6a8a5a");
+  root.style.setProperty("--clr-source-text", "#6a8a5a");
+  root.style.setProperty("--clr-source-context", "#8a9a7a");
+  root.style.setProperty("--clr-placeholder", "#5a7a4a");
+  root.style.setProperty("--clr-input-bg", "rgba(26,58,26,0.1)");
+  root.style.setProperty("--clr-input-bg-focus", "rgba(26,58,26,0.15)");
+  root.style.setProperty("--clr-silver", "#9a9a9a");
+  root.style.setProperty("--clr-bronze", "#A6784C");
+  root.style.setProperty("--clr-gold-faint", "rgba(200,168,26,0.08)");
+  root.style.setProperty("--clr-gold-light", "rgba(200,168,26,0.15)");
+  root.style.setProperty("--clr-intel-border", "rgba(200,168,26,0.1)");
   root.style.setProperty("--font-heading", "'Playfair Display', 'Georgia', serif");
   root.style.setProperty("--font-body", "'Crimson Text', 'Georgia', serif");
 }
@@ -3123,8 +3129,8 @@ function renderStatusBar(state) {
   }
   const mbEl = document.getElementById("s-mb");
   if (mbEl) {
-    const mb = state.mbValue || 0;
-    mbEl.textContent = `${mb.toFixed(1)} \u20A5`;
+    const mb = Math.round(state.mbValue || 0);
+    mbEl.textContent = `${mb} \u20A5`;
     mbEl.className = "stat-value" + (mb < CONSTANTS.MB_WIN_THRESHOLD ? " mb-low" : " mb-ok");
   }
   if (!window.__METIS_PENDING_RESULT__) window.__METIS_PENDING_RESULT__ = null;
@@ -18914,6 +18920,32 @@ function bootstrap(seed = null) {
   } else {
     console.warn("Metis bootstrap: #game-root not found; Begin Journey button is offline.");
   }
+  document.addEventListener("click", (e) => {
+    if (e.target.closest("#pd-confirm")) {
+      e.preventDefault();
+      e.stopPropagation();
+      const btn = e.target.closest("#pd-confirm");
+      if (btn.disabled) return;
+      const game2 = window._metisGame;
+      if (window.__METIS_SHOP_ITEMS && window.__METIS_SHOP_PURCHASED) {
+        window.__METIS_SHOP_ITEMS.forEach((item) => {
+          if (window.__METIS_SHOP_PURCHASED[item.name] > 0) {
+            for (let i = 0; i < window.__METIS_SHOP_PURCHASED[item.name]; i++) {
+              if (item.category === "provisions") {
+                game2.addFood(item.count);
+              } else {
+                game2.buyItem(item.name, item.wt, item.category);
+              }
+            }
+          }
+        });
+      }
+      game2.clearTradeGoods();
+      game2.confirmPreDeparture();
+      document.getElementById("predeparture-overlay")?.classList.remove("active");
+      window.__METIS_RENDER__();
+    }
+  });
   const travelBtn = find("#btn-travel");
   if (travelBtn) {
     travelBtn.addEventListener("click", () => {
@@ -19158,6 +19190,7 @@ __name(revealDiceOutcome, "revealDiceOutcome");
 function showEvent(game) {
   const ev = game.getPendingEvent();
   if (!ev) return;
+  hideOverlays();
   const textEl = document.getElementById("event-text");
   const choicesEl = document.getElementById("event-choices");
   const continueEl = document.getElementById("event-continue");
@@ -19674,6 +19707,8 @@ function showShop(game) {
   shopItems.forEach((item) => {
     purchased[item.name] = 0;
   });
+  window.__METIS_SHOP_ITEMS = shopItems;
+  window.__METIS_SHOP_PURCHASED = purchased;
   function recalc() {
     let totalWeight2 = 0;
     let totalFood = 0;
@@ -19703,10 +19738,10 @@ function showShop(game) {
       confirmBtn.disabled = totalFood < 10;
       if (totalFood < 10) {
         shopStatusEl.textContent = `Need ${10 - totalFood} more food to begin.`;
-        shopStatusEl.style.color = "#8b2500";
+        shopStatusEl.style.color = "var(--clr-danger)";
       } else {
         shopStatusEl.textContent = "Ready to depart!";
-        shopStatusEl.style.color = "#4a7a3a";
+        shopStatusEl.style.color = "var(--clr-success)";
       }
     }
   }
@@ -19721,7 +19756,7 @@ function showShop(game) {
       <div class="pd-item-info">
         <span class="pd-icon">${getItemIcon(item.name)}</span>
         <span class="pd-name">${item.name}</span>
-        <div style="font-size:0.75em;color:#5a4a3a;margin-top:2px;">${item.desc}</div>
+        <div style="font-size:0.75em;color:var(--clr-muted);margin-top:2px;">${item.desc}</div>
       </div>
       <div class="pd-controls">
         <span class="pd-count">${qty > 0 ? "\xD7" + qty : "\u2014"}</span>
@@ -19757,23 +19792,6 @@ function showShop(game) {
     });
   }
   __name(renderList, "renderList");
-  confirmBtn.onclick = () => {
-    shopItems.forEach((item) => {
-      if (purchased[item.name] > 0) {
-        for (let i = 0; i < purchased[item.name]; i++) {
-          if (item.category === "provisions") {
-            game.addFood(item.count);
-          } else {
-            game.buyItem(item.name, item.wt, item.category);
-          }
-        }
-      }
-    });
-    game.clearTradeGoods();
-    game.confirmPreDeparture();
-    document.getElementById("predeparture-overlay")?.classList.remove("active");
-    window.__METIS_RENDER__();
-  };
   recalc();
   renderList();
   document.getElementById("predeparture-overlay")?.classList.add("active");

@@ -2,6 +2,16 @@
 
 All notable changes are documented here. Format loosely follows Keep a Changelog.
 
+## [v84] — 2026-06-11
+
+### Sprint 3 + 4 Closeout — Settlements, Economy, Visual Unification
+- Settlement system finalized: type-specific overlays and actions for HBC, Métis, NWMP, Mission, Trading nodes
+- Engine API expanded for settlements and endgame scoring/trade estimates
+- Green & parchment period palette standardized and tested across overlays; readability restored
+- Fixed text-on-background contrast issues by separating `--clr-ink-on-dark` from `--clr-ink-on-light`
+- Unified overlay button hierarchy and removed hardcoded colors in favor of semantic variables
+- Verified core travel loop in browser: shop → confirm → travel → settlement overlay → continue
+
 ## [v83] — 2026-06-10
 
 ### Dice Clarity & Camp Fix

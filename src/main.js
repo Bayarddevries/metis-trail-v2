@@ -116,6 +116,35 @@ export function bootstrap(seed = null) {
     console.warn('Metis bootstrap: #game-root not found; Begin Journey button is offline.');
   }
 
+  // Delegated click for pre-departure confirm button (outside #game-root)
+  document.addEventListener('click', (e) => {
+    if (e.target.closest('#pd-confirm')) {
+      e.preventDefault();
+      e.stopPropagation();
+      const btn = e.target.closest('#pd-confirm');
+      if (btn.disabled) return;
+      const game = window._metisGame;
+      // Get shop state from showShop closure via window
+      if (window.__METIS_SHOP_ITEMS && window.__METIS_SHOP_PURCHASED) {
+        window.__METIS_SHOP_ITEMS.forEach(item => {
+          if (window.__METIS_SHOP_PURCHASED[item.name] > 0) {
+            for (let i = 0; i < window.__METIS_SHOP_PURCHASED[item.name]; i++) {
+              if (item.category === 'provisions') {
+                game.addFood(item.count);
+              } else {
+                game.buyItem(item.name, item.wt, item.category);
+              }
+            }
+          }
+        });
+      }
+      game.clearTradeGoods();
+      game.confirmPreDeparture();
+      document.getElementById('predeparture-overlay')?.classList.remove('active');
+      window.__METIS_RENDER__();
+    }
+  });
+
   const travelBtn = find('#btn-travel');
   if (travelBtn) {
     travelBtn.addEventListener('click', () => {
@@ -641,6 +670,7 @@ function revealDiceOutcome(diceResult) {
 function showEvent(game) {
   const ev = game.getPendingEvent();
   if (!ev) return;
+  hideOverlays();
   const textEl = document.getElementById('event-text');
   const choicesEl = document.getElementById('event-choices');
   const continueEl = document.getElementById('event-continue');
@@ -1229,6 +1259,10 @@ function showShop(game) {
   const purchased = {};
   shopItems.forEach(item => { purchased[item.name] = 0; });
 
+  // Expose for delegated confirm handler
+  window.__METIS_SHOP_ITEMS = shopItems;
+  window.__METIS_SHOP_PURCHASED = purchased;
+
   function recalc() {
     let totalWeight = 0;
     let totalFood = 0;
@@ -1260,10 +1294,10 @@ function showShop(game) {
       confirmBtn.disabled = totalFood < 10;
       if (totalFood < 10) {
         shopStatusEl.textContent = `Need ${10 - totalFood} more food to begin.`;
-        shopStatusEl.style.color = '#8b2500';
+        shopStatusEl.style.color = 'var(--clr-danger)';
       } else {
         shopStatusEl.textContent = 'Ready to depart!';
-        shopStatusEl.style.color = '#4a7a3a';
+        shopStatusEl.style.color = 'var(--clr-success)';
       }
     }
   }
@@ -1278,7 +1312,7 @@ function showShop(game) {
       <div class="pd-item-info">
         <span class="pd-icon">${getItemIcon(item.name)}</span>
         <span class="pd-name">${item.name}</span>
-        <div style="font-size:0.75em;color:#5a4a3a;margin-top:2px;">${item.desc}</div>
+        <div style="font-size:0.75em;color:var(--clr-muted);margin-top:2px;">${item.desc}</div>
       </div>
       <div class="pd-controls">
         <span class="pd-count">${qty > 0 ? '×' + qty : '—'}</span>
@@ -1315,25 +1349,6 @@ function showShop(game) {
       });
     });
   }
-
-  confirmBtn.onclick = () => {
-    // Add purchased items to cart and game state
-    shopItems.forEach(item => {
-      if (purchased[item.name] > 0) {
-        for (let i = 0; i < purchased[item.name]; i++) {
-          if (item.category === 'provisions') {
-            game.addFood(item.count);
-          } else {
-            game.buyItem(item.name, item.wt, item.category);
-          }
-        }
-      }
-    });
-    game.clearTradeGoods();
-    game.confirmPreDeparture(); // sets S.preDeparture = false
-    document.getElementById('predeparture-overlay')?.classList.remove('active');
-    window.__METIS_RENDER__();
-  };
 
   recalc();
   renderList();

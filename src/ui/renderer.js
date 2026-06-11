@@ -227,8 +227,8 @@ export function renderStatusBar(state) {
   // MB (Made Beaver) currency display
   const mbEl = document.getElementById('s-mb');
   if (mbEl) {
-    const mb = state.mbValue || 0;
-    mbEl.textContent = `${mb.toFixed(1)} ₥`;
+    const mb = Math.round(state.mbValue || 0);
+    mbEl.textContent = `${mb} ₥`;
     mbEl.className = 'stat-value' + (mb < CONSTANTS.MB_WIN_THRESHOLD ? ' mb-low' : ' mb-ok');
   }
 

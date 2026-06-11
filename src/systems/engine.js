@@ -316,7 +316,7 @@ export function createGame(seed = null) {
         }
         return stepLog;
       }
-      if (n.type !== 'river' && S.node > 1) S.pendingSettlement = n;
+      if (n.type !== 'river' && S.node >= 1) S.pendingSettlement = n;
       return stepLog;
     }
 

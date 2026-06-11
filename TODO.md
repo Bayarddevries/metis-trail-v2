@@ -68,26 +68,25 @@ Legend: `pending` | `in_progress` | `blocked` | `done`
 - [x] Journal logging for events, camp actions, settlements
 - [x] Hunt gives trade goods (pelts/hides) not food
 
-## Sprint 3: Settlements & Economy — IN PROGRESS
-- [ ] Settlement Overlay Redesign — type-specific overlays with action cards
-- [ ] HBC Fort Actions — trade goods→₥, buy supplies, rest, trail intel
-- [ ] Métis Camp Actions — gossip, recruit, dance, share food, craft hides
-- [ ] NWMP Post Actions — fines, permits, duty, ammo, rest
-- [ ] Mission Actions — heal, free rest+blessing, blessing, limited trade
-- [ ] Settlement Data — settlementType, name, description, priceMultiplier per node
-- [ ] Hunting Events — terrain-specific (bison/beaver/elk/deer) with DCs
-- [ ] Price Variation — settlement × category × distance multipliers
-- [ ] Endgame Scoring Screen — breakdown, tiers, narrative endings
-- [ ] Engine API — getSettlementActions, settlementAction, getTradeEstimate, getEndgameScore, getSettlementData
+## Sprint 3: Settlements & Economy — DONE
+- [x] Settlement Overlay Redesign — type-specific overlays with action cards
+- [x] HBC Fort Actions — trade goods→₥, buy supplies, rest, trail intel
+- [x] Métis Camp Actions — gossip, recruit, dance, share food, craft hides
+- [x] NWMP Post Actions — fines, permits, duty, ammo, rest
+- [x] Mission Actions — heal, free rest+blessing, blessing, limited trade
+- [x] Settlement Data — settlementType, name, description, priceMultiplier per node
+- [x] Price Variation — settlement × category × distance multipliers
+- [x] Endgame Scoring Screen — breakdown, tiers, narrative endings
+- [x] Engine API — getSettlementActions, settlementAction, getTradeEstimate, getEndgameScore, getSettlementData
 
-## Sprint 4: Visual Unification — PENDING
-- [ ] Color Palette — CSS custom properties via theme.js
-- [ ] Overlay Unification — shared .overlay-panel base class
-- [ ] Status Bar Redesign — two clusters with brass separator
-- [ ] Map Styling — sepia tiles, dotted trail, typed markers, cart SVG
-- [ ] Button Polish — primary/secondary/ghost hierarchy, 44px targets
-- [ ] Journal Polish — collapse chevrons, consistent dice/mechanical
-- [ ] Dice Consistency — wooden block, settle animation, ink-stamp
+## Sprint 4: Visual Unification — DONE
+- [x] Color Palette — CSS custom properties via theme.js
+- [x] Overlay Unification — shared .overlay-panel base class
+- [x] Status Bar Redesign — two clusters with brass separator
+- [x] Map Styling — sepia tiles, dotted trail, typed markers, cart SVG
+- [x] Button Polish — primary/secondary/ghost hierarchy, 44px targets
+- [x] Journal Polish — collapse chevrons, consistent dice/mechanical
+- [x] Dice Consistency — wooden block, settle animation, ink-stamp
 
 ## Sprint 5: Content & Historical Depth — FUTURE
 - [ ] Audit all 55 events for source coverage gaps
