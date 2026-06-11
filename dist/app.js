@@ -19793,20 +19793,16 @@ function showEnd(game) {
       sourceEl.style.display = "none";
     }
   }
-  const mbVal = state.mbValue || 0;
-  const foodBonus = Math.min(state.food, 25);
-  const crewBonus = state.crew === "rested" ? 30 : state.crew === "tired" ? 10 : 0;
-  const daysPenalty = state.day * 8;
-  const wearPenalty = state.wear * state.wear * 40;
+  const breakdown = game.getEndgameScore();
   const scoreLines = [
-    { label: "Base score", value: 1e3 },
-    { label: `MB value (${Math.round(mbVal)} \xD7 80)`, value: Math.round(mbVal * 80) },
-    { label: `Food bonus (${foodBonus} \xD7 12)`, value: foodBonus * 12 },
-    { label: `Crew condition (${state.crew})`, value: crewBonus },
-    { label: `Days on trail (${state.day} \xD7 -8)`, value: -daysPenalty },
-    { label: `Cart wear (${state.wear}\xB2 \xD7 -40)`, value: -wearPenalty }
+    { label: "Base score", value: breakdown.base },
+    { label: `MB value (${Math.round(state.mbValue || 0)} \xD7 80)`, value: breakdown.mbValue },
+    { label: `Food bonus (${Math.min(state.food, 25)} \xD7 12)`, value: breakdown.foodBonus },
+    { label: `Crew condition (${state.crew})`, value: breakdown.crewCondition },
+    { label: `Days on trail (${state.day} \xD7 -8)`, value: breakdown.daysPenalty },
+    { label: `Cart wear (${state.wear}\xB2 \xD7 -40)`, value: breakdown.wearPenalty }
   ];
-  const totalScore = scoreLines.reduce((s, l) => s + l.value, 0);
+  const totalScore = breakdown.score;
   const scoreHtml = scoreLines.map((l) => `
     <div class="stat-row">
       <span class="label">${l.label}</span>
