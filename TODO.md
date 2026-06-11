@@ -88,7 +88,27 @@ Legend: `pending` | `in_progress` | `blocked` | `done`
 - [x] Journal Polish — collapse chevrons, consistent dice/mechanical
 - [x] Dice Consistency — wooden block, settle animation, ink-stamp
 
-## Sprint 5: Content & Historical Depth — FUTURE
+## Sprint 5: Consolidation & Overhaul — COMPLETE
+- [x] Kill dead code (audio module, bus import)
+- [x] Fix narrative rendering (remove dead renderNarrative/renderTravelLinesView)
+- [x] Fix shop confirm (remove clearTradeGoods)
+- [x] Consolidate settlement systems (remove duplicate getDefaultSettlementActions)
+- [x] Fix end screen scoring (use engine getEndgameScore)
+- [x] Contrast audit #2 (darken muted text, fix event source readability)
+- [x] Journal first-person narrative (travel, events, camp, settlements)
+- [x] Fix build script (stop injecting __METIS_ASSETS__ into template)
+- [x] Clean up 66 duplicate script blocks in template
+
+## Sprint 6: Gameplay Polish — IN PROGRESS
+- [ ] Fix settlement/camp outcome feedback (issue #79)
+- [ ] One action per camp/settlement visit (issue #81)
+- [ ] Blessing roll buff (issue #80)
+- [ ] Camp art image (issue #78)
+- [ ] Scrolling consolidation (issue #83)
+- [ ] Journal day grouping (issue #89)
+- [ ] Gossip flavor text (issue #90)
+- [ ] Settlement-specific events from sources (issue #82)
+- [ ] Update sim test for new mechanics
 - [ ] Audit all 55 events for source coverage gaps
 - [ ] Add missing events: smallpox, HBC officers, buffalo hunt, river ferry
 - [ ] Expand women/children presence (currently 4 events)
