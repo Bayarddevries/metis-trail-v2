@@ -559,7 +559,6 @@ export function createGame(seed = null) {
     },
 
     getEndgameScore() {
-      if (!S.won) return { score: 0, breakdown: {} };
       const mbVal = S.mbValue || 0;
       const foodBonus = Math.min(S.food, 25);
       const crewBonus = S.crew === 'rested' ? 30 : S.crew === 'tired' ? 10 : 0;
@@ -568,9 +567,12 @@ export function createGame(seed = null) {
       const baseScore = 500;
       const mbScore = Math.round(mbVal * 80);
       const foodScore = foodBonus * 12;
-      const total = baseScore + mbScore + foodScore + crewBonus - daysPenalty - wearPenalty;
+      const total = S.won
+        ? baseScore + mbScore + foodScore + crewBonus - daysPenalty - wearPenalty
+        : 0;
       let tier;
-      if (total < 500) tier = 'Barely Survived';
+      if (!S.won) tier = 'Defeat';
+      else if (total < 500) tier = 'Barely Survived';
       else if (total < 1200) tier = 'Solid Profit';
       else tier = 'Legendary Haul';
       return {

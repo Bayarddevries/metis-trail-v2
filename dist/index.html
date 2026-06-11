@@ -34,12 +34,15 @@
     flex-shrink: 0;
     border-bottom: 2px solid var(--clr-accent);
     white-space: nowrap;
-    overflow: hidden;
+    overflow-x: auto;
+    overflow-y: hidden;
     height: 36px;
     position: sticky;
     top: 0;
     z-index: 100;
+    scrollbar-width: none;
   }
+  #status-bar::-webkit-scrollbar { display: none; }
   .stat {
     display: flex;
     align-items: center;
@@ -1274,12 +1277,12 @@
   @media (max-width: 768px) {
     #game-container { height: 100dvh; }
     #status-bar {
-      flex-wrap: wrap;
+      flex-wrap: nowrap;
       padding: 4px 8px;
       font-size: 11px;
-      white-space: normal;
-      overflow: visible;
-      row-gap: 2px;
+      overflow-x: auto;
+      overflow-y: hidden;
+      scrollbar-width: none;
     }
     #status-bar .stat {
       padding: 0 4px;
@@ -1289,10 +1292,11 @@
       font-size: 9px;
     }
     #status-bar .segment-progress {
-      flex-basis: 100%;
-      order: -1;
+      flex-basis: auto;
+      order: 0;
       padding: 0 4px 2px;
       font-size: 10px;
+      flex-shrink: 0;
     }
     #map-panel { flex: 1 1 auto; min-height: 0; }
     #bottom-panel {
