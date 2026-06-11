@@ -95,7 +95,8 @@ export async function build() {
   );
 
   await fs.writeFile(indexPath, indexHtml);
-  await fs.writeFile(templatePath, templateHtml);
+  // NOTE: Do NOT write templateHtml back to src/template.html — it's the source of truth.
+  // Only dist/index.html gets the manifest injection.
 
   const stamp = `\nif (!window.__METIS_BOOTED__) { window.__METIS_BOOTED__ = true; try { bootstrap(); } catch (e) { console.error("Metis boot error:", e); } }`;
   await fs.writeFile(appPath, appCode + stamp);
