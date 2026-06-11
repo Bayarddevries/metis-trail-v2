@@ -578,12 +578,12 @@ export function createGame(seed = null) {
       return {
         score: Math.max(0, Math.round(total)),
         breakdown: {
-          base: baseScore,
-          mbValue: mbScore,
-          foodBonus: foodScore,
-          crewCondition: crewBonus,
-          daysPenalty: -daysPenalty,
-          wearPenalty: -wearPenalty,
+          base: Number(baseScore) || 0,
+          mbValue: Number(mbScore) || 0,
+          foodBonus: Number(foodScore) || 0,
+          crewCondition: Number(crewBonus) || 0,
+          daysPenalty: Number(-daysPenalty) || 0,
+          wearPenalty: Number(-wearPenalty) || 0,
         },
         tier,
       };

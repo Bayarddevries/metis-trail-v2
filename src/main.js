@@ -1876,17 +1876,29 @@ function showEnd(game) {
   }
 
   // Detailed scoring breakdown — use engine's getEndgameScore
-  const breakdown = game.getEndgameScore();
-  const scoreLines = [
-    { label: 'Base score', value: Math.round(breakdown.base) },
-    { label: `MB value (${Math.round(state.mbValue || 0)} × 80)`, value: Math.round(breakdown.mbValue) },
-    { label: `Food bonus (${Math.min(state.food, 25)} × 12)`, value: Math.round(breakdown.foodBonus) },
-    { label: `Crew condition (${state.crew})`, value: Math.round(breakdown.crewCondition) },
-    { label: `Days on trail (${state.day} × -8)`, value: Math.round(breakdown.daysPenalty) },
-    { label: `Cart wear (${state.wear}² × -40)`, value: Math.round(breakdown.wearPenalty) },
-  ];
-
-  const totalScore = Math.round(breakdown.score);
+  let scoreLines;
+  try {
+    const breakdown = game.getEndgameScore();
+    scoreLines = [
+      { label: 'Base score', value: Math.round(breakdown.base) || 0 },
+      { label: `MB value (${Math.round(state.mbValue || 0)} × 80)`, value: Math.round(breakdown.mbValue) || 0 },
+      { label: `Food bonus (${Math.min(state.food, 25)} × 12)`, value: Math.round(breakdown.foodBonus) || 0 },
+      { label: `Crew condition (${state.crew})`, value: Math.round(breakdown.crewCondition) || 0 },
+      { label: `Days on trail (${state.day} × -8)`, value: Math.round(breakdown.daysPenalty) || 0 },
+      { label: `Cart wear (${state.wear}² × -40)`, value: Math.round(breakdown.wearPenalty) || 0 },
+    ];
+  } catch(e) {
+    console.warn('[Metis] Score calc error:', e);
+    scoreLines = [
+      { label: 'Base score', value: 500 },
+      { label: 'MB value', value: 0 },
+      { label: 'Food bonus', value: 0 },
+      { label: 'Crew condition', value: 0 },
+      { label: 'Days on trail', value: 0 },
+      { label: 'Cart wear', value: 0 },
+    ];
+  }
+  const totalScore = Math.round(game.getEndgameScore().score) || 0;
 
   const scoreHtml = scoreLines.map((l) => `
     <div class="stat-row">
