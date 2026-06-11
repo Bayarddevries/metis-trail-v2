@@ -390,7 +390,7 @@ export function createGame(seed = null) {
 
   function settlementAction(action) {
     if (!S.pendingSettlement) return [];
-    // Only clear pendingSettlement on 'continue' — other actions keep the settlement open
+    // Clear pendingSettlement on 'continue' or after any other action (one action per visit)
     if (action === 'continue') {
       S.pendingSettlement = null;
       return [];
@@ -470,6 +470,8 @@ export function createGame(seed = null) {
       advance();
     }
     checkGameOver();
+    // One action per visit: clear pendingSettlement after any non-continue action
+    S.pendingSettlement = null;
     return [];
   }
 
@@ -564,6 +566,10 @@ export function createGame(seed = null) {
       const type = S.pendingSettlement.type;
       const state = S;
       const result = executeSettlementAction(actionId, type, state, cart, params);
+      // One action per visit: clear pendingSettlement after any successful non-continue action
+      if (actionId !== 'continue' && result && !result.error) {
+        S.pendingSettlement = null;
+      }
       checkGameOver();
       return result || {};
     },
