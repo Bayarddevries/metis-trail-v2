@@ -19517,7 +19517,7 @@ function showSettlement(game) {
         });
         const outcome = buildSettlementOutcome(action.id, beforeState, afterState, beforeCart, afterCart);
         let intelText = null;
-        if (["trade_gossip", "get_intel", "gossip", "buy_info", "rumours"].includes(action.id)) {
+        if (["get_intel", "trade_gossip", "gossip", "buy_info", "rumours"].includes(action.id)) {
           const intel = afterState.trailIntel || [];
           if (intel.length > 0) intelText = intel[intel.length - 1].text;
         }
@@ -19565,7 +19565,7 @@ function showSettlement(game) {
         };
         resultCard.appendChild(continueBtn);
         actionsEl.appendChild(resultCard);
-        const needRoll = !["trade", "buy_supplies", "share_food", "get_permits", "report_duty", "buy_ammo", "trade_limited", "trade_gossip", "get_intel"].includes(action.id);
+        const needRoll = !["trade", "buy_supplies", "share_food", "get_permits", "report_duty", "buy_ammo", "trade_limited", "get_intel"].includes(action.id);
         if (needRoll && result && result.roll !== null && result.roll !== void 0) {
           const DC_MAP = { rest: 12, get_blessing: 8, dance: 8, craft_hides: 8, heal_crew: 8 };
           const DC = DC_MAP[action.id] || 10;
@@ -19628,9 +19628,8 @@ function buildSettlementOutcome(action, before, after, beforeCart, afterCart) {
   if (action === "grease") msgs.push("Axle greased.");
   if (action === "heal") msgs.push("Healed.");
   if (action === "forage") msgs.push("Foraging...");
-  if (action === "recruit") msgs.push("Reinforcements found.");
-  if (action === "rumours") msgs.push("You learn the latest trail news.");
-  if (action === "gossip") {
+  if (action === "get_intel") msgs.push("Gathered trail intelligence.");
+  if (action === "gossip" || action === "trade_gossip" || action === "rumours") {
     const intel = after.trailIntel && after.trailIntel.length > 0 ? after.trailIntel[after.trailIntel.length - 1] : null;
     if (intel && intel.text) {
       msgs.push(`You spend a day gossiping. "${intel.text}"`);
@@ -20503,7 +20502,7 @@ __name(escapeHtml, "escapeHtml");
 function buildSettlementJournalText(action, st2, intelText) {
   const stName = st2?.name || "the settlement";
   const stType = st2?.type || "unknown";
-  if (intelText && (action === "trade_gossip" || action === "get_intel" || action === "gossip" || action === "buy_info" || action === "rumours")) {
+  if (intelText && (action === "get_intel" || action === "trade_gossip" || action === "gossip" || action === "buy_info" || action === "rumours")) {
     return `At ${stName}, a traveller tells you: "${intelText}"`;
   }
   if (action === "trade_gossip" || action === "gossip" || action === "rumours") {
