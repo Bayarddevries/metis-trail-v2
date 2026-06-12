@@ -9,26 +9,25 @@
 
 ## 🚀 Next Agent — Start Here
 
-**All code changes are committed and pushed. Working tree is clean.**
+**All code changes are committed and pushed until noted otherwise**
 
 ### Immediate priorities (in order):
 
-1. **Fix #73 — Hall of Fame does not load** — This is the only remaining bug. Check `showEnd()` leaderboard loading code in `src/main.js`. Likely a Firebase auth or fetch issue.
-
-2. **Verify v10 deployed** — Open https://bayarddevries.github.io/metis-trail-v2/ and run through the test checklist below. Confirm settlement actions show result cards with flavor text, camp Push On auto-closes, journal has day-grouped entries, scores aren't all 0s.
-
+1. **Fix regression bugs:** #91 camp overlay scroll, #95 store competing scroll regions, #94 store contrast, #93 settlement outcome contrast, #92 end-screen score contrast/zeros
+2. **Docs:** HANDOFF/CHANGELOG kept current; HANDOFF updated after each bug fix
 3. **Then pick from open issues:**
-   - #60 Web Audio ambient engine (code snippet already in audit report Snippet 5)
-   - #59 Haptics module wiring (Haptics utility exists in main.js, needs wiring to game events)
-   - #62 Settlement "recommended action" highlight
-   - #42 Secondary source reformat to period voices
+   - #42 Reformat secondary sources to period voices
    - #40 Party name instead of user name
+   - #25 Full cultural review of project and story elements
+   - #6 Review content for AI writing trends
 
 ### Build & test commands:
 ```bash
-cd /home/bayard_devries/projects/metis-trail-v2
-bun scripts/build.mjs          # build dist/
-python3 -m http.server 8080 --directory dist  # local test server
+cd /home/bayarddevries/metis-trail-v2-repo
+npm test            # vitest
+npm run build       # esbuild into dist/
+python3 -m http.server 8081 --directory dist  # local test server
+# Open http://100.108.183.33:5173 or http://localhost:8081
 ```
 
 ### Critical pitfalls to avoid:

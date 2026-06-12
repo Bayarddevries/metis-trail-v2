@@ -99,7 +99,7 @@ Legend: `pending` | `in_progress` | `blocked` | `done`
 - [x] Fix build script (stop injecting __METIS_ASSETS__ into template)
 - [x] Clean up 66 duplicate script blocks in template
 
-## Sprint 6: Gameplay Polish — IN PROGRESS
+## Sprint 6: Gameplay Polish — COMPLETE
 - [x] Fix settlement/camp outcome feedback (issue #79)
 - [x] One action per camp/settlement visit (issue #81)
 - [x] Blessing roll buff (issue #80)
@@ -108,14 +108,21 @@ Legend: `pending` | `in_progress` | `blocked` | `done`
 - [x] Scrolling consolidation (issue #83)
 - [x] Journal day grouping (issue #89)
 - [x] Settlement-specific events from sources (issue #82)
-- [ ] Audit all 55 events for source coverage gaps
-- [ ] Add missing events: smallpox, HBC officers, buffalo hunt, river ferry
-- [ ] Expand women/children presence (currently 4 events)
-- [ ] French-language dialogue options
-- [ ] Gossip trail mechanic at settlements
-- [ ] Seasonal event variation (June vs October)
-- [ ] Prairie-specific events for western trail
-- [ ] Second half of Carlton Trail nodes with citations
+- [x] Audit all 55 events for source coverage gaps
+- [x] Add missing events: smallpox, HBC officers, buffalo hunt, river ferry
+- [x] Expand women/children presence (currently 4 events)
+- [x] French-language dialogue options
+- [x] Gossip trail mechanic at settlements
+- [x] Seasonal event variation (June vs October)
+- [x] Prairie-specific events for western trail
+- [x] Second half of Carlton Trail nodes with citations
+
+## Outstanding backlog (active GitHub issues)
+- [ ] #91-#95 UI/accessibility bugs from June 12 build (camp/settlement/end/store scroll and contrast)
+- [ ] #42 Reformat secondary sources to period voices
+- [ ] #40 Party name instead of player name
+- [ ] #25 Cultural review
+- [ ] #6 AI-writing/content review
 
 ## Ongoing
 - [ ] Review and approve all historical content before merge

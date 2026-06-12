@@ -1047,3 +1047,18 @@ Files: `src/systems/engine.js`.
 ### Fixed
 - Cross-module map initialization so route tiles render.
 - Cart marker aspect ratio corrected (100x48).
+
+## [Unreleased] — 2026-06-12
+### Added
+- Campfire camp art (`art/campfire.png`) copied to `dist/` by build.
+- Settlement-specific events from cited sources (#82).
+- Gossip flavor text with dynamic intel and settlement targets (#90).
+- Journal day-grouped entries (#89).
+- Seasonal event variation and women/children presence expansion.
+
+### Fixed
+- Camp overlay scroll blocking (#91).
+- Store screen competing scroll regions (#95).
+- Store briefing contrast (#94).
+- Settlement outcome text readability in neutral palette (#93).
+- End-screen final score and black-on-black text (#92).

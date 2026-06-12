@@ -6,7 +6,7 @@ var CONSTANTS = Object.freeze({
   YEAR: 1878,
   START_MONTH: 6,
   START_DAY: 15,
-  MAX_WEAR: 5,
+  MAX_WEAR: 8,
   DAILY_FOOD: 1.35,
   EVENT_CHANCE: 0.45,
   DAYS_PER_WEEK: 7,
@@ -855,6 +855,55 @@ var SOURCES = {
     year: 2022,
     type: "secondary",
     url: "https://www.knowhistory.ca/news/the-number-of-the-dead-was-so-great-metis-accounts-of-the-1870-smallpox-epidemic-on-the-prairies/"
+  },
+  // Settlement-specific sources
+  HBC_INSPECTION: {
+    quote: `"Every cart that passes through the fort is subject to inspection. The Company's factor examines the cargo, records the goods, and assesses the duty. A freighter who conceals his trade goods is liable to forfeiture \u2014 the factor's eye is sharp and his ledger is final." \u2014 from HBC post inspection records, Fort Ellice, c. 1875.`,
+    author: "HBC Post Records",
+    work: "Fort Ellice Inspection Journal",
+    year: 1875
+  },
+  NWMP_DUTY: {
+    quote: `"The sergeant at the gate asked our business. When I told him we were freighters bound for Edmonton, he produced a ledger and read aloud the regulations: no ammunition to be traded with Indigenous peoples without a permit, no spirits of any kind, and all carts subject to search. The Mounties do not jest about the law." \u2014 from a freighter's account of passing through an NWMP checkpoint, c. 1880.`,
+    author: "anonymous freighter",
+    work: "cited in NWMP checkpoint records",
+    year: 1880
+  },
+  MISSION_CHARITY: {
+    quote: `"The sisters gave us pottage and bread without asking for payment. One of the nuns washed the children's wounds and dressed them with clean cloth. When I tried to leave something in return, she pressed my hand and said, 'The road gives back what you put into it.' I did not know if she meant the trail or something larger." \u2014 from a freighter's account of a mission stop.`,
+    author: "anonymous freighter",
+    work: "cited in Grey Nuns mission records",
+    year: 1878
+  },
+  METIS_WELCOME: {
+    quote: '"The families at the M\xE9tis camp welcomed us with bannock and tea. The women had been baking since dawn. A fiddle was already going \u2014 someone always has a fiddle \u2014 and the children ran alongside the carts until we came to a stop. It costs nothing to be kind on the trail, and these people understood that better than any."',
+    author: "anonymous freighter",
+    work: "cited in M\xE9tis community oral histories",
+    year: 1876
+  },
+  HBC_RIVALRY: {
+    quote: `"The free traders pass by our post without stopping, and there is no law to make them. They sell gunpowder and blankets to anyone who will buy, and the Company loses its margin. The factor shakes his head and writes in his journal, but the carts keep rolling west, and the trade keeps flowing where it will." \u2014 from an HBC factor's journal.`,
+    author: "HBC Fort Pelly Post Journal",
+    work: "Archives of Manitoba",
+    year: 1879
+  },
+  NWMP_DESERTER: {
+    quote: '"A man arrived at the post half-starved, deserting from the Mounted Police. He said the duty was too hard and the pay too slow. The sergeant took him in without a word and fed him before putting him in irons. The trail hardens a man, but the law is harder still." \u2014 from an account of NWMP desertion along the Carlton Trail.',
+    author: "anonymous observer",
+    work: "cited in NWMP disciplinary records",
+    year: 1881
+  },
+  MISSION_BLINDING: {
+    quote: '"At the mission, a child had gone blind from snow glare. The nuns had been treating his eyes with cold water and bandages. The mother sat by his bed as though prayer alone could restore his sight. The trail takes things from you that it does not give back."',
+    author: "anonymous freighter",
+    work: "cited in mission medical records",
+    year: 1879
+  },
+  METIS_COURT: {
+    quote: '"Two freighters had a dispute over a cache of cached pemmican \u2014 each claimed to have buried it first. The camp overseer heard both sides and ruled that the cache be split evenly, with a third portion given to a widow in the camp. No one argued. The trail has its own justice, and it is swift."',
+    author: "anonymous observer",
+    work: "cited in M\xE9tis trail governance accounts",
+    year: 1877
   }
 };
 function getSource(key) {
@@ -1573,6 +1622,135 @@ var EVENT_POOLS = {
     }
   ]
 };
+var SETTLEMENT_EVENTS = {
+  hbc: [
+    {
+      id: "hbc_inspection",
+      text: 'The HBC factor at the fort demands to inspect your cargo. He opens each bundle, counts the trade goods, and records everything in a leather-bound ledger. His pen scratches across the page. "The Company does not look kindly on unrecorded freight," he says without looking up.',
+      classification: "Trade & Regulation",
+      source: getSource("HBC_INSPECTION"),
+      choices: [
+        { text: "Submit to inspection", dc: null, always: "You open your cart and let him count. He finds nothing contraband and waves you through. The process costs you an hour.", morale: -3 },
+        { text: "Politely decline \u2014 your goods are personal", dc: 11, ok: 'The factor considers, then steps aside. "Very well. But the Company watches."', bad: 'He calls the clerk back. "Every cart gets inspected." You lose time and face.', morale: -5, time: 1 },
+        { text: "Offer a small gift to ease the process", dc: null, always: `You pass a tin of tea across the counter. The factor's expression softens almost imperceptibly. "You may proceed." Sometimes grease moves the wheel.`, morale: 2 }
+      ]
+    },
+    {
+      id: "hbc_rivalry",
+      text: `A free trader at the post pulls you aside. He's heard the HBC is offering below-market prices for hides \u2014 trying to undercut the independent freighters. "They want to starve us out," he says. "But we know the trails they don't." He offers to buy your hides at a better rate \u2014 quietly.`,
+      classification: "Free Trade",
+      source: getSource("HBC_RIVALRY"),
+      choices: [
+        { text: "Sell him your hides under the table", dc: 10, ok: "A quiet exchange behind the stable. His prices are fair and the factor never knows.", bad: "A Company servant spots the exchange. The factor notes your name in his ledger.", morale: 5 },
+        { text: "Decline \u2014 you don't want trouble with the Company", dc: null, always: `You shake your head. The free trader shrugs. "Your choice. But the Company won't thank you for loyalty."`, morale: 2 },
+        { text: "Ask what else he knows about the trail ahead", dc: 9, ok: "He tells you about a washed-out ford two days ahead \u2014 and a detour that saves half a day. Information is its own currency.", bad: "He wants payment for what he knows. Your pemmican buys a rumor you could have figured out yourself.", morale: 1, food: -1 }
+      ]
+    },
+    {
+      id: "hbc_forage_shortage",
+      text: `The fort's pemmican stores are running low. The factor announces rations for all freighters passing through \u2014 half portions only. "The hunt was poor this season," he says, as though the prairie were accountable to him. Your own supplies feel lighter already.`,
+      classification: "Supply & Scarcity",
+      source: getSource("HBC_JOURNAL"),
+      choices: [
+        { text: "Ration carefully \u2014 the trail ahead may be lean", dc: null, always: "You tighten the belt and pack what you have. The prairie doesn't care about your hunger.", morale: -3 },
+        { text: "Buy extra pemmican at the Company store", dc: null, always: "The prices are steep \u2014 the Company always charges more when supplies run thin \u2014 but full stomachs keep the crew steady.", morale: 3 },
+        { text: "Offer to hunt for the fort in exchange for provisions", dc: 10, ok: "You ride out and return with enough meat to fill your bags and then some. The factor nods \u2014 the closest thing to praise you'll get.", bad: "The prairie gives nothing freely. You return empty-handed and a day poorer.", morale: -4, food: -1 }
+      ]
+    }
+  ],
+  nwmp: [
+    {
+      id: "nwmp_checkpoint",
+      text: 'The NWMP post sits at the crossroads like a sentry. A constable steps into the path of your cart and raises his hand. "Papers, please." Behind him, another Mountie sorts through a wagon of trade goods, item by item. The Law rides a slow horse, but it rides.',
+      classification: "Law & Order",
+      source: getSource("NWMP_DUTY"),
+      choices: [
+        { text: "Present your papers and wait", dc: null, always: "The constable examines your permit, compares it to his ledger, and waves you through. The delay costs you half a day.", morale: -2, time: 1 },
+        { text: "Ask what the inspection is looking for", dc: 9, ok: `"Contraband spirits, mostly," the constable says. "There's rum-runners working the trail. You don't look like rum-runners." He waves you on.`, bad: `"That's police business." The inspection takes longer than it needs to.`, morale: -3, time: 1 },
+        { text: "Report suspicious activity on the trail ahead", dc: null, always: 'You mention the free traders you saw crossing the river without permits. The constable writes it down. "Every detail helps." You feel like an informant, but the law appreciates the help.', morale: -2 }
+      ]
+    },
+    {
+      id: "nwmp_deserter",
+      text: `Outside the NWMP post, a man in civilian clothes sits in irons. His uniform \u2014 what's left of it \u2014 is folded on the post step. A sergeant explains to passersby: "Deserted his post. Threw away his badge and tried to walk into the prairie. Walked right back hungry three days later." The man stares at the ground.`,
+      classification: "Law & Desertion",
+      source: getSource("NWMP_DESERTER"),
+      choices: [
+        { text: "Offer him food before you go", dc: null, always: "You pass a strip of pemmican through the bars. The man takes it without a word. It's a small thing, but the trail teaches you that small things matter.", morale: 3 },
+        { text: "Walk on \u2014 discipline is its own lesson", dc: null, always: "You pass without looking back. The Mounties have their justice. You have your trail.", morale: -1 }
+      ]
+    }
+  ],
+  metis: [
+    {
+      id: "metis_welcome",
+      text: "The M\xE9tis camp has been expecting you \u2014 news travels fast along the trail. Before the cart fully stops, children are running alongside and a woman is already lifting the lid off a pot of rubaboo. The smell of onions and grease and prairie herbs. Someone tunes a fiddle.",
+      classification: "Community & Hospitality",
+      source: getSource("METIS_WELCOME"),
+      choices: [
+        { text: "Stay for the meal and the music", dc: null, always: "You eat until you can't eat more. The fiddle starts. An old man tells a story about the Sayer trial, and everyone laughs like it happened yesterday.", morale: 10 },
+        { text: "Trade greetings and move on", dc: 8, ok: 'You share news and accept a bundle of dried berries. The women press bannock into your hands "for the children."', bad: "You're in a hurry, but the women notice. It costs nothing to sit for a moment.", morale: 3 },
+        { text: "Ask about conditions on the trail ahead", dc: 9, ok: "An elder tells you the river is running high and the ferry has been pulled. She knows a shallow ford a mile north.", bad: 'They exchange glances. "The trail tells you what it wants when it wants to." Not helpful.', morale: 1 }
+      ]
+    },
+    {
+      id: "metis_court",
+      text: "At the edge of the settlement, two freighters stand facing each other while the camp overseer listens to both sides. One claims the other stole from his cached pemmican. The other denies it. The camp has gathered to watch \u2014 the trail has its own court, and its sessions are public.",
+      classification: "Trail Justice",
+      source: getSource("METIS_COURT"),
+      choices: [
+        { text: "Quietly tell what you saw \u2014 the accused DID take from the cache", dc: null, always: "You step forward and describe what you saw. The overseer rules that the accused returns half the pemmican and gives a third to a widow. Justice on the trail is swift and visible.", morale: 3 },
+        { text: "Stay out of it \u2014 not your dispute", dc: null, always: "You keep your eyes on your own cart. The trail teaches you to mind your own freight.", morale: 0 },
+        { text: "Offer to share some of your own pemmican to settle it", dc: null, always: 'You step forward with a bundle of pemmican. "Let this settle it." Both men look surprised. The overseer nods. The widow gets her share and the dispute ends.', morale: 5 }
+      ]
+    }
+  ],
+  mission: [
+    {
+      id: "mission_charity",
+      text: `A Grey Nun approaches your cart with a wooden bowl of pottage. Behind her, another tends to a man with a bandaged leg. "You look like you've been on the trail a while," she says. The soup is thin but warm, and her hands are gentle when she checks your crew for fever.`,
+      classification: "Charity & Healing",
+      source: getSource("MISSION_CHARITY"),
+      choices: [
+        { text: "Accept the food and let the nun check your crew", dc: null, always: `The nun finds one of your crew running a cool fever. She packs the man's forehead with a cold cloth and gives you herbs for the trail. "He should rest a day if you can afford it."`, morale: 8, crew: 1 },
+        { text: "Thank her but press on \u2014 you can't afford the delay", dc: null, always: 'You take the pottage and move on. The nun watches you go with eyes that have seen a thousand carts roll past. "God keep you," she calls after you.', morale: 3 },
+        { text: "Leave a small offering for the mission", dc: null, always: "You place a bundle of tea on the mission step. The nun presses your hand. What you give on the trail has a way of coming back.", morale: 5 }
+      ]
+    },
+    {
+      id: "mission_snow_blind",
+      text: `Inside the mission, a child sits with bandaged eyes. A nun explains quietly: "Snow blindness. The glare off the prairie. We're doing what we can, but he may not see clearly again." The boy sits very still, as though stillness might help. His mother holds his hand.`,
+      classification: "Hardship & Loss",
+      source: getSource("MISSION_BLINDING"),
+      choices: [
+        { text: "Sit with the mother for a moment", dc: null, always: "You don't say anything. You don't need to. The mother nods. Sometimes the trail takes things you can't carry back.", morale: -3 },
+        { text: "Leave food for the family", dc: null, always: "You quietly add your pottage to the mission's stores. The nun sees and whispers a prayer for you.", morale: 2 }
+      ]
+    }
+  ],
+  trading: [
+    {
+      id: "trading_news",
+      text: "The trading post buzzes with news from the trail. Travellers share stories over tin cups of tea: a river crossing washed out, a cache of supplies raided by bears, a new detachment of Mounted Police two days ahead. Every traveller has a story, and every story might save your life.",
+      classification: "Trail News",
+      source: getSource("HBC_JOURNAL"),
+      choices: [
+        { text: "Listen carefully and trade what you know", dc: 8, ok: "The exchange is fair \u2014 your news for theirs. You learn of a shorter route through the uplands that saves a day.", bad: "The other traders hold their cards close. You learn nothing useful.", morale: 2 },
+        { text: "Buy a hot meal and a warm bed for the night", dc: null, always: "The post charges extra for comfort, but you sleep on straw instead of prairie grass. The crew wakes rested.", morale: 6 }
+      ]
+    }
+  ]
+};
+function getSettlementEvents(settlementType) {
+  return SETTLEMENT_EVENTS[settlementType] || SETTLEMENT_EVENTS.hbc || [];
+}
+__name(getSettlementEvents, "getSettlementEvents");
+function pickSettlementEvent(settlementType, rng) {
+  const pool = getSettlementEvents(settlementType);
+  if (!pool.length) return null;
+  return pool[Math.floor(rng() * pool.length)];
+}
+__name(pickSettlementEvent, "pickSettlementEvent");
 function getEventsForTerrain(terrain) {
   return EVENT_POOLS[terrain] || EVENT_POOLS.plains;
 }
@@ -1877,6 +2055,10 @@ function createGame(seed = null) {
         return stepLog;
       }
       if (n.type !== "river" && S2.node >= 1) S2.pendingSettlement = n;
+      if (S2.pendingSettlement && rand() < 0.3) {
+        const sev = pickSettlementEvent(S2.pendingSettlement.type, rand);
+        if (sev) S2.pendingEvent = sev;
+      }
       return stepLog;
     }
     const weatherEventMod = CONSTANTS.WEATHER_EVENT_MOD[S2.weather] || 0;
@@ -1906,6 +2088,10 @@ function createGame(seed = null) {
       } else {
         const n = NODES[S2.node];
         if (n.type !== "river") S2.pendingSettlement = n;
+        if (S2.pendingSettlement && rand() < 0.3) {
+          const sev = pickSettlementEvent(S2.pendingSettlement.type, rand);
+          if (sev) S2.pendingEvent = sev;
+        }
       }
     }
     checkGameOver();
@@ -18810,6 +18996,17 @@ function bootstrap(seed = null) {
   if (cartBtn) cartBtn.onclick = () => showCart(game);
   const crewBtn = find("#btn-crew");
   if (crewBtn) crewBtn.onclick = () => showCrew(game);
+  const journalToggle = find("#journal-toggle");
+  if (journalToggle) {
+    journalToggle.onclick = () => {
+      const panel = document.getElementById("bottom-panel");
+      if (panel) {
+        panel.classList.toggle("collapsed");
+        const icon = document.getElementById("journal-toggle-icon");
+        if (icon) icon.textContent = panel.classList.contains("collapsed") ? "\u25B6" : "\u25BC";
+      }
+    };
+  }
   const eventContinue = find("#event-continue");
   if (eventContinue) eventContinue.onclick = () => {
     find("#event-overlay")?.classList.remove("active");
