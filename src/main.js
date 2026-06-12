@@ -239,6 +239,19 @@ export function bootstrap(seed = null) {
   const crewBtn = find('#btn-crew');
   if (crewBtn) crewBtn.onclick = () => showCrew(game);
 
+  // Journal toggle — collapse/expand bottom panel
+  const journalToggle = find('#journal-toggle');
+  if (journalToggle) {
+    journalToggle.onclick = () => {
+      const panel = document.getElementById('bottom-panel');
+      if (panel) {
+        panel.classList.toggle('collapsed');
+        const icon = document.getElementById('journal-toggle-icon');
+        if (icon) icon.textContent = panel.classList.contains('collapsed') ? '▶' : '▼';
+      }
+    };
+  }
+
   const eventContinue = find('#event-continue');
   if (eventContinue) eventContinue.onclick = () => {
     find('#event-overlay')?.classList.remove('active');
