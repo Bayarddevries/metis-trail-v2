@@ -1688,23 +1688,9 @@ function showCamp(game) {
       needRoll: true,
     },
     {
-      type: 'pemmican_process', icon: '🥩', label: 'Process Pemmican',
-      cost: '3 food',
-      risk: 'On fail: poor yield, meat spoils',
-      flavor: 'Slice the lean meat thin. Dry it over the fire. Pound it fine. Render the tallow. Pack it tight.',
-      canDo: state.food >= 3,
-      needRoll: true,
-    },
-    {
-      type: 'deeprest', icon: '⛺', label: 'Deep Rest',
-      cost: '2 food · 2 days',
-      risk: 'Lose two days but crew fully recovers',
-      flavor: 'Two days of proper rest. Hot food, long sleep, time to mend what is broken.',
-      canDo: state.food >= 2,
-      needRoll: false,
-    },
-    {
-      type: 'push_on', icon: '⏩', label: 'Push On',
+      type: 'push_on',
+      icon: '⏩',
+      label: 'Push On',
       cost: '1.5 food · wear +1 · morale −5',
       risk: 'Skip camp. No recovery. Cart takes extra damage.',
       flavor: 'No rest. The trail does not wait. Drive on through the evening light.',
@@ -1713,6 +1699,7 @@ function showCamp(game) {
     },
   ];
 
+  // Reset UI for camp overlay
   if (actionsEl) {
     actionsEl.innerHTML = '';
     actionsEl.style.display = 'grid';
@@ -1858,8 +1845,7 @@ function showCamp(game) {
           // Log camp action to journal
           const actionLabels = {
             rest: 'Rest', forage: 'Forage', hunt: 'Hunt', repair: 'Repair',
-            scout: 'Scout', dance: 'Dance', pemmican_process: 'Process Pemmican',
-            deeprest: 'Deep Rest', push_on: 'Push On',
+            scout: 'Scout', dance: 'Dance', push_on: 'Push On',
           };
           const mechParts = [];
           if (after.food !== state.food) mechParts.push(`${after.food - state.food >= 0 ? '+' : ''}${(after.food - state.food).toFixed(1)} Food`);

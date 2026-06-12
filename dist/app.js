@@ -20117,26 +20117,6 @@ function showCamp(game) {
       needRoll: true
     },
     {
-      type: "pemmican_process",
-      icon: "\u{1F969}",
-      label: "Process Pemmican",
-      cost: "3 food",
-      risk: "On fail: poor yield, meat spoils",
-      flavor: "Slice the lean meat thin. Dry it over the fire. Pound it fine. Render the tallow. Pack it tight.",
-      canDo: state.food >= 3,
-      needRoll: true
-    },
-    {
-      type: "deeprest",
-      icon: "\u26FA",
-      label: "Deep Rest",
-      cost: "2 food \xB7 2 days",
-      risk: "Lose two days but crew fully recovers",
-      flavor: "Two days of proper rest. Hot food, long sleep, time to mend what is broken.",
-      canDo: state.food >= 2,
-      needRoll: false
-    },
-    {
       type: "push_on",
       icon: "\u23E9",
       label: "Push On",
@@ -20289,8 +20269,6 @@ function showCamp(game) {
             repair: "Repair",
             scout: "Scout",
             dance: "Dance",
-            pemmican_process: "Process Pemmican",
-            deeprest: "Deep Rest",
             push_on: "Push On"
           };
           const mechParts = [];
