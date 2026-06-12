@@ -792,8 +792,8 @@
   .settlement-roll-display .roll-total { font-size:12px; color:var(--clr-ink-on-light); font-weight:700; }
   .settlement-result { margin-top:12px; padding:10px; background:var(--clr-camp-pill-bg); border:1px solid var(--clr-camp-pill-border); border-radius:0; font-size:13px; line-height:1.5; position: relative; z-index: 1; }
   .settlement-close-row { display: flex; justify-content: flex-end; margin-top: 10px; }
-  .camp-close-row { display: flex; justify-content: flex-end; margin-top: 10px; position: relative; z-index: 1; }
-  .camp-art { width: 100%; height: 90px; margin-bottom: 8px; background: url("campfire.png") bottom center no-repeat; background-size: contain; border: 2px solid var(--clr-camp-border); border-radius: 0; position: relative; z-index: 1; }
+  .camp-close-row { display: flex; justify-content: flex-end; margin-top: 10px; }
+  .camp-art { width: 100%; height: 90px; margin-bottom: 8px; background: url("campfire.png") bottom center no-repeat; background-size: contain; border-radius: 0; }
   .settlement-actions .ctrl-btn {
     min-height: 44px;
   }
@@ -1239,35 +1239,26 @@
     overflow: hidden;
   }
   #camp-fireback {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 120px;
-    background: url("campfire.png") bottom center no-repeat;
-    background-size: contain;
-    opacity: 0.55;
-    pointer-events: none;
-    z-index: 0;
+    display: none;
   }
   #camp-overlay .overlay-card::before {
     content: "";
     position: absolute;
     inset: 0;
-    background: linear-gradient(180deg, transparent 40%, rgba(26,18,12,0.25) 100%);
+    background: linear-gradient(180deg, transparent 60%, rgba(26,18,12,0.12) 100%);
     pointer-events: none;
     border-radius: 0;
-    z-index: 2;
+    z-index: 1;
   }
   #camp-overlay .close-btn {
     z-index: 3;
     position: relative;
   }
-  .camp-header { font-family: var(--font-heading); font-size: 18px; font-weight: 700; color: var(--clr-ink-panel); margin-bottom: 6px; position: relative; z-index: 1; }
-  .camp-sub { font-size: 12px; color: var(--clr-muted); margin-bottom: 12px; font-style: italic; position: relative; z-index: 1; }
-  .camp-status { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; position: relative; z-index: 1; }
-  .camp-pill { padding: 5px 10px; background: var(--clr-camp-pill-bg); border: 1px solid var(--clr-camp-pill-border); border-radius: 0; font-size: 12px; font-family: var(--font-heading); font-weight: 600; position: relative; z-index: 1; }
-  .camp-actions { display: grid; grid-template-columns: 1fr; gap: 6px; position: relative; z-index: 1; }
+  .camp-header { font-family: var(--font-heading); font-size: 18px; font-weight: 700; color: var(--clr-ink-panel); margin-bottom: 6px; }
+  .camp-sub { font-size: 12px; color: var(--clr-muted); margin-bottom: 12px; font-style: italic; }
+  .camp-status { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+  .camp-pill { padding: 5px 10px; background: var(--clr-camp-pill-bg); border: 1px solid var(--clr-camp-pill-border); border-radius: 0; font-size: 12px; font-family: var(--font-heading); font-weight: 600; }
+  .camp-actions { display: grid; grid-template-columns: 1fr; gap: 6px; }
   .camp-action-btn { width: 100%; text-align: left; padding: 10px 12px; background: var(--clr-btn-bg); border: 2px solid var(--clr-btn-bg); border-radius: 0; cursor: pointer; font-family: var(--font-heading); color: var(--clr-btn-text); min-height: 44px; transition: background 0.15s, color 0.15s, border-color 0.15s; }
   .camp-action-btn:hover:not(:disabled) { background: var(--clr-btn-hover); color: var(--clr-btn-text); border-color: var(--clr-btn-hover); }
   .camp-action-btn:disabled { opacity: 0.5; cursor: not-allowed; background: var(--clr-bg-dark); border-color: var(--clr-muted); color: var(--clr-muted); }
@@ -1275,9 +1266,9 @@
   .camp-action-label { font-size: 13px; font-weight: 700; color: inherit; }
   .camp-action-cost { font-size: 11px; color: var(--clr-choice-cost); margin-top: 2px; }
   .camp-action-desc { font-size: 11px; color: var(--clr-source-text); margin-top: 2px; line-height: 1.3; font-style: italic; }
-  .camp-group { font-size: 11px; text-transform: uppercase; letter-spacing: 0.4px; margin-top: 10px; margin-bottom: 3px; font-family: var(--font-heading); color: var(--clr-muted); position: relative; z-index: 1; }
-  .camp-result { margin-top: 12px; padding: 10px; background: var(--clr-camp-pill-bg); border: 1px solid var(--clr-camp-pill-border); border-radius: 0; font-size: 13px; line-height: 1.5; position: relative; z-index: 1; }
-  .camp-roll-display { display:flex; align-items:center; justify-content:center; gap:10px; padding:10px; margin-top:10px; background:var(--clr-camp-pill-bg); border:2px solid var(--clr-accent); border-radius:0; font-family:var(--font-heading); position: relative; z-index: 1; }
+  .camp-group { font-size: 11px; text-transform: uppercase; letter-spacing: 0.4px; margin-top: 10px; margin-bottom: 3px; font-family: var(--font-heading); color: var(--clr-muted); }
+  .camp-result { margin-top: 12px; padding: 10px; background: var(--clr-camp-pill-bg); border: 1px solid var(--clr-camp-pill-border); border-radius: 0; font-size: 13px; line-height: 1.5; }
+  .camp-roll-display { display:flex; align-items:center; justify-content:center; gap:10px; padding:10px; margin-top:10px; background:var(--clr-camp-pill-bg); border:2px solid var(--clr-accent); border-radius:0; font-family:var(--font-heading); }
   .camp-roll-display .die { width:44px; height:44px; border-radius:0; background:var(--clr-bg); border:2px solid var(--clr-accent); display:flex; align-items:center; justify-content:center; font-size:18px; font-weight:700; color:var(--clr-ink-on-dark); box-shadow:none; }
   .camp-roll-display .die.settled { animation: dice-settle 0.45s ease-out both; }
   .camp-roll-display .die.pass { border-color:var(--clr-success); color:var(--clr-success); box-shadow:none; }
