@@ -2,7 +2,7 @@ export const CONSTANTS = Object.freeze({
   YEAR: 1878,
   START_MONTH: 6,
   START_DAY: 15,
-  MAX_WEAR: 5,
+  MAX_WEAR: 8,
   DAILY_FOOD: 1.35,
   EVENT_CHANCE: 0.45,
   DAYS_PER_WEEK: 7,
