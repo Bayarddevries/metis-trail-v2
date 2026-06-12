@@ -104,6 +104,10 @@ export async function build() {
   if (assets.length) {
     await fs.writeFile(path.join(outDir, 'manifest.json'), manifest);
   }
+  // Copy art assets referenced in CSS
+  const artSrc = path.join(cwd, 'art', 'campfire.svg');
+  const artDst = path.join(outDir, 'campfire.svg');
+  try { await fs.copyFile(artSrc, artDst); } catch(_) {}
   return outDir;
 }
 
