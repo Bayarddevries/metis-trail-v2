@@ -20215,8 +20215,7 @@ function showCamp(game) {
               hunt: 10,
               repair: 8,
               scout: 9,
-              dance: 8,
-              pemmican_process: 10
+              dance: 8
             }[a.type] || 10;
             const isSuccess = result.rollTotal >= DC;
             rollEl.style.display = "flex";

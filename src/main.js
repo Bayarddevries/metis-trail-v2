@@ -1792,7 +1792,7 @@ function showCamp(game) {
           // Show dice roll if this action used one
           if (a.needRoll && result.roll !== null && rollEl) {
             const DC = {
-              rest: 12, forage: 10, hunt: 10, repair: 8, scout: 9, dance: 8, pemmican_process: 10,
+              rest: 12, forage: 10, hunt: 10, repair: 8, scout: 9, dance: 8,
             }[a.type] || 10;
             const isSuccess = result.rollTotal >= DC;
             rollEl.style.display = 'flex';
