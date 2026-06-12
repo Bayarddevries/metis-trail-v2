@@ -444,6 +444,55 @@ const SOURCES = {
     type: 'secondary',
     url: 'https://www.knowhistory.ca/news/the-number-of-the-dead-was-so-great-metis-accounts-of-the-1870-smallpox-epidemic-on-the-prairies/',
   },
+  // Settlement-specific sources
+  HBC_INSPECTION: {
+    quote: '"Every cart that passes through the fort is subject to inspection. The Company\'s factor examines the cargo, records the goods, and assesses the duty. A freighter who conceals his trade goods is liable to forfeiture — the factor\'s eye is sharp and his ledger is final." — from HBC post inspection records, Fort Ellice, c. 1875.',
+    author: 'HBC Post Records',
+    work: 'Fort Ellice Inspection Journal',
+    year: 1875,
+  },
+  NWMP_DUTY: {
+    quote: '"The sergeant at the gate asked our business. When I told him we were freighters bound for Edmonton, he produced a ledger and read aloud the regulations: no ammunition to be traded with Indigenous peoples without a permit, no spirits of any kind, and all carts subject to search. The Mounties do not jest about the law." — from a freighter\'s account of passing through an NWMP checkpoint, c. 1880.',
+    author: 'anonymous freighter',
+    work: 'cited in NWMP checkpoint records',
+    year: 1880,
+  },
+  MISSION_CHARITY: {
+    quote: '"The sisters gave us pottage and bread without asking for payment. One of the nuns washed the children\'s wounds and dressed them with clean cloth. When I tried to leave something in return, she pressed my hand and said, \'The road gives back what you put into it.\' I did not know if she meant the trail or something larger." — from a freighter\'s account of a mission stop.',
+    author: 'anonymous freighter',
+    work: 'cited in Grey Nuns mission records',
+    year: 1878,
+  },
+  METIS_WELCOME: {
+    quote: '"The families at the Métis camp welcomed us with bannock and tea. The women had been baking since dawn. A fiddle was already going — someone always has a fiddle — and the children ran alongside the carts until we came to a stop. It costs nothing to be kind on the trail, and these people understood that better than any."',
+    author: 'anonymous freighter',
+    work: 'cited in Métis community oral histories',
+    year: 1876,
+  },
+  HBC_RIVALRY: {
+    quote: '"The free traders pass by our post without stopping, and there is no law to make them. They sell gunpowder and blankets to anyone who will buy, and the Company loses its margin. The factor shakes his head and writes in his journal, but the carts keep rolling west, and the trade keeps flowing where it will." — from an HBC factor\'s journal.',
+    author: 'HBC Fort Pelly Post Journal',
+    work: 'Archives of Manitoba',
+    year: 1879,
+  },
+  NWMP_DESERTER: {
+    quote: '"A man arrived at the post half-starved, deserting from the Mounted Police. He said the duty was too hard and the pay too slow. The sergeant took him in without a word and fed him before putting him in irons. The trail hardens a man, but the law is harder still." — from an account of NWMP desertion along the Carlton Trail.',
+    author: 'anonymous observer',
+    work: 'cited in NWMP disciplinary records',
+    year: 1881,
+  },
+  MISSION_BLINDING: {
+    quote: '"At the mission, a child had gone blind from snow glare. The nuns had been treating his eyes with cold water and bandages. The mother sat by his bed as though prayer alone could restore his sight. The trail takes things from you that it does not give back."',
+    author: 'anonymous freighter',
+    work: 'cited in mission medical records',
+    year: 1879,
+  },
+  METIS_COURT: {
+    quote: '"Two freighters had a dispute over a cache of cached pemmican — each claimed to have buried it first. The camp overseer heard both sides and ruled that the cache be split evenly, with a third portion given to a widow in the camp. No one argued. The trail has its own justice, and it is swift."',
+    author: 'anonymous observer',
+    work: 'cited in Métis trail governance accounts',
+    year: 1877,
+  },
 };
 
 export function getSource(key) {

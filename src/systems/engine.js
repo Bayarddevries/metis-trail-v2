@@ -5,7 +5,7 @@ import { makeRNG, d20 } from '../core/seed.js';
 import { NODES } from '../data/nodes.js';
 import { startingCart, totalWeight } from '../data/items.js';
 import { getSource } from '../data/sources/index.js';
-import { pickEventForTerrain } from '../data/events.js';
+import { pickEventForTerrain, pickSettlementEvent } from '../data/events.js';
 
 export function createGame(seed = null) {
   const rng = makeRNG(seed);
@@ -325,6 +325,11 @@ export function createGame(seed = null) {
         return stepLog;
       }
       if (n.type !== 'river' && S.node >= 1) S.pendingSettlement = n;
+      // Settlement event: 30% chance when arriving at a settlement
+      if (S.pendingSettlement && rand() < 0.3) {
+        const sev = pickSettlementEvent(S.pendingSettlement.type, rand);
+        if (sev) S.pendingEvent = sev;
+      }
       return stepLog;
     }
 
@@ -355,6 +360,11 @@ export function createGame(seed = null) {
       } else {
         const n = NODES[S.node];
         if (n.type !== 'river') S.pendingSettlement = n;
+        // Settlement event: 30% chance when arriving at a settlement
+        if (S.pendingSettlement && rand() < 0.3) {
+          const sev = pickSettlementEvent(S.pendingSettlement.type, rand);
+          if (sev) S.pendingEvent = sev;
+        }
       }
     }
     checkGameOver();
