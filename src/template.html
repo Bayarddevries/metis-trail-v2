@@ -1052,17 +1052,26 @@
     font-size: 15px;
     font-weight: 700;
     color: var(--clr-ink-panel);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
   .settlement-action-card-cost {
     font-size: 11px;
     color: var(--clr-accent);
     font-family: var(--font-heading);
     letter-spacing: 0.03em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
   .settlement-action-card-risk {
     font-size: 11px;
     color: var(--clr-danger);
     line-height: 1.3;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
   .settlement-action-card-flavor {
     font-size: 12px;
@@ -1490,16 +1499,17 @@
     margin-top: 4px;
   }
   .camp-card-btn:hover:not(:disabled) {
-    background: var(--clr-bg);
-    color: var(--clr-ink);
-  }
-  .camp-card-btn:hover:not(:disabled) {
     background: var(--clr-btn-hover);
     color: var(--clr-btn-text);
   }
   .camp-card-btn:disabled {
     opacity: 0.4;
     cursor: not-allowed;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .camp-card-btn, .ctrl-btn, .choice-btn, .settlement-action-card-btn {
+      transition: none;
+    }
   }
   .camp-critical {
     font-family: var(--font-heading);
