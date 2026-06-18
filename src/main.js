@@ -273,6 +273,24 @@ export function bootstrap(seed = null) {
 }
 
 window.__METIS_BOOT__ = bootstrap;
+
+// Mobile Safari 100svh fallback — address bar causes layout issues
+(function fixMobileViewport() {
+  const root = document.getElementById('game-root');
+  const container = document.getElementById('game-container');
+  if (!root) return;
+  function setHeight() {
+    const h = window.innerHeight;
+    root.style.height = h + 'px';
+    if (container) container.style.height = h + 'px';
+  }
+  // Only apply on small screens where address bar is an issue
+  if (window.innerWidth < 768) {
+    setHeight();
+    window.addEventListener('resize', setHeight);
+  }
+})();
+
 let pendingResult = null;
 
 function publishResult(text) {
