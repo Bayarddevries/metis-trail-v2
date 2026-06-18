@@ -7,10 +7,48 @@
 <link rel="stylesheet" href="leaflet.css" />
 <script src="leaflet.js"></script>
 <style>
-  /* CSS custom properties are set by src/ui/theme.js via applyTheme()
-     at bootstrap. Keep this block empty — do not define colors here. */
+  /* critical fallbacks — applied before theme.js loads */
   :root {
+    --clr-bg: #1a1410;
+    --clr-ink-on-dark: #e8dcc8;
+    --clr-ink-on-light: #e8dcc8;
+    --clr-accent: #c8a81a;
+    --clr-bg-dark: #0f0c08;
+    --clr-panel-bg: #2d241a;
+    --clr-ink-panel: #e8dcc8;
+    --clr-overlay-bg: rgba(20,18,14,0.95);
+    --clr-danger: #c85040;
+    --clr-success: #7aa85a;
+    --clr-warn: #e0c030;
+    --clr-muted: #8a7a60;
+    --font-heading: 'IM Fell Double Pica', Georgia, 'Times New Roman', serif;
+    --font-body: 'IM Fell English', Georgia, 'Times New Roman', serif;
+    --font-italic: 'IM Fell English', Georgia, 'Times New Roman', serif;
   }
+
+  /* Self-hosted IM Fell fonts — regular + italic */
+  @font-face {
+    font-family: 'IM Fell Double Pica';
+    src: url('fonts/IM-Fell-Double-Pica.ttf') format('truetype');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: 'IM Fell English';
+    src: url('fonts/IM-Fell-English-Regular.ttf') format('truetype');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: 'IM Fell English';
+    src: url('fonts/IM-Fell-English.ttf') format('truetype');
+    font-weight: 400;
+    font-style: italic;
+    font-display: swap;
+  }
+
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html, body { height: 100%; overflow: hidden; }
   body { font-family: var(--font-body); color: var(--clr-ink); background: var(--clr-bg); }
@@ -23,11 +61,12 @@
     overflow: hidden;
   }
 
+  /* ── Status Bar ─────────────────────────────────────────────── */
   #status-bar {
     display: flex;
     align-items: center;
-    gap: 12px;
-    padding: 8px 18px;
+    gap: 10px;
+    padding: 6px 14px;
     background: var(--clr-bg);
     color: var(--clr-ink-on-dark);
     font-size: 12px;
@@ -36,46 +75,64 @@
     white-space: nowrap;
     overflow-x: auto;
     overflow-y: hidden;
-    height: 44px;
+    height: 40px;
     position: sticky;
     top: 0;
     z-index: 100;
     scrollbar-width: none;
   }
   #status-bar::-webkit-scrollbar { display: none; }
+
+  #settings-btn {
+    background: none;
+    border: 1px solid var(--clr-accent);
+    color: var(--clr-accent);
+    font-family: var(--font-heading);
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 3px 8px;
+    border-radius: 0;
+    flex-shrink: 0;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  #settings-btn:hover { background: var(--clr-accent); color: var(--clr-bg); }
+
   .stat {
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 4px;
     padding: 0 4px;
   }
   .stat-label {
-    color: var(--clr-ink-light);
+    color: var(--clr-muted);
     font-size: 10px;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.04em;
     font-family: var(--font-heading);
   }
-  .stat-value { font-weight: 800; font-size: 13px; }
+  .stat-value { font-weight: 700; font-size: 12px; }
+
+  .stat.tappable {
+    cursor: pointer;
+    border: 1px solid transparent;
+    border-radius: 0;
+    padding: 2px 6px;
+    transition: border-color 0.15s;
+  }
+  .stat.tappable:hover { border-color: var(--clr-accent); }
+
   .stat-value.food-low { color: var(--clr-danger); }
   .stat-value.wear-high { color: var(--clr-warn); }
   .stat-value.crew-rested { color: var(--clr-success); }
   .stat-value.crew-tired { color: var(--clr-warn); }
   .stat-value.crew-exhausted { color: var(--clr-danger); }
-  .stat-value.weather-clear { color: var(--clr-warn); }
-  .stat-value.weather-overcast { color: var(--clr-muted); }
-  .stat-value.weather-rain { color: var(--clr-weather-rain); }
-  .stat-value.weather-storm { color: var(--clr-danger); }
-  .stat-value.weather-snow { color: var(--clr-weather-snow); }
-  .stat-value.mb-ok { color: var(--clr-accent); }
-  .stat-value.mb-low { color: var(--clr-danger); }
-  .stat-value.blessing-active { color: var(--clr-blessing); }
-  .stat-group { display: flex; align-items: center; gap: 8px; }
-  .stat-group + .stat-group { padding-left: 12px; border-left: 1px solid var(--clr-accent); }
+
   .segment-progress {
     flex: 1;
     text-align: center;
-    font-size: 12px;
+    font-size: 11px;
     color: var(--clr-accent);
     padding: 0 8px;
     overflow: hidden;
@@ -83,6 +140,20 @@
     font-family: var(--font-heading);
     letter-spacing: 0.3px;
     white-space: nowrap;
+  }
+
+  /* Mobile status bar */
+  @media (max-width: 768px) {
+    #status-bar { padding: 4px 10px; height: 36px; gap: 6px; }
+    .stat-label { font-size: 9px; }
+    .stat-value { font-size: 11px; }
+    .segment-progress { font-size: 10px; padding: 0 4px; }
+  }
+  @media (max-width: 420px) {
+    #status-bar { padding: 4px 8px; height: 34px; gap: 4px; }
+    .stat-label { display: none; }
+    .stat-value { font-size: 10px; }
+    .segment-progress { display: none; }
   }
 
   #map-panel {
@@ -98,7 +169,7 @@
   }
 
   #map .leaflet-tile-pane {
-    filter: grayscale(1) contrast(1.1) brightness(0.9);
+    filter: grayscale(1) contrast(1.3) brightness(0.7) sepia(0.3);
   }
   .leaflet-control-attribution {
     display: none;
@@ -150,6 +221,7 @@
     box-shadow: none;
   }
 
+  /* ── Bottom Panel ───────────────────────────────────────────── */
   #bottom-panel {
     flex-shrink: 0;
     display: flex;
@@ -170,11 +242,13 @@
   #bottom-panel.collapsed #controls {
     display: none;
   }
+
+  /* Journal toggle / header */
   #journal-toggle {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 6px 18px;
+    padding: 6px 14px;
     background: var(--clr-bg-dark);
     border-bottom: 1px solid rgba(139,105,20,0.2);
     cursor: pointer;
@@ -207,21 +281,31 @@
   #bottom-panel.collapsed #journal-toggle-icon {
     transform: rotate(180deg);
   }
+
+  /* Journal area */
   #journal {
-    height: 18vh;
-    min-height: 100px;
-    max-height: 18vh;
+    height: 30vh;
+    min-height: 120px;
+    max-height: 30vh;
     padding: 10px 18px 10px 28px;
     overflow-y: auto;
     font-family: var(--font-body);
     font-size: 13px;
-    line-height: 1.6;
+    font-style: normal;
+    line-height: 1.65;
     background: var(--clr-journal-bg);
     border-top: 1px solid rgba(139,105,20,0.2);
     border-left: 3px solid rgba(139,105,20,0.15);
     color: var(--clr-ink-on-light);
     flex-shrink: 0;
   }
+  #journal:empty::before {
+    content: 'The trail awaits. Click Travel West to begin.';
+    color: var(--clr-muted);
+    font-style: italic;
+  }
+
+  /* Journal entries */
   .journal-day-group {
     margin-bottom: 6px;
   }
@@ -275,7 +359,8 @@
   }
   .journal-text {
     font-size: 13px;
-    line-height: 1.6;
+    line-height: 1.65;
+    font-style: normal;
   }
   .journal-entry.collapsed .journal-text,
   .journal-entry.collapsed .journal-dice,
@@ -296,80 +381,61 @@
     margin-top: 2px;
   }
 
+  /* ── Bottom Controls ────────────────────────────────────────── */
   #controls {
     display: flex;
-    flex-direction: column;
-    padding: 6px 16px;
-    gap: 6px;
-    border-top: 1px solid var(--clr-accent);
+    gap: 8px;
+    padding: 8px 14px;
     background: var(--clr-bg-dark);
+    border-top: 2px solid var(--clr-accent);
     flex-shrink: 0;
   }
-  /* Button hierarchy - unified across all overlays */
-  .action-primary {
-    background: var(--clr-accent);
-    color: var(--clr-bg);
-    border: none;
-  }
-  .action-primary:hover { filter: brightness(1.1); }
-  
-  .action-secondary {
-    background: transparent;
-    color: var(--clr-accent);
-    border: 2px solid var(--clr-accent);
-  }
-  .action-secondary:hover { 
-    background: var(--clr-accent); 
-    color: var(--clr-bg); 
-  }
-  
-  .action-ghost {
-    background: transparent;
-    color: var(--clr-ink-light);
-    border: none;
-  }
-  .action-ghost:hover { color: var(--clr-accent); }
-
+  /* Base button styles */
   .ctrl-btn {
-    padding: 10px 14px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 24px;
     font-family: var(--font-heading);
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 600;
+    letter-spacing: 0.04em;
     cursor: pointer;
-    min-height: 44px;
     border-radius: 0;
+    border: 2px solid var(--clr-accent);
     background: var(--clr-accent);
     color: var(--clr-btn-text);
-    border: 2px solid var(--clr-accent);
+    min-height: 44px;
+    text-transform: uppercase;
+    transition: background 0.15s, border-color 0.15s;
   }
   .ctrl-btn:hover { background: var(--clr-btn-hover); }
-  .ctrl-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-  .ctrl-btn.secondary {
-    background: transparent;
-    color: var(--clr-accent);
-    border: 2px solid var(--clr-accent);
+  .ctrl-btn:focus { outline: 1px solid var(--clr-ink); outline-offset: 2px; }
+  .ctrl-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+  .ctrl-btn.secondary { background: transparent; color: var(--clr-accent); }
+  .ctrl-btn.secondary:hover { background: rgba(200, 168, 26, 0.12); }
+  .ctrl-btn.ghost { background: transparent; border-color: transparent; color: var(--clr-accent); padding: 8px 12px; }
+  .ctrl-btn.ghost:hover { background: rgba(200, 168, 26, 0.08); }
+
+  #controls .ctrl-btn {
+    flex: 1;
+    min-height: 48px;
   }
-  .ctrl-btn.secondary:hover {
-    background: var(--clr-accent);
-    color: var(--clr-btn-text);
+  #btn-travel {
+    flex: 2;
   }
-  .ctrl-btn.ghost {
-    background: transparent;
-    color: var(--clr-ink-on-dark);
-    border: 1px solid var(--clr-ink-light);
-  }
-  .ctrl-btn.ghost:hover {
-    background: var(--clr-ink-light);
-    color: var(--clr-btn-text);
-  }
-  .secondary-btns {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 8px;
+  #btn-camp {
+    flex: 2;
   }
 
-  @media (max-width: 520px) {
-    .secondary-btns { grid-template-columns: 1fr; }
+  /* Mobile bottom panel */
+  @media (max-width: 768px) {
+    #journal { height: 25vh; max-height: 25vh; padding: 8px 12px 8px 20px; font-size: 12px; }
+    #controls { padding: 6px 10px; gap: 6px; }
+  }
+  @media (max-width: 420px) {
+    #journal { height: 20vh; max-height: 20vh; }
+    #controls .ctrl-btn { min-height: 44px; font-size: 12px; }
   }
 
   .overlay {
@@ -425,6 +491,57 @@
     position: relative;
   }
 
+  /* Modal overlay for extra food, confirmations */
+  .modal-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: var(--clr-overlay-bg);
+    z-index: 3000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  .modal {
+    background: var(--clr-panel-bg);
+    border: 2px solid var(--clr-accent);
+    border-radius: 0;
+    padding: 22px;
+    max-width: 400px;
+    width: 90%;
+    text-align: center;
+  }
+  .modal h3 {
+    font-family: var(--font-heading);
+    font-size: 16px;
+    color: var(--clr-ink-panel);
+    margin-bottom: 8px;
+  }
+  .modal p {
+    font-size: 13px;
+    color: var(--clr-ink-on-light);
+    margin-bottom: 14px;
+    line-height: 1.5;
+  }
+  .extra-food-options {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .extra-btn {
+    padding: 10px 14px;
+    font-family: var(--font-heading);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    min-height: 44px;
+    border-radius: 0;
+    background: var(--clr-accent);
+    color: var(--clr-btn-text);
+    border: 2px solid var(--clr-accent);
+  }
+  .extra-btn:hover { background: var(--clr-btn-hover); }
+  .extra-btn:focus { outline: 1px solid var(--clr-ink); outline-offset: 2px; }
+
   #event-overlay .overlay-card {
     border-color: var(--clr-event-border);
   }
@@ -443,6 +560,8 @@
     border-top-left-radius: 10px;
     border-bottom-left-radius: 10px;
     opacity: 0.95;
+    pointer-events: none;
+    z-index: 0;
   }
   .overlay-card h2 {
     font-family: var(--font-heading);
@@ -1357,6 +1476,30 @@
     border-left: 3px solid var(--clr-danger);
   }
 
+  /* Camp result — items gained from hunt */
+  .camp-items-gained {
+    margin-top: 10px;
+    padding-top: 8px;
+    border-top: 1px solid var(--clr-accent);
+  }
+  .camp-items-gained .item-gained {
+    font-family: var(--font-heading);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--clr-success);
+    margin: 4px 0;
+    padding: 4px 8px;
+    background: rgba(46,90,62,0.1);
+    border-left: 3px solid var(--clr-success);
+  }
+  .camp-items-gained .item-weight {
+    font-family: var(--font-body);
+    font-size: 11px;
+    font-weight: 400;
+    color: var(--clr-muted);
+    margin-left: 6px;
+  }
+
   @media (max-width: 768px) {
     #game-container { height: 100dvh; }
     #status-bar {
@@ -1422,12 +1565,6 @@
 
   /* 420px breakpoint — smaller phones */
   @media (max-width: 420px) {
-    #status-bar { padding: 3px 4px; font-size: 10px; gap: 4px; }
-    #status-bar .stat-group { gap: 2px; }
-    #status-bar .stat-group + .stat-group { padding-left: 4px; }
-    #status-bar .stat-label { font-size: 8px; }
-    #status-bar .stat-value { font-size: 12px; }
-    #status-bar .segment-progress { font-size: 9px; padding: 0 2px; }
     #narrative { font-size: 11px; line-height: 1.5; padding: 3px 8px; padding-left: 20px; }
     #controls { padding: 4px 8px; gap: 3px; }
     .ctrl-btn { padding: 10px 2px; font-size: 12px; min-height: 44px; }
@@ -1662,80 +1799,78 @@
 <div id="game-root">
   <div id="game-container">
     <div id="status-bar">
-      <div class="stat-group">
-        <span class="stat"><span class="stat-label">Day</span><span class="stat-value" id="s-day">1</span></span>
-        <span class="stat"><span class="stat-label" id="s-month">June 15</span></span>
-        <span class="stat"><span class="stat-label" id="s-season">Summer</span></span>
-      </div>
-      <span class="segment-progress" id="s-segment">Fort Garry — begin your journey</span>
-      <div class="stat-group">
-        <span class="stat"><span class="stat-label">Weather</span><span class="stat-value weather-clear" id="s-weather">Clear</span></span>
-        <span class="stat"><span class="stat-label">MB</span><span class="stat-value mb-ok" id="s-mb">0 ₥</span></span>
-        <span class="stat" id="s-blessing-wrap" style="display:none;"><span class="stat-label">Blessing</span><span class="stat-value blessing-active" id="s-blessing">✝ 3d</span></span>
-        <span class="stat"><span class="stat-label">Food</span><span class="stat-value" id="s-food">30</span></span>
-        <span class="stat"><span class="stat-label">Wear</span><span class="stat-value" id="s-wear">0</span></span>
-        <span class="stat"><span class="stat-label">Crew</span><span class="stat-value" id="s-crew">Rested</span></span>
-      </div>
-    </div>
+    <button id="settings-btn" title="Settings">⚙</button>
+    <span class="stat"><span class="stat-label">Day</span><span class="stat-value" id="s-day">1</span></span>
+    <span class="stat"><span class="stat-value" id="s-month">June 15</span></span>
+    <span class="stat"><span class="stat-value" id="s-season">Summer</span></span>
+    <span class="segment-progress" id="s-segment">Fort Garry — begin your journey</span>
+    <span class="stat"><span class="stat-label">Weather</span><span class="stat-value" id="s-weather">Clear</span></span>
+    <span class="stat tappable" id="stat-food"><span class="stat-label">Food</span><span class="stat-value" id="s-food">0</span></span>
+    <span class="stat"><span class="stat-label">Wear</span><span class="stat-value" id="s-wear">0</span></span>
+    <span class="stat"><span class="stat-label">Morale</span><span class="stat-value" id="s-morale">70</span></span>
+    <span class="stat tappable" id="stat-crew"><span class="stat-label">Crew</span><span class="stat-value" id="s-crew">Rested</span></span>
+    <span class="stat"><span class="stat-label">Trade</span><span class="stat-value" id="s-trade">0</span></span>
+  </div>
 
     <div id="map-panel">
       <div id="map"></div>
+    </div>
 
-      <div class="overlay" id="event-overlay">
-        <div class="overlay-card event-card">
-          <div class="event-header">
-            <h2 id="event-name">On the Trail</h2>
-            <div id="event-location" class="event-location"></div>
-          </div>
-          <div id="event-text" class="event-text"></div>
-          <div id="event-source" class="event-source" style="display:none"></div>
-          <div id="event-amount" class="event-amount" style="display:none"></div>
-          <div id="event-stamp" class="event-stamp" style="display:none"></div>
-          <div class="event-line" aria-hidden="true"></div>
-          <div id="event-roll-display" class="event-roll-display" style="display:none"></div>
-          <div id="event-dice-outcome" class="dice-outcome"></div>
-          <div class="event-choices-wrap">
-            <div id="event-choices" class="event-choices"></div>
-          </div>
-          <div class="choice-actions">
-            <button id="event-continue" class="ctrl-btn" style="display:none">Continue West</button>
-          </div>
+    <div class="overlay" id="event-overlay">
+      <div class="overlay-card event-card">
+        <div class="event-header">
+          <h2 id="event-name">On the Trail</h2>
+          <div id="event-location" class="event-location"></div>
+        </div>
+        <div id="event-text" class="event-text"></div>
+        <div id="event-source" class="event-source" style="display:none"></div>
+        <div id="event-amount" class="event-amount" style="display:none"></div>
+        <div id="event-stamp" class="event-stamp" style="display:none"></div>
+        <div class="event-line" aria-hidden="true"></div>
+        <div id="event-roll-display" class="event-roll-display" style="display:none"></div>
+        <div id="event-dice-outcome" class="dice-outcome"></div>
+        <div class="event-choices-wrap">
+          <div id="event-choices" class="event-choices"></div>
+        </div>
+        <div class="choice-actions">
+          <button id="event-continue" class="ctrl-btn" style="display:none">Continue West</button>
         </div>
       </div>
+    </div>
 
-      <div class="overlay" id="settlement-overlay">
-        <div class="overlay-card">
-          <div class="settlement-header">
-            <h2 id="settlement-name"></h2>
-            <span class="settlement-badge" id="settlement-badge"></span>
-            <div class="settlement-distance" id="settlement-distance"></div>
-          </div>
-          <div class="settlement-desc" id="settlement-desc"></div>
-          <div class="settlement-actions" id="settlement-actions"></div>
-          <div class="settlement-roll-display" id="settlement-roll-display" style="display:none;"></div>
-          <div class="settlement-result" id="settlement-result" style="display:none;"></div>
-          <div class="settlement-close-row">
-            <button class="ctrl-btn primary" id="settlement-continue" style="display:none;margin-top:10px">Continue West</button>
-          </div>
+    <div class="overlay" id="settlement-overlay">
+      <div class="overlay-card">
+        <div class="settlement-header">
+          <h2 id="settlement-name"></h2>
+          <span class="settlement-badge" id="settlement-badge"></span>
+          <div class="settlement-distance" id="settlement-distance"></div>
+        </div>
+        <div class="settlement-desc" id="settlement-desc"></div>
+        <div class="settlement-actions" id="settlement-actions"></div>
+        <div class="settlement-roll-display" id="settlement-roll-display" style="display:none;"></div>
+        <div class="settlement-result" id="settlement-result" style="display:none;"></div>
+        <div class="settlement-close-row">
+          <button class="ctrl-btn ghost" id="settlement-close" style="margin-right:8px;">✕</button>
+          <button class="ctrl-btn primary" id="settlement-continue">Continue West</button>
         </div>
       </div>
+    </div>
 
-      <div class="overlay" id="cart-overlay">
-        <div class="overlay-card">
-          <button class="close-btn" id="cart-close-btn">✕</button>
-          <h2>Cart Contents</h2>
-          <div id="inv-list"></div>
-          <button class="ctrl-btn" id="cart-close-btn-2" style="margin-top:10px">Close</button>
-        </div>
+    <div class="overlay" id="cart-overlay">
+      <div class="overlay-card">
+        <button class="close-btn" id="cart-close-btn">✕</button>
+        <h2>Cart Contents</h2>
+        <div id="inv-list"></div>
+        <button class="ctrl-btn" id="cart-close-btn-2" style="margin-top:10px">Close</button>
       </div>
+    </div>
 
-      <div class="overlay" id="crew-overlay">
-        <div class="overlay-card">
-          <button class="close-btn" id="crew-close-btn">✕</button>
-          <h2>Crew Status</h2>
-          <div id="crew-status"></div>
-          <button class="ctrl-btn" id="crew-close-btn-2" style="margin-top:10px">Close</button>
-        </div>
+    <div class="overlay" id="crew-overlay">
+      <div class="overlay-card">
+        <button class="close-btn" id="crew-close-btn">✕</button>
+        <h2>Crew Status</h2>
+        <div id="crew-status"></div>
+        <button class="ctrl-btn" id="crew-close-btn-2" style="margin-top:10px">Close</button>
       </div>
     </div>
 
@@ -1745,22 +1880,21 @@
         <span id="journal-toggle-icon">▼</span>
       </div>
       <div id="journal">
-        <div class="journal-day-group" data-day="0">
-          <div class="journal-day-header"><span class="journal-day-toggle">▼</span> Before the Journey</div>
-          <div class="journal-day-content">
-            <div class="journal-entry">
-              <div class="journal-text">Welcome to the Métis Trail. Click Begin Journey to start.</div>
-            </div>
-          </div>
-        </div>
       </div>
       <div id="trail-intel" style="display:none;padding:6px 10px;background:var(--clr-gold-faint);border-top:1px solid var(--clr-accent);font-size:0.85em;color:var(--clr-accent);"></div>
       <div id="controls">
-        <button class="ctrl-btn primary" id="btn-travel">Travel</button>
-        <button class="ctrl-btn secondary" id="btn-camp">Camp</button>
-        <div class="secondary-btns">
-          <button class="ctrl-btn ghost" id="btn-cart">Cart</button>
-          <button class="ctrl-btn ghost" id="btn-crew">Crew</button>
+        <button class="ctrl-btn primary" id="btn-travel">Travel West</button>
+        <button class="ctrl-btn secondary" id="btn-camp" style="display:none">Make Camp</button>
+      </div>
+    </div>
+
+    <!-- Settings Overlay -->
+    <div class="overlay" id="settings-overlay">
+      <div class="overlay-card" style="max-width: 320px; text-align: center;">
+        <h2 style="margin-bottom: 12px;">Settings</h2>
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <button class="ctrl-btn primary" id="settings-new-game">New Game</button>
+          <button class="ctrl-btn secondary" id="settings-close">Close</button>
         </div>
       </div>
     </div>
@@ -1801,30 +1935,15 @@
     </div>
   </div>
 
-  <div class="overlay" id="predeparture-overlay">
+  <div class="overlay" id="predeparture-overlay" hidden>
     <div class="overlay-card" style="max-width: 560px;">
       <h2>Fort Garry Outfitters</h2>
-      <p class="predeparture-subtitle">You've got trade goods to sell and a long road ahead. Outfit wisely.</p>
-
-      <div class="predeparture-briefing">
-        <p><strong>Outfitter's Brief:</strong> "Five hundred and sixty-seven miles to Fort Edmonton. You've got until November before the snow buries the Carlton Trail. Your Red River cart carries 100 kg max — every kilogram counts."</p>
-        <p class="briefing-hint"><em>Buy food, repair supplies, and gear. You'll need every bit of it on the trail. Once you head west, there's no turning back.</em></p>
-        <p style="margin-top:8px;font-size:0.9em;color:var(--clr-source-text);">Your trade goods are worth <span id="shop-starting-balance" style="font-weight:700;color:var(--clr-accent);">14</span> ₥. Spend it all — you won't need money on the trail, just supplies.</p>
-      </div>
-
-      <div style="display:flex;justify-content:space-between;align-items:center;margin:12px 0 8px;">
-        <span style="font-family:var(--font-heading);font-size:13px;font-weight:600;color:var(--clr-accent);">₥ REMAINING: <span id="shop-balance" style="font-size:16px;">14</span></span>
-        <span id="shop-food-count" style="font-size:12px;color:var(--clr-source-text);">Food: 0</span>
-      </div>
-
-      <div id="predeparture-weight" class="predeparture-weight">
-        <span id="pd-weight-current">0</span> / 100 kg
-        <span id="pd-weight-status" class="under">100 kg spare</span>
-      </div>
-      <div id="shop-status" style="font-size:0.85em;color:var(--clr-accent);margin-bottom:8px;">Buy at least 10 food to begin your journey.</div>
-
+      <p class="predeparture-subtitle">Your cart awaits. Pick one extra item for the journey.</p>
       <div id="predeparture-list"></div>
-
+      <div id="predeparture-weight" class="predeparture-weight">
+        <span id="pd-weight-current">11.5</span> / 100 kg
+        <span id="pd-weight-status" class="under">88.5 kg spare</span>
+      </div>
       <div class="predeparture-actions">
         <button id="pd-confirm" class="ctrl-btn" disabled>Confirm Outfit</button>
       </div>
@@ -1896,7 +2015,7 @@
     </div>
   </div>
 </div>
-  <script type="module" src="app.js?v=12"></script>
+  <script type="module" src="app.js?v=13"></script>
 <script>window.__METIS_ASSETS__={
   "assets": []
 };</script>

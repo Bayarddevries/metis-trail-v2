@@ -32,6 +32,17 @@ export async function build() {
     path.join(outDir, 'leaflet.js')
   );
 
+  // Copy self-hosted fonts to dist/fonts/
+  await fs.mkdir(path.join(outDir, 'fonts'), { recursive: true });
+  await fs.copyFile(
+    path.join(cwd, 'src', 'fonts', 'IM-Fell-Double-Pica.ttf'),
+    path.join(outDir, 'fonts', 'IM-Fell-Double-Pica.ttf')
+  );
+  await fs.copyFile(
+    path.join(cwd, 'src', 'fonts', 'IM-Fell-English.ttf'),
+    path.join(outDir, 'fonts', 'IM-Fell-English.ttf')
+  );
+
   const result = await esbuild.build({
     absWorkingDir: cwd,
     entryPoints: [path.join(cwd, 'src/main.js')],

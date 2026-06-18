@@ -10,59 +10,20 @@ import { CONSTANTS } from './core/constants.js';
 import { saveScore, getTopScores, getMyScores, syncLocalScores } from './firebase.js';
 import Haptics from './ui/haptics.js';
 import { getItemIcon } from './ui/icons.js';
+import {
+  buildTravelEntry, buildTravelReflection,
+  buildEventChoiceEntry, buildEventAutoEntry, buildEventReflection,
+  buildCampEntry, buildCampReflection,
+  buildSettlementArrivalEntry, buildSettlementJourneyEntry, buildSettlementActionEntry, buildSettlementReflection,
+  buildItemUseEntry, buildLeaveBehindEntry,
+} from './ui/journalNarrative.js';
 
 // Sync any locally-saved scores on page load
 syncLocalScores();
 
-// First-person travel journal entry generator
-function buildTravelJournalEntry(prevNode, node, after, prevWear) {
-  if (!prevNode || !node) {
-    return 'Another day on the Carlton Trail. The prairie stretches on, dry and endless.';
-  }
+// (buildTravelJournalEntry removed — using buildTravelEntry + buildTravelReflection from journalNarrative.js)
 
-  const openings = [
-    `We pushed west from ${prevNode.name}, heading toward ${node.name}.`,
-    `The cart rolled out of ${prevNode.name} at first light. ${node.name} lies ahead.`,
-    `Left ${prevNode.name} behind. The road to ${node.name} beckons.`,
-    `We broke camp and set our faces west — ${node.name} was the day's goal.`,
-    `Dawn found us loading up and moving on. ${prevNode.name} gave way to open trail.`,
-  ];
-
-  const middles = [
-    `The wheels creak beneath our load. The oxen plod on, patient as the grass.`,
-    `A long day under a wide sky. Not a tree for miles, just the big empty.`,
-    `The trail winds through grass taller than a man on horseback.`,
-    `Clouds built in the west but held their rain. We counted the oxen at midday — all present.`,
-    `The jingle of harness, the groan of the cart. The rhythm of the trail.`,
-  ];
-
-  const wear = after.wear > prevWear
-    ? ' The cart took a beating on the rough trail — the axle groans louder now.'
-    : '';
-
-  const weather = after.weather && after.weather !== 'clear'
-    ? ` ${({ overcast: 'A grey ceiling of cloud followed us all day.', rain: 'A cold rain came on by noon — we huddled under canvas.', storm: 'Thunder rolled across the prairie. We pressed on regardless.', snow: 'Snow fell fine as powder, dusting the oxen\'s backs.' })[after.weather] || ''}`
-    : '';
-
-  // Pick varied fragments based on day number to avoid repetition
-  const day = after.day || 1;
-  const opening = openings[day % openings.length];
-  const middle = middles[(day * 3) % middles.length];
-
-  return `${opening}${wear}${weather} ${middle}`;
-}
-
-// First-person event journal entry generator
-function buildEventJournalEntry(eventData, result) {
-  const desc = eventData.text || 'Something happened on the trail.';
-  if (!result || result.roll === null) {
-    return desc;
-  }
-  const outcome = result.text || (result.success ? 'It went well enough.' : 'That did not go as hoped.');
-  // Strip "Success. " / "Failure. " prefix for cleaner prose
-  const clean = outcome.replace(/^(Success|Failure)\.\s*/, '');
-  return `${desc} ${clean}`;
-}
+// (buildEventJournalEntry removed — using buildEventChoiceEntry + buildEventReflection from journalNarrative.js)
 
 export function bootstrap(seed = null) {
   const game = createGame(seed);
@@ -121,77 +82,76 @@ export function bootstrap(seed = null) {
     if (savedName) nameInput.value = savedName;
   }
 
-  // Profanity filter for party names
-  const PROFANE = /\b(f+u+c+k+|s+h+i+t+|b+i+t+c+h+|a+s+s+h+o+l+e+|d+a+m+n+|c+u+n+t+|f+a+g+|n+i+g+g+|r+e+t+a+r+d+|w+h+o+r+e+|s+l+u+t+|p+i+s+s+|t+i+t+s+|d+i+c+k+|p+u+s+s+y+|c+o+c+k+|m+e+r+d+e+|p+u+t+a+|b+a+r+d+a+s+h+|b+o+r+d+e+l+|c+h+i+n+k+|g+o+o+k+|k+i+k+e+|s+p+i+c+|w+e+t+b+a+c+k+|t+r+a+n+n+y+|d+y+k+e+|k+a+f+i+r+|m+u+l+a+t+t+o+|p+a+k+i+|s+q+u+a+w+|w+o+g+|z+i+g+g+e+r+)\b/gi;
-  function sanitizeName(raw) {
-    let cleaned = raw.replace(PROFANE, (m) => '*'.repeat(m.length));
-    // Also block names that are just symbols/numbers
-    if (!/[a-zA-Z]/.test(cleaned)) cleaned = 'Traveller';
-    return cleaned.substring(0, 32);
+  // Track visited settlements for arrival vs journey entries
+  const visitedSettlements = new Set();
+
+  // ── Stat-tap overlays ──────────────────────────────────────────
+  document.getElementById('stat-food')?.addEventListener('click', () => {
+    if (window._metisGame) showCart(window._metisGame);
+  });
+  document.getElementById('stat-crew')?.addEventListener('click', () => {
+    if (window._metisGame) showCrew(window._metisGame);
+  });
+
+  // ── Settings menu ──────────────────────────────────────────────
+  document.getElementById('settings-btn')?.addEventListener('click', () => {
+    document.getElementById('settings-overlay')?.classList.add('active');
+  });
+  document.getElementById('settings-close')?.addEventListener('click', () => {
+    document.getElementById('settings-overlay')?.classList.remove('active');
+  });
+  document.getElementById('settings-new-game')?.addEventListener('click', () => {
+    clearSave();
+    window.location.reload();
+  });
+
+  // ── Overlay exclusivity ────────────────────────────────────────
+  // When any overlay opens, close others
+  const overlayIds = ['event-overlay', 'settlement-overlay', 'cart-overlay', 'crew-overlay', 'predeparture-overlay', 'settings-overlay'];
+  function closeAllOverlays() {
+    overlayIds.forEach(id => document.getElementById(id)?.classList.remove('active'));
   }
 
-  // Event delegation on #game-root survives DOM rebuilds from render()
-  const gameRoot = find('#game-root');
-  if (gameRoot) {
-    gameRoot.addEventListener('click', (e) => {
-      if (e.target.closest('#intro-start')) {
-        // Save player name (sanitized)
-        const rawName = nameInput?.value?.trim() || '';
-        const nameVal = sanitizeName(rawName) || 'Traveller';
-        if (nameVal) {
-          localStorage.setItem('metisPlayerName', nameVal);
-        }
-        // Update input to show sanitized version
-        if (nameInput && rawName !== nameVal) {
-          nameInput.value = nameVal;
-        }
-        const introOverlay = find('#intro-overlay');
-        if (introOverlay) {
-          introOverlay.classList.remove('active');
-          introOverlay.setAttribute('hidden', '');
-        }
-        // If pre-departure is enabled, show it now
-        const currentState = game.getState();
-        if (currentState.preDeparture) {
-          showShop(game);
-        } else {
-          window.__METIS_RENDER__();
-        }
+  // ── Save-game version migration ────────────────────────────────
+  const SAVE_VERSION = 2;
+  const savedRaw = localStorage.getItem('metis-trail-v2.save');
+  if (savedRaw) {
+    try {
+      const parsed = JSON.parse(savedRaw);
+      const saveVer = parsed.schemaVersion || parsed.data?.schemaVersion || 0;
+      if (saveVer < SAVE_VERSION) {
+        localStorage.removeItem('metis-trail-v2.save');
+        console.info(`[Metis] Cleared incompatible save (v${saveVer} < v${SAVE_VERSION})`);
       }
-    });
-  } else {
-    console.warn('Metis bootstrap: #game-root not found; Begin Journey button is offline.');
+    } catch(e) { /* ignore corrupt saves */ }
   }
 
-  // Delegated click for pre-departure confirm button (outside #game-root)
+  // Don't call render() here — it would hide the intro overlay immediately.
+  // The intro's "Begin Journey" button calls render() on click.
+
+  // ── Intro start handler ────────────────────────────────────────
   document.addEventListener('click', (e) => {
-    if (e.target.closest('#pd-confirm')) {
-      e.preventDefault();
-      e.stopPropagation();
-      const btn = e.target.closest('#pd-confirm');
-      if (btn.disabled) return;
-      const game = window._metisGame;
-      // Get shop state from showShop closure via window
-      if (window.__METIS_SHOP_ITEMS && window.__METIS_SHOP_PURCHASED) {
-        window.__METIS_SHOP_ITEMS.forEach(item => {
-          if (window.__METIS_SHOP_PURCHASED[item.name] > 0) {
-            for (let i = 0; i < window.__METIS_SHOP_PURCHASED[item.name]; i++) {
-              if (item.category === 'provisions') {
-                game.addFood(item.count);
-              } else {
-                game.buyItem(item.name, item.wt, item.category);
-              }
-            }
-          }
-        });
+    if (e.target.closest('#intro-start')) {
+      const rawName = nameInput?.value?.trim() || '';
+      const nameVal = rawName || 'Traveller';
+      if (nameVal) localStorage.setItem('metisPlayerName', nameVal);
+      const introOverlay = document.getElementById('intro-overlay');
+      if (introOverlay) {
+        introOverlay.classList.remove('active');
+        introOverlay.setAttribute('hidden', '');
       }
-      game.confirmPreDeparture();
-      document.getElementById('predeparture-overlay')?.classList.remove('active');
-      window.__METIS_RENDER__();
+      if (game.getState().preDeparture) {
+        showShop(game);
+      } else {
+        window.__METIS_RENDER__();
+      }
     }
   });
 
-  const travelBtn = find('#btn-travel');
+  // ── Travel / Camp button handlers ──────────────────────────────
+  const travelBtn = document.getElementById('btn-travel');
+  const campBtn = document.getElementById('btn-camp');
+
   if (travelBtn) {
     travelBtn.addEventListener('click', () => {
       const { pendingEvent, pendingSettlement, over } = game.getState();
@@ -200,119 +160,116 @@ export function bootstrap(seed = null) {
       const blocked = travelOneDay();
       Haptics.travel();
       if (blocked === true) return;
-      // Play wear damage sound if wear increased
       const after = game.getState();
       if (after.wear > prevWear) Haptics.wear();
       // Log travel to journal
       const node = NODES[after.node];
       const prevNode = NODES[after.node - 1];
+      const cart = game.getCart();
       journalLog({
         day: after.day,
         date: monthName(after.month) + ' ' + after.day,
         title: 'On the Trail',
-        text: buildTravelJournalEntry(prevNode, node, after, prevWear),
+        text: buildTravelReflection(prevNode, node, after, cart, after.day),
         mech: after.wear > prevWear ? 'Wear +1' : '',
-        collapsed: true
+        collapsed: false
       });
       window.__METIS_RENDER__();
     });
-    travelBtn.setAttribute('data-metis-travel-bound', '1');
   }
 
-  const campClose = find('#camp-close-btn');
-  const campContinue = find('#camp-continue');
-
-  if (campClose) campClose.onclick = () => find('#camp-overlay')?.classList.remove('active');
-  if (campContinue) {
-    campContinue.onclick = () => {
-      find('#camp-overlay')?.classList.remove('active');
-      // After camp action, the travel loop waits for user to press Travel again
-    };
+  if (campBtn) {
+    campBtn.addEventListener('click', () => {
+      showCamp(game);
+    });
   }
 
-  const campBtn = find('#btn-camp');
-  if (campBtn) campBtn.onclick = () => showCamp(game);
-
-  const cartBtn = find('#btn-cart');
-  if (cartBtn) cartBtn.onclick = () => showCart(game);
-
-  const crewBtn = find('#btn-crew');
-  if (crewBtn) crewBtn.onclick = () => showCrew(game);
-
-  // Journal toggle — collapse/expand bottom panel
-  const journalToggle = find('#journal-toggle');
+  // ── Journal toggle ─────────────────────────────────────────────
+  const journalToggle = document.getElementById('journal-toggle');
   if (journalToggle) {
-    journalToggle.onclick = () => {
+    journalToggle.addEventListener('click', () => {
       const panel = document.getElementById('bottom-panel');
       if (panel) {
         panel.classList.toggle('collapsed');
         const icon = document.getElementById('journal-toggle-icon');
         if (icon) icon.textContent = panel.classList.contains('collapsed') ? '▶' : '▼';
       }
-    };
+    });
   }
 
-  const eventContinue = find('#event-continue');
+  // ── Overlay close handlers ─────────────────────────────────────
+  const eventContinue = document.getElementById('event-continue');
   if (eventContinue) eventContinue.onclick = () => {
-    find('#event-overlay')?.classList.remove('active');
+    document.getElementById('event-overlay')?.classList.remove('active');
   };
 
-  const settlementContinue = find('#settlement-continue');
+  const settlementContinue = document.getElementById('settlement-continue');
   if (settlementContinue) settlementContinue.onclick = () => {
     const st = game.getState().pendingSettlement;
     const after = game.getState();
     if (st) {
+      const cart = game.getCart();
+      const weather = after.weather || 'clear';
+      const isFirstVisit = !visitedSettlements.has(st.name);
+      if (isFirstVisit) visitedSettlements.add(st.name);
+      const text = isFirstVisit
+        ? buildSettlementArrivalEntry(st)
+        : buildSettlementJourneyEntry(st, weather, cart);
       journalLog({
         day: after.day,
         date: monthName(after.month) + ' ' + after.day,
         title: `Arrived at ${st.name}`,
-        text: st.desc || `${st.name} — a ${st.type} settlement on the Carlton Trail.`,
+        text: text,
         mech: '',
-        collapsed: true,
+        collapsed: false,
       });
     }
     game.settlementAction('continue');
-    find('#settlement-overlay')?.classList.remove('active');
+    document.getElementById('settlement-overlay')?.classList.remove('active');
     window.__METIS_RENDER__();
   };
 
-  const settlementClose = find('#settlement-close');
+  const settlementClose = document.getElementById('settlement-close');
   if (settlementClose) settlementClose.onclick = () => {
     const st = game.getState().pendingSettlement;
     const after = game.getState();
     if (st) {
+      const cart = game.getCart();
+      const weather = after.weather || 'clear';
+      const isFirstVisit = !visitedSettlements.has(st.name);
+      if (isFirstVisit) visitedSettlements.add(st.name);
+      const text = isFirstVisit
+        ? buildSettlementArrivalEntry(st)
+        : buildSettlementJourneyEntry(st, weather, cart);
       journalLog({
         day: after.day,
         date: monthName(after.month) + ' ' + after.day,
         title: `Arrived at ${st.name}`,
-        text: st.desc || `${st.name} — a ${st.type} settlement on the Carlton Trail.`,
+        text: text,
         mech: '',
-        collapsed: true,
+        collapsed: false,
       });
     }
     game.settlementAction('continue');
-    find('#settlement-overlay')?.classList.remove('active');
+    document.getElementById('settlement-overlay')?.classList.remove('active');
     window.__METIS_RENDER__();
   };
 
-  const cartClose = find('#cart-close-btn');
-  const cartClose2 = find('#cart-close-btn-2');
-  if (cartClose) cartClose.onclick = () => find('#cart-overlay')?.classList.remove('active');
-  if (cartClose2) cartClose2.onclick = () => find('#cart-overlay')?.classList.remove('active');
+  const cartClose = document.getElementById('cart-close-btn');
+  const cartClose2 = document.getElementById('cart-close-btn-2');
+  if (cartClose) cartClose.onclick = () => document.getElementById('cart-overlay')?.classList.remove('active');
+  if (cartClose2) cartClose2.onclick = () => document.getElementById('cart-overlay')?.classList.remove('active');
 
-  const crewClose = find('#crew-close-btn');
-  const crewClose2 = find('#crew-close-btn-2');
-  if (crewClose) crewClose.onclick = () => find('#crew-overlay')?.classList.remove('active');
-  if (crewClose2) crewClose2.onclick = () => find('#crew-overlay')?.classList.remove('active');
+  const crewClose = document.getElementById('crew-close-btn');
+  const crewClose2 = document.getElementById('crew-close-btn-2');
+  if (crewClose) crewClose.onclick = () => document.getElementById('crew-overlay')?.classList.remove('active');
+  if (crewClose2) crewClose2.onclick = () => document.getElementById('crew-overlay')?.classList.remove('active');
 
-  const restartBtn = find('#end-restart');
+  const restartBtn = document.getElementById('end-restart');
   if (restartBtn) restartBtn.onclick = () => {
     clearSave();
     window.location.reload();
   };
-
-  // Don't call render() here — it would hide the intro overlay immediately.
-  // The intro's "Begin Journey" button calls render() on click.
 }
 
 window.__METIS_BOOT__ = bootstrap;
@@ -630,7 +587,7 @@ function renderTrailIntel(state) {
 }
 
 function hideOverlays() {
-  ['intro-overlay', 'event-overlay', 'settlement-overlay', 'cart-overlay', 'crew-overlay'].forEach((id) => {
+  ['intro-overlay', 'event-overlay', 'settlement-overlay', 'cart-overlay', 'crew-overlay', 'settings-overlay'].forEach((id) => {
     const el = document.getElementById(id);
     if (el) el.classList.remove('active');
   });
@@ -781,6 +738,7 @@ function showEvent(game) {
   // Track whether this event has a pending dice roll
   let diceResult = null;
   let eventData = null; // captured for journal logging
+  let eventBefore = null; // captured before auto-event resolution
 
   // Continue button handler — shared by dice and non-dice paths
   continueEl.onclick = () => {
@@ -793,6 +751,8 @@ function showEvent(game) {
       if (eventData) {
         const after = game.getState();
         const res = diceResult.result;
+        const cart = game.getCart();
+        const weather = after.weather || 'clear';
         const mechParts = [];
         if (after.food !== diceResult.before.food) mechParts.push(`${after.food - diceResult.before.food >= 0 ? '+' : ''}${(after.food - diceResult.before.food).toFixed(1)} Food`);
         if (after.wear !== diceResult.before.wear) mechParts.push(`Wear ${after.wear - diceResult.before.wear >= 0 ? '+' : ''}${after.wear - diceResult.before.wear}`);
@@ -802,14 +762,35 @@ function showEvent(game) {
           day: after.day,
           date: monthName(after.month) + ' ' + after.day,
           title: eventData.classification || 'Event',
-          text: buildEventJournalEntry(eventData, res),
+          text: buildEventReflection(eventData, res, weather, cart),
           dice: res && res.roll !== null ? `Rolled ${res.roll} — need ${res.dc}+ — ${res.success ? '✓ Success' : '✗ Failure'}` : null,
           mech: mechParts.join(' · '),
-          collapsed: true,
+          collapsed: false,
         });
       }
       diceResult = null;
       eventData = null;
+    } else {
+      // Auto-event (no dice, no choices) — log to journal
+      if (eventData) {
+        const after = game.getState();
+        const cart = game.getCart();
+        const weather = after.weather || 'clear';
+        const beforeState = eventBefore || after;
+        const mechParts = [];
+        if (after.food !== beforeState.food) mechParts.push(`${after.food - beforeState.food >= 0 ? '+' : ''}${(after.food - beforeState.food).toFixed(1)} Food`);
+        if (after.wear !== beforeState.wear) mechParts.push(`Wear ${after.wear - beforeState.wear >= 0 ? '+' : ''}${after.wear - beforeState.wear}`);
+        journalLog({
+          day: after.day,
+          date: monthName(after.month) + ' ' + after.day,
+          title: eventData.classification || 'Event',
+          text: buildEventAutoEntry(eventData.text || '', weather, cart),
+          mech: mechParts.join(' · '),
+          collapsed: false,
+        });
+        eventData = null;
+        eventBefore = null;
+      }
     }
     // Close overlay and re-render
     continueEl.style.display = 'none';
@@ -891,6 +872,9 @@ function showEvent(game) {
   if (!ev.choices || ev.choices.length === 0) {
     continueEl.style.display = 'inline-block';
     continueEl.classList.add('ready');
+    // Set eventData + before state for auto-event journal logging
+    eventData = { classification: ev.classification, text: ev.text };
+    eventBefore = { ...game.getState() };
   }
 
   document.getElementById('event-overlay')?.classList.add('active');
@@ -967,7 +951,7 @@ function showSettlement(game) {
 
     const riskRow = document.createElement('div');
     riskRow.className = 'settlement-action-card-risk';
-    riskRow.textContent = action.risk ? `Risk: ${action.risk}` : '';
+    riskRow.textContent = action.risk ? `Receive: ${action.risk}` : '';
 
     const flavorRow = document.createElement('div');
     flavorRow.className = 'settlement-action-card-flavor';
@@ -980,17 +964,13 @@ function showSettlement(game) {
     // Determine if action can be performed
     const st = game.getState();
     const cart = game.getCart();
-    const credit = st.credit?.[node.type] || 0;
     let canDo = true;
 
     // Check preconditions for each action
     switch (action.id) {
       case 'trade': canDo = cart.some(i => i.type === 'trade' && i.count > 0); break;
-      case 'buy_supplies': canDo = credit > 0; break;
       case 'rest': canDo = st.food >= 1; break;
-      case 'get_intel': canDo = credit >= 1; break;
       case 'trade_gossip': canDo = true; break;
-      case 'recruit_crew': canDo = credit >= 2 && st.food >= 1 && (st.crewCount || 3) < 6; break;
       case 'dance': canDo = st.food >= 1; break;
       case 'share_food': canDo = st.food >= 2; break;
       case 'craft_hides': {
@@ -999,11 +979,8 @@ function showSettlement(game) {
         canDo = (hides?.count || 0) >= 3 && (shag?.count || 0) >= 1;
         break;
       }
-      case 'pay_fines': canDo = (st.fines || 0) > 0 && credit >= (st.fines || 0); break;
-      case 'get_permits': canDo = credit >= 2; break;
       case 'report_duty': canDo = true; break;
-      case 'buy_ammo': canDo = credit >= 1.5; break;
-      case 'heal_crew': canDo = credit >= 2 || (cart.find(i => i.name === 'Medicine Pouch')?.count || 0) >= 1; break;
+      case 'heal_crew': canDo = (cart.find(i => i.name === 'Medicine Pouch')?.count || 0) >= 1; break;
       case 'get_blessing': canDo = st.food >= 1; break;
       case 'trade_limited': canDo = true; break;
       default: canDo = true;
@@ -1050,7 +1027,9 @@ function showSettlement(game) {
           const intel = afterState.trailIntel || [];
           if (intel.length > 0) intelText = intel[intel.length - 1].text;
         }
-        const flavor = buildSettlementJournalText(action.id, node, intelText);
+        const flavor = buildSettlementActionEntry(action.id, action.cost, action.risk || action.flavor);
+        const reflectionText = buildSettlementReflection(node, afterState, afterCart);
+        const fullText = flavor + ' ' + reflectionText;
 
         // Build mechanical summary
         const mechParts = [];
@@ -1071,7 +1050,7 @@ function showSettlement(game) {
 
         const rcFlavor = document.createElement('div');
         rcFlavor.className = 'settlement-action-card-flavor';
-        rcFlavor.textContent = flavor;
+        rcFlavor.textContent = fullText;
         resultCard.appendChild(rcFlavor);
 
         if (mechParts.length) {
@@ -1094,9 +1073,9 @@ function showSettlement(game) {
             day: afterState.day,
             date: monthName(afterState.month) + ' ' + afterState.day,
             title: `${action.label} at ${node.name}`,
-            text: flavor,
+            text: fullText,
             mech: mechParts.join(' · '),
-            collapsed: true,
+            collapsed: false,
           });
           document.getElementById('settlement-overlay')?.classList.remove('active');
           window.__METIS_RENDER__();
@@ -1162,12 +1141,8 @@ function buildSettlementOutcome(action, before, after, beforeCart, afterCart) {
   if (after.day !== before.day) msgs.push(`${after.day - before.day} Day(s)`);
   if (action === 'trade') {
     const lost = beforeCart.reduce((s, i) => s + i.count, 0) - afterCart.reduce((s, i) => s + i.count, 0);
-    if (lost > 0) msgs.push(`Traded ${lost} good(s) for MB credit.`);
+    if (lost > 0) msgs.push(`Traded ${lost} good(s) for supplies.`);
   }
-  if (action === 'buy_food') msgs.push('Bought food with MB credit.');
-  if (action === 'buy_repair') msgs.push('Repaired cart with MB credit.');
-  if (action === 'buy_heal') msgs.push('Healed crew with MB credit.');
-  if (action === 'buy_info') msgs.push('Gathered trail intelligence.');
   if (action === 'repair') msgs.push('Cart repaired.');
   if (action === 'grease') msgs.push('Axle greased.');
   if (action === 'heal') msgs.push('Healed.');
@@ -1205,8 +1180,8 @@ function showCart(game) {
       const canUnload = i.count > 0;
       const hint = i.category ? getCategoryHint(i.category) : '';
       const desc = i.desc ? `<div style="font-size:0.8em;color:#5a4a3a;margin-top:2px;">${i.desc}</div>` : '';
-      const mbStr = (i.type === 'trade' || i.category === 'furs') && i.mbValue
-        ? `<span style="color:var(--clr-accent);font-size:0.85em;margin-left:4px;">${i.mbValue} ₥</span>`
+      const mbStr = (i.type === 'trade' || i.category === 'furs')
+        ? `<span style="color:var(--clr-accent);font-size:0.85em;margin-left:4px;">Trade good</span>`
         : '';
       return `
     <div class="cart-row" style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;padding:6px 0;border-bottom:1px solid rgba(0,0,0,0.08);">
@@ -1240,7 +1215,7 @@ function getCategoryHint(category) {
     provisions: '1 food/day keeps the crew alive. Running out means death.',
     repair: 'Reduces cart wear. No repair supplies = stranded when cart breaks.',
     parts: 'Needed for cart repair and crafting recipes at settlements.',
-    furs: 'Trade goods. Sell at settlements for ₥ credit. Need ₥ to win.',
+    furs: 'Trade goods. Deliver to Fort Edmonton for endgame score.',
     shelter: 'Cold nights and river crossings. Tarp doubles as raft.',
     fuel: 'Required for cold nights. Without fire, crew condition drops.',
     hunting: 'Ammo enables hunting camp action. Also used in defensive events.',
@@ -1258,176 +1233,158 @@ function showShop(game) {
   const currentEl = document.getElementById('pd-weight-current');
   const statusEl = document.getElementById('pd-weight-status');
   const confirmBtn = document.getElementById('pd-confirm');
+  // Pre-departure overlay elements (required)
+  if (!listEl || !weightEl || !currentEl || !statusEl || !confirmBtn) return;
+  // Settlement shop overlay elements (optional - may be null in pre-departure)
   const balanceEl = document.getElementById('shop-balance');
   const shopStatusEl = document.getElementById('shop-status');
   const foodCountEl = document.getElementById('shop-food-count');
+  const isPreDeparture = !!state.preDeparture;
 
-  if (!listEl || !weightEl || !currentEl || !statusEl || !confirmBtn || !balanceEl || !shopStatusEl || !foodCountEl) return;
+  // Show the correct overlay
+  if (isPreDeparture) {
+    document.getElementById('predeparture-overlay')?.classList.add('active');
+    document.getElementById('predeparture-overlay')?.removeAttribute('hidden');
 
-  // Starting ₥ from trade goods in cart
-  let balance = game.getCart().reduce((sum, i) => sum + (i.mbValue || 0) * i.count, 0);
-  const startingBalance = balance;
+    // Starter kit (auto-included)
+    const starterItems = [
+      { name: 'Medicine Pouch', wt: 1.5, category: 'medical', count: 1 },
+      { name: 'Ammunition Belt', wt: 2, category: 'hunting', count: 1 },
+      { name: 'Canvas Tarp', wt: 4, category: 'shelter', count: 1 },
+    ];
 
-  // Shop items: name, description, price, category, weight
-  const shopItems = [
-    { name: 'Pemmican Rations', desc: 'Dried meat and fat. 1 food/day keeps the crew alive.', price: 2.5, category: 'provisions', wt: 2.5, count: 5 },
-    { name: 'Spare Axle', desc: 'Hard maple. Heavy but essential for a Red River cart.', price: 3.0, category: 'parts', wt: 15, count: 1 },
-    { name: 'Shaganappi', desc: 'Rawhide strips. Binding, lashing, and cart repair.', price: 1.5, category: 'repair', wt: 3, count: 3 },
-    { name: 'Tool Kit', desc: 'Axe, auger, drawknife. Required for major repairs.', price: 2.5, category: 'parts', wt: 8, count: 1 },
-    { name: 'Canvas Tarp', desc: 'Waterproof. Shelter and cart-raft conversion.', price: 2.0, category: 'shelter', wt: 4, count: 1 },
-    { name: 'Firewood Bundle', desc: 'Dried poplar. Required for cold nights.', price: 1.0, category: 'fuel', wt: 6, count: 2 },
-    { name: 'Rope (50ft)', desc: 'Hemp. Crossings, repairs, binding.', price: 1.5, category: 'parts', wt: 3, count: 1 },
-    { name: 'Ammunition Belt', desc: 'Shot and ball. For hunting and defence.', price: 2.0, category: 'hunting', wt: 2, count: 1 },
-    { name: 'Medicine Pouch', desc: 'Herbal remedies and bandages.', price: 3.0, category: 'medical', wt: 1.5, count: 1 },
-    { name: 'Blanket', desc: 'Wool. Winter survival.', price: 2.0, category: 'shelter', wt: 3, count: 2 },
-  ];
+    // Extra items player can pick ONE from
+    const extraItems = [
+      { name: 'Pemmican Rations', wt: 2.5, category: 'provisions', count: 7, desc: 'Dried meat and fat. The staple of the prairie.' },
+      { name: 'Spare Axle', wt: 15, category: 'parts', count: 1, desc: 'Hard maple. Heavy but essential for a Red River cart.' },
+      { name: 'Shaganappi', wt: 3, category: 'repair', count: 3, desc: 'Rawhide strips. Binding, lashing, and cart repair.' },
+      { name: 'Tool Kit', wt: 8, category: 'parts', count: 1, desc: 'Axe, auger, drawknife. Required for major repairs.' },
+      { name: 'Firewood Bundle', wt: 6, category: 'fuel', count: 1, desc: 'Dried poplar. Required for cold nights.' },
+      { name: 'Rope (50ft)', wt: 3, category: 'parts', count: 1, desc: 'Hemp. Crossings, repairs, binding.' },
+      { name: 'Blanket', wt: 3, category: 'shelter', count: 2, desc: 'Wool. Winter survival.' },
+    ];
 
-  // Track purchased counts
-  const purchased = {};
-  shopItems.forEach(item => { purchased[item.name] = 0; });
+    // Track selected extra item
+    let selectedExtra = null;
 
-  // Expose for delegated confirm handler
-  window.__METIS_SHOP_ITEMS = shopItems;
-  window.__METIS_SHOP_PURCHASED = purchased;
+    function recalc() {
+      let totalWeight = 0;
+      const cart = game.getCart();
+      cart.forEach(i => { totalWeight += i.wt * i.count; });
+      starterItems.forEach(item => { totalWeight += item.wt * item.count; });
+      if (selectedExtra) {
+        totalWeight += selectedExtra.wt * selectedExtra.count;
+      }
 
-  function recalc() {
-    let totalWeight = 0;
-    let totalFood = 0;
-    shopItems.forEach(item => {
-      totalWeight += item.wt * purchased[item.name];
-      if (item.category === 'provisions') totalFood += purchased[item.name] * 5; // 5 rations per purchase
-    });
-    // Add trade goods weight
-    const cart = game.getCart();
-    cart.forEach(i => { totalWeight += i.wt * i.count; });
+      currentEl.textContent = totalWeight.toFixed(1);
+      weightEl.classList.remove('over', 'at-capacity', 'under');
+      statusEl.classList.remove('over', 'at-capacity', 'under');
 
-    currentEl.textContent = totalWeight.toFixed(1);
-    balanceEl.textContent = Math.round(balance);
-    foodCountEl.textContent = 'Food: ' + totalFood;
-
-    const capacity = state.capacity;
-    weightEl.classList.remove('over', 'at-capacity', 'under');
-    statusEl.classList.remove('over', 'at-capacity', 'under');
-
-    if (totalWeight > capacity) {
-      weightEl.classList.add('over');
-      statusEl.classList.add('over');
-      statusEl.textContent = `${(totalWeight - capacity).toFixed(1)} kg over`;
-      confirmBtn.disabled = true;
-    } else {
-      weightEl.classList.add('under');
-      statusEl.classList.add('under');
-      statusEl.textContent = `${(capacity - totalWeight).toFixed(1)} kg spare`;
-      confirmBtn.disabled = totalFood < 10;
-      if (totalFood < 10) {
-        shopStatusEl.textContent = `Need ${10 - totalFood} more food to begin.`;
-        shopStatusEl.style.color = 'var(--clr-danger)';
+      if (totalWeight > state.capacity) {
+        weightEl.classList.add('over');
+        statusEl.classList.add('over');
+        statusEl.textContent = `${(totalWeight - state.capacity).toFixed(1)} kg over`;
+        confirmBtn.disabled = true;
       } else {
-        shopStatusEl.textContent = 'Ready to depart!';
-        shopStatusEl.style.color = 'var(--clr-success)';
+        weightEl.classList.add('under');
+        statusEl.classList.add('under');
+        statusEl.textContent = `${(state.capacity - totalWeight).toFixed(1)} kg spare`;
+        confirmBtn.disabled = false;
       }
     }
-  }
 
-  function renderList() {
-    // Build combined list: trade goods from cart + shop items
-    const cart = game.getCart();
-    const tradeGoods = cart.filter(i => i.type === 'trade' || i.category === 'furs');
+    function renderList() {
+      let html = '<div style="font-family:var(--font-heading);font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:var(--clr-accent);margin:10px 0 6px;">Starter Kit (auto-included)</div>';
+      starterItems.forEach(item => {
+        html += `<div class="pd-row" style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--clr-muted);">
+          <div class="pd-item-info">
+            <span class="pd-name">${item.name}</span>
+            <div style="font-size:0.75em;color:var(--clr-muted);margin-top:2px;">${item.wt} kg</div>
+          </div>
+        </div>`;
+      });
 
-    let html = '';
-
-    // Section: Your Trade Goods (can sell back)
-    if (tradeGoods.length > 0) {
-      html += `<div style="font-family:var(--font-heading);font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:var(--clr-accent);margin:10px 0 6px;">Your Trade Goods</div>`;
-      tradeGoods.forEach(item => {
-        const mbVal = item.mbValue || 1;
+      html += '<div style="font-family:var(--font-heading);font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:var(--clr-accent);margin:14px 0 6px;">Pick ONE Extra Item</div>';
+      extraItems.forEach(item => {
+        const isSelected = selectedExtra && selectedExtra.name === item.name;
         const itemWeight = (item.wt * item.count).toFixed(1);
-        html += `
-    <div class="pd-row" data-trade-item="${item.name}">
-      <div class="pd-item-info">
-        <span class="pd-icon">${getItemIcon(item.name)}</span>
-        <span class="pd-name">${item.name} ×${item.count}</span>
-        <div style="font-size:0.75em;color:var(--clr-accent);margin-top:2px;">${mbVal} ₥ each · ${itemWeight} kg total</div>
-      </div>
-      <div class="pd-controls">
-        <button class="pd-sell" data-item="${item.name}" style="padding:4px 12px;font-size:0.85em;background:var(--clr-danger);color:#fff;border:2px solid var(--clr-danger);font-family:var(--font-heading);font-weight:600;cursor:pointer;">Sell 1</button>
-        <span class="pd-weight" style="color:var(--clr-muted);">${item.wt} kg ea</span>
-      </div>
-    </div>`;
+        html += `<div class="pd-row extra-item-row" data-item="${item.name}" style="display:flex;justify-content:space-between;align-items:center;padding:10px;border:2px solid ${isSelected ? 'var(--clr-accent)' : 'var(--clr-muted)'};background:${isSelected ? 'rgba(139,105,20,0.1)' : 'transparent'};cursor:pointer;border-radius:0;transition:border-color 0.15s,background 0.15s;" onmouseover="this.style.borderColor='var(--clr-accent)'" onmouseout="this.style.borderColor='${isSelected ? 'var(--clr-accent)' : 'var(--clr-muted)'}'">
+          <div class="pd-item-info" style="flex:1;">
+            <span class="pd-name" style="font-weight:${isSelected ? '700' : '600'};">${item.name} ×${item.count}</span>
+            <div style="font-size:0.75em;color:var(--clr-muted);margin-top:2px;">${item.desc}</div>
+            <div style="font-size:0.7em;color:var(--clr-accent);margin-top:2px;">${itemWeight} kg total</div>
+          </div>
+          <div class="pd-controls" style="display:flex;align-items:center;gap:8px;">
+            ${isSelected ? '<span style="color:var(--clr-accent);font-family:var(--font-heading);font-size:14px;">✓ Selected</span>' : '<button class="pd-extra-pick" data-item="' + item.name + '" style="padding:6px 14px;background:var(--clr-accent);color:var(--clr-bg);border:2px solid var(--clr-accent);font-family:var(--font-heading);font-weight:600;cursor:pointer;">Pick This</button>'}
+          </div>
+        </div>`;
+      });
+
+      if (cart.length > 0) {
+        html += '<div style="font-family:var(--font-heading);font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:var(--clr-accent);margin:14px 0 6px;">Your Trade Goods</div>';
+        cart.forEach(item => {
+          const itemWeight = (item.wt * item.count).toFixed(1);
+          html += `<div class="pd-row" style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--clr-muted);">
+            <div class="pd-item-info">
+              <span class="pd-name">${item.name} ×${item.count}</span>
+              <div style="font-size:0.75em;color:var(--clr-muted);margin-top:2px;">${itemWeight} kg total</div>
+            </div>
+          </div>`;
+        });
+      }
+      listEl.innerHTML = html;
+
+      // Attach pick handlers
+      listEl.querySelectorAll('.pd-extra-pick').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const name = btn.dataset.item;
+          selectedExtra = extraItems.find(i => i.name === name);
+          recalc();
+          renderList();
+        });
+      });
+
+      // Also allow clicking the whole row
+      listEl.querySelectorAll('.extra-item-row').forEach(row => {
+        row.addEventListener('click', () => {
+          if (!selectedExtra || selectedExtra.name !== row.dataset.item) {
+            selectedExtra = extraItems.find(i => i.name === row.dataset.item);
+          } else {
+            selectedExtra = null;
+          }
+          recalc();
+          renderList();
+        });
       });
     }
 
-    // Section: Buy Supplies
-    html += `<div style="font-family:var(--font-heading);font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:var(--clr-accent);margin:14px 0 6px;">Buy Supplies</div>`;
-    html += shopItems.map(item => {
-      const canBuy = balance >= item.price;
-      const itemWeight = (item.wt * item.count).toFixed(1);
-      const qty = purchased[item.name];
-      return `
-    <div class="pd-row" data-item="${item.name}">
-      <div class="pd-item-info">
-        <span class="pd-icon">${getItemIcon(item.name)}</span>
-        <span class="pd-name">${item.name}</span>
-        <div style="font-size:0.75em;color:var(--clr-muted);margin-top:2px;">${item.desc}</div>
-      </div>
-      <div class="pd-controls">
-        <span class="pd-count">${qty > 0 ? '×' + qty : '—'}</span>
-        ${qty > 0 ? `<button class="pd-remove" data-item="${item.name}" style="padding:4px 12px;font-size:0.85em;background:transparent;color:var(--clr-danger);border:2px solid var(--clr-danger);font-family:var(--font-heading);font-weight:600;cursor:pointer;">Remove</button>` : ''}
-        <button class="pd-buy" data-item="${item.name}" ${canBuy ? '' : 'disabled'} style="padding:4px 12px;font-size:0.85em;background:var(--clr-success);color:#fff;border:2px solid var(--clr-success);font-family:var(--font-heading);font-weight:600;cursor:pointer;">+ Buy (${item.price} ₥)</button>
-        <span class="pd-weight">${itemWeight} kg</span>
-      </div>
-    </div>`;
-    }).join('');
+    const cart = game.getCart();
+    recalc();
+    renderList();
 
-    listEl.innerHTML = html;
-
-    // Trade good sell buttons
-    listEl.querySelectorAll('.pd-sell').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const name = btn.dataset.item;
-        const item = cart.find(i => i.name === name);
-        if (item && item.count > 0) {
-          // Sell: remove from cart, add ₥ to balance
-          game.offloadItem(name);
-          balance += (item.mbValue || 1);
-          recalc();
-          renderList();
+    // Direct click handler on confirm button
+    confirmBtn.onclick = () => {
+      const game = window._metisGame;
+      // Add starter kit
+      starterItems.forEach(item => {
+        for (let i = 0; i < item.count; i++) {
+          game.buyItem(item.name, item.wt, item.category);
         }
       });
-    });
-
-    // Buy buttons
-    listEl.querySelectorAll('.pd-buy').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const name = btn.dataset.item;
-        const item = shopItems.find(i => i.name === name);
-        if (item && balance >= item.price) {
-          balance -= item.price;
-          purchased[item.name]++;
-          recalc();
-          renderList();
+      // Add selected extra item
+      if (selectedExtra) {
+        for (let i = 0; i < selectedExtra.count; i++) {
+          game.buyItem(selectedExtra.name, selectedExtra.wt, selectedExtra.category);
         }
-      });
-    });
-
-    // Remove buttons
-    listEl.querySelectorAll('.pd-remove').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const name = btn.dataset.item;
-        const item = shopItems.find(i => i.name === name);
-        if (item && purchased[item.name] > 0) {
-          balance += item.price;
-          purchased[item.name]--;
-          recalc();
-          renderList();
-        }
-      });
-    });
+      }
+      game.addFood(18);
+      game.confirmPreDeparture();
+      document.getElementById('predeparture-overlay')?.classList.remove('active');
+      window.__METIS_RENDER__();
+    };
+    return;
   }
-
-  recalc();
-  renderList();
-  document.getElementById('predeparture-overlay')?.classList.add('active');
 }
 
 function showCrew(game) {
@@ -1717,7 +1674,7 @@ function showCamp(game) {
 
       const riskRow = document.createElement('div');
       riskRow.className = 'camp-card-risk';
-      riskRow.textContent = `Risk: ${a.risk}`;
+      riskRow.textContent = `Receive: ${a.risk}`;
 
       const flavorRow = document.createElement('div');
       flavorRow.className = 'camp-card-flavor';
@@ -1757,13 +1714,17 @@ function showCamp(game) {
               title: 'Camp: Push On',
               text: a.flavor,
               mech: `-1.5 Food · +1 Wear · -5 Morale`,
-              collapsed: true,
+              collapsed: false,
             });
             document.getElementById('camp-overlay')?.classList.remove('active');
             window.__METIS_RENDER__();
             return;
           } else {
             result = game.campAction(a.type);
+          }
+          // Attach foodAfter for narrative templates (engine result doesn't include it)
+          if (result && !result.error) {
+            result.foodAfter = game.getState().food;
           }
           const errEl = document.getElementById('camp-result');
           const rollEl = document.getElementById('camp-roll-display');
@@ -1802,30 +1763,33 @@ function showCamp(game) {
             `;
             // Animate the die
             const dieEl = document.getElementById('camp-die');
-            let ticks = 0;
-            const maxTicks = 6 + Math.floor(Math.random() * 4);
-            const spinId = setInterval(() => {
-              dieEl.textContent = String(Math.floor(Math.random() * 20) + 1);
-              ticks++;
-              if (ticks >= maxTicks) {
-                clearInterval(spinId);
-                dieEl.textContent = String(result.roll);
-                dieEl.className = 'die small font-spectral settled ' + (isSuccess ? 'pass' : 'fail');
-                Haptics.uiTap();
-                // Show result text after settle
-                if (errEl) {
-                  errEl.style.display = 'block';
-                  let html = '';
-                  if (result.critical) {
-                    html += `<div class="camp-critical">⚠ Critical Failure</div>`;
+            if (dieEl) {
+              let ticks = 0;
+              const maxTicks = 6 + Math.floor(Math.random() * 4);
+              const spinId = setInterval(() => {
+                if (!dieEl.parentNode) { clearInterval(spinId); return; }
+                dieEl.textContent = String(Math.floor(Math.random() * 20) + 1);
+                ticks++;
+                if (ticks >= maxTicks) {
+                  clearInterval(spinId);
+                  dieEl.textContent = String(result.roll);
+                  dieEl.className = 'die small font-spectral settled ' + (isSuccess ? 'pass' : 'fail');
+                  if (Haptics) Haptics.uiTap();
+                  // Show result text after settle
+                  if (errEl) {
+                    errEl.style.display = 'block';
+                    let html = '';
+                    if (result.critical) {
+                      html += '<div class="camp-critical">⚠ Critical Failure</div>';
+                    }
+                    html += flavorText;
+                    errEl.innerHTML = html;
                   }
-                  html += flavorText;
-                  errEl.innerHTML = html;
+                  const continueEl = document.getElementById('camp-continue');
+                  if (continueEl) continueEl.style.display = 'inline-block';
                 }
-                const continueEl = document.getElementById('camp-continue');
-                if (continueEl) continueEl.style.display = 'inline-block';
-              }
-            }, 60);
+              }, 60);
+            }
           } else {
             // No dice — show result immediately
             if (errEl) {
@@ -1851,20 +1815,33 @@ function showCamp(game) {
           if (after.wear !== state.wear) mechParts.push(`Wear ${after.wear - state.wear >= 0 ? '+' : ''}${after.wear - state.wear}`);
           if (after.morale !== state.morale) mechParts.push(`Morale ${after.morale - state.morale >= 0 ? '+' : ''}${after.morale - state.morale}`);
           if (after.crew !== state.crew) mechParts.push(`Crew: ${state.crew} → ${after.crew}`);
+          const cart = game.getCart();
+          const weather = after.weather || 'clear';
+          const campEntry = buildCampEntry(a.type, result, 0, cart, weather);
+          const campReflection = buildCampReflection(a.type, result, cart, weather, after.day);
           journalLog({
             day: after.day,
             date: monthName(after.month) + ' ' + after.day,
             title: `Camp: ${actionLabels[a.type] || a.type}`,
-            text: a.flavor,
+            text: campReflection,
             dice: result.roll !== null ? `Rolled ${result.roll} — need ${({rest:12,forage:10,hunt:10,repair:8,scout:9,dance:8,pemmican_process:10}[a.type]||10)}+ — ${result.rollTotal >= ({rest:12,forage:10,hunt:10,repair:8,scout:9,dance:8,pemmican_process:10}[a.type]||10) ? '✓ Success' : '✗ Failure'}${result.critical ? ' — ⚠ CRITICAL' : ''}` : null,
             mech: mechParts.join(' · '),
-            collapsed: true,
+            collapsed: false,
           });
         });
       }
 
       actionsEl.appendChild(card);
     });
+  }
+
+  // Wire the Continue West button
+  const campContinueBtn = document.getElementById('camp-continue');
+  if (campContinueBtn) {
+    campContinueBtn.onclick = () => {
+      document.getElementById('camp-overlay')?.classList.remove('active');
+      window.__METIS_RENDER__();
+    };
   }
 
   document.getElementById('camp-overlay')?.classList.add('active');
@@ -1922,7 +1899,7 @@ function showEnd(game) {
     };
     scoreLines = [
       { label: 'Base score', value: safeNum(breakdown?.base) },
-      { label: `MB value (${safeNum(state.mbValue)} × 80)`, value: safeNum(breakdown?.mbValue) },
+      { label: 'Trade goods delivered', value: safeNum(breakdown?.tradeBonus) },
       { label: `Food bonus (${Math.min(safeNum(state.food), 25)} × 12)`, value: safeNum(breakdown?.foodBonus) },
       { label: `Crew condition (${state.crew || 'unknown'})`, value: safeNum(breakdown?.crewCondition) },
       { label: `Days on trail (${safeNum(state.day)} × -8)`, value: safeNum(breakdown?.daysPenalty) },
@@ -2086,73 +2063,6 @@ function escapeHtml(str) {
   const div = document.createElement('div');
   div.textContent = str;
   return div.innerHTML;
-}
-
-function actionLabel(a) {
-  const map = {
-    rest: 'Rest · 1 day · +2 food · +25 morale',
-    trade: 'Trade Goods → MB Credit',
-    repair: 'Repair · −2 wear',
-    heal: 'Heal · +20 morale',
-    craft: 'Craft',
-    buy_food: 'Buy Food (0.5 MB)',
-    buy_repair: 'Repair (2 MB)',
-    buy_heal: 'Heal (1 MB)',
-    buy_info: 'Intel (0.5 MB)',
-  };
-  return map[a] || a;
-}
-function actionSubtitle(a) {
-  return '';
-}
-
-// Narrative journal text for settlement actions
-function buildSettlementJournalText(action, st, intelText) {
-  const stName = st?.name || 'the settlement';
-  const stType = st?.type || 'unknown';
-
-  // If we have actual intel text from gossip/intel actions, use it
-  if (intelText && (action === 'get_intel' || action === 'trade_gossip' || action === 'gossip' || action === 'buy_info' || action === 'rumours')) {
-    return `At ${stName}, a traveller tells you: "${intelText}"`;
-  }
-
-  // Settlement-type-specific gossip
-  if (action === 'trade_gossip' || action === 'gossip' || action === 'rumours') {
-    const gossipByType = {
-      hbc: `At ${stName}, a clerk leans in: "The Company keeps its ledgers tight, but the trail keeps its own accounts. I've heard tell of what lies ahead."`,
-      metis: `At ${stName}, the women gather and talk. News passes between camps faster than the wind across the prairie. "${stName} knows all the trails."`,
-      mission: `At ${stName}, the sisters share what they've learned from travellers. "God watches over the road," they say, "but the road has its own ways."`,
-      nwmp: `At ${stName}, a constable shares the latest reports. "The law rides slow, but word rides faster. Here's what we know."`,
-      trading: `At ${stName}, traders swap stories with their wares. "Every cart that passes carries news. Sit, and you'll hear it all."`,
-    };
-    return gossipByType[stType] || gossipByType.trading;
-  }
-
-  const texts = {
-    rest: `A day of rest at ${stName}. The crew recovers, the oxen graze. The weight of the trail lifts, if only for a day.`,
-    trade: `Trade goods exchanged at ${stName}. The ledgers are updated, the cart a little lighter, the credit a little heavier.`,
-    repair: `The cart is tended at ${stName}. Shaganappi and effort — the wheels turn smoother.`,
-    heal: `The crew is tended at ${stName}. Wounds dressed, spirits mended.`,
-    buy_food: `Supplies taken on at ${stName}. The cart grows heavier with food for the trail ahead.`,
-    buy_repair: `Cart repaired at ${stName}. The wear comes off, the wheels turn true.`,
-    buy_heal: `The crew is healed at ${stName}. Morale restored, strength returned.`,
-    buy_info: `News gathered at ${stName}. The trail ahead becomes a little less uncertain.`,
-    craft: `Work done at ${stName}. Raw materials become something more useful.`,
-    forage: `Foraging around ${stName}. The land yields what it can.`,
-    recruit: `New hands found at ${stName}. The crew grows by one.`,
-    get_intel: `Intelligence gathered at ${stName}. The map of the trail ahead grows clearer.`,
-    get_blessing: `A blessing received at ${stName}. The journey ahead feels lighter, the burden shared.`,
-    share_food: `Food shared with the community at ${stName}. Generosity on the trail builds its own credit.`,
-    dance: `An evening of music and dance at ${stName}. The fiddle plays and the trail's weight lifts, if only for a night.`,
-    pay_fines: `Fines settled at ${stName}. The ledger balanced, the road open again.`,
-    get_permits: `Permits obtained at ${stName}. The paperwork of empire, but it keeps the cart moving.`,
-    report_duty: `Duty reported at ${stName}. The forms filled, the wait endured.`,
-    buy_ammo: `Ammunition purchased at ${stName}. The belt heavier, the hunt more certain.`,
-    heal_crew: `The crew tended at ${stName}. Wounds dressed, strength returned.`,
-    craft_hides: `Hides worked at ${stName}. The women's hands turn raw pelts into trade goods.`,
-    trade_limited: `A cautious trade at ${stName}. Not everything is for sale, but something can be found.`,
-  };
-  return texts[action] || `Time spent at ${stName}.`;
 }
 
 // Expose render globally for event listener callbacks

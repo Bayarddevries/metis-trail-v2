@@ -7,11 +7,46 @@ var CONSTANTS = Object.freeze({
   START_MONTH: 6,
   START_DAY: 15,
   MAX_WEAR: 8,
-  DAILY_FOOD: 1.35,
+  DAILY_FOOD: 0.6,
+  // Base food consumed per travel day (was 1.0 - reduced for survivability)
+  CAMP_BASE_FOOD: 0.5,
+  // Base food cost per camp night (for 2 actions) (was 1.0)
   EVENT_CHANCE: 0.45,
   DAYS_PER_WEEK: 7,
   CREW_MOD: { rested: 1, tired: 0, exhausted: -2 },
   WEAR_MOD: { 0: 0, 1: 0, 2: 0, 3: -1, 4: -3, 5: -5 },
+  // Phase 0.4 — Hunting yields per terrain (configurable)
+  HUNT_YIELDS: {
+    plains: {
+      foodMin: 3,
+      foodMax: 5,
+      // increased from 2-4
+      common: { name: "Bison Hide", wt: 6, icon: "\u{1F9AC}", desc: "A heavy bison hide from the open prairie." },
+      rare: { name: "Prime Bison Hide", wt: 10, icon: "\u{1F9AC}", desc: "A massive prime bison hide \u2014 worth triple at market." }
+    },
+    river_valley: {
+      foodMin: 2,
+      foodMax: 4,
+      // increased from 1-3
+      common: { name: "Beaver Pelt", wt: 4, icon: "\u{1F9AB}", desc: "A fine beaver pelt from the river valley." },
+      rare: { name: "Prime Beaver Pelt", wt: 5, icon: "\u{1F9AB}", desc: "A prime winter beaver pelt \u2014 exceptionally thick." }
+    },
+    wooded: {
+      foodMin: 2,
+      foodMax: 3,
+      // increased from 1-2
+      common: { name: "Wolf Pelt", wt: 3, icon: "\u{1F43A}", desc: "A grey wolf pelt from the wooded trail." },
+      rare: { name: "Prime Wolf Pelt", wt: 4, icon: "\u{1F43A}", desc: "A prime wolf pelt, thick and unblemished." }
+    },
+    uplands: {
+      foodMin: 2,
+      foodMax: 3,
+      // increased from 1-2
+      common: { name: "Elk Hide", wt: 6, icon: "\u{1F98C}", desc: "A sturdy elk hide from the uplands." },
+      rare: { name: "Prime Elk Hide", wt: 9, icon: "\u{1F98C}", desc: "A prime elk hide \u2014 massive and worth triple at market." }
+    }
+  },
+  HUNT_RARITY_WEIGHTS: { food: 0.7, common: 0.25, rare: 0.05 },
   WEATHER_STATES: ["clear", "overcast", "rain", "storm", "snow"],
   SEASON_BASE_WEATHER: {
     summer: { clear: 45, overcast: 25, rain: 20, storm: 10, snow: 0 },
@@ -31,17 +66,141 @@ var CONSTANTS = Object.freeze({
   WEATHER_EVENT_MOD: { clear: 0, overcast: 0, rain: 0.1, storm: 0.15, snow: 0.1 },
   WEATHER_CAMP_MORALE: { clear: 15, overcast: 15, rain: 10, storm: 5, snow: 5 },
   WEATHER_LABELS: { clear: "Clear", overcast: "Overcast", rain: "Rain", storm: "Storm", snow: "Snow" },
-  // MB (Made Beaver) currency system
-  MB_WIN_THRESHOLD: 10,
-  // minimum MB value needed at Edmonton to win
-  MB_FOOD_COST: 0.5,
-  // 1 MB buys 2 food at base rate
-  MB_REPAIR_COST: 2,
-  // 2 MB for a settlement-quality repair (-2 wear)
-  MB_HEAL_COST: 1,
-  // 1 MB for medical treatment (+20 morale)
-  MB_INFO_COST: 0.5
-  // 0.5 MB for trail intelligence / gossip
+  // Weight & travel physics
+  CART_CAPACITY: 100,
+  WEIGHT_TRAVEL_MULT: 0.5,
+  // weightRatio * 0.5 = extra days per base day
+  WEIGHT_WEAR_MULT: 0.5,
+  // weightRatio * 0.5 = extra wear chance
+  // Phase 0.5 — Settlement Barter (pure barter, no MB currency)
+  // Each settlement type has unique exchange rates: { give: [{item, count}], receive: [{item, count}] }
+  SETTLEMENT_BARTER: {
+    hbc: {
+      // Trade furs for food at Company rates (6 food per pelt, was 5)
+      trade_furs_food: {
+        give: [{ name: "any_fur", count: 1 }],
+        // any trade/category:furs item
+        receive: [{ name: "Pemmican Rations", count: 6 }],
+        flavor: "The Company factor weighs your furs in silence. The ledger decides: pemmican or powder?"
+      },
+      // Trade furs for supplies
+      trade_furs_supplies: {
+        give: [{ name: "any_fur", count: 1 }],
+        options: [
+          { id: "ammunition", receive: [{ name: "Ammunition Belt", count: 2 }], flavor: "Pemmican, axes, shaganappi, tools \u2014 everything a carter needs for the long trail." },
+          { id: "shaganappi", receive: [{ name: "Shaganappi", count: 3 }], flavor: "Rawhide strips. Binding, lashing, and cart repair." },
+          { id: "medicine", receive: [{ name: "Medicine Pouch", count: 1 }], flavor: "Herbal remedies and bandages." },
+          { id: "rope", receive: [{ name: "Rope (50ft)", count: 1 }], flavor: "Hemp. Crossings, repairs, binding." }
+        ],
+        flavor: "The Company store has what you need \u2014 at Company prices."
+      },
+      // Rest costs food
+      rest: {
+        give: [{ name: "Pemmican Rations", count: 1 }],
+        receive: [{ name: "rested", count: 1 }, { name: "Morale", count: 15 }],
+        flavor: "A warm fire in the mess hall, dry blankets, and a night without the wind."
+      }
+    },
+    metis: {
+      // Trade gossip - free, gives intel
+      trade_gossip: {
+        give: [],
+        receive: [{ name: "trail_intel", count: 1 }, { name: "Morale", count: 3 }],
+        flavor: "News travels faster than carts on the prairie. The women know everything."
+      },
+      // Dance - costs 1 food, big morale boost
+      dance: {
+        give: [{ name: "Pemmican Rations", count: 1 }],
+        receive: [{ name: "Morale", count: 15 }],
+        flavor: "The fiddle starts. A Red River jig. Boots on hard ground. Nobody thinks about tomorrow."
+      },
+      // Share food - give food, get morale + reputation
+      share_food: {
+        give: [{ name: "Pemmican Rations", count: 2 }],
+        // minimum 2
+        receive: [{ name: "Morale", count: 10 }, { name: "ReputationMetis", count: 1 }],
+        flavor: "Generosity on the trail is its own currency. What you give returns in loyalty."
+      },
+      // Trade furs for food at better rates (7 food per pelt, was 6)
+      trade_furs_food: {
+        give: [{ name: "any_fur", count: 1 }],
+        receive: [{ name: "Pemmican Rations", count: 7 }],
+        flavor: "The M\xE9tis traders know the prairie. Their prices are fair and the pemmican is rich."
+      }
+    },
+    nwmp: {
+      // Safe passage permit - trade 1 fur
+      permit: {
+        give: [{ name: "any_fur", count: 1 }],
+        receive: [{ name: "hasPermit", count: 1 }],
+        flavor: "A stamp, a signature, and the Queen's law lets you cross the water legal."
+      },
+      // Pay fine - trade 1 fur
+      pay_fine: {
+        give: [{ name: "any_fur", count: 1 }],
+        receive: [{ name: "finesCleared", count: 1 }],
+        flavor: "The sergeant reads your name from the ledger. The debt is cleared."
+      },
+      // Buy ammo - trade 1 fur for 2 ammo belts
+      buy_ammo: {
+        give: [{ name: "any_fur", count: 1 }],
+        receive: [{ name: "Ammunition Belt", count: 2 }],
+        flavor: "Ball and powder, measured honest. The Mounties don't cheat a carter on shot."
+      },
+      // Rest - costs 1 food, no morale bonus
+      rest: {
+        give: [{ name: "Pemmican Rations", count: 1 }],
+        receive: [{ name: "rested", count: 1 }],
+        flavor: "A cot in the barracks. Clean, quiet, and the sentry paces all night."
+      }
+    },
+    mission: {
+      // Heal crew - 1 Medicine Pouch OR 2 food
+      heal_crew: {
+        giveOptions: [
+          { give: [{ name: "Medicine Pouch", count: 1 }], receive: [{ name: "rested", count: 1 }, { name: "Morale", count: 10 }] },
+          { give: [{ name: "Pemmican Rations", count: 2 }], receive: [{ name: "rested", count: 1 }, { name: "Morale", count: 10 }] }
+        ],
+        flavor: "The Grey Nuns tend the sick without asking who you are or where you come from."
+      },
+      // Free rest + blessing
+      rest_blessing: {
+        give: [],
+        receive: [{ name: "rested", count: 1 }, { name: "Morale", count: 15 }, { name: "blessingDays", count: 3 }],
+        flavor: "A chapel bell at evening. You sleep on straw but wake with a lighter spirit."
+      },
+      // Trade furs for food at charity rates (4 food per pelt, was 3)
+      trade_furs_food: {
+        give: [{ name: "any_fur", count: 1 }],
+        receive: [{ name: "Pemmican Rations", count: 4 }],
+        flavor: "The mission garden feeds the body. The trade feeds the journey."
+      }
+    },
+    trading: {
+      // Trade furs for food at best rates (10 food per pelt, was 8)
+      trade_furs_food: {
+        give: [{ name: "any_fur", count: 1 }],
+        receive: [{ name: "Pemmican Rations", count: 10 }],
+        flavor: "A free trader with no Company badge. His prices are his own."
+      },
+      // Trade furs for supplies
+      trade_furs_supplies: {
+        give: [{ name: "any_fur", count: 1 }],
+        options: [
+          { id: "ammunition", receive: [{ name: "Ammunition Belt", count: 2 }], flavor: "What the Company posts run out of, the free traders sometimes have." },
+          { id: "shaganappi", receive: [{ name: "Shaganappi", count: 3 }], flavor: "Rawhide strips. Binding, lashing, and cart repair." },
+          { id: "medicine", receive: [{ name: "Medicine Pouch", count: 1 }], flavor: "Herbal remedies and bandages." }
+        ],
+        flavor: "What the Company posts run out of, the free traders sometimes have."
+      },
+      // Rest - costs 1 food
+      rest: {
+        give: [{ name: "Pemmican Rations", count: 1 }],
+        receive: [{ name: "rested", count: 1 }, { name: "Morale", count: 10 }],
+        flavor: "A lean-to by the fire. Simple shelter, honest company."
+      }
+    }
+  }
 });
 function crewMod(state) {
   return CONSTANTS.CREW_MOD[state.crew] ?? 0;
@@ -397,10 +556,142 @@ var NODES = [
 ];
 
 // src/data/items.js
+var ITEMS = [
+  {
+    name: "Pemmican Rations",
+    wt: 2.5,
+    count: 7,
+    type: "food",
+    category: "provisions",
+    perishable: true,
+    desc: "Dried meat and fat. The staple of the prairie. Never truly spoils.",
+    source: {
+      quote: "Pemmican... composed of pounded dried meat, melted fat, and berries.",
+      author: "Ernest C. N. Acheson",
+      work: "The Buffalo and the Prairie",
+      year: 1910,
+      url: "https://archive.org/stream/toredriverbeyond00marb/toredriverbeyond00marb_djvu.txt"
+    }
+  },
+  {
+    name: "Spare Axle",
+    wt: 15,
+    count: 1,
+    type: "repair",
+    category: "parts",
+    perishable: false,
+    desc: "Hard maple. Heavy but essential for a Red River cart."
+  },
+  {
+    name: "Shaganappi",
+    wt: 3,
+    count: 3,
+    type: "repair",
+    category: "repair",
+    perishable: false,
+    desc: "Rawhide strips. Binding, lashing, and cart repair.",
+    source: {
+      quote: "Shaganappi... raw-hide thongs, much used by the half-breeds for binding their cart-wheels.",
+      author: "R. G. McConnell",
+      work: "The North-West of Canada",
+      year: 1885,
+      url: "https://archive.org/stream/toredriverbeyond00marb/toredriverbeyond00marb_djvu.txt"
+    }
+  },
+  {
+    name: "Tool Kit",
+    wt: 8,
+    count: 1,
+    type: "tool",
+    category: "parts",
+    perishable: false,
+    desc: "Axe, auger, drawknife. Required for major repairs."
+  },
+  {
+    name: "Bison Hide",
+    wt: 6,
+    count: 4,
+    type: "trade",
+    category: "furs",
+    perishable: false,
+    mbValue: 6,
+    desc: "Folded. Trade value at any post."
+  },
+  {
+    name: "Canvas Tarp",
+    wt: 4,
+    count: 2,
+    type: "shelter",
+    category: "shelter",
+    perishable: false,
+    desc: "Waterproof. Shelter and cart-raft conversion."
+  },
+  {
+    name: "Firewood Bundle",
+    wt: 6,
+    count: 1,
+    type: "fuel",
+    category: "fuel",
+    perishable: false,
+    desc: "Dried poplar. Required for cold nights."
+  },
+  {
+    name: "Rope (50ft)",
+    wt: 3,
+    count: 1,
+    type: "tool",
+    category: "parts",
+    perishable: false,
+    desc: "Hemp. Crossings, repairs, binding."
+  },
+  {
+    name: "Ammunition Belt",
+    wt: 2,
+    count: 1,
+    type: "ammo",
+    category: "hunting",
+    perishable: false,
+    desc: "Shot and ball. For hunting and defence."
+  },
+  {
+    name: "Medicine Pouch",
+    wt: 1.5,
+    count: 1,
+    type: "medical",
+    category: "medical",
+    perishable: true,
+    desc: "Herbal remedies and bandages."
+  },
+  {
+    name: "Blanket",
+    wt: 3,
+    count: 2,
+    type: "shelter",
+    category: "shelter",
+    perishable: false,
+    desc: "Wool. Winter survival."
+  },
+  {
+    name: "Beaver Pelts",
+    wt: 4,
+    count: 3,
+    type: "trade",
+    category: "furs",
+    perishable: false,
+    mbValue: 10,
+    desc: "Prime bundle. The foundation of the northern trade.",
+    source: {
+      quote: "Beaver... the very foundation of the northern trade.",
+      author: "HBC Archives",
+      work: "Fort Edmonton Post Journal, 1878",
+      url: "https://archive.org/stream/P000279/P000279_djvu.txt"
+    }
+  }
+];
 function startingCart() {
   return [
-    { name: "Bison Hide", wt: 6, count: 4, type: "trade", category: "furs", mbValue: 1.25, perishable: false, desc: "Folded. Trade value: ~1.25 \u20A5 each at any post." },
-    { name: "Beaver Pelts", wt: 4, count: 3, type: "trade", category: "furs", mbValue: 3, perishable: false, desc: "Prime bundle. The foundation of the northern trade. ~3 \u20A5 each." }
+    { name: "Bison Hide", wt: 6, count: 4, type: "trade", category: "furs", perishable: false, mbValue: 6, desc: "Folded. Trade value at any post." },
+    { name: "Beaver Pelts", wt: 4, count: 3, type: "trade", category: "furs", perishable: false, mbValue: 10, desc: "Prime bundle. The foundation of the northern trade." }
   ];
 }
 __name(startingCart, "startingCart");
@@ -920,11 +1211,11 @@ var EVENT_POOLS = {
       classification: "Freight & Trade",
       source: getSource("MMF_COMMUNITIES"),
       choices: [
-        { text: "Hire him as a scout", dc: 11, ok: "He rides ahead and spots a safer campsite.", bad: "He takes the easy path and you lose a day.", wear: 0, time: -1, addsRep: { key: "metis", delta: 1 }, branch: {
+        { text: "Hire him as a scout", dc: 11, ok: "He rides ahead and spots a safer campsite.", bad: "He takes the easy path and you lose a day.", wear: 0, time: 1, addsRep: { key: "metis", delta: 1 }, itemBonus: { name: "Rope (50ft)", dcBonus: 2 }, branch: {
           id: "plains_scout_return",
           text: "The scout returns with news: a lone HBC clerk is stranded with a broken cart ahead.",
           choices: [
-            { text: "Help tow them to the next post", dc: 10, ok: "They are grateful. The clerk gives you trade goods.", bad: "The axle breaks under the strain.", wear: 1, food: 4, setsFlag: "helped_hbc", addsRep: { key: "hbc", delta: 1 } },
+            { text: "Help tow them to the next post", dc: 10, ok: "They are grateful. The clerk gives you trade goods.", bad: "The axle breaks under the strain.", wear: 2, morale: -4, setsFlag: "helped_hbc", addsRep: { key: "hbc", delta: 1 }, give: [{ name: "Bison Hide", amt: 1 }] },
             { text: "Tip your hat and press on", dc: null, always: "You do not have time for strangers." }
           ]
         } },
@@ -945,7 +1236,7 @@ var EVENT_POOLS = {
       text: "Midday halt by a cattail slough. Pemmican is passed around; bannock is frying in a cast-iron pan, the smell of grease and onions drifting across the camp. A M\xE9tis campsite nearby offers company \u2014 strangers become friends over shared food and stories of the trail behind.",
       source: getSource("FONSECA_CAMP"),
       choices: [
-        { text: "Share rubaboo and trade stories", dc: 8, ok: "The circle of travellers is warm. Morale rises.", bad: "You are too guarded to connect fully.", morale: 8, addsRep: { key: "metis", delta: 1 }, setsFlag: "shared_camp_meal" },
+        { text: "Share rubaboo and trade stories", dc: 8, ok: "The circle of travellers is warm. Morale rises.", bad: "You are too guarded to connect fully.", morale: 4, addsRep: { key: "metis", delta: 1 }, setsFlag: "shared_camp_meal" },
         { text: "Eat quickly and move on", dc: null, always: "Hunger is satisfied, but nothing more.", alwaysWear: 0 }
       ]
     },
@@ -954,7 +1245,7 @@ var EVENT_POOLS = {
       text: "Moon on the grass. A fiddle starts up somewhere down the line \u2014 a Red River jig, sharp enough to cut. French and Michif voices carry across the dark. One of the crew starts humming along.",
       source: getSource("FONSECA_DANCE"),
       choices: [
-        { text: "Dance until your boots throw dust", dc: 10, ok: "Laughter drowns out the dark.", bad: "You strain a shoulder and sleep poorly.", morale: 12, addsRep: { key: "metis", delta: 1 } },
+        { text: "Dance until your boots throw dust", dc: 10, ok: "Laughter drowns out the dark.", bad: "You strain a shoulder and sleep poorly.", morale: 12, addsRep: { key: "metis", delta: 1 }, badMorale: -4, badWear: 1 },
         { text: "Turn in early; tomorrow is long", dc: null, always: "Rest restores you in small measure.", morale: 4 }
       ]
     },
@@ -963,16 +1254,15 @@ var EVENT_POOLS = {
       text: "The oxen have scattered after drinking \u2014 a chaos of traces and running hooves across the mid-day camp. Ropes tangle, carts shift, and the air fills with shouting. To drive the refractory animals among the carts is a last resort, but sometimes the only one.",
       source: getSource("FONSECA_OX_SCATTER"),
       choices: [
-        { text: "Call and whistle them back", dc: 11, ok: "The animals respond to the familiar sounds.", bad: "You lose an hour rounding them up.", time: 1, morale: -4 },
-        { text: "Send someone ahead", dc: 9, ok: "Your crew brings them in quietly and quickly.", bad: "One runner turns an ankle.", crew: "tired", addsRep: { key: "metis", delta: 1 } }
+        { text: "Call and whistle them back", dc: 11, ok: "The animals respond to the familiar sounds.", bad: "You lose an hour rounding them up.", time: 1, morale: -4, okMorale: 3 },
+        { text: "Send someone ahead", dc: 9, ok: "Your crew brings them in quietly and quickly.", bad: "One runner turns an ankle.", crew: "tired", addsRep: { key: "metis", delta: 1 }, okMorale: 3, okTime: -1 }
       ]
     },
     {
-      id: "plains_squeal",
       text: "The dry wood of the hub screams against the axle \u2014 a blood-curdling sound that carries for miles across the open prairie. Every traveller on the trail knows that squeal. It means a loaded cart is coming, and the sound alone is enough to make oxen nervous and strangers take notice.",
       source: getSource("BREHAUT_CART"),
       choices: [
-        { text: "Apply shaganappi before it worsens", dc: 7, ok: "The scream quiets. The trail is kinder.", bad: "Insufficient grease; the noise persists.", morale: -3, squeal: 0, branch: {
+        { text: "Apply shaganappi before it worsens", dc: 7, ok: "The scream quiets. The trail is kinder.", bad: "Insufficient grease; the noise persists. The cart takes a beating.", morale: -3, wear: 1, requiresItem: "Shaganappi", consumesItem: "Shaganappi", branch: {
           id: "plains_squeal_draw_attention",
           text: "Your squealing cart draws a mounted rider from a nearby coul\xE9e.",
           choices: [
@@ -980,7 +1270,7 @@ var EVENT_POOLS = {
             { text: "Offer a quiet trade", dc: 9, ok: "He tips his hat and moves on.", bad: "He senses weakness and haggles hard.", food: -1 }
           ]
         } },
-        { text: "Ignore the noise", dc: null, always: "The day's miles do not lessen the complaint.", alwaysWear: 0, squeal: 25 }
+        { text: "Ignore the noise", dc: null, always: "The day's miles do not lessen the complaint. The axle groans louder with every league.", alwaysWear: 2 }
       ]
     },
     {
@@ -988,7 +1278,7 @@ var EVENT_POOLS = {
       text: "Cart crests the rise and you pull the ox up short. Below: a hundred carts in a circle, horses everywhere, dust so thick you can taste it. Four hundred hunters sitting quiet, waiting for the sign. Beyond them the herd \u2014 you feel the hooves through the ground before you hear them.",
       source: getSource("GOULET_HUNT"),
       choices: [
-        { text: "Join the hunt", dc: 12, ok: "The hunt captain nods. You take a share of the meat.", bad: "You are slow to position. You earn only a strip.", food: 8, addsRep: { key: "metis", delta: 2 }, itemBonus: { name: "Ammunition Belt", dcBonus: 3 } },
+        { text: "Join the hunt", dc: 12, ok: "The hunt captain nods. You take a share of the meat.", bad: "You are slow to position. You earn only a strip.", food: 8, addsRep: { key: "metis", delta: 2 }, itemBonus: { name: "Ammunition Belt", dcBonus: 3 }, badFood: 2, badMorale: -3 },
         { text: "Observe and move on", dc: null, always: "You watch from a respectful distance. The hunt is spectacular.", alwaysWear: 0 }
       ]
     },
@@ -997,8 +1287,8 @@ var EVENT_POOLS = {
       text: "Smoke on the horizon, thick and brown against the blue sky. Then the wind shifts and the smell hits you \u2014 dry grass, pine, and the acrid bite of a prairie fire racing toward you. The dry grass crackles at its edge, and the wall of flame moves faster than a man can run.",
       source: getSource("LACOMBE_FIRE"),
       choices: [
-        { text: "Ride for the river bottom", dc: 14, ok: "The fire edge passes. You lose only an afternoon's travel.", bad: "The wind shifts. You lose supplies and the cart is singed.", food: -3, wear: 1, morale: -12 },
-        { text: "Light a backfire and wait it out", dc: 11, ok: "A practised escape. The backfire draws the main blaze away.", bad: "The flames jump. Your cart is spared but the oxen panic.", morale: -8, time: -1 }
+        { text: "Ride for the river bottom", dc: 14, ok: "The fire edge passes. You lose only an afternoon's travel.", bad: "The wind shifts. You lose supplies and the cart is singed.", food: -3, wear: 1, morale: -12, time: 1, okTime: 1 },
+        { text: "Light a backfire and wait it out", dc: 11, ok: "A practised escape. The backfire draws the main blaze away from your position.", bad: "The flames jump. Your cart is spared but the oxen panic.", morale: -8, time: 1 }
       ]
     },
     {
@@ -1006,7 +1296,7 @@ var EVENT_POOLS = {
       text: "A M\xE9tis settlement celebrates the anniversary of the Sayer trial \u2014 the day free trade became a right, not a privilege. The air is thick with pride and the smell of roasting meat. Folk cheer for independent carters, and your cart is a symbol of that freedom.",
       source: getSource("SAWYER_TRIAL"),
       choices: [
-        { text: "Display independent freight proudly", dc: 9, ok: "The folk cheer. Prices are better here.", bad: "You are taken for a Company man. Prices are unkind.", food: 5, addsRep: { key: "metis", delta: 2 } },
+        { text: "Display independent freight proudly", dc: 9, ok: "The folk cheer. Prices are better here.", bad: "You are taken for a Company man. Prices are unkind.", food: -2, morale: -4, addsRep: { key: "metis", delta: 2 } },
         { text: "Stay quiet and keep moving", dc: null, always: "Circumspection keeps your goods and your secrets.", alwaysWear: 0 }
       ]
     },
@@ -1033,7 +1323,7 @@ var EVENT_POOLS = {
       text: "A great elm has fallen across the trail \u2014 branches splayed like fingers blocking the path. The trunk is too heavy to move, and the bush on either side is thick with undergrowth. You will need to cut your way through or find another route entirely.",
       source: getSource("SCHULTZ_STUMPS"),
       choices: [
-        { text: "Cut a way through", dc: 10, ok: "The path opens. Useful firewood goes on the cart.", bad: "The work is harder than expected.", time: 1 },
+        { text: "Cut a way through", dc: 10, ok: "The path opens. Useful firewood goes on the cart.", bad: "The work is harder than expected.", time: 1, give: [{ name: "Firewood Bundle", amt: 1 }] },
         { text: "Bypass through the bush", dc: 11, ok: "The bush breaks open onto the old trail.", bad: "A branch catches the canvas cover.", wear: 1 },
         { text: "Backtrack to the ford", dc: null, always: "A long, slow re-route. But safe.", time: 2 }
       ]
@@ -1052,7 +1342,7 @@ var EVENT_POOLS = {
       text: "Dawn finds a cinnamon bear rooting through your bread sack at the edge of camp. The bears along the Carlton were a constant threat to unprotected provisions. This one is bold \u2014 it has smelled the pemmican and it is not leaving without a fight.",
       source: getSource("LACOMBE_BEAR"),
       choices: [
-        { text: "Beat the pan and drive it off", dc: 11, ok: "The bear lumbers away with a swat at its nose.", bad: "It turns. A strap snaps and half the flour is gone.", food: -3, morale: -6, wear: 1, itemBonus: { name: "Ammunition Belt", dcBonus: 4 } },
+        { text: "Beat the pan and drive it off", dc: 11, ok: "The bear lumbers away with a swat at its nose.", bad: "It turns. A strap snaps and half the flour is gone.", food: -3, morale: -6, wear: 1, itemBonus: { name: "Ammunition Belt", dcBonus: 4 }, requiresItem: "Ammunition Belt", okMorale: 4 },
         { text: "Climb for height and wait", dc: null, always: "The bear eventually loses interest. You lose the morning, not the flour.", time: 1 }
       ]
     },
@@ -1061,8 +1351,8 @@ var EVENT_POOLS = {
       text: "Green sky. Dead still. Then the hail \u2014 walnut stones hammering the canvas, bouncing off the cart bed. The oxen bellow and pull sideways. On the open prairie the cart is all you've got.",
       source: getSource("LACOMBE_HAIL"),
       choices: [
-        { text: "Cover the canvas and ride it out", dc: 10, ok: "The wagon top holds. The oxen are skittish but unhurt.", bad: "Canvas tears and two rounds of cheese are spoiled.", food: -2, morale: -4, itemBonus: { name: "Canvas Tarp", dcBonus: 4 } },
-        { text: "Scramble to the nearest coulee", dc: 9, ok: "Natural shelter saves the load.", bad: "A slipped wheel in the rush.", wear: 1 }
+        { text: "Cover the canvas and ride it out", dc: 10, ok: "The wagon top holds. The oxen are skittish but unhurt.", bad: "Canvas tears and two rounds of cheese are spoiled.", food: -2, morale: -4, itemBonus: { name: "Canvas Tarp", dcBonus: 4 }, requiresItem: "Canvas Tarp", okMorale: 3 },
+        { text: "Scramble to the nearest coulee", dc: 9, ok: "Natural shelter saves the load.", bad: "A slipped wheel in the rush.", wear: 1, okMorale: 3 }
       ]
     },
     {
@@ -1071,7 +1361,7 @@ var EVENT_POOLS = {
       classification: "Supply Find",
       source: getSource("BREHAUT_ABANDONED"),
       choices: [
-        { text: "Search the cache", dc: 8, ok: "You find strips of dried rawhide \u2014 shaganappi, still supple. Useful for repairs or crafting.", bad: "The cache has been picked over. Only dust and a few scraps of hide remain.", give: [{ name: "Shaganappi", amt: 2 }], morale: 5 },
+        { text: "Search the cache", dc: 8, ok: "You find strips of dried rawhide \u2014 shaganappi, still supple. Useful for repairs or crafting.", bad: "The cache has been picked over. Only dust and a few scraps of hide remain.", give: [{ name: "Shaganappi", amt: 2 }], morale: 5, badGive: [{ name: "Shaganappi", amt: 1 }] },
         { text: "Leave it \u2014 mark the spot for the return", dc: null, always: "You notch a tree and remember the spot. The cache will keep.", morale: 2 }
       ]
     },
@@ -1081,7 +1371,7 @@ var EVENT_POOLS = {
       classification: "Supply Find",
       source: getSource("FONSECA_SUPPLY_CACHE"),
       choices: [
-        { text: "Open the cache", dc: 9, ok: "Inside: a folded bison hide, still cured and ready for trade or crafting. The Company's loss is your gain.", bad: "The bundle is damp. The hide is salvageable but the tools inside are rusted.", give: [{ name: "Bison Hide", amt: 1 }], morale: 5 },
+        { text: "Open the cache", dc: 9, ok: "Inside: a folded bison hide, still cured and ready for trade or crafting. The Company's loss is your gain.", bad: "The bundle is damp. The hide is salvageable but the tools inside are rusted.", give: [{ name: "Bison Hide", amt: 1 }], morale: 5, badGive: [{ name: "Bison Hide", amt: 1 }], badWear: 1 },
         { text: "Report it at the next post", dc: null, always: "You rebury the cache and note the location. The Company can sort it out.", addsRep: { key: "hbc", delta: 1 } }
       ]
     },
@@ -1120,7 +1410,7 @@ var EVENT_POOLS = {
       classification: "Supply Find",
       source: getSource("LACOMBE_HERBS"),
       choices: [
-        { text: "Gather the herbs and prepare a remedy", dc: 8, ok: "You crush the yarrow for wounds and dry the sage for fever. A medicine pouch, restocked.", bad: "The preparation is imperfect but usable.", give: [{ name: "Medicine Pouch", amt: 1 }], morale: 6 },
+        { text: "Gather the herbs and prepare a remedy", dc: 8, ok: "You crush the yarrow for wounds and dry the sage for fever. A medicine pouch, restocked.", bad: "The preparation is imperfect but usable.", give: [{ name: "Medicine Pouch", amt: 1 }], morale: 6, consumesItem: "Firewood Bundle" },
         { text: "Take only what you need for now", dc: null, always: "You gather a small bundle. Enough for one use, not a full restock.", give: [{ name: "Medicine Pouch", amt: 1 }], morale: 3 }
       ]
     },
@@ -1130,8 +1420,8 @@ var EVENT_POOLS = {
       classification: "Supply Find",
       source: getSource("BREHAUT_ABANDONED_CARTS"),
       choices: [
-        { text: "Salvage the spare axle", dc: 9, ok: "The axle comes free with some effort. Heavy, but a godsend when yours finally gives.", bad: "The wood is sound but the fittings are rusted. It will do in a pinch.", give: [{ name: "Spare Axle", amt: 1 }], morale: 5 },
-        { text: "Take canvas and shaganappi too", dc: null, always: "You strip what you can carry. The tarp is rotted but the shaganappi bindings are still supple.", give: [{ name: "Shaganappi", amt: 2 }], morale: 3 }
+        { text: "Salvage the spare axle", dc: 9, ok: "The axle comes free with some effort. Heavy, but a godsend when yours finally gives.", bad: "The wood is sound but the fittings are rusted. It will do in a pinch.", give: [{ name: "Spare Axle", amt: 1 }], morale: 5, requiresItem: "Tool Kit" },
+        { text: "Take canvas and shaganappi too", dc: null, always: "You strip what you can carry. The tarp is rotted but the shaganappi bindings are still supple.", give: [{ name: "Canvas Tarp", amt: 1 }, { name: "Shaganappi", amt: 2 }], morale: 3 }
       ]
     },
     {
@@ -1140,7 +1430,7 @@ var EVENT_POOLS = {
       classification: "Survival",
       source: getSource("CALHOON_CART_FORT"),
       choices: [
-        { text: "Hold the line", dc: 12, ok: "Whatever it was, it passes. The circle holds. The women and children are safe. The brigade breaks camp and moves on.", bad: "The strain of holding takes its toll. Exhaustion sets in.", wear: 1, crew: "tired", morale: -6 },
+        { text: "Hold the line", dc: 12, ok: "Whatever it was, it passes. The circle holds. The women and children are safe. The brigade breaks camp and moves on.", bad: "The strain of holding takes its toll. Exhaustion sets in.", wear: 1, crew: "tired", morale: -6, okMorale: 5, okRep: { key: "metis", delta: 1 } },
         { text: "Scatter and flee", dc: null, always: "You break the circle and run. The carts are left behind \u2014 you salvage what you can, but supplies are lost to the plains.", food: -4, wear: 2, morale: -10, crew: "exhausted" }
       ]
     },
@@ -1151,7 +1441,7 @@ var EVENT_POOLS = {
       source: getSource("SMALLPOX_1870"),
       choices: [
         { text: "Make camp and pray", dc: null, always: "You stop and wait. Two days lost. The fever breaks \u2014 barely. The crew member survives, but will not be strong for days.", crew: "tired", morale: -15, time: 2 },
-        { text: "Press on \u2014 reach the next post", dc: 14, ok: "The crew finds a reserve of strength. You make it to the next settlement with the sick in the cart.", bad: "The sick grow worse on the rough trail. The cart jolts them with every rut.", morale: -20, crew: "exhausted", wear: 1 }
+        { text: "Press on \u2014 reach the next post", dc: 14, ok: "The crew finds a reserve of strength. You make it to the next settlement with the sick in the cart.", bad: "The sick grow worse on the rough trail. The cart jolts them with every rut.", morale: -20, crew: "exhausted", wear: 1, okMorale: 5, okTime: -1 }
       ]
     }
   ],
@@ -1161,7 +1451,7 @@ var EVENT_POOLS = {
       text: "The heavy cloud bursts without warning. The trail turns to a slurry and the cart sinks to the naves \u2014 the wheels disappearing into mud that grabs and holds. Sudden storms of rain turned the valley trail into a bog that could trap a loaded cart for hours.",
       source: getSource("FONSECA_RAIN"),
       choices: [
-        { text: "Unhitch and pole the cart through", dc: 12, ok: "The oxen respond; you keep moving, soaked.", bad: "A wheel hub sinks axle-deep.", wear: 1, morale: -4, itemBonus: { name: "Rope (50ft)", dcBonus: 3 } },
+        { text: "Unhitch and pole the cart through", dc: 12, ok: "The oxen respond; you keep moving, soaked.", bad: "A wheel hub sinks axle-deep.", wear: 1, morale: -4, itemBonus: { name: "Rope (50ft)", dcBonus: 3 }, okMorale: 3, okWear: -1 },
         { text: "Wait it out on dry ground", dc: null, always: "Two hours of rain. The mud thickens.", time: 1 }
       ]
     },
@@ -1170,7 +1460,7 @@ var EVENT_POOLS = {
       text: "A hidden washout has eaten into the bank. The cart slews and the axle groans \u2014 a sound that makes every carter's stomach drop. The ground gives way beneath the wheel, and the cart tilts toward the river. You need a repair, and you need it before the bank collapses further.",
       source: getSource("SCHULTZ_STUMPS"),
       choices: [
-        { text: "Set a temporary truss with canvas and rope", dc: 11, ok: "A crude repair holds for the remaining miles.", bad: "The truss fails in the next gully.", wear: 1, time: 1 },
+        { text: "Set a temporary truss with canvas and rope", dc: 11, ok: "A crude repair holds for the remaining miles.", bad: "The truss fails in the next gully.", wear: 1, time: 1, requiresItem: "Spare Axle", itemBonus: { name: "Tool Kit", dcBonus: 3 } },
         { text: "Spike the wheel and coast downhill", dc: null, always: "You save time but the wheel wobbles loose.", alwaysWear: 1, morale: -4 }
       ]
     },
@@ -1179,9 +1469,9 @@ var EVENT_POOLS = {
       text: "The river is running high and fast, brown with spring melt. The bank trail is muddy and narrow \u2014 one wrong step and the cart slides toward the water. The carts had indeed entered straight into the water, turned upstream to make the crossing in a horse-shoe fashion. You must decide: risk the ford or wait for calmer water.",
       source: getSource("FONSECA_FORD"),
       choices: [
-        { text: "Ford carefully", dc: 13, ok: "The ox keeps footing and you stay dry enough.", bad: "The cart tilts in the current. Repairs are needed after crossing.", wear: 1 },
+        { text: "Ford carefully", dc: 13, ok: "The ox keeps footing and you stay dry enough.", bad: "The cart tilts in the current. Repairs are needed after crossing.", wear: 1, itemBonus: { name: "Canvas Tarp", dcBonus: 2 }, requiresItem: "Rope (50ft)" },
         { text: "Wait for afternoon", dc: null, always: "You camp and cross later when the water drops.", time: 1 },
-        { text: "Scout for the horse-shoe ford upstream", dc: 11, ok: "You find the concealed path and cross safely.", bad: "The scouting costs precious daylight and energy.", morale: -4, time: -1 }
+        { text: "Scout for the horse-shoe ford upstream", dc: 11, ok: "You find the concealed path and cross safely.", bad: "The scouting costs precious daylight and energy.", morale: -4, time: 1 }
       ]
     },
     {
@@ -1189,8 +1479,8 @@ var EVENT_POOLS = {
       text: "An NWMP patrol stops you just above the ferry landing. Red coats inspect the carts with scrupulous care \u2014 duty is collected in cash or goods, and every cart is subject to inspection. The mounted police established posts along the trail to enforce Ottawa's regulations.",
       source: getSource("MACLEOD_NWMP"),
       choices: [
-        { text: "Show your papers", dc: 9, ok: "The permits read clearly. They let you pass.", bad: "A signature mismatch. You are delayed.", time: 1, addsRep: { key: "nwmp", delta: 1 } },
-        { text: "Talk your way past", dc: 12, ok: "They accept your story.", bad: "They insist on a spot inspection. Wear is likely.", wear: 1, addsRep: { key: "nwmp", delta: -1 }, branch: /* @__PURE__ */ __name(() => ({
+        { text: "Show your papers", dc: 9, ok: "The permits read clearly. They let you pass.", bad: "A signature mismatch. You are delayed.", time: 1, addsRep: { key: "nwmp", delta: -1 } },
+        { text: "Talk your way past", dc: 12, ok: "They accept your story.", bad: "They insist on a spot inspection. Wear is likely.", wear: 1, addsRep: { key: "nwmp", delta: 0 }, branch: /* @__PURE__ */ __name(() => ({
           id: "nwmp_detain",
           text: "The inspection turns up a loose rivet in your axle. The sergeant orders you to make camp until morning.",
           choices: [
@@ -1205,7 +1495,7 @@ var EVENT_POOLS = {
       text: "The opposite bank is steep \u2014 eight feet of loose earth down to the water. A line was tied to the middle of the axle of the cart, and a turn of the line made around the trunk of a tree on the bank. The cart must be lowered carefully, or the whole thing slides into the river.",
       source: getSource("FONSECA_BANK"),
       choices: [
-        { text: "Lower the cart with a line tied to a tree", dc: 10, ok: "A careful descent protects the load.", bad: "The knot slips at the last moment; the cart jars.", wear: 1 },
+        { text: "Lower the cart with a line tied to a tree", dc: 10, ok: "A careful descent protects the load.", bad: "The knot slips at the last moment; the cart jars.", wear: 1, requiresItem: "Rope (50ft)", consumesItem: "Rope (50ft)" },
         { text: "Free descent", dc: null, always: "The cart slides hard; the contents shift dangerously.", alwaysWear: 1 }
       ]
     },
@@ -1223,7 +1513,7 @@ var EVENT_POOLS = {
       text: "One of your crew wakes shaking. By noon they can't stand. The river water \u2014 you knew better, but the casks were low. The trail's seen this before. It doesn't get easier.",
       source: getSource("HBC_DISEASE"),
       choices: [
-        { text: "Use the medicine pouch and rest the day", dc: 14, ok: "The crisis passes. One day lost, but the crew recovers.", bad: "The fever breaks but the crew is weak for days.", crew: "tired", morale: -8, consumesItem: "Medicine Pouch" },
+        { text: "Use the medicine pouch and rest the day", dc: 14, ok: "The crisis passes. One day lost, but the crew recovers.", bad: "The fever breaks but the crew is weak for days.", crew: "tired", morale: -8, consumesItem: "Medicine Pouch", time: 1 },
         { text: "Push through without rest", dc: null, always: "The worst passes but the toll is steep.", morale: -20, crew: "exhausted" }
       ]
     },
@@ -1232,7 +1522,7 @@ var EVENT_POOLS = {
       text: "Mosquitoes rise from the riverbank in a cloud \u2014 you breathe them, they're in your eyes. The oxen stampede. The fire dies under the smoke. Sand flies after. Mud everywhere. The carts keep moving west because stopping is worse.",
       source: getSource("FONSECA_MOSQUITOES"),
       choices: [
-        { text: "Move camp to high ground before dark", dc: 9, ok: "The move is miserable but the night is quieter.", bad: "A wheel is twisted in the dark.", wear: 1 },
+        { text: "Move camp to high ground before dark", dc: 9, ok: "The move is miserable but the night is quieter.", bad: "A wheel is twisted in the dark.", wear: 1, okMorale: 3, okTime: -1 },
         { text: "Use canvas tarps and tough it out", dc: 11, ok: "You hunker down. Morning comes.", bad: "The insects are relentless. Morale falls hard.", morale: -10, itemBonus: { name: "Canvas Tarp", dcBonus: 4 } }
       ]
     },
@@ -1241,11 +1531,11 @@ var EVENT_POOLS = {
       text: "The crossing here is too deep to ford. You eye the spare hides in the cart \u2014 enough to build a raft, if you know how. Four cart wheels were taken and placed dish upwards on the surface of the water. The boat was launched, and floated like a duck.",
       source: getSource("FONSECA_RAFT"),
       choices: [
-        { text: "Build a cart-raft with 2 bison hides", dc: 12, ok: "The improvised ferry floats. The crew swims the line across.", bad: "One hide splits mid-river; cargo gets wet.", morale: -6, setsFlag: "built_rafts", requiresItem: { name: "Bison Hide", count: 2 }, branch: {
+        { text: "Build a cart-raft with 2 bison hides", dc: 12, ok: "The improvised ferry floats. The crew swims the line across.", bad: "One hide splits mid-river; cargo gets wet.", morale: -6, food: -2, setsFlag: "built_rafts", requiresItem: { name: "Bison Hide", count: 2 }, branch: {
           id: "river_raft_wash",
           text: "On the far bank, an elder watches your landing and nods slowly.",
           choices: [
-            { text: "Greet him respectfully", dc: 10, ok: "He shares drying hides and directions for the next leg.", bad: "He is suspicious and leaves without speaking.", addsRep: { key: "cree", delta: 1 }, morale: 8 },
+            { text: "Greet him respectfully", dc: 10, ok: "He shares drying hides and directions for the next leg.", bad: "He is suspicious and leaves without speaking.", addsRep: { key: "cree", delta: -1 }, morale: -4 },
             { text: "Get moving without conversation", dc: null, always: "Pragmatic. The crossing cost enough time.", alwaysWear: 0 }
           ]
         } },
@@ -1257,7 +1547,7 @@ var EVENT_POOLS = {
       text: "Gabriel Dumont is at the crossing, his ferry moored to the bank. His fee is fair, but the current is heavy today \u2014 the ferry rocks and the oarsman strains. Dumont watches the river with the calm of a man who has crossed it a thousand times.",
       source: getSource("DUMONT_ACCOUNTS"),
       choices: [
-        { text: "Take the ferry now", dc: 10, ok: "He rows hard and gets you across cleanly.", bad: "The ferry lurches. Cargo shifts and one wheel takes damage.", wear: 1, addsRep: { key: "metis", delta: 1 } },
+        { text: "Take the ferry now", dc: 10, ok: "He rows hard and gets you across cleanly.", bad: "The ferry lurches. Cargo shifts and one wheel takes damage.", wear: 1, addsRep: { key: "metis", delta: 1 }, itemBonus: { name: "Canvas Tarp", dcBonus: 2 } },
         { text: "Wait out the current", dc: null, always: "You wait one day for calmer water.", time: 1 }
       ]
     },
@@ -1266,9 +1556,9 @@ var EVENT_POOLS = {
       text: "The spring flood has turned the river into a brown, churning torrent. Debris spins in the current \u2014 branches, logs, the remains of last year's ice. The ford is barely visible, marked by two willow sticks driven into the bank. The oxen smell the water and balk.",
       source: getSource("FONSECA_FORD"),
       choices: [
-        { text: "Ford now while you can see the markers", dc: 14, ok: "The oxen find their footing. The cart tilts but holds. You reach the far bank soaked but whole.", bad: "A submerged log catches the axle. The cart spins in the current.", wear: 2, food: -2 },
+        { text: "Ford now while you can see the markers", dc: 14, ok: "The oxen find their footing. The cart tilts but holds. You reach the far bank soaked but whole.", bad: "A submerged log catches the axle. The cart spins in the current.", wear: 2, food: -2, okMorale: 4, okWear: -1 },
         { text: "Wait for the water to drop", dc: null, always: "You camp on the high bank and wait. The river drops by morning.", time: 1 },
-        { text: "Build a cart-raft with 2 Bison Hides", dc: 12, ok: "The improvised ferry floats. The crew swims the line across.", bad: "One hide splits mid-river. Cargo gets wet.", morale: -6, requiresItem: { name: "Bison Hide", count: 2 } }
+        { text: "Build a cart-raft with 2 Bison Hides", dc: 12, ok: "The improvised ferry floats. The crew swims the line across.", bad: "One hide splits mid-river. Cargo gets wet.", morale: -6, food: -2, requiresItem: { name: "Bison Hide", count: 2 } }
       ]
     },
     {
@@ -1276,8 +1566,8 @@ var EVENT_POOLS = {
       text: "A lone trader crests the rise ahead, his cart loaded with bundles wrapped in oilcloth. He waves \u2014 a free trader, independent of the Company, carrying goods from settlement to settlement. His prices are his own, and his news is fresh.",
       source: getSource("SAWYER_TRIAL"),
       choices: [
-        { text: "Trade with him", dc: null, always: "You exchange one of his goods for one of yours. Fair value, no questions asked.", morale: 5 },
-        { text: "Buy information about the trail ahead", dc: 8, ok: "He shares what he knows \u2014 which posts have supplies, which trails are washed out.", bad: "He is close-mouth about conditions ahead. You learn little.", morale: 3 },
+        { text: "Trade with him", dc: null, always: "You exchange one of his goods for one of yours. Fair value, no questions asked.", morale: 5, give: [{ name: "Bison Hide", amt: 1 }], take: [{ name: "Shaganappi", amt: 1 }] },
+        { text: "Buy information about the trail ahead", dc: 8, ok: "He shares what he knows \u2014 which posts have supplies, which trails are washed out.", bad: "He is close-mouth about conditions ahead. You learn little.", morale: 3, badMorale: -2 },
         { text: "Refuse and keep moving", dc: null, always: "You tip your hat and press on. Not all strangers are friends." }
       ]
     },
@@ -1297,7 +1587,7 @@ var EVENT_POOLS = {
       classification: "Supply Find",
       source: getSource("BREHAUT_AMMO"),
       choices: [
-        { text: "Trade food for the ammunition belt", dc: 9, ok: "He accepts your offer. The belt is sound \u2014 enough shot for several hunts or defence.", bad: "He wants more than you can spare. The deal falls through.", give: [{ name: "Ammunition Belt", amt: 1 }], food: -3, morale: 3 },
+        { text: "Trade food for the ammunition belt", dc: 9, ok: "He accepts your offer. The belt is sound \u2014 enough shot for several hunts or defence.", bad: "He wants more than you can spare. The deal falls through.", give: [{ name: "Ammunition Belt", amt: 1 }], food: -3, morale: 3, badFood: -1, badMorale: -2 },
         { text: "Ask where he found it", dc: null, always: 'He gestures vaguely upstream. "The trail provides." You press on.', morale: 2 }
       ]
     },
@@ -1308,7 +1598,7 @@ var EVENT_POOLS = {
       source: getSource("FONSECA_RAIN"),
       choices: [
         { text: "Wait for the water to drop", dc: null, always: "You camp on high ground. By morning the river has dropped enough to cross.", time: 1 },
-        { text: "Push through while you can", dc: 13, ok: "The oxen find footing. The cart tilts but holds.", bad: "A submerged log catches the axle.", wear: 2, food: -2 }
+        { text: "Push through while you can", dc: 13, ok: "The oxen find footing. The cart tilts but holds.", bad: "A submerged log catches the axle.", wear: 2, food: -2, okMorale: 3, okWear: -1 }
       ]
     },
     {
@@ -1317,7 +1607,7 @@ var EVENT_POOLS = {
       classification: "Supply Find",
       source: getSource("FONSECA_HBC_SUPPLY"),
       choices: [
-        { text: "Take the canvas tarp", dc: 8, ok: "The tarp is heavy but waterproof. Shelter, cart cover, or raft material \u2014 it will serve.", bad: "The oilcloth is torn but the canvas beneath is sound.", give: [{ name: "Canvas Tarp", amt: 1 }], morale: 5 },
+        { text: "Take the canvas tarp", dc: 8, ok: "The tarp is heavy but waterproof. Shelter, cart cover, or raft material \u2014 it will serve.", bad: "The oilcloth is torn but the canvas beneath is sound.", give: [{ name: "Canvas Tarp", amt: 1 }], morale: 5, badGive: [{ name: "Canvas Tarp", amt: 1 }], badWear: 1 },
         { text: "Leave it \u2014 too heavy for the cart", dc: null, always: "You mark the cairn and move on. The cache will keep for the next traveller.", morale: 1 }
       ]
     },
@@ -1337,7 +1627,7 @@ var EVENT_POOLS = {
       text: "A Cree hunter steps onto the trail ahead, his rifle resting easy in the crook of his arm. He studies your cart and nods at the pemmican sacks \u2014 a gesture of recognition between peoples who know the same hunger. The wooded corridors of the Carlton Trail were meeting places, where M\xE9tis and Cree traded goods and news.",
       source: getSource("MMF_COMMUNITIES"),
       choices: [
-        { text: "Offer a trade", dc: 11, ok: "He swaps fresh meat for part of your load.", bad: "He senses you are short on food. The deal goes poorly.", food: 3, addsRep: { key: "cree", delta: 1 }, itemBonus: { name: "Ammunition Belt", dcBonus: 2 } },
+        { text: "Offer a trade", dc: 11, ok: "He swaps fresh meat for part of your load.", bad: "He senses you are short on food. The deal goes poorly.", food: 3, addsRep: { key: "cree", delta: 1 }, itemBonus: { name: "Ammunition Belt", dcBonus: 2 }, requiresItem: "Ammunition Belt", badFood: -1, badMorale: -3 },
         { text: "Keep moving", dc: null, always: "He watches but does not interfere.", alwaysWear: 0 }
       ]
     },
@@ -1346,8 +1636,8 @@ var EVENT_POOLS = {
       text: "A hidden rut drops one wheel into a creek bed \u2014 the cart tilts dangerously, and the load shifts toward the ditch. Being run over by the heavy wooden wheels of a Red River cart was the leading cause of death on the trails. Quick hands are needed now.",
       source: getSource("BREHAUT_CART"),
       choices: [
-        { text: "Catch the weight and right it", dc: 12, ok: "Quick hands save the day.", bad: "The cart upsets. One food item is lost.", food: -1, wear: 1, itemBonus: { name: "Rope (50ft)", dcBonus: 3 } },
-        { text: "Call for help", dc: 9, ok: "A nearby M\xE9tis party rights the cart swiftly.", bad: "Helpers arrive slow and grumpy.", morale: -5, time: 1 }
+        { text: "Catch the weight and right it", dc: 12, ok: "Quick hands save the day.", bad: "The cart upsets. One food item is lost.", food: -1, wear: 1, itemBonus: { name: "Rope (50ft)", dcBonus: 3 }, requiresItem: "Rope (50ft)" },
+        { text: "Call for help", dc: 9, ok: "A nearby M\xE9tis party rights the cart swiftly. They share a laugh and some pemmican.", bad: "Helpers arrive slow and grumpy.", morale: 3, addsRep: { key: "metis", delta: 1 }, time: 1, give: [{ name: "Pemmican Rations", amt: 1 }] }
       ]
     },
     {
@@ -1355,7 +1645,7 @@ var EVENT_POOLS = {
       text: "The mosquitoes and biting flies rise from the slough in a living cloud. The animals spook and the crew wants to run. Bound away to the water, into which they plunged neck deep, remaining there safe from the tormenting flies and mosquitoes.",
       source: getSource("FONSECA_MOSQUITOES"),
       choices: [
-        { text: "Drive through to firmer ground", dc: 11, ok: "You outpace the worst of the cloud.", bad: "The animals bolt; a strap snaps.", wear: 1, crew: "tired" },
+        { text: "Drive through to firmer ground", dc: 11, ok: "You outpace the worst of the cloud.", bad: "The animals bolt; a strap snaps.", wear: 1, crew: "tired", okMorale: 3, okTime: -1 },
         { text: "Let the oxen cool in the water", dc: null, always: "The delay costs time but saves nerves.", time: 1 }
       ]
     },
@@ -1364,7 +1654,7 @@ var EVENT_POOLS = {
       text: "A black bear crosses the trail thirty yards ahead, then stops and turns, taking the measure of the party. Bears were common along the wooded corridors of the Carlton Trail and could be dangerous when surprised at close range. This one is calm \u2014 for now.",
       source: getSource("LACOMBE_BEAR"),
       choices: [
-        { text: "Stand your ground and make noise", dc: 12, ok: "The bear veers away.", bad: "It charges and the oxen bolt.", wear: 1, morale: -6, crew: "tired" },
+        { text: "Stand your ground and make noise", dc: 12, ok: "The bear veers away.", bad: "It charges and the oxen bolt.", wear: 1, morale: -6, crew: "tired", okMorale: 4 },
         { text: "Back away quietly with the cart", dc: null, always: "The bear waits until you are clear, then moves on.", time: 1 }
       ]
     },
@@ -1373,7 +1663,7 @@ var EVENT_POOLS = {
       text: "A rattlesnake hums in the grass beside the trail, still as a root until you are almost on it. Rattlesnakes were common on the southern stretches of the trail and caused many a nervous night. The lead ox smells it first and refuses to move.",
       source: getSource("SCHULTZ_RATTLESNAKE"),
       choices: [
-        { text: "Hook it clear with a pole and move on", dc: 10, ok: "The snake disappears into the brush.", bad: "It strikes at the lead ox.", wear: 1, morale: -2 },
+        { text: "Hook it clear with a pole and move on", dc: 10, ok: "The snake disappears into the brush.", bad: "It strikes at the lead ox.", wear: 1, morale: -2, okMorale: 3 },
         { text: "Backtrack to a wider crossing", dc: null, always: "A slow detour, but nerves settle.", time: 1 }
       ]
     },
@@ -1382,8 +1672,8 @@ var EVENT_POOLS = {
       text: "A hidden washout drops the front wheel axle-deep. The cart tilts dangerously toward the ditch. Many a worn-out axle and broken wheel attest the power of its stumps and coulees. You need to free the cart before the soil gives way completely.",
       source: getSource("SCHULTZ_STUMPS"),
       choices: [
-        { text: "Spade and block the wheel", dc: 11, ok: "You free the cart without damage.", bad: "The soil gives way twice.", time: 1, morale: -3 },
-        { text: "Lighten and rock it free", dc: 9, ok: "A quick heave gets you out clean.", bad: "A crate lands in the muck.", food: -2, wear: 1 }
+        { text: "Spade and block the wheel", dc: 11, ok: "You free the cart without damage.", bad: "The soil gives way twice.", time: 1, morale: -3, okMorale: 3, okTime: -1 },
+        { text: "Lighten and rock it free", dc: 9, ok: "A quick heave gets you out clean.", bad: "A crate lands in the muck.", food: -2, wear: 1, okMorale: 3, okTime: -1 }
       ]
     },
     {
@@ -1392,7 +1682,7 @@ var EVENT_POOLS = {
       source: getSource("MMF_COMMUNITIES"),
       choices: [
         { text: "Listen to what he has to say", dc: null, always: "He points to the trail ahead, then draws a line in the dust. Warning or welcome \u2014 you cannot be sure, but the gesture is clear.", morale: 5 },
-        { text: "Offer a gift and trade words", dc: 9, ok: "He accepts your offering and shares what he knows about the trail. His directions save you a day.", bad: "He takes the gift but says little. Some knowledge is not for strangers.", morale: 3 },
+        { text: "Offer a gift and trade words", dc: 9, ok: "He accepts your offering and shares what he knows about the trail. His directions save you a day.", bad: "He takes the gift but says little. Some knowledge is not for strangers.", morale: 3, okTime: -1, badMorale: -2, badFood: -1 },
         { text: "Nod respectfully and move on", dc: null, always: "You tip your hat and press west. The old man watches you go." }
       ]
     },
@@ -1401,7 +1691,7 @@ var EVENT_POOLS = {
       text: "A hollow oak, its trunk scarred by fire, hums with life. Wild bees stream in and out of a knot near the crown \u2014 a bee tree, full of honey. The air smells of wax and sweetness. It is a rare find on the open prairie, where sugar is worth its weight in trade goods.",
       source: getSource("GOULET_BEE_TREE"),
       choices: [
-        { text: "Harvest the honey", dc: 10, ok: "Smoke calms the bees. You fill a pail with golden honey \u2014 enough to trade or eat for days.", bad: "The bees are not pleased. Stings and smoke, but you get a little honey.", food: 3, time: 1 },
+        { text: "Harvest the honey", dc: 10, ok: "Smoke calms the bees. You fill a pail with golden honey \u2014 enough to trade or eat for days.", bad: "The bees are not pleased. Stings and smoke, but you get a little honey.", food: 3, time: 1, badFood: 1, badMorale: -2 },
         { text: "Mark the tree for the return journey", dc: null, always: "You notch the bark and remember the spot. The honey will keep.", morale: 3 },
         { text: "Leave it \u2014 you cannot spare the time", dc: null, always: "The trail waits. The bees keep their treasure." }
       ]
@@ -1411,9 +1701,9 @@ var EVENT_POOLS = {
       text: "Smoke on the horizon. Then the wind shifts and the smell hits you \u2014 dry wood, pine resin, and the acrid bite of a forest fire pushing toward you. The treeline ahead glows orange. The oxen smell it too and pull at their traces. The prairie burned every afternoon, but this is different \u2014 this fire is coming for you.",
       source: getSource("LACOMBE_FIRE"),
       choices: [
-        { text: "Ride for the river bottom", dc: 12, ok: "The fire edge passes. You lose only an afternoon.", bad: "The wind shifts. You lose supplies and the cart is singed.", food: -3, wear: 1, morale: -12 },
-        { text: "Light a backfire and wait it out", dc: 10, ok: "A practised escape. The backfire draws the main blaze away from your position.", bad: "The flames jump. Your cart is spared but the oxen panic.", morale: -8, time: -1 },
-        { text: "Use water from the slough to wet the canvas", dc: 11, ok: "The wet tarp protects the load. You wait in the smoke until the fire passes.", bad: "There is not enough water. The canvas smolders.", morale: -6, itemBonus: { name: "Canvas Tarp", dcBonus: 3 } }
+        { text: "Ride for the river bottom", dc: 12, ok: "The fire edge passes. You lose only an afternoon.", bad: "The wind shifts. You lose supplies and the cart is singed.", food: -3, wear: 1, morale: -12, time: 1, okTime: 1 },
+        { text: "Light a backfire and wait it out", dc: 10, ok: "A practised escape. The backfire draws the main blaze away from your position.", bad: "The flames jump. Your cart is spared but the oxen panic.", morale: -8, time: 1 },
+        { text: "Use water from the slough to wet the canvas", dc: 11, ok: "The wet tarp protects the load. You wait in the smoke until the fire passes.", bad: "There is not enough water. The canvas smolders.", morale: -2, time: 1, itemBonus: { name: "Canvas Tarp", dcBonus: 3 } }
       ]
     },
     {
@@ -1432,7 +1722,7 @@ var EVENT_POOLS = {
       classification: "Supply Find",
       source: getSource("SCHULTZ_DEADFALL"),
       choices: [
-        { text: "Gather firewood", dc: 8, ok: "You split and bundle the dry wood. A full bundle \u2014 enough for several nights of warmth.", bad: "The wood is sound but heavier than expected. You take what you can carry.", give: [{ name: "Firewood Bundle", amt: 1 }], morale: 5 },
+        { text: "Gather firewood", dc: 8, ok: "You split and bundle the dry wood. A full bundle \u2014 enough for several nights of warmth.", bad: "The wood is sound but heavier than expected. You take what you can carry.", give: [{ name: "Firewood Bundle", amt: 1 }], morale: 5, badGive: [{ name: "Firewood Bundle", amt: 1 }] },
         { text: "Mark the spot for the return journey", dc: null, always: "You notch a tree and remember the spot. The wood will keep.", morale: 2 }
       ]
     }
@@ -1443,8 +1733,9 @@ var EVENT_POOLS = {
       text: "The trail climbs onto a windy upland bench, the prairie falling away on all sides. Rain draws near \u2014 you can smell it in the air, feel it in the drop of temperature. The ridge offers no shelter, and the cart is exposed to whatever the sky decides to deliver.",
       source: getSource("LACOMBE_HAIL"),
       choices: [
-        { text: "Press through before the storm", dc: 11, ok: "You gain the far shelter with minutes to spare.", bad: "The rain catches you on exposed ground.", wear: 1, morale: -6 },
-        { text: "Hike to a rocky ledge and wait", dc: null, always: "Cold, but the cart and crew are intact.", time: 1 }
+        { text: "Press through before the storm", dc: 11, ok: "You gain the far shelter with minutes to spare.", bad: "The rain catches you on exposed ground.", wear: 1, morale: -6, itemBonus: { name: "Canvas Tarp", dcBonus: 3 } },
+        { text: "Hike to a rocky ledge and wait", dc: null, always: "Cold, but the cart and crew are intact.", time: 1 },
+        { text: "Wrap up in blankets and endure", dc: 10, ok: "The blankets hold the cold at bay.", bad: "The wind cuts through the wool.", morale: -8, requiresItem: "Blanket", consumesItem: "Blanket" }
       ]
     },
     {
@@ -1452,7 +1743,7 @@ var EVENT_POOLS = {
       text: "The ground turns treacherous \u2014 old stumps hidden in tall grass, narrow coulees cutting across the path without warning. Many a worn-out axle and broken wheel attest the power of its stumps and coulees. The cart lurches and groans with every hidden obstacle.",
       source: getSource("SCHULTZ_STUMPS"),
       choices: [
-        { text: "Hug the ridge line to avoid low ground", dc: 11, ok: "Clear ground saves the cart.", bad: "A hidden stump catches the wheel hub.", wear: 1 },
+        { text: "Hug the ridge line to avoid low ground", dc: 11, ok: "Clear ground saves the cart.", bad: "A hidden stump catches the wheel hub.", wear: 1, itemBonus: { name: "Tool Kit", dcBonus: 2 } },
         { text: "Take the direct trail", dc: null, always: "The going is rough but quick.", alwaysWear: 0 }
       ]
     },
@@ -1461,7 +1752,7 @@ var EVENT_POOLS = {
       text: "The ridge offers no shelter. Lightning finds the highest point and the rain comes down in sheets. Sudden storms of hail and sleet were not uncommon on the uplands in late spring. The oxen bellow and strain at their traces, and the cart slides on the wet grass.",
       source: getSource("LACOMBE_HAIL"),
       choices: [
-        { text: "Hobble the oxen and weather it under the cart", dc: 11, ok: "The canvas holds. You are soaked but intact.", bad: "A lightning-struck tree falls nearby.", morale: -6, time: -1, itemBonus: { name: "Canvas Tarp", dcBonus: 4 } },
+        { text: "Hobble the oxen and weather it under the cart", dc: 11, ok: "The canvas holds. You are soaked but intact.", bad: "A lightning-struck tree falls nearby.", morale: -6, time: 1, itemBonus: { name: "Canvas Tarp", dcBonus: 4 } },
         { text: "Run for the coulee bottom", dc: 9, ok: "Lower ground is safer.", bad: "A slipped wheel in the mud.", wear: 1 }
       ]
     },
@@ -1471,8 +1762,8 @@ var EVENT_POOLS = {
       source: getSource("GOULET_HUNT"),
       choices: [
         { text: "Wait for the herd to pass", dc: null, always: "You make camp and wait. The herd takes half a day to pass. The ground is churned to dust.", time: 1 },
-        { text: "Drive through the edge of the herd", dc: 13, ok: "The oxen plunge in. The herd parts just enough. You emerge on the other side, hearts pounding.", bad: "A bull takes offense. The oxen bolt. Cart tips and supplies scatter.", wear: 2, morale: -8 },
-        { text: "Hunt a straggler for food", dc: 11, ok: "A young bull is separated from the herd. The crew brings it down and butchers it on the spot.", bad: "The shot scatters the herd toward you. The oxen stampede.", food: 6, itemBonus: { name: "Ammunition Belt", dcBonus: 3 } }
+        { text: "Drive through the edge of the herd", dc: 13, ok: "The oxen plunge in. The herd parts just enough. You emerge on the other side, hearts pounding.", bad: "A bull takes offense. The oxen bolt. Cart tips and supplies scatter.", wear: 2, morale: -8, okMorale: 5, okTime: -1 },
+        { text: "Hunt a straggler for food", dc: 11, ok: "A young bull is separated from the herd. The crew brings it down and butchers it on the spot.", bad: "The shot scatters the herd toward you. The oxen stampede.", food: 6, itemBonus: { name: "Ammunition Belt", dcBonus: 3 }, badWear: 2, badMorale: -8 }
       ]
     },
     {
@@ -1481,7 +1772,7 @@ var EVENT_POOLS = {
       source: getSource("LACOMBE_HAIL"),
       choices: [
         { text: "Hobble the oxen and wait it out", dc: null, always: "You huddle under the cart. The storm passes in twenty minutes. Everyone is soaked but alive.", morale: -4 },
-        { text: "Push for the coulee bottom", dc: 10, ok: "Lower ground is safer. The hail lessens as you descend.", bad: "A slipped wheel in the mud. The cart tilts but holds.", wear: 1 },
+        { text: "Push for the coulee bottom", dc: 10, ok: "Lower ground is safer. The hail lessens as you descend.", bad: "A slipped wheel in the mud. The cart tilts but holds.", wear: 1, okMorale: 3, okWear: -1 },
         { text: "Use the Canvas Tarp as shelter", dc: 9, ok: "The tarp holds against the worst of it. The crew stays dry enough.", bad: "The wind tears at the canvas. A pole snaps.", morale: -3, itemBonus: { name: "Canvas Tarp", dcBonus: 3 } }
       ]
     },
@@ -1491,7 +1782,7 @@ var EVENT_POOLS = {
       source: getSource("MMF_COMMUNITIES"),
       choices: [
         { text: "Hire him as a guide", dc: null, always: "He rides ahead and finds the best path. You save a day of wandering.", food: -3, extraProgress: 1, addsRep: { key: "metis", delta: 1 } },
-        { text: "Trade for information instead", dc: 8, ok: "He shares what he knows about the trail ahead in exchange for news from the settlements.", bad: "He is polite but reveals little. You part ways no wiser.", morale: 5 },
+        { text: "Trade for information instead", dc: 8, ok: "He shares what he knows about the trail ahead in exchange for news from the settlements.", bad: "He is polite but reveals little. You part ways no wiser.", morale: 5, badMorale: -2 },
         { text: "Decline and rely on your own sense", dc: null, always: "You nod respectfully and press on alone. The trail is harder to find than expected.", time: 1 }
       ]
     },
@@ -1500,7 +1791,7 @@ var EVENT_POOLS = {
       text: "The oxen refuse to drink. The water hole ahead is alkaline \u2014 white crust rings the edge, and the smell of alkali rides the wind. The animals know before you do: this water will sicken them.",
       source: getSource("SCHULTZ_ALKALI"),
       choices: [
-        { text: "Force the oxen through to clean water beyond", dc: 11, ok: "The oxen drink reluctantly and you push on. They recover by evening.", bad: "One ox goes lame from the bad water. Progress slows to a crawl.", crew: "tired", morale: -6 },
+        { text: "Force the oxen through to clean water beyond", dc: 11, ok: "The oxen drink reluctantly and you push on. They recover by evening.", bad: "One ox goes lame from the bad water. Progress slows to a crawl.", crew: "tired", morale: -6, itemBonus: { name: "Medicine Pouch", dcBonus: 2 } },
         { text: "Detour to find a clean spring", dc: null, always: "A longer route, but the water is sweet. The oxen drink deeply and press on with new energy.", time: 1, morale: 5 },
         { text: "Ration Pemmican Rations to sustain the crew", dc: null, always: "You stretch your food and wait for the oxen to adjust. A hungry day, but no one falls ill.", food: -3 }
       ]
@@ -1510,8 +1801,8 @@ var EVENT_POOLS = {
       text: "The temperature drops after sunset. By morning, a thin crust of ice covers the water barrels and the oxen's breath rises in white plumes. The ground is too hard to drive tent pegs. The crew huddles together for warmth, and the firewood burns faster than you planned.",
       source: getSource("SCHULTZ_FROST"),
       choices: [
-        { text: "Burn extra Firewood Bundle to keep warm", dc: null, always: "The fire holds back the cold. The crew sleeps, but your fuel reserves are thinner now.", morale: 5 },
-        { text: "Push through without extra fire", dc: 9, ok: "Grit and determination. The crew complains but holds together.", bad: "Fingers go numb. One crew member cannot feel their feet by morning.", crew: "tired", morale: -10 },
+        { text: "Burn extra Firewood Bundle to keep warm", dc: null, always: "The fire holds back the cold. The crew sleeps, but your fuel reserves are thinner now.", morale: 5, consumesItem: "Firewood Bundle" },
+        { text: "Push through without extra fire", dc: 9, ok: "Grit and determination. The crew complains but holds together.", bad: "Fingers go numb. One crew member cannot feel their feet by morning.", crew: "tired", morale: -10, okMorale: 3 },
         { text: "Make camp and wait for the thaw", dc: null, always: "You wait for the sun to warm the ground. A lost day, but the crew is intact.", time: 1 }
       ]
     },
@@ -1522,7 +1813,7 @@ var EVENT_POOLS = {
       source: getSource("SCHULTZ_SNOW"),
       choices: [
         { text: "Make camp and wait for the thaw", dc: null, always: "You wait for the sun to melt the snow. A lost day, but the crew is intact.", time: 1, morale: -2 },
-        { text: "Push through \u2014 follow the ridge", dc: 11, ok: "The going is brutal but you keep moving.", bad: "The snow deepens. Progress is measured in yards.", crew: "tired", morale: -8 }
+        { text: "Push through \u2014 follow the ridge", dc: 11, ok: "The going is brutal but you keep moving.", bad: "The snow deepens. Progress is measured in yards.", crew: "tired", morale: -8, okMorale: 3, okTime: -1 }
       ]
     },
     {
@@ -1542,15 +1833,15 @@ var EVENT_POOLS = {
       text: "The crossing here is too deep to ford. You eye the spare hides in the cart. Four cart wheels were taken and placed dish upwards on the surface of the water. The boat was launched, and floated like a duck.",
       source: getSource("FONSECA_RAFT"),
       choices: [
-        { text: "Build a cart-raft with 2 bison hides", dc: 12, ok: "The improvised ferry floats. The crew swims the line across.", bad: "One hide splits mid-river; cargo gets wet.", morale: -6, setsFlag: "built_rafts", requiresItem: { name: "Bison Hide", count: 2 }, branch: {
+        { text: "Build a cart-raft with 2 bison hides", dc: 12, ok: "The improvised ferry floats. The crew swims the line across.", bad: "One hide splits mid-river; cargo gets wet.", morale: -6, food: -2, setsFlag: "built_rafts", requiresItem: { name: "Bison Hide", count: 2 }, branch: {
           id: "river_raft_wash",
           text: "On the far bank, an elder watches your landing and nods slowly.",
           choices: [
-            { text: "Greet him respectfully", dc: 10, ok: "He shares drying hides and directions for the next leg.", bad: "He is suspicious and leaves without speaking.", addsRep: { key: "cree", delta: 1 }, morale: 8 },
+            { text: "Greet him respectfully", dc: 10, ok: "He shares drying hides and directions for the next leg.", bad: "He is suspicious and leaves without speaking.", addsRep: { key: "cree", delta: -1 }, morale: -4 },
             { text: "Get moving without conversation", dc: null, always: "Pragmatic. The crossing cost enough time.", alwaysWear: 0 }
           ]
         } },
-        { text: "Ford the cart carefully", dc: 13, ok: "The ox swims straight and true; the bed stays high.", bad: "The current turns the cart. Wet freight and one damaged wheel.", wear: 2, food: -2 }
+        { text: "Ford the cart carefully", dc: 13, ok: "The ox swims straight and true; the bed stays high.", bad: "The current turns the cart. Wet freight and one damaged wheel.", wear: 2, food: -2, okMorale: 3, okWear: -1 }
       ]
     },
     {
@@ -1559,7 +1850,7 @@ var EVENT_POOLS = {
       source: getSource("MACLEOD_NWMP"),
       choices: [
         { text: "Declare your goods and pay duty", dc: null, always: "The paperwork is tedious but fair. You keep your peace.", food: -2, addsRep: { key: "nwmp", delta: 1 } },
-        { text: "Attempt to pass quietly", dc: 13, ok: "They are busy and let you slip through.", bad: "Caught concealing cargo. Goods are confiscated.", morale: -15, addsRep: { key: "nwmp", delta: -2 } }
+        { text: "Attempt to pass quietly", dc: 13, ok: "They are busy and let you slip through.", bad: "Caught concealing cargo. Goods are confiscated.", morale: -15, addsRep: { key: "nwmp", delta: -2 }, okMorale: 3 }
       ]
     },
     {
@@ -1567,8 +1858,8 @@ var EVENT_POOLS = {
       text: "You meet a crew of boatmen heading for the Portage La Loche. Their faces are lean, their hands calloused, but their eyes are sharp. This famous brigade traveled 4000 miles every year, and the men who crewed it knew every river from the Red to the Athabasca.",
       source: getSource("BARKWELL_BRIGADE"),
       choices: [
-        { text: "Exchange dried fish and route talk", dc: 8, ok: "They share intelligence on the next water crossings.", bad: "The conversation is brief and businesslike.", morale: 6 },
-        { text: "Hire a guide for the hard water ahead", dc: 10, ok: "A steady hand joins your crew for three days.", bad: "The boatman is competent but expensive.", food: -3, extraProgress: 2, addsRep: { key: "metis", delta: 1 } }
+        { text: "Exchange dried fish and route talk", dc: 8, ok: "They share intelligence on the next water crossings.", bad: "The conversation is brief and businesslike.", morale: 6, badMorale: -2 },
+        { text: "Hire a guide for the hard water ahead", dc: 10, ok: "A steady hand joins your crew for three days.", bad: "The boatman is competent but expensive.", food: -3, extraProgress: 2, addsRep: { key: "metis", delta: 1 }, badFood: -1, badMorale: -3 }
       ]
     },
     {
@@ -1577,7 +1868,7 @@ var EVENT_POOLS = {
       source: getSource("FONSECA_ICE"),
       choices: [
         { text: "Wait for the ice to clear", dc: null, always: "You camp and watch the river. By morning, the channel is clear enough.", time: 1 },
-        { text: "Find an alternate crossing upstream", dc: 11, ok: "A narrower point, but the ice has passed. You cross carefully.", bad: "The bank is steep. The cart slips but holds.", wear: 1 },
+        { text: "Find an alternate crossing upstream", dc: 11, ok: "A narrower point, but the ice has passed. You cross carefully.", bad: "The bank is steep. The cart slips but holds.", wear: 1, okMorale: 3, okWear: -1, okTime: -1 },
         { text: "Risk the crossing now", dc: 15, ok: "The oxen are strong swimmers. You make it across, ice grinding at the cart sides.", bad: "A slab of ice catches the axle. The cart tips. Cargo lost to the current.", wear: 2, food: -4 }
       ]
     },
@@ -1586,8 +1877,8 @@ var EVENT_POOLS = {
       text: "A York boat rounds the bend, its oars flashing in the sun. HBC markings on the hull \u2014 a supply boat heading downstream from the northern posts. The crew waves. They have news, and they have trade goods that have not seen a settlement in months.",
       source: getSource("HBC_JOURNAL"),
       choices: [
-        { text: "Trade with the boat crew", dc: null, always: "You exchange news and goods. The boatmen are glad for fresh supplies from the south.", morale: 5 },
-        { text: "Ask for news of the trail ahead", dc: 8, ok: "They tell you which posts are well-stocked and which trails have washed out. Valuable intelligence.", bad: "They are close-mouth about Company business. You learn little.", morale: 3 },
+        { text: "Trade with the boat crew", dc: null, always: "You exchange news and goods. The boatmen are glad for fresh supplies from the south.", morale: 5, give: [{ name: "Bison Hide", amt: 1 }], take: [{ name: "Shaganappi", amt: 1 }] },
+        { text: "Ask for news of the trail ahead", dc: 8, ok: "They tell you which posts are well-stocked and which trails have washed out. Valuable intelligence.", bad: "They are close-mouth about Company business. You learn little.", morale: 3, badMorale: -2 },
         { text: "Wave and continue on your way", dc: null, always: "You are heading west, they are heading east. Your paths cross and diverge." }
       ]
     },
@@ -1596,7 +1887,7 @@ var EVENT_POOLS = {
       text: "The oxen are halfway across when the cart lurches and stops. The front wheels have dropped into a hidden sandbar, and the current is pushing against the cart bed. The oxen strain but cannot pull free. The water is rising.",
       source: getSource("BREHAUT_SANDBAR"),
       choices: [
-        { text: "Unload and float the cart free", dc: 11, ok: "You lighten the load and the oxen pull clear. Wet cargo, but the cart is safe.", bad: "The current shifts the cart. A barrel is swept away.", food: -2, wear: 1 },
+        { text: "Unload and float the cart free", dc: 11, ok: "You lighten the load and the oxen pull clear. Wet cargo, but the cart is safe.", bad: "The current shifts the cart. A barrel is swept away.", food: -2, wear: 1, okFood: -1, okWear: -1 },
         { text: "Use Rope (50ft) to anchor and pull from bank", dc: 10, ok: "The rope holds. The crew on the bank heaves. The cart grinds free.", bad: "The rope slips. The cart settles deeper.", wear: 1, itemBonus: { name: "Rope (50ft)", dcBonus: 3 } },
         { text: "Wait for the water level to drop", dc: null, always: "You wait. The current lessens by afternoon and the oxen pull free.", time: 1, morale: -5 }
       ]
@@ -1606,8 +1897,8 @@ var EVENT_POOLS = {
       text: "The crossing here is too deep to ford. You eye the spare hides in the cart \u2014 enough to build a raft, if you know how. The river is wide and the current steady. On the far bank, the trail continues west.",
       source: getSource("FONSECA_RAF"),
       choices: [
-        { text: "Build a cart-raft with 2 Bison Hides", dc: 12, ok: "The improvised ferry floats. The crew swims the line across.", bad: "One hide splits mid-river. Cargo gets wet.", morale: -6, requiresItem: { name: "Bison Hide", count: 2 } },
-        { text: "Ford the cart carefully", dc: 13, ok: "The ox swims straight and true; the bed stays high.", bad: "The current turns the cart. Wet freight and one damaged wheel.", wear: 2, food: -2 }
+        { text: "Build a cart-raft with 2 Bison Hides", dc: 12, ok: "The improvised ferry floats. The crew swims the line across.", bad: "One hide splits mid-river. Cargo gets wet.", morale: -6, food: -2, requiresItem: { name: "Bison Hide", count: 2 } },
+        { text: "Ford the cart carefully", dc: 13, ok: "The ox swims straight and true; the bed stays high.", bad: "The current turns the cart. Wet freight and one damaged wheel.", wear: 2, food: -2, okMorale: 3, okWear: -1 }
       ]
     },
     {
@@ -1616,8 +1907,8 @@ var EVENT_POOLS = {
       classification: "Supply Find",
       source: getSource("FONSECA_BEAVER"),
       choices: [
-        { text: "Set traps and hunt beaver", dc: 10, ok: "The traps hold. You harvest two prime pelts and smoke the meat over the fire.", bad: "The beavers are wary. You get one pelt and little meat.", give: [{ name: "Beaver Pelts", amt: 2 }], morale: 6 },
-        { text: "Fish instead \u2014 lower risk", dc: 8, ok: "The river yields enough fish to stretch your rations by a day.", bad: "The fish are not biting. A wasted afternoon.", food: 3, morale: 2 }
+        { text: "Set traps and hunt beaver", dc: 10, ok: "The traps hold. You harvest two prime pelts and smoke the meat over the fire.", bad: "The beavers are wary. You get one pelt and little meat.", give: [{ name: "Beaver Pelts", amt: 2 }], morale: 6, badGive: [{ name: "Beaver Pelts", amt: 1 }], badFood: 1 },
+        { text: "Fish instead \u2014 lower risk", dc: 8, ok: "The river yields enough fish to stretch your rations by a day.", bad: "The fish are not biting. A wasted afternoon.", food: 3, morale: 2, badMorale: -2 }
       ]
     }
   ]
@@ -1809,7 +2100,8 @@ function createGame(seed = null) {
     date: { month: CONSTANTS.START_MONTH, day: CONSTANTS.START_DAY },
     season: seasonFor(CONSTANTS.START_MONTH),
     crew: "rested",
-    food: 23,
+    food: 0,
+    // starting food added via pre-departure confirm
     wear: 0,
     morale: 70,
     node: 0,
@@ -1827,22 +2119,14 @@ function createGame(seed = null) {
     reputation: { hbc: 0, nwmp: 0, metis: 0, mission: 0, cree: 0 },
     capacity: 100,
     usedWeight: 0,
-    credit: { hbc: 0, metis: 0, nwmp: 0, mission: 0 },
-    mbValue: 0,
-    // total MB value of all trade goods in cart
     perishable: {},
     preDeparture: true,
     weather: initWeather(),
-    blessingDays: 0
+    blessingDays: 0,
+    trailIntel: [],
+    hasPermit: false,
+    fines: 0
   };
-  function calcMB() {
-    return cart.filter((i) => i.type === "trade" || i.category === "furs").reduce((s, i) => s + (i.mbValue || 0) * i.count, 0);
-  }
-  __name(calcMB, "calcMB");
-  function recalcMB() {
-    S2.mbValue = Math.round(calcMB() * 100) / 100;
-  }
-  __name(recalcMB, "recalcMB");
   function checkGameOver() {
     if (S2.over) return;
     if (S2.food <= 0) {
@@ -1943,14 +2227,12 @@ function createGame(seed = null) {
           result.effects.push(`+${g.amt} ${g.name}`);
         }
       });
-      recalcMB();
     }
     if (ch.consumesItem) {
       const idx = cart.findIndex((i) => i.name === ch.consumesItem);
       if (idx !== -1 && cart[idx].count > 0) {
         cart[idx].count--;
         result.effects.push(`-1 ${ch.consumesItem}`);
-        recalcMB();
       }
     }
     if (ch.extraProgress) {
@@ -1989,13 +2271,15 @@ function createGame(seed = null) {
     const wearPenalty = S2.wear * S2.wear;
     const foodBonus = Math.min(S2.food, 25);
     const crewBonus = S2.crew === "rested" ? 30 : S2.crew === "tired" ? 10 : 0;
-    const noRestPenalty = Math.max(0, S2.travelDaysWithoutRest - 3) * 15;
+    const noRestPenalty = Math.max(0, S2.travelDaysWithoutRest - 3) * 10;
+    const tradeGoodsCount = cart.filter((i) => i.type === "trade" || i.category === "furs").reduce((s, i) => s + i.count, 0);
+    const tradeBonus = tradeGoodsCount * 150;
     let score = 1e3;
-    score += Math.round(S2.mbValue * 80);
-    score += foodBonus * 12;
+    score += tradeBonus;
+    score += foodBonus * 15;
     score += crewBonus;
-    score -= daysPenalty * 8;
-    score -= wearPenalty * 40;
+    score -= daysPenalty * 5;
+    score -= wearPenalty * 25;
     score -= noRestPenalty;
     return Math.max(0, Math.round(score));
   }
@@ -2004,16 +2288,26 @@ function createGame(seed = null) {
   function travelOneDay2() {
     if (S2.over || S2.pendingSettlement) return stepLog;
     const nextDist = NODES[S2.node + 1]?.dist || 1;
+    const usedWeight = totalWeight(cart);
+    const weightRatio = usedWeight / CONSTANTS.CART_CAPACITY;
+    const travelMult = 1 + weightRatio * CONSTANTS.WEIGHT_TRAVEL_MULT;
+    const wearMult = 1 + weightRatio * CONSTANTS.WEIGHT_WEAR_MULT;
     advanceWeather();
     const weatherFood = CONSTANTS.WEATHER_FOOD_MOD[S2.weather] || 0;
+    const foodBefore = S2.food;
     S2.food = Math.max(0, Math.round((S2.food - CONSTANTS.DAILY_FOOD - weatherFood) * 10) / 10);
-    S2.segmentDay++;
+    if (S2.food <= 0) {
+      S2.morale = Math.max(0, S2.morale - 10);
+      S2.crew = "exhausted";
+      S2.wear = Math.min(CONSTANTS.MAX_WEAR, S2.wear + 1);
+    }
+    S2.segmentDay += travelMult;
     S2.travelDaysWithoutRest++;
     advance();
     if (S2.blessingDays > 0) S2.blessingDays--;
     const wearChance = { plains: 0.1, river_valley: 0.15, wooded: 0.2 };
     const weatherWearMult = CONSTANTS.WEATHER_WEAR_MULT[S2.weather] || 1;
-    if (rand() < (wearChance[NODES[S2.node].terrain] || 0.2) * weatherWearMult) S2.wear++;
+    if (rand() < (wearChance[NODES[S2.node].terrain] || 0.2) * weatherWearMult * wearMult) S2.wear++;
     if (S2.wear >= 4 && rand() < 0.35) {
       S2.pendingEvent = getSquealEvent();
       return stepLog;
@@ -2038,8 +2332,6 @@ function createGame(seed = null) {
         return stepLog;
       }
       if (S2.node >= NODES.length - 1) {
-        const hasTrade = cart.some((i) => i.type === "trade" && i.count > 0);
-        recalcMB();
         S2.over = true;
         if (S2.food <= 0) {
           S2.endReason = "starvation";
@@ -2048,9 +2340,9 @@ function createGame(seed = null) {
         } else if (S2.morale <= 0) {
           S2.endReason = "abandoned";
         } else {
-          S2.won = S2.mbValue >= CONSTANTS.MB_WIN_THRESHOLD;
+          S2.won = true;
           S2.score = calcScore();
-          S2.endReason = S2.won ? "victory" : "no_trade";
+          S2.endReason = "victory";
         }
         return stepLog;
       }
@@ -2080,10 +2372,8 @@ function createGame(seed = null) {
       S2.node++;
       S2.segmentDay = 0;
       if (S2.node >= NODES.length - 1) {
-        const hasTrade = cart.some((i) => i.type === "trade" && i.count > 0);
-        recalcMB();
         S2.over = true;
-        S2.won = S2.mbValue >= CONSTANTS.MB_WIN_THRESHOLD && S2.wear < CONSTANTS.MAX_WEAR;
+        S2.won = true;
         S2.score = calcScore();
       } else {
         const n = NODES[S2.node];
@@ -2123,92 +2413,73 @@ function createGame(seed = null) {
     checkGameOver();
   }
   __name(pushOn2, "pushOn");
-  function settlementAction(action) {
-    if (!S2.pendingSettlement) return [];
-    if (action === "continue") {
-      S2.pendingSettlement = null;
-      return [];
+  function getSettlementActionsByType(type) {
+    const barter = CONSTANTS.SETTLEMENT_BARTER[type] || CONSTANTS.SETTLEMENT_BARTER.hbc;
+    const actions = [];
+    const DISPLAY_NAMES = {
+      "any_fur": "Any Fur/Pelt",
+      "Pemmican Rations": "Pemmican Rations",
+      "rested": "Rested",
+      "Morale": "Morale",
+      "blessingDays": "Blessing",
+      "trail_intel": "Trail Intel",
+      "hasPermit": "Permit",
+      "finesCleared": "Fines Cleared",
+      "ReputationMetis": "Reputation"
+    };
+    function displayName(name3) {
+      return DISPLAY_NAMES[name3] || name3.replace(/_/g, " ");
     }
-    if (action === "rest") {
-      S2.crew = "rested";
-      S2.food = Math.max(0, S2.food - 1);
-      S2.travelDaysWithoutRest = 0;
-      S2.morale = Math.min(100, S2.morale + 15);
-    }
-    if (action === "repair") {
-      const shag = cart.find((i) => i.name === "Shaganappi");
-      if (S2.wear > 0 && shag && shag.count > 0) {
-        shag.count--;
-        S2.wear = Math.max(0, S2.wear - 2);
-        recalcMB();
-      } else if (S2.wear > 0) {
-        S2.wear = Math.max(0, S2.wear - 2);
+    __name(displayName, "displayName");
+    for (const [actionId, trade] of Object.entries(barter)) {
+      if (trade.giveOptions) {
+        trade.giveOptions.forEach((opt, idx) => {
+          const giveDesc = opt.give.map((g) => `${g.count} ${displayName(g.name)}`).join(" + ");
+          const receiveDesc = opt.receive.map((r) => `${r.count} ${displayName(r.name)}`).join(", ");
+          actions.push({
+            id: `${actionId}_${idx}`,
+            label: actionId.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()),
+            cost: giveDesc || "Free",
+            risk: receiveDesc,
+            flavor: trade.flavor
+          });
+        });
+      } else if (trade.options) {
+        trade.options.forEach((opt) => {
+          const giveDesc = trade.give.map((g) => `${g.count} ${displayName(g.name)}`).join(" + ");
+          const receiveDesc = opt.receive.map((r) => `${r.count} ${displayName(r.name)}`).join(", ");
+          actions.push({
+            id: `${actionId}_${opt.id}`,
+            label: `${actionId.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}: ${opt.id.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}`,
+            cost: giveDesc || "Free",
+            risk: receiveDesc,
+            flavor: opt.flavor
+          });
+        });
+      } else {
+        const giveDesc = trade.give.map((g) => `${g.count} ${displayName(g.name)}`).join(" + ");
+        const receiveDesc = trade.receive.map((r) => `${r.count} ${displayName(r.name)}`).join(", ");
+        actions.push({
+          id: actionId,
+          label: actionId.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()),
+          cost: giveDesc || "Free",
+          risk: receiveDesc,
+          flavor: trade.flavor
+        });
       }
     }
-    if (action === "heal") {
-      S2.crew = "rested";
-      S2.morale = Math.min(100, S2.morale + 20);
-    }
-    if (action === "trade") {
-      const tg = cart.find((i) => i.type === "trade" && i.count > 0);
-      if (tg) {
-        tg.count--;
-        recalcMB();
-        const mbGain = tg.mbValue || 1;
-        S2.credit[S2.pendingSettlement?.type || "hbc"] = (S2.credit[S2.pendingSettlement?.type || "hbc"] || 0) + mbGain;
-        S2.tradesMade++;
-      }
-    }
-    if (action === "buy_food") {
-      const cost = CONSTANTS.MB_FOOD_COST;
-      const settleType = S2.pendingSettlement?.type || "hbc";
-      if ((S2.credit[settleType] || 0) >= cost) {
-        S2.credit[settleType] -= cost;
-        S2.food += Math.floor(1 / cost);
-      }
-    }
-    if (action === "buy_repair") {
-      const cost = CONSTANTS.MB_REPAIR_COST;
-      const settleType = S2.pendingSettlement?.type || "hbc";
-      if ((S2.credit[settleType] || 0) >= cost && S2.wear > 0) {
-        S2.credit[settleType] -= cost;
-        S2.wear = Math.max(0, S2.wear - 2);
-      }
-    }
-    if (action === "buy_heal") {
-      const cost = CONSTANTS.MB_HEAL_COST;
-      const settleType = S2.pendingSettlement?.type || "hbc";
-      if ((S2.credit[settleType] || 0) >= cost) {
-        S2.credit[settleType] -= cost;
-        S2.morale = Math.min(100, S2.morale + 20);
-        S2.crew = "rested";
-      }
-    }
-    if (action === "buy_info") {
-      const cost = CONSTANTS.MB_INFO_COST;
-      const settleType = S2.pendingSettlement?.type || "hbc";
-      if ((S2.credit[settleType] || 0) >= cost) {
-        S2.credit[settleType] -= cost;
-        S2.morale = Math.min(100, S2.morale + 5);
-        S2.flags["trail_intel_" + S2.node] = true;
-      }
-    }
-    if (action === "craft") {
-      const recipes = this.getAvailableRecipes();
-      if (recipes.length === 0) return { error: "No recipes available" };
-      advance();
-    }
-    checkGameOver();
-    S2.pendingSettlement = null;
-    return [];
+    return actions;
   }
-  __name(settlementAction, "settlementAction");
+  __name(getSettlementActionsByType, "getSettlementActionsByType");
   return {
     travelOneDay: travelOneDay2,
     makeCamp,
     pushOn: pushOn2,
     chooseEventChoice,
+    getSettlementActionsByType,
     getState() {
+      const usedWeight = totalWeight(cart);
+      const weightRatio = usedWeight / CONSTANTS.CART_CAPACITY;
       return {
         day: S2.day,
         month: S2.month,
@@ -2226,16 +2497,23 @@ function createGame(seed = null) {
         score: S2.score,
         pendingEvent: S2.pendingEvent,
         pendingSettlement: S2.pendingSettlement,
-        usedWeight: totalWeight(cart),
+        usedWeight,
         capacity: S2.capacity,
+        weightRatio: Math.round(weightRatio * 100) / 100,
         preDeparture: S2.preDeparture,
         weather: S2.weather,
         currentTerrain: NODES[S2.node]?.terrain || "plains",
         travelDaysWithoutRest: S2.travelDaysWithoutRest,
-        mbValue: S2.mbValue,
-        credit: { ...S2.credit },
         blessingDays: S2.blessingDays,
-        trailIntel: S2.trailIntel ? [...S2.trailIntel] : []
+        trailIntel: S2.trailIntel ? [...S2.trailIntel] : [],
+        camps: S2.camps,
+        eventsResolved: S2.eventsResolved,
+        tradesMade: S2.tradesMade,
+        flags: S2.flags,
+        reputation: S2.reputation,
+        credit: S2.credit || {},
+        perishable: S2.perishable,
+        seed: S2.seed
       };
     },
     getCart() {
@@ -2245,13 +2523,12 @@ function createGame(seed = null) {
       const idx = cart.findIndex((i) => i.name === name3);
       if (idx === -1 || cart[idx].count <= 0) return false;
       cart[idx].count--;
-      recalcMB();
       return true;
     },
     getTradeEstimate(itemId, quantity, settlementType) {
       const item = cart.find((i) => i.name === itemId);
       if (!item) return null;
-      const basePrice = item.mbValue || 1;
+      const basePrice = 1;
       const mult = getSettlementPriceMultiplier(settlementType, item.category);
       const distanceFactor = S2.node / (NODES.length - 1);
       const buyPrice = Math.round(basePrice * mult.buy * (1 + distanceFactor * 0.15) * 100) / 100;
@@ -2292,38 +2569,80 @@ function createGame(seed = null) {
       const type = S2.pendingSettlement.type;
       const state = S2;
       const result = executeSettlementAction(actionId, type, state, cart, params);
-      if (actionId !== "continue" && result && !result.error) {
+      if (result && !result.error) {
         S2.pendingSettlement = null;
       }
       checkGameOver();
       return result || {};
     },
     getEndgameScore() {
-      const mbVal = S2.mbValue || 0;
-      const foodBonus = Math.min(S2.food, 25);
-      const crewBonus = S2.crew === "rested" ? 30 : S2.crew === "tired" ? 10 : 0;
-      const daysPenalty = S2.day * 8;
-      const wearPenalty = S2.wear * S2.wear * 40;
+      const state = S2;
+      const foodBonus = Math.min(state.food, 25);
+      const crewBonus = state.crew === "rested" ? 30 : state.crew === "tired" ? 10 : 0;
+      const daysPenalty = state.day * 8;
+      const wearPenalty = state.wear * state.wear * 40;
       const baseScore = 500;
-      const mbScore = Math.round(mbVal * 80);
+      const RARITY_MULT = {
+        "Prime Bison Hide": 5,
+        "Prime Elk Hide": 5,
+        "Prime Beaver Pelt": 5,
+        "Prime Wolf Pelt": 5,
+        "Bison Hide": 3,
+        "Elk Hide": 3,
+        "Beaver Pelt": 2,
+        "Wolf Pelt": 2
+      };
+      let tradeBonus = 0;
+      let tradeGoodsCount = 0;
+      let primeCount = 0;
+      let typesCollected = /* @__PURE__ */ new Set();
+      const tradeItems = cart.filter((i) => i.type === "trade" || i.category === "furs");
+      for (const item of tradeItems) {
+        const mult = RARITY_MULT[item.name] || 1;
+        tradeBonus += item.count * 50 * mult;
+        tradeGoodsCount += item.count;
+        if (mult >= 5) primeCount += item.count;
+        typesCollected.add(item.name);
+      }
+      const moraleBonus = Math.floor(state.morale / 2);
+      const blessingBonus = (state.blessingDays || 0) * 10;
+      const speedBonus = state.day <= 40 ? 100 : state.day <= 50 ? 50 : 0;
       const foodScore = foodBonus * 12;
-      const total = S2.won ? baseScore + mbScore + foodScore + crewBonus - daysPenalty - wearPenalty : 0;
-      let tier;
-      if (!S2.won) tier = "Defeat";
-      else if (total < 500) tier = "Barely Survived";
-      else if (total < 1200) tier = "Solid Profit";
-      else tier = "Legendary Haul";
+      const total = state.won ? baseScore + tradeBonus + foodScore + crewBonus + moraleBonus + blessingBonus + speedBonus - daysPenalty - wearPenalty : 0;
+      let tier = "Defeat";
+      if (state.won) {
+        const hasAllTypes = typesCollected.size >= 4;
+        const noStarvation = state.food > 0;
+        const lowWear = state.wear <= 2;
+        if (tradeGoodsCount >= 5 && state.crew === "rested") {
+          if (hasAllTypes && noStarvation && lowWear && primeCount >= 2) {
+            tier = "Legendary";
+          } else {
+            tier = "Prosperous";
+          }
+        } else if (tradeGoodsCount >= 3 && state.food > 0) {
+          tier = "Trader";
+        } else {
+          tier = "Survivor";
+        }
+      }
       return {
         score: Math.max(0, Math.round(total)),
         breakdown: {
           base: Math.round(baseScore),
-          mbValue: Math.round(mbScore),
+          tradeGoods: Math.round(tradeBonus),
           foodBonus: Math.round(foodScore),
           crewCondition: Math.round(crewBonus),
+          morale: Math.round(moraleBonus),
+          blessings: Math.round(blessingBonus),
+          speed: Math.round(speedBonus),
           daysPenalty: Math.round(-daysPenalty),
           wearPenalty: Math.round(-wearPenalty)
         },
-        tier
+        tier,
+        tradeGoodsCount,
+        primeCount,
+        typesCollected: typesCollected.size
       };
     },
     getSettlementData(nodeId) {
@@ -2349,7 +2668,7 @@ function createGame(seed = null) {
             { name: "Bison Hide", count: 2 },
             { name: "Shaganappi", count: 1 }
           ],
-          output: { name: "Finished Hides", icon: "\u{1F7EB}", mbValue: 3.5 },
+          output: { name: "Finished Hides", icon: "\u{1F7EB}" },
           settlement: "hbc"
         },
         {
@@ -2359,7 +2678,7 @@ function createGame(seed = null) {
             { name: "Shaganappi", count: 2 },
             { name: "Rope (50ft)", count: 1 }
           ],
-          output: { name: "Travois Kit", icon: "\u{1F6D2}", mbValue: 2.5 },
+          output: { name: "Travois Kit", icon: "\u{1F6D2}" },
           settlement: "metis"
         },
         {
@@ -2369,7 +2688,7 @@ function createGame(seed = null) {
             { name: "Ammunition Belt", count: 1 },
             { name: "Tool Kit", count: 1 }
           ],
-          output: { name: "Gunpowder Pack", icon: "\u{1F4A5}", mbValue: 4 },
+          output: { name: "Gunpowder Pack", icon: "\u{1F4A5}" },
           settlement: "nwmp"
         }
       ];
@@ -2384,19 +2703,40 @@ function createGame(seed = null) {
         })
       }));
     },
-    campAction(type) {
+    campAction(type, extraFood = 0) {
       const action = String(type || "").toLowerCase();
       const costItems = [];
       const effects = [];
+      const itemEffects = [];
       let roll = null;
       let rollTotal = null;
       let critical = false;
       if (action === "rest") {
-        if (S2.food < 1) return { error: "Not enough food to rest." };
-        S2.food -= 1;
-        costItems.push({ name: "Food", count: -1 });
+        const foodCost = 1 + extraFood;
+        if (S2.food < foodCost) return { error: "Not enough food to rest." };
+        S2.food -= foodCost;
+        costItems.push({ name: "Food", count: -foodCost });
+        const hasTarp = cart.some((i) => i.name === "Canvas Tarp" && i.count > 0);
+        const hasBlanket = cart.some((i) => i.name === "Blanket" && i.count > 0);
+        const hasFirewood2 = cart.some((i) => i.name === "Firewood Bundle" && i.count > 0);
+        const isWetWeather = ["rain", "storm", "snow"].includes(S2.weather);
+        const isColdWeather = ["snow"].includes(S2.weather);
         roll = d();
-        rollTotal = roll + crewMod(S2);
+        const restBonus = Math.min(extraFood, 2) * 2;
+        let itemBonus = 0;
+        if (hasTarp && isWetWeather) {
+          itemBonus += 2;
+          itemEffects.push("Canvas Tarp kept the damp off. +2 rest bonus.");
+        }
+        if (hasBlanket && isColdWeather) {
+          itemBonus += 3;
+          itemEffects.push("Blankets held the cold at bay. +3 rest bonus.");
+        }
+        if (hasFirewood2 && isColdWeather) {
+          itemBonus += 2;
+          itemEffects.push("Firewood warmed the camp. +2 rest bonus.");
+        }
+        rollTotal = roll + crewMod(S2) + restBonus + itemBonus;
         if (roll === 1) {
           critical = true;
           S2.crew = "tired";
@@ -2405,38 +2745,39 @@ function createGame(seed = null) {
           effects.push("Critical failure: the camp is a disaster \u2014 cold, sleepless, demoralizing.", "Morale -3", "Crew tired");
         } else if (rollTotal >= 15) {
           S2.crew = "rested";
-          S2.morale = Math.max(0, Math.min(100, S2.morale + 20));
+          S2.morale = Math.max(0, Math.min(100, S2.morale + 20 + extraFood * 5 + itemBonus));
           S2.wear = Math.max(0, S2.wear - 1);
           S2.travelDaysWithoutRest = 0;
-          effects.push("Wonderful rest.", "Crew rested", "Morale +20", "Wear -1");
+          effects.push("Wonderful rest.", "Crew rested", `Morale +${20 + extraFood * 5 + itemBonus}`, "Wear -1");
         } else if (rollTotal >= 8) {
           S2.crew = "rested";
-          S2.morale = Math.max(0, Math.min(100, S2.morale + 15));
+          S2.morale = Math.max(0, Math.min(100, S2.morale + 15 + extraFood * 3 + itemBonus));
           S2.wear = Math.max(0, S2.wear - 1);
           S2.travelDaysWithoutRest = 0;
-          effects.push("Crew rested", "Morale +15", "Wear -1");
+          effects.push("Crew rested", `Morale +${15 + extraFood * 3 + itemBonus}`, "Wear -1");
         } else {
           S2.crew = "tired";
-          S2.morale = Math.max(0, Math.min(100, S2.morale + 5));
+          S2.morale = Math.max(0, Math.min(100, S2.morale + 5 + extraFood * 2 + itemBonus));
           S2.travelDaysWithoutRest = 0;
-          effects.push("Rough night.", "Morale +5", "Crew tired");
+          effects.push("Rough night.", `Morale +${5 + extraFood * 2 + itemBonus}`, "Crew tired");
         }
       } else if (action === "forage") {
         roll = d();
-        rollTotal = roll + crewMod(S2);
+        const forageBonus = Math.min(extraFood, 2) * 2;
+        rollTotal = roll + crewMod(S2) + forageBonus;
         if (roll === 1) {
           critical = true;
           advance();
           effects.push("Critical failure: wasted the whole day. Found nothing.", "+1 day lost");
         }
         const baseGain = Math.floor(Math.random() * 6) + (rollTotal >= 12 ? 6 : rollTotal >= 8 ? 4 : 1);
-        S2.food += baseGain;
+        S2.food += baseGain + extraFood;
         if (rollTotal >= 12) {
-          effects.push(`Excellent foraging. +${baseGain} Food`);
+          effects.push(`Excellent foraging. +${baseGain + extraFood} Food`);
         } else if (rollTotal >= 8) {
-          effects.push(`Foraged +${baseGain} Food`);
+          effects.push(`Foraged +${baseGain + extraFood} Food`);
         } else if (rollTotal >= 5) {
-          effects.push(`Lean haul. +${baseGain} Food`);
+          effects.push(`Lean haul. +${baseGain + extraFood} Food`);
         } else {
           effects.push("Found little today.");
         }
@@ -2445,35 +2786,76 @@ function createGame(seed = null) {
         if (!ammo || ammo.count < 1) return { error: "Need 1 Ammunition Belt to hunt." };
         ammo.count -= 1;
         costItems.push({ name: "Ammunition Belt", count: -1 });
+        const foodCost = extraFood;
+        if (foodCost > 0) {
+          if (S2.food < foodCost) return { error: "Not enough food for extra supplies." };
+          S2.food -= foodCost;
+          costItems.push({ name: "Food", count: -foodCost });
+        }
         advance();
         roll = d();
-        rollTotal = roll + crewMod(S2);
+        const huntBonus = Math.min(extraFood, 2) * 2;
+        rollTotal = roll + crewMod(S2) + huntBonus;
+        const resultItems = [];
+        let meatGain = 0;
         if (roll === 1) {
           critical = true;
           S2.morale = Math.max(0, S2.morale - 2);
           effects.push("Critical failure: shot went wide, startled the game, lost ammo.", "Morale -2");
         } else if (rollTotal >= 10) {
           const terrain = NODES[S2.node]?.terrain || "plains";
-          let prey;
-          if (terrain === "river_valley") {
-            prey = { name: "Beaver Pelt", icon: "\u{1F9AB}", mbValue: 3 };
-          } else if (terrain === "uplands") {
-            prey = { name: "Elk Hide", icon: "\u{1FACE}", mbValue: 2.5 };
-          } else if (terrain === "wooded") {
-            prey = { name: "Deer Hide", icon: "\u{1F98C}", mbValue: 1.8 };
+          const yields = CONSTANTS.HUNT_YIELDS[terrain] || CONSTANTS.HUNT_YIELDS.plains;
+          const weights = CONSTANTS.HUNT_RARITY_WEIGHTS;
+          const rarityRoll = Math.random();
+          let yieldResult = { type: "food", item: null };
+          if (rarityRoll < weights.food) {
+            yieldResult.type = "food";
+          } else if (rarityRoll < weights.food + weights.common) {
+            yieldResult.type = "common";
+            yieldResult.item = yields.common;
           } else {
-            prey = { name: "Bison Hide", icon: "\u{1F403}", mbValue: 1.25 };
+            yieldResult.type = "rare";
+            yieldResult.item = yields.rare;
           }
-          const existing = cart.find((c) => c.name === prey.name);
-          if (existing) {
-            existing.count++;
+          if (yieldResult.type === "food") {
+            meatGain = Math.floor(Math.random() * (yields.foodMax - yields.foodMin + 1)) + yields.foodMin;
+          } else if (yieldResult.type === "common") {
+            meatGain = Math.floor(yields.foodMin / 2) + 1;
           } else {
-            cart.push({ name: prey.name, icon: prey.icon, type: "trade", category: "furs", wt: 4, count: 1, mbValue: prey.mbValue, desc: `Hunted on the ${terrain.replace(/_/g, " ")}.` });
+            meatGain = Math.floor(yields.foodMin / 2) + 1;
           }
-          recalcMB();
-          effects.push(`Clean kill. +1 ${prey.name} (trade good)`);
+          meatGain += extraFood;
+          S2.food += meatGain;
+          effects.push(`Clean kill. +${meatGain} Food`);
+          if (yieldResult.item) {
+            const item = yieldResult.item;
+            const existing = cart.find((c) => c.name === item.name);
+            if (existing) {
+              existing.count++;
+            } else {
+              cart.push({
+                name: item.name,
+                icon: item.icon,
+                type: "trade",
+                category: "furs",
+                wt: item.wt,
+                count: 1,
+                desc: item.desc
+              });
+            }
+            resultItems.push({
+              name: item.name,
+              wt: item.wt,
+              rarity: yieldResult.type
+              // 'common' or 'rare'
+            });
+            effects.push(`+1 ${item.name} (${item.wt} kg)`);
+          }
         } else {
           effects.push("Shot went wide. No pelts gained.");
+        }
+        if (roll !== 1 && rollTotal >= 10) {
+          return { day: S2.day, effects, costItems, roll, rollTotal, critical, food: meatGain, items: resultItems };
         }
       } else if (action === "repair") {
         const shag = cart.find((i) => i.name === "Shaganappi");
@@ -2548,11 +2930,24 @@ function createGame(seed = null) {
         effects.push("+2 Food spent", "Crew rested", "Morale +30", "Wear -2");
         advance();
         advance();
+      } else if (action === "cook") {
+        const firewood = cart.find((i) => i.name === "Firewood Bundle");
+        if (!firewood || firewood.count < 1) return { error: "Need Firewood to cook." };
+        if (S2.food < 1) return { error: "Need 1 Food to cook." };
+        firewood.count -= 1;
+        S2.food -= 1;
+        costItems.push({ name: "Firewood Bundle", count: -1 }, { name: "Food", count: -1 });
+        S2.crew = "rested";
+        S2.morale = Math.max(0, Math.min(100, S2.morale + 10));
+        const healAmt = S2.crew === "exhausted" ? 30 : 20;
+        S2.morale = Math.max(0, Math.min(100, S2.morale + healAmt));
+        S2.travelDaysWithoutRest = 0;
+        effects.push("Cooked a hot meal.", "Firewood used", "Morale +" + (10 + healAmt), "Crew rested");
       } else {
         return { error: "Unknown camp action." };
       }
       if (effects.length === 0 && costItems.length === 0) effects.push("Nothing changes.");
-      return { day: S2.day, effects, costItems, roll, rollTotal, critical };
+      return { day: S2.day, effects, costItems, roll, rollTotal, critical, itemEffects };
     },
     craftRecipe(recipeId) {
       const recipes = this.getAvailableRecipes();
@@ -2590,7 +2985,6 @@ function createGame(seed = null) {
           category: "furs",
           wt: 3,
           count: 1,
-          mbValue: recipe.output.mbValue,
           desc: `Crafted: ${recipe.output.name}.`
         });
       }
@@ -2638,7 +3032,7 @@ function createGame(seed = null) {
         return {
           type: "settlement",
           name: S2.pendingSettlement.name,
-          actions: availableSettlementActions(S2.pendingSettlement.type)
+          actions: getSettlementActionsByType(S2.pendingSettlement.type).map((a) => a.id)
         };
       return { type: "travel" };
     },
@@ -2659,8 +3053,7 @@ function createGame(seed = null) {
         currentCount: item.count,
         category: item.category,
         desc: item.desc,
-        icon: item.icon,
-        mbValue: item.mbValue
+        icon: item.icon
       }));
     },
     setPreDepartureCount(itemName, newCount) {
@@ -2670,13 +3063,11 @@ function createGame(seed = null) {
       const clamped = Math.max(0, Math.min(newCount, maxCount));
       item.count = clamped;
       S2.usedWeight = totalWeight(cart);
-      recalcMB();
       return true;
     },
     confirmPreDeparture() {
       S2.preDeparture = false;
       S2.usedWeight = totalWeight(cart);
-      recalcMB();
       return cart.map((i) => ({ name: i.name, count: i.count, wt: i.wt }));
     },
     getScoreData() {
@@ -2697,7 +3088,6 @@ function createGame(seed = null) {
         weather: S2.weather,
         cartItems: cart.reduce((s, i) => s + i.count, 0),
         tradeGoods: tradeGoods.reduce((s, i) => s + i.count, 0),
-        mbValue: S2.mbValue,
         distance: S2.node,
         seed: S2.seed
       };
@@ -2707,304 +3097,155 @@ function createGame(seed = null) {
       if (existing) {
         existing.count++;
       } else {
-        cart.push({ name: name3, wt, count: 1, category, type: category === "provisions" ? "food" : "item", mbValue: 0 });
+        cart.push({ name: name3, wt, count: 1, category, type: category === "provisions" ? "food" : "item" });
       }
-      recalcMB();
     },
     addFood(amount) {
       S2.food += amount;
-    },
-    clearTradeGoods() {
-      for (let i = cart.length - 1; i >= 0; i--) {
-        if (cart[i].type === "trade" || cart[i].category === "furs") {
-          cart.splice(i, 1);
-        }
-      }
-      recalcMB();
     }
   };
 }
 __name(createGame, "createGame");
-function getSettlementPriceMultiplier(type, category) {
-  const multipliers = {
-    hbc: { buy: 1, sell: 1, categories: { furs: { buy: 1, sell: 1 }, provisions: { buy: 1, sell: 1 }, repair: { buy: 1, sell: 1 }, medical: { buy: 1, sell: 1 }, shelter: { buy: 1, sell: 1 }, fuel: { buy: 1, sell: 1 }, tool: { buy: 1, sell: 1 }, hunting: { buy: 1, sell: 1 } } },
-    metis: { buy: 0.9, sell: 1.1, categories: { furs: { buy: 0.9, sell: 1.1 }, provisions: { buy: 0.95, sell: 1.05 }, repair: { buy: 1, sell: 1 }, medical: { buy: 1, sell: 1 }, shelter: { buy: 1, sell: 1 }, fuel: { buy: 1, sell: 1 }, tool: { buy: 1, sell: 1 }, hunting: { buy: 1, sell: 1 } } },
-    nwmp: { buy: 1.2, sell: 0.8, categories: { furs: { buy: 1.1, sell: 0.9 }, provisions: { buy: 1.2, sell: 0.8 }, repair: { buy: 1.2, sell: 0.8 }, medical: { buy: 1, sell: 1 }, shelter: { buy: 1, sell: 1 }, fuel: { buy: 1, sell: 1 }, tool: { buy: 1, sell: 1 }, hunting: { buy: 0.8, sell: 1.2 } } },
-    // ammo cheaper
-    mission: { buy: 0.8, sell: 1.5, categories: { furs: { buy: 0.8, sell: 1.5 }, provisions: { buy: 0.7, sell: 1.3 }, repair: { buy: 1, sell: 1 }, medical: { buy: 0.8, sell: 1.2 }, shelter: { buy: 1, sell: 1 }, fuel: { buy: 1, sell: 1 }, tool: { buy: 1, sell: 1 }, hunting: { buy: 1, sell: 1 } } },
-    trading: { buy: 1.1, sell: 0.9, categories: { furs: { buy: 1.1, sell: 0.9 }, provisions: { buy: 1.1, sell: 0.9 }, repair: { buy: 1.1, sell: 0.9 }, medical: { buy: 1, sell: 1 }, shelter: { buy: 1, sell: 1 }, fuel: { buy: 1, sell: 1 }, tool: { buy: 1, sell: 1 }, hunting: { buy: 1, sell: 1 } } }
-  };
-  const m = multipliers[type] || multipliers.hbc;
-  const cat = m.categories[category] || { buy: m.buy, sell: m.sell };
-  return { buy: cat.buy, sell: cat.sell };
-}
-__name(getSettlementPriceMultiplier, "getSettlementPriceMultiplier");
-function getSettlementActionsByType(type) {
-  switch (type) {
-    case "hbc":
-      return [
-        { id: "trade", label: "Trade Goods for \u20A5", cost: "1 trade good", risk: "Best rates for pelts/hides", flavor: "The Company factors weigh your furs in silence. The ledger decides your worth." },
-        { id: "buy_supplies", label: "Buy Supplies", cost: "\u20A5 varies", risk: "Full inventory available", flavor: "Pemmican, axes, shaganappi, tools \u2014 everything a carter needs for the long trail." },
-        { id: "rest", label: "Rest at the Fort", cost: "1 food", risk: "Crew rested, morale +15", flavor: "A warm fire in the mess hall, dry blankets, and a night without the wind." },
-        { id: "get_intel", label: "Get Trail Intel", cost: "1 \u20A5", risk: "Reveals next 2 nodes", flavor: "The clerk unfolds a map stained with ink and tea. He marks the hazards ahead." }
-      ];
-    case "metis":
-      return [
-        { id: "trade_gossip", label: "Trade Gossip", cost: "Free", risk: "Reveals 1 gossip entry", flavor: "News travels faster than carts on the prairie. The women know everything." },
-        { id: "recruit_crew", label: "Recruit Crew", cost: "2 \u20A5 + 1 food", risk: "+1 crew member (max 6)", flavor: "A young hand looking for work. Strong back, willing heart \u2014 if you can feed him." },
-        { id: "dance", label: "Dance", cost: "1 food", risk: "Morale +10, no day advance", flavor: "The fiddle starts. A Red River jig. Boots on hard ground. Nobody thinks about tomorrow." },
-        { id: "share_food", label: "Share Food", cost: "Give 2+ food", risk: "Morale +5 per food", flavor: "Generosity on the trail is its own currency. What you give returns in loyalty." },
-        { id: "craft_hides", label: "Craft Finished Hides", cost: "3 raw hides + 1 shaganappi", risk: "Creates finished_hide (worth 2\xD7 \u20A5)", flavor: "The women scrape, stretch, and smoke the hides. Patience turns rawhide into profit." }
-      ];
-    case "nwmp":
-      return [
-        { id: "pay_fines", label: "Pay Fines", cost: "\u20A5 varies", risk: "Clears fines if any", flavor: "The sergeant reads your name from the ledger. The amount is not negotiable." },
-        { id: "get_permits", label: "Get Permits", cost: "2 \u20A5", risk: "Required for river crossings", flavor: "A stamp, a signature, and the Queen's law lets you cross the water legal." },
-        { id: "report_duty", label: "Report for Duty", cost: "1 day", risk: "\u20A5 reward, morale \u22125", flavor: "Red coats, drill, and the weight of Ottawa's authority. The pay is fair but the pride costs." },
-        { id: "buy_ammo", label: "Buy Ammo", cost: "1.5 \u20A5 per Belt", risk: "Cheaper than HBC", flavor: "Ball and powder, measured honest. The Mounties don't cheat a carter on shot." },
-        { id: "rest", label: "Rest", cost: "1 food", risk: "Crew rested (no morale bonus)", flavor: "A cot in the barracks. Clean, quiet, and the sentry paces all night." }
-      ];
-    case "mission":
-      return [
-        { id: "heal_crew", label: "Heal Crew", cost: "1 Medicine Pouch or 2 \u20A5", risk: "Clears injury/illness, morale +10", flavor: "The Grey Nuns tend the sick without asking who you are or where you come from." },
-        { id: "rest", label: "Free Rest + Blessing", cost: "Free", risk: "Crew rested, morale +15", flavor: "A chapel bell at evening. You sleep on straw but wake with a lighter spirit." },
-        { id: "get_blessing", label: "Get Blessing", cost: "1 food", risk: "Morale +10, +1 to dice rolls for 3 days", flavor: "The priest's hand on your brow. The trail feels less hostile after prayer." },
-        { id: "trade_limited", label: "Trade (Limited)", cost: "Buy pemmican 0.5 \u20A5, sell blankets 1.5 \u20A5", risk: "Charity rates", flavor: "The mission garden feeds the body. The trade feeds the journey." }
-      ];
-    case "trading":
-      return [
-        { id: "trade", label: "Trade Goods", cost: "1 trade good", risk: "Standard rates", flavor: "A free trader with no Company badge. His prices are his own." },
-        { id: "buy_supplies", label: "Buy Supplies", cost: "\u20A5 varies", risk: "Basic inventory", flavor: "What the Company posts run out of, the free traders sometimes have." },
-        { id: "rest", label: "Rest", cost: "1 food", risk: "Crew rested, morale +10", flavor: "A lean-to by the fire. Simple shelter, honest company." },
-        { id: "get_intel", label: "Get Trail Intel", cost: "1 \u20A5", risk: "Reveals next node", flavor: "He rides the trail weekly. His news is fresh and his memory long." }
-      ];
-    default:
-      return [
-        { id: "trade", label: "Trade Goods", cost: "1 trade good", risk: "Standard rates", flavor: "The factor weighs your furs. The ledger is final." },
-        { id: "rest", label: "Rest", cost: "1 food", risk: "Crew rested, morale +10", flavor: "A night under roof and beam. The trail waits for morning." }
-      ];
-  }
-}
-__name(getSettlementActionsByType, "getSettlementActionsByType");
 function executeSettlementAction(actionId, type, state, cart, params) {
-  const credit = state.credit?.[type] || 0;
-  if (actionId === "trade") {
-    const tradeItems = cart.filter((i) => i.type === "trade" && i.count > 0);
-    if (tradeItems.length === 0) return { error: "No trade goods to trade" };
-    const item = tradeItems[0];
-    item.count--;
-    const mbGain = item.mbValue || 1;
-    state.credit[type] = (state.credit[type] || 0) + mbGain;
-    state.tradesMade++;
-    return { traded: item.name, mbGain, credit: state.credit[type] };
-  }
-  if (actionId === "buy_supplies") {
-    return { action: "buy_supplies", message: "Opens supply purchase interface", credit: state.credit[type] };
-  }
-  if (actionId === "rest") {
-    if (state.food < 1) return { error: "Need 1 food to rest" };
-    state.food -= 1;
-    state.crew = "rested";
-    state.travelDaysWithoutRest = 0;
-    state.morale = Math.min(100, state.morale + (type === "hbc" ? 15 : type === "mission" ? 15 : 10));
-    return { rested: true, moraleGain: type === "hbc" ? 15 : type === "mission" ? 15 : 10 };
-  }
-  if (actionId === "get_intel") {
-    if ((state.credit[type] || 0) < 1) return { error: "Need 1 \u20A5 for intelligence" };
-    state.credit[type] -= 1;
-    const nextNode1 = NODES[state.node + 1];
-    const nextNode2 = NODES[state.node + 2];
-    state.trailIntel = state.trailIntel || [];
-    if (nextNode1) {
-      state.trailIntel.push({
-        fromDay: state.day,
-        text: `${nextNode1.name}: ${nextNode1.terrain.replace(/_/g, " ")} terrain. ${nextNode1.desc?.substring(0, 80)}...`,
-        bonus: { dcBonus: 1 }
-      });
-    }
-    if (nextNode2 && type === "hbc") {
-      state.trailIntel.push({
-        fromDay: state.day,
-        text: `${nextNode2.name}: ${nextNode2.terrain.replace(/_/g, " ")} terrain.`,
-        bonus: { dcBonus: 1 }
-      });
-    }
-    state.morale = Math.min(100, state.morale + 5);
-    return { intelGathered: true, moraleGain: 5, credit: state.credit[type] };
-  }
-  if (actionId === "trade_gossip") {
-    state.trailIntel = state.trailIntel || [];
-    const nextNode = NODES[state.node + 1];
-    if (nextNode) {
-      state.trailIntel.push({
-        fromDay: state.day,
-        text: `Gossip from ${state.pendingSettlement?.name}: ${nextNode.name} has ${nextNode.terrain.replace(/_/g, " ")} ahead.`,
-        bonus: { dcBonus: 1 }
-      });
-    }
-    state.morale = Math.min(100, state.morale + 3);
-    return { gossipGathered: true, moraleGain: 3 };
-  }
-  if (actionId === "recruit_crew") {
-    if ((state.credit[type] || 0) < 2) return { error: "Need 2 \u20A5 to recruit" };
-    if (state.food < 1) return { error: "Need 1 food to recruit" };
-    if ((state.crewCount || 3) >= 6) return { error: "Maximum crew (6) reached" };
-    state.credit[type] -= 2;
-    state.food -= 1;
-    state.crewCount = (state.crewCount || 3) + 1;
-    state.morale = Math.min(100, state.morale + 5);
-    return { recruited: true, crewCount: state.crewCount, moraleGain: 5, credit: state.credit[type] };
-  }
-  if (actionId === "dance") {
-    if (state.food < 1) return { error: "Need 1 food to dance" };
-    state.food -= 1;
-    state.morale = Math.min(100, state.morale + 10);
-    return { danced: true, moraleGain: 10 };
-  }
-  if (actionId === "share_food") {
-    const foodToGive = params.food || 2;
-    if (state.food < foodToGive) return { error: `Need ${foodToGive} food to share` };
-    state.food -= foodToGive;
-    const moraleGain = foodToGive * 5;
-    state.morale = Math.min(100, state.morale + moraleGain);
-    state.reputation.metis = (state.reputation.metis || 0) + 1;
-    return { shared: true, foodGiven: foodToGive, moraleGain, reputationGain: 1 };
-  }
-  if (actionId === "craft_hides") {
-    const hides = cart.find((i) => ["Bison Hide", "Beaver Pelts", "Elk Hide", "Deer Hide"].includes(i.name));
-    const shag = cart.find((i) => i.name === "Shaganappi");
-    if (!hides || hides.count < 3) return { error: "Need 3 raw hides" };
-    if (!shag || shag.count < 1) return { error: "Need 1 shaganappi" };
-    hides.count -= 3;
-    shag.count -= 1;
-    const finished = cart.find((i) => i.name === "Finished Hides");
-    if (finished) finished.count++;
-    else cart.push({ name: "Finished Hides", wt: 3, count: 1, type: "trade", category: "furs", mbValue: 3.5, desc: "Expertly prepared hides. Worth double at market.", perishable: false });
-    state.mbValue = cart.filter((i) => i.type === "trade" || i.category === "furs").reduce((s, i) => s + (i.mbValue || 0) * i.count, 0);
-    return { crafted: "Finished Hides", mbValue: state.mbValue };
-  }
-  if (actionId === "pay_fines") {
-    const fines = state.fines || 0;
-    if (fines === 0) return { error: "No fines to pay" };
-    if ((state.credit[type] || 0) < fines) return { error: `Need ${fines} \u20A5 to pay fines` };
-    state.credit[type] -= fines;
-    state.fines = 0;
-    return { finesPaid: fines, credit: state.credit[type] };
-  }
-  if (actionId === "get_permits") {
-    if ((state.credit[type] || 0) < 2) return { error: "Need 2 \u20A5 for permit" };
-    state.credit[type] -= 2;
-    state.hasPermit = true;
-    return { permitObtained: true, credit: state.credit[type] };
-  }
-  if (actionId === "report_duty") {
-    const reward = Math.round(state.node / NODES.length * 10) + 2;
-    state.credit[type] = (state.credit[type] || 0) + reward;
-    state.morale = Math.max(0, state.morale - 5);
-    const nextDate = advanceDate(state.date.month, state.date.day, state.year);
-    state.date = nextDate;
-    state.month = nextDate.month;
-    state.day++;
-    state.segmentDay = 0;
-    return { dutyDone: true, reward, moraleLoss: 5, credit: state.credit[type] };
-  }
-  if (actionId === "buy_ammo") {
-    if ((state.credit[type] || 0) < 1.5) return { error: "Need 1.5 \u20A5 for ammunition" };
-    state.credit[type] -= 1.5;
-    const ammo = cart.find((i) => i.name === "Ammunition Belt");
-    if (ammo) ammo.count++;
-    else cart.push({ name: "Ammunition Belt", wt: 2, count: 1, type: "ammo", category: "hunting", mbValue: 0.9, desc: "Shot and ball. For hunting and defence.", perishable: false });
-    return { bought: "Ammunition Belt", credit: state.credit[type] };
-  }
-  if (actionId === "heal_crew") {
-    const med = cart.find((i) => i.name === "Medicine Pouch");
-    if ((state.credit[type] || 0) >= 2) {
-      state.credit[type] -= 2;
-    } else if (med && med.count > 0) {
-      med.count--;
-    } else {
-      return { error: "Need 2 \u20A5 or 1 Medicine Pouch" };
-    }
-    state.crew = "rested";
-    state.morale = Math.min(100, state.morale + 10);
-    state.flags.injured = false;
-    state.flags.ill = false;
-    return { healed: true, moraleGain: 10, credit: state.credit[type] };
-  }
-  if (actionId === "get_blessing") {
-    if (state.food < 1) return { error: "Need 1 food for blessing" };
-    state.food -= 1;
-    state.morale = Math.min(100, state.morale + 10);
-    state.blessingDays = 3;
-    return { blessed: true, moraleGain: 10, blessingDays: 3 };
-  }
-  if (actionId === "trade_limited") {
-    return { action: "trade_limited", message: "Limited trade available: buy pemmican (0.5 \u20A5), sell blankets (1.5 \u20A5)", credit: state.credit[type] };
-  }
-  if (actionId === "buy_food") {
-    const cost = 0.5;
-    if ((state.credit[type] || 0) < cost) return { error: "Need 0.5 \u20A5 credit" };
-    state.credit[type] -= cost;
-    state.food += 2;
-    return { bought: "food", amount: 2, credit: state.credit[type] };
-  }
-  if (actionId === "buy_repair") {
-    const cost = 2;
-    if ((state.credit[type] || 0) < cost) return { error: "Need 2 \u20A5 credit" };
-    if (state.wear <= 0) return { error: "Cart does not need repair" };
-    state.credit[type] -= cost;
-    state.wear = Math.max(0, state.wear - 2);
-    return { repaired: true, wearReduced: 2, credit: state.credit[type] };
-  }
-  if (actionId === "buy_heal") {
-    const cost = 1;
-    if ((state.credit[type] || 0) < cost) return { error: "Need 1 \u20A5 credit" };
-    state.credit[type] -= cost;
-    state.morale = Math.min(100, state.morale + 20);
-    state.crew = "rested";
-    return { healed: true, moraleGain: 20, credit: state.credit[type] };
-  }
-  if (actionId === "buy_info") {
-    const cost = 0.5;
-    if ((state.credit[type] || 0) < cost) return { error: "Need 0.5 \u20A5 credit" };
-    state.credit[type] -= cost;
-    state.morale = Math.min(100, state.morale + 5);
-    state.flags["trail_intel_" + state.node] = true;
-    return { intel: true, moraleGain: 5, credit: state.credit[type] };
-  }
-  if (actionId === "repair") {
-    const shag = cart.find((i) => i.name === "Shaganappi");
-    if (state.wear > 0 && shag && shag.count > 0) {
-      shag.count--;
-      state.wear = Math.max(0, state.wear - 2);
-      state.mbValue = cart.filter((i) => i.type === "trade" || i.category === "furs").reduce((s, i) => s + (i.mbValue || 0) * i.count, 0);
-    } else if (state.wear > 0) {
-      state.wear = Math.max(0, state.wear - 2);
-    }
-    return { repaired: true };
-  }
-  if (actionId === "heal") {
-    state.crew = "rested";
-    state.morale = Math.min(100, state.morale + 20);
-    return { healed: true };
-  }
   if (actionId === "continue") {
     state.pendingSettlement = null;
     return { continued: true };
   }
-  return { error: `Unknown action: ${actionId}` };
+  const barter = CONSTANTS.SETTLEMENT_BARTER[type] || CONSTANTS.SETTLEMENT_BARTER.hbc;
+  let matchedTrade = null;
+  let matchedOption = null;
+  if (barter[actionId]) {
+    matchedTrade = barter[actionId];
+  } else {
+    for (const [baseId, trade] of Object.entries(barter)) {
+      if (trade.options) {
+        for (const opt of trade.options) {
+          if (`${baseId}_${opt.id}` === actionId) {
+            matchedTrade = trade;
+            matchedOption = opt;
+            break;
+          }
+        }
+      } else if (trade.giveOptions) {
+        for (let i = 0; i < trade.giveOptions.length; i++) {
+          if (`${baseId}_${i}` === actionId) {
+            matchedTrade = trade;
+            matchedOption = trade.giveOptions[i];
+            break;
+          }
+        }
+      }
+      if (matchedTrade) break;
+    }
+  }
+  if (!matchedTrade) {
+    return { error: `Unknown action: ${actionId}` };
+  }
+  const furItems = cart.filter((i) => (i.type === "trade" || i.category === "furs") && i.count > 0);
+  const hasFur = furItems.length > 0;
+  const furItem = furItems[0];
+  let giveItems = matchedTrade.give || [];
+  let receiveItems = matchedOption?.receive || matchedTrade.receive || [];
+  if (matchedOption && matchedOption.give) {
+    giveItems = matchedOption.give;
+  }
+  for (const give of giveItems) {
+    if (give.name === "any_fur") {
+      if (!hasFur) return { error: "No furs to trade" };
+    } else if (give.name === "Pemmican Rations") {
+      if (state.food < give.count) return { error: `Need ${give.count} food` };
+    } else {
+      const item = cart.find((i) => i.name === give.name);
+      if (!item || item.count < give.count) return { error: `Need ${give.count} ${give.name}` };
+    }
+  }
+  for (const give of giveItems) {
+    if (give.name === "any_fur") {
+      const idx = cart.findIndex((i) => (i.type === "trade" || i.category === "furs") && i.count > 0);
+      if (idx !== -1) {
+        cart[idx].count--;
+        if (cart[idx].count === 0) cart.splice(idx, 1);
+      }
+    } else if (give.name === "Pemmican Rations") {
+      state.food -= give.count;
+    } else {
+      const idx = cart.findIndex((i) => i.name === give.name);
+      if (idx !== -1) {
+        cart[idx].count -= give.count;
+        if (cart[idx].count === 0) cart.splice(idx, 1);
+      }
+    }
+  }
+  const isRestAction = receiveItems.some((r) => r.name === "rested");
+  const isHealAction = actionId === "heal_crew_0" || actionId === "heal_crew_1";
+  const itemEffects = [];
+  if (isRestAction || isHealAction) {
+    const hasTarp = cart.some((i) => i.name === "Canvas Tarp" && i.count > 0);
+    const hasBlanket = cart.some((i) => i.name === "Blanket" && i.count > 0);
+    const hasFirewood2 = cart.some((i) => i.name === "Firewood Bundle" && i.count > 0);
+    const isWetWeather = ["rain", "storm", "snow"].includes(state.weather);
+    const isColdWeather = ["snow"].includes(state.weather);
+    if (hasTarp && isWetWeather) {
+      itemEffects.push("Canvas Tarp kept the damp off. +5 Morale.");
+      state.morale = Math.min(100, state.morale + 5);
+    }
+    if (hasBlanket && isColdWeather) {
+      itemEffects.push("Blankets held the cold at bay. +8 Morale.");
+      state.morale = Math.min(100, state.morale + 8);
+    }
+    if (hasFirewood2 && isColdWeather) {
+      itemEffects.push("Firewood warmed the shelter. +5 Morale.");
+      state.morale = Math.min(100, state.morale + 5);
+    }
+  }
+  const results = { flavor: matchedTrade.flavor || matchedOption?.flavor, itemEffects };
+  for (const receive of receiveItems) {
+    if (receive.name === "Pemmican Rations") {
+      state.food += receive.count;
+      results.foodGain = (results.foodGain || 0) + receive.count;
+    } else if (receive.name === "rested") {
+      state.crew = "rested";
+      state.travelDaysWithoutRest = 0;
+      results.rested = true;
+    } else if (receive.name === "Morale") {
+      state.morale = Math.min(100, state.morale + receive.count);
+      results.moraleGain = (results.moraleGain || 0) + receive.count;
+    } else if (receive.name === "blessingDays") {
+      state.blessingDays = receive.count;
+      results.blessingDays = receive.count;
+    } else if (receive.name === "ReputationMetis") {
+      state.reputation.metis = (state.reputation.metis || 0) + receive.count;
+      results.reputationGain = receive.count;
+    } else if (receive.name === "trail_intel") {
+      state.trailIntel = state.trailIntel || [];
+      const next = NODES[state.node + 1];
+      if (next) state.trailIntel.push({ fromDay: state.day, text: `Gossip from ${state.pendingSettlement?.name}: ${next.name} has ${next.terrain.replace(/_/g, " ")} ahead.`, bonus: { dcBonus: 1 } });
+      results.gossipGathered = true;
+    } else if (receive.name === "hasPermit") {
+      state.hasPermit = true;
+      results.permitObtained = true;
+    } else if (receive.name === "finesCleared") {
+      state.fines = 0;
+      results.finesPaid = true;
+    } else {
+      const existing = cart.find((i) => i.name === receive.name);
+      if (existing) {
+        existing.count += receive.count;
+      } else {
+        const itemData = ITEMS.find((i) => i.name === receive.name);
+        if (itemData) {
+          cart.push({ ...itemData, count: receive.count });
+        } else {
+          cart.push({ name: receive.name, wt: 1, count: receive.count, type: "item", category: "item", mbValue: 0, perishable: false, desc: "" });
+        }
+      }
+      results[`got_${receive.name.replace(/\s+/g, "_").toLowerCase()}`] = receive.count;
+    }
+  }
+  state.tradesMade++;
+  return results;
 }
 __name(executeSettlementAction, "executeSettlementAction");
-function availableSettlementActions(type) {
-  const base = ["rest", "trade", "buy_food"];
-  if (type === "hbc") return [...base, "buy_repair", "craft", "buy_info"];
-  if (type === "metis") return [...base, "craft", "buy_info"];
-  if (type === "trading") return [...base, "buy_repair", "buy_info"];
-  if (type === "mission") return [...base, "buy_heal", "buy_info"];
-  if (type === "nwmp") return [...base, "craft", "buy_info"];
-  return base;
-}
-__name(availableSettlementActions, "availableSettlementActions");
 function getSquealEvent() {
   return {
     id: "squeal_axle",
@@ -3042,87 +3283,88 @@ __name(getSquealEvent, "getSquealEvent");
 
 // src/ui/theme.js
 function applyTheme(root) {
-  root.style.setProperty("--clr-bg", "#0d2b0d");
-  root.style.setProperty("--clr-panel-bg", "#f5e6c8");
-  root.style.setProperty("--clr-journal-bg", "#f5e6c8");
-  root.style.setProperty("--clr-ink-on-dark", "#e8d5a8");
-  root.style.setProperty("--clr-ink-on-light", "#1a3a1a");
-  root.style.setProperty("--clr-ink-light", "#c4b080");
-  root.style.setProperty("--clr-ink-dark", "#2c1a0a");
-  root.style.setProperty("--clr-accent", "#d4a820");
-  root.style.setProperty("--clr-success", "#5a9a4a");
-  root.style.setProperty("--clr-danger", "#b83030");
-  root.style.setProperty("--clr-blessing", "#B8860B");
+  root.style.setProperty("--clr-bg", "#1a1410");
+  root.style.setProperty("--clr-panel-bg", "#2d241a");
+  root.style.setProperty("--clr-journal-bg", "#2d241a");
+  root.style.setProperty("--clr-ink-on-dark", "#e8dcc8");
+  root.style.setProperty("--clr-ink-on-light", "#e8dcc8");
+  root.style.setProperty("--clr-ink-light", "#b8a890");
+  root.style.setProperty("--clr-ink-dark", "#e8dcc8");
+  root.style.setProperty("--clr-accent", "#c8a81a");
+  root.style.setProperty("--clr-success", "#7aa85a");
+  root.style.setProperty("--clr-danger", "#c85040");
+  root.style.setProperty("--clr-blessing", "#c8a81a");
   root.style.setProperty("--clr-ink", "var(--clr-ink-on-dark)");
   root.style.setProperty("--clr-ink-panel", "var(--clr-ink-on-light)");
-  root.style.setProperty("--clr-bg-dark", "#0a1f0a");
+  root.style.setProperty("--clr-bg-dark", "#0f0c08");
   root.style.setProperty("--clr-card-bg", "var(--clr-panel-bg)");
   root.style.setProperty("--clr-btn-bg", "var(--clr-accent)");
-  root.style.setProperty("--clr-btn-text", "#0d2b0d");
-  root.style.setProperty("--clr-btn-hover", "#e0b830");
+  root.style.setProperty("--clr-btn-text", "#1a1410");
+  root.style.setProperty("--clr-btn-hover", "#e0c030");
   root.style.setProperty("--clr-status-bar-bg", "var(--clr-bg)");
   root.style.setProperty("--clr-status-text", "var(--clr-ink-on-dark)");
   root.style.setProperty("--clr-status-accent", "var(--clr-accent)");
-  root.style.setProperty("--clr-overlay-bg", "rgba(10,25,10,0.92)");
+  root.style.setProperty("--clr-overlay-bg", "rgba(20,18,14,0.95)");
   root.style.setProperty("--clr-border", "var(--clr-accent)");
-  root.style.setProperty("--clr-map-bg", "#0d2b0d");
-  root.style.setProperty("--clr-tooltip-bg", "rgba(10,25,10,0.92)");
+  root.style.setProperty("--clr-map-bg", "#1a1410");
+  root.style.setProperty("--clr-tooltip-bg", "rgba(20,18,14,0.95)");
   root.style.setProperty("--clr-tooltip-text", "var(--clr-ink-on-dark)");
   root.style.setProperty("--clr-tooltip-border", "var(--clr-accent)");
-  root.style.setProperty("--clr-map-frame-shadow", "rgba(0,0,0,0.4)");
+  root.style.setProperty("--clr-map-frame-shadow", "rgba(0,0,0,0.5)");
   root.style.setProperty("--clr-narrative-text", "var(--clr-ink-on-dark)");
-  root.style.setProperty("--clr-ruled-line", "rgba(212,168,32,0.12)");
-  root.style.setProperty("--clr-ledger-border", "rgba(212,168,32,0.15)");
+  root.style.setProperty("--clr-ruled-line", "rgba(200,168,26,0.15)");
+  root.style.setProperty("--clr-ledger-border", "rgba(200,168,26,0.18)");
   root.style.setProperty("--clr-ledger-margin", "var(--clr-accent)");
   root.style.setProperty("--clr-paper-texture", "none");
   root.style.setProperty("--clr-event-border", "var(--clr-accent)");
   root.style.setProperty("--clr-event-accent-bar", "var(--clr-accent)");
-  root.style.setProperty("--clr-settlement-hbc", "#c84040");
-  root.style.setProperty("--clr-settlement-metis", "#4a8cc8");
-  root.style.setProperty("--clr-settlement-nwmp", "#3a9a5a");
-  root.style.setProperty("--clr-settlement-mission", "#c8a030");
-  root.style.setProperty("--clr-settlement-trading", "#c8a030");
+  root.style.setProperty("--clr-settlement-hbc", "#c85050");
+  root.style.setProperty("--clr-settlement-metis", "#5a9cff");
+  root.style.setProperty("--clr-settlement-nwmp", "#4ab86a");
+  root.style.setProperty("--clr-settlement-mission", "#d8b840");
+  root.style.setProperty("--clr-settlement-trading", "#d8b840");
   root.style.setProperty("--clr-food-low", "var(--clr-danger)");
-  root.style.setProperty("--clr-warn", "#e0b830");
+  root.style.setProperty("--clr-warn", "#e0c030");
   root.style.setProperty("--clr-ok", "var(--clr-success)");
-  root.style.setProperty("--clr-weather-rain", "#7ab0d0");
-  root.style.setProperty("--clr-weather-snow", "#d0dce8");
-  root.style.setProperty("--clr-over-bg", "rgba(184,48,48,0.12)");
-  root.style.setProperty("--clr-over-border", "#c84040");
-  root.style.setProperty("--clr-over-text", "#e06060");
-  root.style.setProperty("--clr-warn-bg", "rgba(224,184,48,0.12)");
-  root.style.setProperty("--clr-warn-border", "#e0b830");
-  root.style.setProperty("--clr-gold", "#e0b830");
-  root.style.setProperty("--clr-ok-bg", "rgba(90,154,74,0.12)");
-  root.style.setProperty("--clr-ok-border", "#5a9a4a");
-  root.style.setProperty("--clr-ok-text", "#5a9a4a");
-  root.style.setProperty("--clr-catitem-bg", "rgba(212,168,32,0.06)");
-  root.style.setProperty("--clr-catitem-border", "rgba(212,168,32,0.15)");
-  root.style.setProperty("--clr-muted", "#6b5740");
-  root.style.setProperty("--clr-pdrow-bg", "rgba(212,168,32,0.04)");
-  root.style.setProperty("--clr-pdrow-border", "rgba(212,168,32,0.1)");
+  root.style.setProperty("--clr-weather-rain", "#8abce0");
+  root.style.setProperty("--clr-weather-snow", "#b8c8e0");
+  root.style.setProperty("--clr-over-bg", "rgba(200,80,64,0.15)");
+  root.style.setProperty("--clr-over-border", "#c85040");
+  root.style.setProperty("--clr-over-text", "#e07060");
+  root.style.setProperty("--clr-warn-bg", "rgba(224,192,48,0.15)");
+  root.style.setProperty("--clr-warn-border", "#e0c030");
+  root.style.setProperty("--clr-gold", "#e0c030");
+  root.style.setProperty("--clr-ok-bg", "rgba(122,168,90,0.15)");
+  root.style.setProperty("--clr-ok-border", "#7aa85a");
+  root.style.setProperty("--clr-ok-text", "#7aa85a");
+  root.style.setProperty("--clr-catitem-bg", "rgba(200,168,26,0.08)");
+  root.style.setProperty("--clr-catitem-border", "rgba(200,168,26,0.18)");
+  root.style.setProperty("--clr-muted", "#8a7a60");
+  root.style.setProperty("--clr-pdrow-bg", "rgba(200,168,26,0.06)");
+  root.style.setProperty("--clr-pdrow-border", "rgba(200,168,26,0.12)");
   root.style.setProperty("--clr-camp-border", "var(--clr-accent)");
-  root.style.setProperty("--clr-camp-pill-bg", "rgba(212,168,32,0.08)");
-  root.style.setProperty("--clr-camp-pill-border", "rgba(212,168,32,0.2)");
-  root.style.setProperty("--clr-camp-btn-hover", "#1a3a1a");
-  root.style.setProperty("--clr-campfire-glow", "radial-gradient(ellipse at 50% 100%, rgba(190,130,20,0.35) 0%, rgba(200,168,26,0.22) 35%, transparent 70%)");
-  root.style.setProperty("--clr-campfire-embers", `url("data:image/svg+xml,%3Csvg viewBox='0 0 300 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='campNoise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.025' numOctaves='5' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23campNoise)' opacity='0.08'/%3E%3C/svg%3E")`);
-  root.style.setProperty("--clr-campfire-flicker", "radial-gradient(circle at 45% 75%, rgba(255,140,40,0.15) 0%, transparent 40%), radial-gradient(circle at 55% 65%, rgba(255,110,30,0.12) 0%, transparent 35%), radial-gradient(circle at 60% 80%, rgba(255,80,20,0.1) 0%, transparent 30%)");
-  root.style.setProperty("--clr-success-glow", "rgba(90,154,74,0.3)");
-  root.style.setProperty("--clr-danger-glow", "rgba(184,48,48,0.3)");
-  root.style.setProperty("--clr-choice-cost", "#9a8a6a");
-  root.style.setProperty("--clr-source-text", "#c4b080");
-  root.style.setProperty("--clr-source-context", "#a09070");
-  root.style.setProperty("--clr-placeholder", "#5a4a35");
-  root.style.setProperty("--clr-input-bg", "rgba(255,245,230,0.08)");
-  root.style.setProperty("--clr-input-bg-focus", "rgba(255,245,230,0.12)");
-  root.style.setProperty("--clr-silver", "#b0b0b0");
-  root.style.setProperty("--clr-bronze", "#c89050");
-  root.style.setProperty("--clr-gold-faint", "rgba(212,168,32,0.08)");
-  root.style.setProperty("--clr-gold-light", "rgba(212,168,32,0.15)");
-  root.style.setProperty("--clr-intel-border", "rgba(212,168,32,0.12)");
-  root.style.setProperty("--font-heading", "'Playfair Display', 'Georgia', serif");
-  root.style.setProperty("--font-body", "'Crimson Text', 'Georgia', serif");
+  root.style.setProperty("--clr-camp-pill-bg", "rgba(200,168,26,0.1)");
+  root.style.setProperty("--clr-camp-pill-border", "rgba(200,168,26,0.25)");
+  root.style.setProperty("--clr-camp-btn-hover", "#2a2015");
+  root.style.setProperty("--clr-campfire-glow", "radial-gradient(ellipse at 50% 100%, rgba(180,130,20,0.4) 0%, rgba(200,168,26,0.25) 35%, transparent 70%)");
+  root.style.setProperty("--clr-campfire-embers", `url("data:image/svg+xml,%3Csvg viewBox='0 0 300 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='campNoise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.025' numOctaves='5' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23campNoise)' opacity='0.1'/%3E%3C/svg%3E")`);
+  root.style.setProperty("--clr-campfire-flicker", "radial-gradient(circle at 45% 75%, rgba(255,140,40,0.18) 0%, transparent 40%), radial-gradient(circle at 55% 65%, rgba(255,110,30,0.15) 0%, transparent 35%), radial-gradient(circle at 60% 80%, rgba(255,80,20,0.12) 0%, transparent 30%)");
+  root.style.setProperty("--clr-success-glow", "rgba(122,168,90,0.35)");
+  root.style.setProperty("--clr-danger-glow", "rgba(200,80,64,0.35)");
+  root.style.setProperty("--clr-choice-cost", "#a89878");
+  root.style.setProperty("--clr-source-text", "#b8a890");
+  root.style.setProperty("--clr-source-context", "#988870");
+  root.style.setProperty("--clr-placeholder", "#6a5a40");
+  root.style.setProperty("--clr-input-bg", "rgba(232,220,200,0.1)");
+  root.style.setProperty("--clr-input-bg-focus", "rgba(232,220,200,0.15)");
+  root.style.setProperty("--clr-silver", "#b8b8b8");
+  root.style.setProperty("--clr-bronze", "#d8a060");
+  root.style.setProperty("--clr-gold-faint", "rgba(200,168,26,0.1)");
+  root.style.setProperty("--clr-gold-light", "rgba(200,168,26,0.18)");
+  root.style.setProperty("--clr-intel-border", "rgba(200,168,26,0.15)");
+  root.style.setProperty("--font-heading", "'IM Fell Double Pica', 'Georgia', serif");
+  root.style.setProperty("--font-body", "'IM Fell English', 'Georgia', serif");
+  root.style.setProperty("--font-italic", "'IM Fell English', 'Georgia', serif");
 }
 __name(applyTheme, "applyTheme");
 
@@ -3130,7 +3372,7 @@ __name(applyTheme, "applyTheme");
 function mount() {
   const gameRoot = document.getElementById("game-root");
   if (!gameRoot) throw new Error("#game-root missing");
-  applyTheme(gameRoot);
+  applyTheme(document.documentElement);
   return gameRoot;
 }
 __name(mount, "mount");
@@ -3141,6 +3383,559 @@ __name(find, "find");
 
 // art/cart_marker.png
 var cart_marker_default = "./cart_marker-CQL7K2BU.png";
+
+// src/ui/journalNarrative.js
+function describeFood(units) {
+  const u = Math.floor(units);
+  if (u <= 0) return "No food left. The larder is bare.";
+  if (u === 1) return "One day's pemmican remains.";
+  if (u <= 3) return `${u} days' pemmican.`;
+  if (u <= 7) return `A week's worth of pemmican (${u} days).`;
+  if (u <= 14) return `Two weeks' pemmican (${u} days).`;
+  return `Well-stocked: ${u} days' pemmican.`;
+}
+__name(describeFood, "describeFood");
+var TRAVEL_OPENINGS = [
+  (prev, next) => `We broke camp at ${prev} before dawn. ${next} lay ahead.`,
+  (prev, next) => `The cart rolled out of ${prev} with first light. ${next} was the day's mark.`,
+  (prev, next) => `Left ${prev} behind us. The trail to ${next} stretched empty and wide.`,
+  (prev, next) => `Dawn found us harnessing up at ${prev}. ${next} called from the west.`,
+  (prev, next) => `We pushed on from ${prev}. The road to ${next} would not walk itself.`
+];
+var TRAVEL_MIDDLES = [
+  "The wheels groaned beneath the load. Oxen plodded, patient as the grass is tall.",
+  "A long day under a bowl of sky. Nothing but grass and wind for miles.",
+  "The trail wound through grass taller than a rider on horseback.",
+  "Clouds gathered west but held their rain. We counted oxen at noon \u2014 all present.",
+  "The jingle of harness, the creak of wood. The rhythm of the Carlton Trail.",
+  "Heat shimmered off the prairie. The oxen breathed hard, but kept their pace.",
+  "A hawk circled overhead. The grass rippled like water in the wind."
+];
+var TRAVEL_WEAR_LINES = [
+  "The cart took a beating \u2014 the axle groans louder now.",
+  "A bad rut near the river crossing. The near wheel nearly came off.",
+  "The trail was rough today. Boards shifted in the bed. We'll need to check the lashings.",
+  "Red River carts are tough, but this ground tests them. Wear shows on the hubs."
+];
+var TRAVEL_WEATHER_LINES = {
+  overcast: [
+    "A grey ceiling followed us all day. No sun, no rain \u2014 just the weight of cloud.",
+    "The sky closed over by morning. Flat grey, pressing down on the grass."
+  ],
+  rain: [
+    "Cold rain came on by midday. We huddled under canvas, steam rising from the oxen.",
+    "A soaking rain. The trail turned to grease. Wheels sank to the hubs in places."
+  ],
+  storm: [
+    "Thunder rolled across the prairie like wagon wheels on stone. We pressed on regardless.",
+    "Lightning split the sky. The oxen balked but the whip brought them round."
+  ],
+  snow: [
+    "Snow fell fine as powder, dusting the oxen's backs. Winter breathes early here.",
+    "First snow of the season. White fingers in the grass. The cart left dark tracks."
+  ]
+};
+var EVENT_CHOICE_RAIN_SUCCESS = [
+  (choiceText) => `The rain hammered down but ${choiceText.toLowerCase()}. The ground was slick, boots heavy, but the work got done.`,
+  (choiceText) => `Rain-soaked ground made every step a fight, yet ${choiceText.toLowerCase()}. The tarp shed water like a duck's back.`,
+  (choiceText) => `Midday deluge. You ${choiceText.toLowerCase()} through the downpour. Canvas kept the powder dry \u2014 that mattered.`
+];
+var EVENT_CHOICE_RAIN_FAILURE = [
+  (choiceText) => `The rain turned the trail to soup. You tried to ${choiceText.toLowerCase()} but the mud won. Boots stuck, temper frayed.`,
+  (choiceText) => `Cold rain all day. ${choiceText} failed \u2014 the ground went to grease and the wagon slid sideways.`,
+  (choiceText) => `Rain found every seam. You ${choiceText.toLowerCase()} but the wet powder fouled. A miserable failure.`
+];
+var EVENT_CHOICE_STORM_SUCCESS = [
+  (choiceText) => `Thunder cracked overhead. You ${choiceText.toLowerCase()} with lightning at your back. The oxen held \u2014 barely.`,
+  (choiceText) => `Storm winds howled. Still you ${choiceText.toLowerCase()}. The tarp snapped but held. The work is done.`,
+  (choiceText) => `Black sky, white lightning. You ${choiceText.toLowerCase()} and the gods didn't strike you down.`
+];
+var EVENT_CHOICE_STORM_FAILURE = [
+  (choiceText) => `The storm broke right when you needed calm. ${choiceText} went wrong \u2014 lightning spooked the oxen, wind scattered your focus.`,
+  (choiceText) => `Thunder rolled like drumbeats of doom. You ${choiceText.toLowerCase()} but the elements swallowed the effort.`,
+  (choiceText) => `A flash, a crack, the oxen bolted. ${choiceText} \u2014 abandoned. The storm took its due.`
+];
+var EVENT_CHOICE_SNOW_SUCCESS = [
+  (choiceText) => `Snow muffled the world. You ${choiceText.toLowerCase()} in the white quiet. Blankets and firewood kept the chill at bay.`,
+  (choiceText) => `First snow dusted the trail. You ${choiceText.toLowerCase()} with cold fingers but steady hands. The fire waited at camp.`,
+  (choiceText) => `White fingers of winter in the grass. Still you ${choiceText.toLowerCase()} and the work held.`
+];
+var EVENT_CHOICE_SNOW_FAILURE = [
+  (choiceText) => `Snow blinded the way. You tried to ${choiceText.toLowerCase()} but the cold stole feeling from fingers. The work slipped.`,
+  (choiceText) => `Frost bit deep. ${choiceText} failed \u2014 no firewood, no blankets, just the cold and the failure.`,
+  (choiceText) => `The snow came down thick. You ${choiceText.toLowerCase()} but the world went white. Nothing gained.`
+];
+var EVENT_CHOICE_OVERCAST_SUCCESS = [
+  (choiceText) => `Grey sky, flat light. You ${choiceText.toLowerCase()} in the gloom. No rain, no sun \u2014 just the work.`,
+  (choiceText) => `The clouds pressed low. You ${choiceText.toLowerCase()} without drama. Steady does it.`
+];
+var EVENT_CHOICE_OVERCAST_FAILURE = [
+  (choiceText) => `The grey day drained the spirit. You ${choiceText.toLowerCase()} but the weight of the sky wore you down.`,
+  (choiceText) => `Overcast and heavy. ${choiceText} came to nothing. The light never broke through.`
+];
+var EVENT_AUTO_RAIN_TARP = [
+  "Rain came on hard. The tarp was up in seconds \u2014 dry underneath while the prairie drowned.",
+  "The canvas Tarp earned its weight today. Water ran off in sheets. Crew stayed dry, powder stayed ready.",
+  "A proper soaking rain. But the tarp held. You watched the water bead and roll off. Good gear."
+];
+var EVENT_AUTO_STORM_TARP = [
+  "Thunder and wind. The tarp snapped like a sail but the lashings held. Nothing wet but the ground.",
+  "Storm winds tested every knot. The tarp stood firm. The oxen balked but the shelter held.",
+  "Lightning split the sky. Under the tarp the crew waited it out. Dry, warm enough, alive."
+];
+var EVENT_AUTO_SNOW_BLANKET = [
+  "Snow piled deep by morning. Blankets between the bedroll and the cold \u2014 that was the difference.",
+  "First snow. The wool blankets turned bitter ground into tolerable rest. Firewood cracked beside you.",
+  "White silence at dawn. Blankets held the body heat. The fire died to coals but you woke whole."
+];
+var EVENT_AUTO_SNOW_FIREWOOD = [
+  "The fire burned all night. Poplar coals warming the watch. Snow melted in a circle around the flames.",
+  "Firewood bundle spent, but the night was warm. Steam rose from wet blankets drying by the fire.",
+  "Wood smoke in the wool. The fire held back the winter dark. Another night survived."
+];
+var EVENT_AUTO_CLEAR = [
+  "Clear sky, dry trail. The day passed without weather trouble.",
+  "Sun on the grass. Good travelling weather \u2014 rare enough to note.",
+  "The prairie stretched empty under blue. No rain, no storm, no snow. Just trail."
+];
+var CAMP_REST_SUCCESS = [
+  "We slept deep. The fire held. Morning found us whole.",
+  "Good rest. The crew woke slow but steady. Oxen grazed the sweet grass.",
+  "The night passed quiet. No wolves, no wind. Just stars and the fire's glow."
+];
+var CAMP_REST_SUCCESS_RAIN = [
+  "Rain hammered the tarp all night, but we stayed dry underneath. The fire hissed but held. Morning comes grey and clean.",
+  "The canvas Tarp earned its weight. Water ran off in sheets while we slept warm. Crew woke rested, not soaked.",
+  "Thunder rolled overhead. The tarp drummed but didn't leak. A good night's rest despite the storm."
+];
+var CAMP_REST_SUCCESS_SNOW = [
+  "Snow piled against the tarp by morning. Blankets and firewood saw us through. The crew woke to white silence.",
+  "The cold bit deep but the blankets held. Firewood cracked and popped all night. We wake stiff but alive.",
+  "First light on fresh snow. The fire died to coals but the blankets kept the chill off. Crew rested."
+];
+var CAMP_REST_FAILURE = [
+  "Slept light. Every sound woke us. The crew rises stiff and grumbling.",
+  "The ground was hard. Roots and stones through the bedroll. No true rest.",
+  "Wind moaned through the grass all night. We watched the fire die by turns."
+];
+var CAMP_REST_FAILURE_RAIN = [
+  "Rain found every gap in the shelter. Woke shivering, clothes damp. The crew is miserable.",
+  "The tarp leaked at the seams. Spent half the night re-lashing it. No one slept well.",
+  "Cold rain all night. The fire went out. Crew rises soaked and sullen."
+];
+var CAMP_REST_FAILURE_SNOW = [
+  "Snow drifted over the bedrolls. No blankets, no firewood \u2014 just cold ground and waking up frozen.",
+  "The cold crept through everything. No firewood to keep the dark warm. Crew exhausted.",
+  "Woke to ice on the whiskers. No blankets meant a night of shivering. Morale is shot."
+];
+var CAMP_FORAGE_SUCCESS = [
+  "Found wild turnips and saskatoons in the coulee. The pot will be full tonight.",
+  "Prairie onions and lamb's quarters. Enough for a proper meal and tomorrow's breakfast.",
+  "A good haul \u2014 berries, roots, even a few mushrooms. The land provides when you know where to look."
+];
+var CAMP_FORAGE_FAILURE = [
+  "Walked miles. Found nothing but dry grass and mosquitoes. The basket stays empty.",
+  "The ground's been picked clean. Not a turnip, not a berry. Lean night ahead.",
+  "Spent the day searching. Came back with a handful of bitter greens and sore feet."
+];
+var CAMP_HUNT_SUCCESS = [
+  "Tracked a bull bison to the river crossing. Clean shot. The crew is butchering now.",
+  "Beaver at the creek bend. Two pelts and meat for days. The trap line paid off.",
+  "Elk on the uplands. Long stalk, clean kill. Heavy packs on the return."
+];
+var CAMP_HUNT_FAILURE = [
+  "Stalked a herd all afternoon. Wind shifted. They smelled us and vanished.",
+  "Found sign but no beast. The ammunition's spent and the bag's empty.",
+  "A shot at a running deer. Missed clean. The echo's the only thing we brought back."
+];
+var CAMP_REPAIR_SUCCESS = [
+  "Shaganappi held. The wheel's true again. Good for another hundred miles.",
+  "Bound the hub, lashed the reach. The cart rolls quiet now.",
+  "Axe and auger did the work. New spokes fitted, old ones saved for patches."
+];
+var CAMP_REPAIR_FAILURE = [
+  "The shaganappi snapped mid-pull. Wasted the strip and the time.",
+  "Cracked the hub trying to seat the spoke. That's a day lost and a part ruined.",
+  "Rain softened the rawhide. It stretched instead of binding. Have to do it over."
+];
+var CAMP_SCOUT_SUCCESS = [
+  "Rode five miles ahead. Good water at the next crossing. Grass thick. No sign of trouble.",
+  "Scouted the river bend. Shallow ford, firm bottom. We'll cross easy tomorrow.",
+  "Trail's clear to the next ridge. Saw a herd of bison \u2014 meat if we need it."
+];
+var CAMP_SCOUT_FAILURE = [
+  "Rode out and saw nothing but grass. The trail's empty. No news is news, I suppose.",
+  "Horse threw a shoe halfway. Had to walk back. Wasted the day.",
+  "Got turned around in a coulee. Came back after dark with nothing to report."
+];
+var CAMP_DANCE_SUCCESS = [
+  "The fiddle sang. Boots pounded the hard ground. For an hour, nobody remembered the trail.",
+  "Red River jig until the fire died. Even the quiet ones joined in. Morale's high.",
+  "Music and laughter carried across the grass. The night felt shorter for it."
+];
+var CAMP_DANCE_FAILURE = [
+  "Fiddle started but the tune fell flat. Feet dragged. Hearts weren't in it.",
+  "Half the crew sat it out. The rest went through motions. Silence crowded back fast.",
+  "Played a reel but nobody danced. The fire popped. Someone muttered about tomorrow."
+];
+var CAMP_COOK_SUCCESS = [
+  "Pemmican stew thick with onions and wild roots. Steam rose. The crew ate slow, savoring.",
+  "The pot bubbled. Fat slicked the surface. Warm food in cold hands \u2014 that's wealth.",
+  "Stew tonight. Everyone had seconds. Even the oxen got the scraps."
+];
+var CAMP_COOK_FAILURE = [
+  "Fire wouldn't catch. Wood too green. The pemmican stayed tough and cold.",
+  "Pot boiled over. Lost half the broth to the coals. Thin supper for the lot of us.",
+  "Burnt the bottom. Scraped the pot clean but the taste lingers. Morale took a hit."
+];
+var CAMP_PUSH_ON = [
+  "No camp tonight. Drove on through the gloaming. The cart groans, the crew's silent.",
+  "Pushed past the usual stopping place. Night fell. We'll pay for this in the morning.",
+  "The trail doesn't wait. Neither do we. Wear on the cart, wear on the people."
+];
+var SETTLEMENT_ARRIVAL = [
+  (name3, type) => `The spires of ${name3} rose from the river bottom. A ${type} post \u2014 we'd heard tell.`,
+  (name3, type) => `${name3} ahead. Smoke from chimneys, the smell of woodsmoke and cattle. Civilization, of a sort.`,
+  (name3, type) => `Rode into ${name3} as the bell rang vespers. ${type} folk, but the trade's honest.`
+];
+var SETTLEMENT_TRADE = [
+  (give, receive) => `Traded ${give} for ${receive}. Fair measure. The factor nodded, weighed honest.`,
+  (give, receive) => `Laid out ${give} on the counter. Walked away with ${receive}. Good business.`,
+  (give, receive) => `Haggling done. ${give} went their way, ${receive} came ours. Both sides satisfied.`
+];
+var SETTLEMENT_ACTION = {
+  heal_crew: [
+    "The sisters tended our sick. Cool hands, quiet prayers. The fever broke by morning.",
+    "Grey Nuns asked no questions. Bound wounds, brewed tea. The crew walks easier now.",
+    'Medicine given freely. "God provides," the sister said. We left pemmican on the altar.'
+  ],
+  rest_blessing: [
+    "Slept in the chapel loft. Straw mattress, but the bell at matins woke a lighter spirit.",
+    "Evening prayer in the nave. Three days' blessing on the road ahead. Felt the weight lift.",
+    "Confession and communion. The trail feels shorter when the soul's unburdened."
+  ],
+  trade_furs_food: [
+    "Folded hides on the counter. Pemmican in the cart. The mission garden feeds the journey.",
+    "Beaver for bison meat. Straight trade. The factor's scales were true.",
+    "Hides from the spring hunt. Now rations for the fall push. Good exchange."
+  ],
+  trade_gossip: [
+    "Sat by the fire with the women. News travels fast on the prairie \u2014 next settlement's prairies, they said.",
+    "Shared bannock and tea. The old women know every trail and river. Learned what lies ahead.",
+    "Listened to stories in Michif and French. The gossip is worth more than gold on this trail."
+  ],
+  dance: [
+    "The fiddle sang. Boots pounded the hard ground. For an hour, nobody remembered the trail.",
+    "Red River jig until the fire died. Even the quiet ones joined in. Morale's high.",
+    "Music and laughter carried across the grass. The night felt shorter for it."
+  ],
+  share_food: [
+    "Broke pemmican with the camp. What you give on the trail returns in loyalty.",
+    "Shared our rations with a family waiting for hunters. Their gratitude was a warm thing.",
+    "The M\xE9tis remember generosity. Gave two rations, earned their respect for leagues."
+  ],
+  permit: [
+    "A stamp, a signature, and the Queen's law lets you cross the water legal.",
+    "The sergeant reviewed our papers. Permit granted \u2014 no trouble at the crossings ahead.",
+    "Official parchment in hand. The Mounties' word carries weight on the river."
+  ],
+  pay_fine: [
+    "The sergeant reads your name from the ledger. The debt is cleared.",
+    "Fur for the fine. No questions, no hard feelings. The law is the law.",
+    "Paid the Mounties their due. Clean slate for the rest of the trail."
+  ],
+  buy_ammo: [
+    `"Ball and powder, measured honest. The Mounties don't cheat a carter on shot."`,
+    "Two belts of ammunition for a beaver pelt. Fair trade from the Queen's men.",
+    "Fresh powder and ball. The sergeant weighed it himself. Honest measure."
+  ],
+  trade_furs_supplies_ammunition: [
+    "Traded pelts for powder and shot. The Company store prices are steep but the goods are good.",
+    "Laid down a hide, walked away with ammunition. The factor didn't blink.",
+    "Company lead and powder. Cost a pelt but the quality's there."
+  ],
+  trade_furs_supplies_shaganappi: [
+    "Rawhide strips for a prime beaver. The best binding on the prairie.",
+    "Three strips of shaganappi. That'll fix a wheel or lash a load proper.",
+    "Wet rawhide shrinks drum-tight. Worth every hide we traded."
+  ],
+  trade_furs_supplies_medicine: [
+    "Medicine pouch for a wolf pelt. The herbs smell of sage and willow bark.",
+    "The factor handed over a pouch. Said it'd break a fever by morning.",
+    "Traded fur for medicine. The Company knows what keeps carters alive."
+  ],
+  trade_furs_supplies_rope: [
+    "Fifty feet of hemp for a bison hide. Crossings and repairs, all in one coil.",
+    "Good rope. The Company doesn't skimp on cordage.",
+    "Rope for the river crossings ahead. Traded a hide and slept easier for it."
+  ],
+  rest: [
+    "A warm fire in the mess hall, dry blankets, and a night without the wind.",
+    "Cot in the barracks. Clean, quiet, and the sentry paces all night.",
+    "A lean-to by the fire. Simple shelter, honest company."
+  ]
+};
+var TRAVEL_REFLECTIONS = [
+  "My back aches from the jolting. The younger hands complain but they keep pace. I wonder how many more days this body has in it.",
+  "The officer at the last post said the trail gets harder north of the Assiniboine. I believe him. Every mile feels earned now.",
+  "We passed a grave today. Just a wooden cross, weathered grey. No name. The prairie keeps its dead close.",
+  "The cart creaks a new rhythm. Hub on the near side needs attention. Shaganappi will hold it for now.",
+  "Strange to think the river flows north while we chase the sunset. The world turns different out here.",
+  "The crew talks less each day. Not from anger \u2014 just the weight of distance. I hear them hum old songs sometimes.",
+  "A half-breed trapper shared firewater last night. Said the bison are moving west. Said the trail is changing. He was not wrong.",
+  "Dreams of Red River feel like another life. The fort, the bells, the women laughing on the landing. All behind us now."
+];
+var CAMP_REFLECTIONS = {
+  rest: [
+    "Fire dimming. The oxen breathe slow. Tomorrow we do it again. God willing, the wheels hold.",
+    "Stars so thick you could scoop them. The quiet is the loudest thing on the trail.",
+    "Wrote a letter in my head to Marie. Burned it in the fire. Some words aren't meant to travel."
+  ],
+  forage: [
+    "Hands smell of earth and onion. Good work today, if the pot holds out.",
+    "The land gives when you ask right. Took only what we needed. Left the rest for the next hands."
+  ],
+  hunt: [
+    "Blood on the knife, steam in the cold. The animal gave its life. We waste nothing \u2014 hide, meat, sinew, bone.",
+    "The shot rings in my ears still. Clean kill. The crew works fast now. They know the rhythm."
+  ],
+  repair: [
+    "Shaganappi binds more than wood. It binds the journey together. One more day the cart rolls.",
+    "The auger sang through oak. Spoke seated true. This cart has carried generations \u2014 it carries us now."
+  ],
+  scout: [
+    "Rode until the grass meet sky. The trail ahead is honest. No surprises waiting \u2014 just distance.",
+    "Saw smoke on the horizon. Another camp, another story. We are not alone on this road."
+  ],
+  dance: [
+    "The fiddle quiet now. Feet sore, heart lighter. We laughed at nothing and everything.",
+    "Old Pierre played the tune my father taught me. For a moment I was a boy again at St. Boniface."
+  ],
+  cook: [
+    "Steam rises, bellies fill. This is the wealth of the trail \u2014 hot food and hands that made it.",
+    "The youngest hand asked for seconds. Gave him mine. He's growing. We all are, in our way."
+  ],
+  push_on: [
+    "No fire tonight. The dark presses close. We gained miles but lost something softer.",
+    "The oxen's breath clouds the lantern light. They do not complain. Neither should I."
+  ]
+};
+var EVENT_REFLECTIONS = {
+  success: [
+    "Fortune favored us today. I will not question why \u2014 only give thanks and keep moving.",
+    "The dice fell right. Tomorrow they may not. I store this luck like pemmican for lean days."
+  ],
+  failure: [
+    "The trail teaches hard lessons. This one stings. We carry the scar and the wisdom both.",
+    "Failed today. The ground won. But we are still here, still moving. That counts for something."
+  ],
+  critical: [
+    "The world broke open today. What we lost cannot be named in numbers. We walk differently now.",
+    "A day that will wake me in winters to come. The crew watches me. I must not show the crack."
+  ]
+};
+var SETTLEMENT_REFLECTIONS = [
+  (name3, day) => `${name3} behind us. Day ${day} on the trail. The map shrinks in my hands but the distance feels longer.`,
+  (name3, day) => `Traded, rested, prayed at ${name3}. The ledger balances but the soul's account is harder to tally. Day ${day}.`,
+  (name3, day) => `Left ${name3} with full bellies and lighter hearts. The trail waits for no man. Day ${day} and counting.`,
+  (name3, day) => `The factor's scales were honest. The priest's blessing felt true. Even the Mountie nodded respect. Day ${day}.`,
+  (name3, day) => `Rode out of ${name3} before the bell finished ringing. The road does not care for goodbyes. Day ${day}.`
+];
+function pick(arr) {
+  return arr[Math.floor(Math.random() * arr.length)];
+}
+__name(pick, "pick");
+function buildTravelEntry(prevNode, node, after, prevWear, cart = []) {
+  if (!prevNode || !node) {
+    return "Another day on the Carlton Trail. The prairie stretches on, dry and endless.";
+  }
+  const opening = pick(TRAVEL_OPENINGS)(prevNode.name, node.name);
+  const middle = pick(TRAVEL_MIDDLES);
+  const wearLine = after.wear > prevWear ? " " + pick(TRAVEL_WEAR_LINES) : "";
+  const weather = after.weather && after.weather !== "clear" ? " " + pickWeatherLine(after.weather, cart) : "";
+  return `${opening}${wearLine}${weather} ${middle}`;
+}
+__name(buildTravelEntry, "buildTravelEntry");
+function pickWeatherLine(weather, cart) {
+  const hasTarp = cart.some((i) => i.name === "Canvas Tarp" && i.count > 0);
+  const hasBlanket = cart.some((i) => i.name === "Blanket" && i.count > 0);
+  const hasFirewood2 = cart.some((i) => i.name === "Firewood Bundle" && i.count > 0);
+  const lines = TRAVEL_WEATHER_LINES[weather] || [];
+  if (!lines.length) return "";
+  let line = pick(lines);
+  if (weather === "rain" || weather === "storm") {
+    if (hasTarp) {
+      line = line.replace("We huddled under canvas", "The tarp held. We stirred dry underneath");
+      line = line.replace("The trail turned to grease", "Wheels sank but the tarp kept the load dry");
+    }
+  }
+  if (weather === "snow") {
+    if (hasBlanket || hasFirewood2) {
+      line = line.replace("Winter breathes early here", "Blankets and firewood kept the night at bay");
+      line = line.replace("The cart left dark tracks", "Firewood warmed the watch, blankets the sleep");
+    }
+  }
+  return line;
+}
+__name(pickWeatherLine, "pickWeatherLine");
+function buildCampEntry(actionType, result, extraFood = 0, cart = [], weather = "clear") {
+  const isSuccess = result && result.rollTotal !== null && result.rollTotal >= ({ rest: 12, forage: 10, hunt: 10, repair: 8, scout: 9, dance: 8, cook: 10 }[actionType] || 10);
+  const critical = result && result.critical;
+  const extraFoodLine = extraFood > 0 ? ` We put in ${extraFood} extra rations for the effort.` : "";
+  const hasTarp = cart.some((i) => i.name === "Canvas Tarp" && i.count > 0);
+  const hasBlanket = cart.some((i) => i.name === "Blanket" && i.count > 0);
+  const hasFirewood2 = cart.some((i) => i.name === "Firewood Bundle" && i.count > 0);
+  const isWet = ["rain", "storm"].includes(weather);
+  const isCold = weather === "snow";
+  let templates;
+  if (actionType === "rest") {
+    if (isSuccess) {
+      if (isWet) templates = CAMP_REST_SUCCESS_RAIN;
+      else if (isCold) templates = CAMP_REST_SUCCESS_SNOW;
+      else templates = CAMP_REST_SUCCESS;
+    } else {
+      if (isWet) templates = CAMP_REST_FAILURE_RAIN;
+      else if (isCold) templates = CAMP_REST_FAILURE_SNOW;
+      else templates = CAMP_REST_FAILURE;
+    }
+  } else {
+    templates = {
+      forage: isSuccess ? CAMP_FORAGE_SUCCESS : CAMP_FORAGE_FAILURE,
+      hunt: isSuccess ? CAMP_HUNT_SUCCESS : CAMP_HUNT_FAILURE,
+      repair: isSuccess ? CAMP_REPAIR_SUCCESS : CAMP_REPAIR_FAILURE,
+      scout: isSuccess ? CAMP_SCOUT_SUCCESS : CAMP_SCOUT_FAILURE,
+      dance: isSuccess ? CAMP_DANCE_SUCCESS : CAMP_DANCE_FAILURE,
+      cook: isSuccess ? CAMP_COOK_SUCCESS : CAMP_COOK_FAILURE,
+      push_on: CAMP_PUSH_ON
+    }[actionType] || ["The night passed."];
+  }
+  let text = pick(templates);
+  if (critical && !isSuccess) {
+    text = "\u26A0 Critical failure. " + text;
+  }
+  return text + extraFoodLine;
+}
+__name(buildCampEntry, "buildCampEntry");
+function buildSettlementArrivalEntry(settlement) {
+  return pick(SETTLEMENT_ARRIVAL)(settlement.name, settlement.type);
+}
+__name(buildSettlementArrivalEntry, "buildSettlementArrivalEntry");
+function buildSettlementActionEntry(actionId, giveDesc, receiveDesc) {
+  if (actionId === "trade" || actionId === "trade_limited") {
+    return pick(SETTLEMENT_TRADE)(giveDesc, receiveDesc);
+  }
+  const templates = SETTLEMENT_ACTION[actionId];
+  if (templates) return pick(templates);
+  return `Completed ${actionId.replace(/_/g, " ")} at the post.`;
+}
+__name(buildSettlementActionEntry, "buildSettlementActionEntry");
+function buildEventChoiceEntry(eventData, result, weather = "clear", cart = []) {
+  const desc = eventData.text || "Something happened on the trail.";
+  if (!result || result.roll === null) {
+    return desc;
+  }
+  const isSuccess = result.success;
+  const choiceText = result.text || (isSuccess ? "It went well enough." : "That did not go as hoped.");
+  const cleanChoice = choiceText.replace(/^(Success|Failure)\.\s*/, "");
+  const hasTarp = cart.some((i) => i.name === "Canvas Tarp" && i.count > 0);
+  const hasBlanket = cart.some((i) => i.name === "Blanket" && i.count > 0);
+  const hasFirewood2 = cart.some((i) => i.name === "Firewood Bundle" && i.count > 0);
+  const isWet = ["rain", "storm"].includes(weather);
+  const isCold = weather === "snow";
+  let templates;
+  if (weather === "rain") {
+    templates = isSuccess ? EVENT_CHOICE_RAIN_SUCCESS : EVENT_CHOICE_RAIN_FAILURE;
+  } else if (weather === "storm") {
+    templates = isSuccess ? EVENT_CHOICE_STORM_SUCCESS : EVENT_CHOICE_STORM_FAILURE;
+  } else if (weather === "snow") {
+    templates = isSuccess ? EVENT_CHOICE_SNOW_SUCCESS : EVENT_CHOICE_SNOW_FAILURE;
+  } else if (weather === "overcast") {
+    templates = isSuccess ? EVENT_CHOICE_OVERCAST_SUCCESS : EVENT_CHOICE_OVERCAST_FAILURE;
+  } else {
+    return `${desc} ${cleanChoice}`;
+  }
+  const templateFn = pick(templates);
+  let enhanced = templateFn(cleanChoice);
+  if (isSuccess && isWet && hasTarp) {
+    enhanced += " The tarp kept the gear dry.";
+  }
+  if (isSuccess && isCold) {
+    if (hasBlanket) enhanced += " Blankets turned the cold to comfort.";
+    else if (hasFirewood2) enhanced += " The fire held the night back.";
+  }
+  return `${desc} ${enhanced}`;
+}
+__name(buildEventChoiceEntry, "buildEventChoiceEntry");
+function buildEventAutoEntry(desc, weather = "clear", cart = []) {
+  const hasTarp = cart.some((i) => i.name === "Canvas Tarp" && i.count > 0);
+  const hasBlanket = cart.some((i) => i.name === "Blanket" && i.count > 0);
+  const hasFirewood2 = cart.some((i) => i.name === "Firewood Bundle" && i.count > 0);
+  const isWet = ["rain", "storm"].includes(weather);
+  const isCold = weather === "snow";
+  let templates;
+  if (weather === "rain" && hasTarp) templates = EVENT_AUTO_RAIN_TARP;
+  else if (weather === "storm" && hasTarp) templates = EVENT_AUTO_STORM_TARP;
+  else if (weather === "snow" && hasBlanket) templates = EVENT_AUTO_SNOW_BLANKET;
+  else if (weather === "snow" && hasFirewood2) templates = EVENT_AUTO_SNOW_FIREWOOD;
+  else templates = EVENT_AUTO_CLEAR;
+  const template = pick(templates);
+  return `${desc} ${template}`;
+}
+__name(buildEventAutoEntry, "buildEventAutoEntry");
+function buildSettlementJourneyEntry(settlement, weather = "clear", cart = []) {
+  const hasTarp = cart.some((i) => i.name === "Canvas Tarp" && i.count > 0);
+  const hasBlanket = cart.some((i) => i.name === "Blanket" && i.count > 0);
+  let base = pick(SETTLEMENT_ARRIVAL)(settlement.name, settlement.type);
+  if (weather === "rain") {
+    base += hasTarp ? " The tarp saw us through the wet miles." : " Rain soaked the trail all the way here.";
+  } else if (weather === "storm") {
+    base += hasTarp ? " Storm winds tested the canvas \u2014 it held." : " The storm broke over us on the final stretch.";
+  } else if (weather === "snow") {
+    base += hasBlanket || hasFirewood ? " Snow fell the last day but blankets and fire saw us through." : " Snow dusted the approach. Cold miles behind us.";
+  } else if (weather === "overcast") {
+    base += " Grey sky the whole way. No rain, but no sun either.";
+  } else {
+    base += " Clear skies favored the approach.";
+  }
+  return base;
+}
+__name(buildSettlementJourneyEntry, "buildSettlementJourneyEntry");
+function getFoodDescription(units) {
+  return describeFood(units);
+}
+__name(getFoodDescription, "getFoodDescription");
+function buildTravelReflection(prevNode, node, after, cart = [], day = 1) {
+  const base = buildTravelEntry(prevNode, node, after, 0, cart);
+  const reflection = pick(TRAVEL_REFLECTIONS);
+  const foodDesc = describeFood(after.food);
+  const wearDesc = after.wear > 0 ? ` Cart wear: ${after.wear}.` : " Cart holds sound.";
+  return `${base} ${reflection} ${foodDesc}${wearDesc}`;
+}
+__name(buildTravelReflection, "buildTravelReflection");
+function buildCampReflection(actionType, result, cart = [], weather = "clear", day = 1) {
+  const base = buildCampEntry(actionType, result, 0, cart, weather);
+  const reflections = CAMP_REFLECTIONS[actionType] || ["The night passes."];
+  const reflection = pick(reflections);
+  const foodDesc = describeFood(result?.foodAfter || 0);
+  return `${base} ${reflection} ${foodDesc}`;
+}
+__name(buildCampReflection, "buildCampReflection");
+function buildEventReflection(eventData, result, weather = "clear", cart = []) {
+  const base = buildEventChoiceEntry(eventData, result, weather, cart);
+  let tier = "success";
+  if (result?.critical) tier = "critical";
+  else if (!result?.success) tier = "failure";
+  const reflection = pick(EVENT_REFLECTIONS[tier] || EVENT_REFLECTIONS.success);
+  return `${base} ${reflection}`;
+}
+__name(buildEventReflection, "buildEventReflection");
+function buildSettlementReflection(settlement, after, cart = []) {
+  const base = buildSettlementJourneyEntry(settlement, after.weather || "clear", cart);
+  const reflection = pick(SETTLEMENT_REFLECTIONS)(settlement.name, after.day);
+  const foodDesc = describeFood(after.food);
+  return `${base} ${reflection} ${foodDesc}`;
+}
+__name(buildSettlementReflection, "buildSettlementReflection");
 
 // src/ui/renderer.js
 var MONTH_NAMES = ["", "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
@@ -3172,7 +3967,7 @@ function initMap() {
   if (!el || typeof L === "undefined") return;
   if (map) return;
   if (!window.__METIS_READY__) return;
-  applyTheme(el);
+  applyTheme(document.documentElement);
   const { center, zoom } = getInitialView();
   map = L.map("map", {
     center,
@@ -3285,6 +4080,8 @@ function renderStatusBar(state) {
   const foodEl = document.getElementById("s-food");
   const wearEl = document.getElementById("s-wear");
   const crewEl = document.getElementById("s-crew");
+  const moraleEl = document.getElementById("s-morale");
+  const tradeEl = document.getElementById("s-trade");
   if (dayEl) dayEl.textContent = String(state.day);
   if (monthEl) monthEl.textContent = monthName(state.month);
   if (seasonEl) seasonEl.textContent = state.season;
@@ -3292,7 +4089,7 @@ function renderStatusBar(state) {
     if (state.pendingSettlement) {
       segEl.textContent = `At: ${node?.name || "camp"}`;
     } else if (next) {
-      segEl.textContent = `Next: ${next.name} (${next.dist} day segment)`;
+      segEl.textContent = `${node?.name || "Camp"} \u2192 ${next.name} \xB7 Segment ${state.segment || 1} of ${NODES.length - 1}`;
     } else {
       segEl.textContent = node?.name || "Arrived";
     }
@@ -3302,23 +4099,33 @@ function renderStatusBar(state) {
   if (crewState === "tired") crewCls += " crew-tired";
   else if (crewState === "exhausted") crewCls += " crew-exhausted";
   else if (crewState === "rested") crewCls += " crew-rested";
-  crewEl.textContent = String(state.crew);
-  crewEl.className = crewCls;
-  foodEl.textContent = String(Math.floor(state.food));
-  foodEl.className = "stat-value" + (state.food <= 5 ? " food-low" : "");
-  wearEl.textContent = String(state.wear);
-  wearEl.className = "stat-value" + (state.wear >= 4 ? " wear-high" : "");
+  if (crewEl) {
+    crewEl.textContent = String(state.crew);
+    crewEl.className = crewCls;
+  }
+  if (foodEl) {
+    foodEl.textContent = String(Math.floor(state.food));
+    foodEl.title = getFoodDescription(state.food);
+    foodEl.className = "stat-value" + (state.food <= 5 ? " food-low" : "");
+  }
+  if (wearEl) {
+    wearEl.textContent = String(state.wear);
+    wearEl.className = "stat-value" + (state.wear >= 4 ? " wear-high" : "");
+  }
+  if (moraleEl) {
+    moraleEl.textContent = String(state.morale);
+    moraleEl.className = "stat-value";
+  }
+  if (tradeEl) {
+    const tradeCount = (window._metisGame?.getCart?.() || []).filter((i) => i.type === "trade" || i.category === "furs").reduce((s, i) => s + i.count, 0);
+    tradeEl.textContent = String(tradeCount);
+    tradeEl.className = "stat-value";
+  }
   const weatherEl = document.getElementById("s-weather");
   if (weatherEl) {
     const w = state.weather || "clear";
     weatherEl.textContent = CONSTANTS.WEATHER_LABELS[w] || "Clear";
-    weatherEl.className = "stat-value weather-" + w;
-  }
-  const mbEl = document.getElementById("s-mb");
-  if (mbEl) {
-    const mb = Math.round(state.mbValue || 0);
-    mbEl.textContent = `${mb} \u20A5`;
-    mbEl.className = "stat-value" + (mb < CONSTANTS.MB_WIN_THRESHOLD ? " mb-low" : " mb-ok");
+    weatherEl.className = "stat-value";
   }
   const blessingWrap = document.getElementById("s-blessing-wrap");
   const blessingEl = document.getElementById("s-blessing");
@@ -3329,6 +4136,20 @@ function renderStatusBar(state) {
       blessingWrap.style.display = "inline";
     } else {
       blessingWrap.style.display = "none";
+    }
+  }
+  const travelBtn = document.getElementById("btn-travel");
+  const campBtn = document.getElementById("btn-camp");
+  if (travelBtn && campBtn) {
+    if (state.pendingEvent || state.pendingSettlement || state.over || state.preDeparture) {
+      travelBtn.style.display = "none";
+      campBtn.style.display = "none";
+    } else if (state.traveledToday) {
+      travelBtn.style.display = "none";
+      campBtn.style.display = "flex";
+    } else {
+      travelBtn.style.display = "flex";
+      campBtn.style.display = "none";
     }
   }
   if (!window.__METIS_PENDING_RESULT__) window.__METIS_PENDING_RESULT__ = null;
@@ -3437,22 +4258,22 @@ var ENDINGS = {
     id: "victory",
     title: "Fort Edmonton at Last!",
     narrative: {
-      high: "The palisade walls at Edmonton. Your cart made it \u2014 axle held, wheels still on. The crew's behind you, hollow-eyed but standing. You've still got MB credit to your name. The Company men will pay well.",
-      humble: "You reach Fort Edmonton with nothing left to give but your word. The cart groans as you roll through the gate \u2014 held together by rope and stubbornness. The crew is hollow-eyed but standing. Your MB credit is thin, but you arrived. Against the prairie, the weather, and every broken trail between Garry and Edmonton, you arrived."
+      high: "The palisade walls at Edmonton. Your cart made it \u2014 axle held, wheels still on. The crew's behind you, hollow-eyed but standing. Your holds are full of pelts and hides. The Company men will pay well.",
+      humble: "You reach Fort Edmonton with nothing left to give but your word. The cart groans as you roll through the gate \u2014 held together by rope and stubbornness. The crew is hollow-eyed but standing. Your cart is bare, but you arrived. Against the prairie, the weather, and every broken trail between Garry and Edmonton, you arrived."
     },
     quote: getSource("FORT_EDMONTON"),
     quoteHigh: getSource("SAWYER_TRIAL"),
-    tip: "Tip: Trade goods for MB credit at settlements, then spend MB on food and repairs. Keep your total MB value above 8 when you reach Edmonton. Repair wear early \u2014 letting the cart degrade costs points fast."
+    tip: "Tip: Trade goods (furs, hides) at settlements for food and repairs. Keep your trade goods count high when you reach Edmonton \u2014 each is worth 50 points. Repair wear early \u2014 letting the cart degrade costs points fast."
   },
   no_trade: {
     id: "no_trade",
     title: "Empty-Handed at Edmonton",
     narrative: {
-      high: "You reach Fort Edmonton, but your MB credit is gone. Every fur and hide was traded along the way to survive \u2014 food, repairs, medicine. You made the journey, but the Company men at the post look at your bare cart and empty ledger and shake their heads. A trip without profit is just a long walk.",
-      humble: "The gates of Fort Edmonton are open before you, but there is nothing to show for the journey. No furs, no hides, no MB credit to your name. You spent everything to keep the crew alive through the hardest stretches. You survived \u2014 but the ledger will not remember this trip."
+      high: "You reach Fort Edmonton, but your cart holds no trade goods. Every fur and hide was bartered along the way to survive \u2014 food, repairs, medicine. You made the journey, but the Company men at the post look at your bare cart and empty ledger and shake their heads. A trip without profit is just a long walk.",
+      humble: "The gates of Fort Edmonton are open before you, but there is nothing to show for the journey. No furs, no hides, no trade goods to your name. You spent everything to keep the crew alive through the hardest stretches. You survived \u2014 but the ledger will not remember this trip."
     },
     quote: getSource("HBC_JOURNAL"),
-    tip: "Tip: Trade goods for MB credit at settlements, then spend MB on food and repairs. Keep your total MB value above 8 when you reach Edmonton. Balance survival with profit \u2014 forage and hunt to supplement food instead of trading away all your cargo."
+    tip: "Tip: Barter goods for supplies at settlements, then hold onto trade goods (furs, hides) for the end score. Keep your trade goods count above 5 when you reach Edmonton. Balance survival with profit \u2014 forage and hunt to supplement food instead of bartering away all your cargo."
   },
   starvation: {
     id: "starvation",
@@ -18808,42 +19629,6 @@ __name(getItemIcon, "getItemIcon");
 
 // src/main.js
 syncLocalScores();
-function buildTravelJournalEntry(prevNode, node, after, prevWear) {
-  if (!prevNode || !node) {
-    return "Another day on the Carlton Trail. The prairie stretches on, dry and endless.";
-  }
-  const openings = [
-    `We pushed west from ${prevNode.name}, heading toward ${node.name}.`,
-    `The cart rolled out of ${prevNode.name} at first light. ${node.name} lies ahead.`,
-    `Left ${prevNode.name} behind. The road to ${node.name} beckons.`,
-    `We broke camp and set our faces west \u2014 ${node.name} was the day's goal.`,
-    `Dawn found us loading up and moving on. ${prevNode.name} gave way to open trail.`
-  ];
-  const middles = [
-    `The wheels creak beneath our load. The oxen plod on, patient as the grass.`,
-    `A long day under a wide sky. Not a tree for miles, just the big empty.`,
-    `The trail winds through grass taller than a man on horseback.`,
-    `Clouds built in the west but held their rain. We counted the oxen at midday \u2014 all present.`,
-    `The jingle of harness, the groan of the cart. The rhythm of the trail.`
-  ];
-  const wear = after.wear > prevWear ? " The cart took a beating on the rough trail \u2014 the axle groans louder now." : "";
-  const weather = after.weather && after.weather !== "clear" ? ` ${{ overcast: "A grey ceiling of cloud followed us all day.", rain: "A cold rain came on by noon \u2014 we huddled under canvas.", storm: "Thunder rolled across the prairie. We pressed on regardless.", snow: "Snow fell fine as powder, dusting the oxen's backs." }[after.weather] || ""}` : "";
-  const day = after.day || 1;
-  const opening = openings[day % openings.length];
-  const middle = middles[day * 3 % middles.length];
-  return `${opening}${wear}${weather} ${middle}`;
-}
-__name(buildTravelJournalEntry, "buildTravelJournalEntry");
-function buildEventJournalEntry(eventData, result) {
-  const desc = eventData.text || "Something happened on the trail.";
-  if (!result || result.roll === null) {
-    return desc;
-  }
-  const outcome = result.text || (result.success ? "It went well enough." : "That did not go as hoped.");
-  const clean = outcome.replace(/^(Success|Failure)\.\s*/, "");
-  return `${desc} ${clean}`;
-}
-__name(buildEventJournalEntry, "buildEventJournalEntry");
 function bootstrap(seed = null) {
   const game = createGame(seed);
   window._metisGame = game;
@@ -18897,67 +19682,60 @@ function bootstrap(seed = null) {
     const savedName = localStorage.getItem("metisPlayerName");
     if (savedName) nameInput.value = savedName;
   }
-  const PROFANE = /\b(f+u+c+k+|s+h+i+t+|b+i+t+c+h+|a+s+s+h+o+l+e+|d+a+m+n+|c+u+n+t+|f+a+g+|n+i+g+g+|r+e+t+a+r+d+|w+h+o+r+e+|s+l+u+t+|p+i+s+s+|t+i+t+s+|d+i+c+k+|p+u+s+s+y+|c+o+c+k+|m+e+r+d+e+|p+u+t+a+|b+a+r+d+a+s+h+|b+o+r+d+e+l+|c+h+i+n+k+|g+o+o+k+|k+i+k+e+|s+p+i+c+|w+e+t+b+a+c+k+|t+r+a+n+n+y+|d+y+k+e+|k+a+f+i+r+|m+u+l+a+t+t+o+|p+a+k+i+|s+q+u+a+w+|w+o+g+|z+i+g+g+e+r+)\b/gi;
-  function sanitizeName(raw) {
-    let cleaned = raw.replace(PROFANE, (m) => "*".repeat(m.length));
-    if (!/[a-zA-Z]/.test(cleaned)) cleaned = "Traveller";
-    return cleaned.substring(0, 32);
+  const visitedSettlements = /* @__PURE__ */ new Set();
+  document.getElementById("stat-food")?.addEventListener("click", () => {
+    if (window._metisGame) showCart(window._metisGame);
+  });
+  document.getElementById("stat-crew")?.addEventListener("click", () => {
+    if (window._metisGame) showCrew(window._metisGame);
+  });
+  document.getElementById("settings-btn")?.addEventListener("click", () => {
+    document.getElementById("settings-overlay")?.classList.add("active");
+  });
+  document.getElementById("settings-close")?.addEventListener("click", () => {
+    document.getElementById("settings-overlay")?.classList.remove("active");
+  });
+  document.getElementById("settings-new-game")?.addEventListener("click", () => {
+    clearSave();
+    window.location.reload();
+  });
+  const overlayIds = ["event-overlay", "settlement-overlay", "cart-overlay", "crew-overlay", "predeparture-overlay", "settings-overlay"];
+  function closeAllOverlays() {
+    overlayIds.forEach((id) => document.getElementById(id)?.classList.remove("active"));
   }
-  __name(sanitizeName, "sanitizeName");
-  const gameRoot = find("#game-root");
-  if (gameRoot) {
-    gameRoot.addEventListener("click", (e) => {
-      if (e.target.closest("#intro-start")) {
-        const rawName = nameInput?.value?.trim() || "";
-        const nameVal = sanitizeName(rawName) || "Traveller";
-        if (nameVal) {
-          localStorage.setItem("metisPlayerName", nameVal);
-        }
-        if (nameInput && rawName !== nameVal) {
-          nameInput.value = nameVal;
-        }
-        const introOverlay = find("#intro-overlay");
-        if (introOverlay) {
-          introOverlay.classList.remove("active");
-          introOverlay.setAttribute("hidden", "");
-        }
-        const currentState = game.getState();
-        if (currentState.preDeparture) {
-          showShop(game);
-        } else {
-          window.__METIS_RENDER__();
-        }
+  __name(closeAllOverlays, "closeAllOverlays");
+  const SAVE_VERSION = 2;
+  const savedRaw = localStorage.getItem("metis-trail-v2.save");
+  if (savedRaw) {
+    try {
+      const parsed = JSON.parse(savedRaw);
+      const saveVer = parsed.schemaVersion || parsed.data?.schemaVersion || 0;
+      if (saveVer < SAVE_VERSION) {
+        localStorage.removeItem("metis-trail-v2.save");
+        console.info(`[Metis] Cleared incompatible save (v${saveVer} < v${SAVE_VERSION})`);
       }
-    });
-  } else {
-    console.warn("Metis bootstrap: #game-root not found; Begin Journey button is offline.");
+    } catch (e) {
+    }
   }
   document.addEventListener("click", (e) => {
-    if (e.target.closest("#pd-confirm")) {
-      e.preventDefault();
-      e.stopPropagation();
-      const btn = e.target.closest("#pd-confirm");
-      if (btn.disabled) return;
-      const game2 = window._metisGame;
-      if (window.__METIS_SHOP_ITEMS && window.__METIS_SHOP_PURCHASED) {
-        window.__METIS_SHOP_ITEMS.forEach((item) => {
-          if (window.__METIS_SHOP_PURCHASED[item.name] > 0) {
-            for (let i = 0; i < window.__METIS_SHOP_PURCHASED[item.name]; i++) {
-              if (item.category === "provisions") {
-                game2.addFood(item.count);
-              } else {
-                game2.buyItem(item.name, item.wt, item.category);
-              }
-            }
-          }
-        });
+    if (e.target.closest("#intro-start")) {
+      const rawName = nameInput?.value?.trim() || "";
+      const nameVal = rawName || "Traveller";
+      if (nameVal) localStorage.setItem("metisPlayerName", nameVal);
+      const introOverlay = document.getElementById("intro-overlay");
+      if (introOverlay) {
+        introOverlay.classList.remove("active");
+        introOverlay.setAttribute("hidden", "");
       }
-      game2.confirmPreDeparture();
-      document.getElementById("predeparture-overlay")?.classList.remove("active");
-      window.__METIS_RENDER__();
+      if (game.getState().preDeparture) {
+        showShop(game);
+      } else {
+        window.__METIS_RENDER__();
+      }
     }
   });
-  const travelBtn = find("#btn-travel");
+  const travelBtn = document.getElementById("btn-travel");
+  const campBtn = document.getElementById("btn-camp");
   if (travelBtn) {
     travelBtn.addEventListener("click", () => {
       const { pendingEvent, pendingSettlement, over } = game.getState();
@@ -18970,92 +19748,93 @@ function bootstrap(seed = null) {
       if (after.wear > prevWear) haptics_default.wear();
       const node = NODES[after.node];
       const prevNode = NODES[after.node - 1];
+      const cart = game.getCart();
       journalLog({
         day: after.day,
         date: monthName(after.month) + " " + after.day,
         title: "On the Trail",
-        text: buildTravelJournalEntry(prevNode, node, after, prevWear),
+        text: buildTravelReflection(prevNode, node, after, cart, after.day),
         mech: after.wear > prevWear ? "Wear +1" : "",
-        collapsed: true
+        collapsed: false
       });
       window.__METIS_RENDER__();
     });
-    travelBtn.setAttribute("data-metis-travel-bound", "1");
   }
-  const campClose = find("#camp-close-btn");
-  const campContinue = find("#camp-continue");
-  if (campClose) campClose.onclick = () => find("#camp-overlay")?.classList.remove("active");
-  if (campContinue) {
-    campContinue.onclick = () => {
-      find("#camp-overlay")?.classList.remove("active");
-    };
+  if (campBtn) {
+    campBtn.addEventListener("click", () => {
+      showCamp(game);
+    });
   }
-  const campBtn = find("#btn-camp");
-  if (campBtn) campBtn.onclick = () => showCamp(game);
-  const cartBtn = find("#btn-cart");
-  if (cartBtn) cartBtn.onclick = () => showCart(game);
-  const crewBtn = find("#btn-crew");
-  if (crewBtn) crewBtn.onclick = () => showCrew(game);
-  const journalToggle = find("#journal-toggle");
+  const journalToggle = document.getElementById("journal-toggle");
   if (journalToggle) {
-    journalToggle.onclick = () => {
+    journalToggle.addEventListener("click", () => {
       const panel = document.getElementById("bottom-panel");
       if (panel) {
         panel.classList.toggle("collapsed");
         const icon = document.getElementById("journal-toggle-icon");
         if (icon) icon.textContent = panel.classList.contains("collapsed") ? "\u25B6" : "\u25BC";
       }
-    };
+    });
   }
-  const eventContinue = find("#event-continue");
+  const eventContinue = document.getElementById("event-continue");
   if (eventContinue) eventContinue.onclick = () => {
-    find("#event-overlay")?.classList.remove("active");
+    document.getElementById("event-overlay")?.classList.remove("active");
   };
-  const settlementContinue = find("#settlement-continue");
+  const settlementContinue = document.getElementById("settlement-continue");
   if (settlementContinue) settlementContinue.onclick = () => {
     const st2 = game.getState().pendingSettlement;
     const after = game.getState();
     if (st2) {
+      const cart = game.getCart();
+      const weather = after.weather || "clear";
+      const isFirstVisit = !visitedSettlements.has(st2.name);
+      if (isFirstVisit) visitedSettlements.add(st2.name);
+      const text = isFirstVisit ? buildSettlementArrivalEntry(st2) : buildSettlementJourneyEntry(st2, weather, cart);
       journalLog({
         day: after.day,
         date: monthName(after.month) + " " + after.day,
         title: `Arrived at ${st2.name}`,
-        text: st2.desc || `${st2.name} \u2014 a ${st2.type} settlement on the Carlton Trail.`,
+        text,
         mech: "",
-        collapsed: true
+        collapsed: false
       });
     }
     game.settlementAction("continue");
-    find("#settlement-overlay")?.classList.remove("active");
+    document.getElementById("settlement-overlay")?.classList.remove("active");
     window.__METIS_RENDER__();
   };
-  const settlementClose = find("#settlement-close");
+  const settlementClose = document.getElementById("settlement-close");
   if (settlementClose) settlementClose.onclick = () => {
     const st2 = game.getState().pendingSettlement;
     const after = game.getState();
     if (st2) {
+      const cart = game.getCart();
+      const weather = after.weather || "clear";
+      const isFirstVisit = !visitedSettlements.has(st2.name);
+      if (isFirstVisit) visitedSettlements.add(st2.name);
+      const text = isFirstVisit ? buildSettlementArrivalEntry(st2) : buildSettlementJourneyEntry(st2, weather, cart);
       journalLog({
         day: after.day,
         date: monthName(after.month) + " " + after.day,
         title: `Arrived at ${st2.name}`,
-        text: st2.desc || `${st2.name} \u2014 a ${st2.type} settlement on the Carlton Trail.`,
+        text,
         mech: "",
-        collapsed: true
+        collapsed: false
       });
     }
     game.settlementAction("continue");
-    find("#settlement-overlay")?.classList.remove("active");
+    document.getElementById("settlement-overlay")?.classList.remove("active");
     window.__METIS_RENDER__();
   };
-  const cartClose = find("#cart-close-btn");
-  const cartClose2 = find("#cart-close-btn-2");
-  if (cartClose) cartClose.onclick = () => find("#cart-overlay")?.classList.remove("active");
-  if (cartClose2) cartClose2.onclick = () => find("#cart-overlay")?.classList.remove("active");
-  const crewClose = find("#crew-close-btn");
-  const crewClose2 = find("#crew-close-btn-2");
-  if (crewClose) crewClose.onclick = () => find("#crew-overlay")?.classList.remove("active");
-  if (crewClose2) crewClose2.onclick = () => find("#crew-overlay")?.classList.remove("active");
-  const restartBtn = find("#end-restart");
+  const cartClose = document.getElementById("cart-close-btn");
+  const cartClose2 = document.getElementById("cart-close-btn-2");
+  if (cartClose) cartClose.onclick = () => document.getElementById("cart-overlay")?.classList.remove("active");
+  if (cartClose2) cartClose2.onclick = () => document.getElementById("cart-overlay")?.classList.remove("active");
+  const crewClose = document.getElementById("crew-close-btn");
+  const crewClose2 = document.getElementById("crew-close-btn-2");
+  if (crewClose) crewClose.onclick = () => document.getElementById("crew-overlay")?.classList.remove("active");
+  if (crewClose2) crewClose2.onclick = () => document.getElementById("crew-overlay")?.classList.remove("active");
+  const restartBtn = document.getElementById("end-restart");
   if (restartBtn) restartBtn.onclick = () => {
     clearSave();
     window.location.reload();
@@ -19136,7 +19915,7 @@ function renderTrailIntel(state) {
 }
 __name(renderTrailIntel, "renderTrailIntel");
 function hideOverlays() {
-  ["intro-overlay", "event-overlay", "settlement-overlay", "cart-overlay", "crew-overlay"].forEach((id) => {
+  ["intro-overlay", "event-overlay", "settlement-overlay", "cart-overlay", "crew-overlay", "settings-overlay"].forEach((id) => {
     const el = document.getElementById(id);
     if (el) el.classList.remove("active");
   });
@@ -19257,6 +20036,7 @@ function showEvent(game) {
   }
   let diceResult = null;
   let eventData = null;
+  let eventBefore = null;
   continueEl.onclick = () => {
     continueEl.classList.remove("ready");
     if (diceResult) {
@@ -19265,6 +20045,8 @@ function showEvent(game) {
       if (eventData) {
         const after = game.getState();
         const res = diceResult.result;
+        const cart = game.getCart();
+        const weather = after.weather || "clear";
         const mechParts = [];
         if (after.food !== diceResult.before.food) mechParts.push(`${after.food - diceResult.before.food >= 0 ? "+" : ""}${(after.food - diceResult.before.food).toFixed(1)} Food`);
         if (after.wear !== diceResult.before.wear) mechParts.push(`Wear ${after.wear - diceResult.before.wear >= 0 ? "+" : ""}${after.wear - diceResult.before.wear}`);
@@ -19274,14 +20056,34 @@ function showEvent(game) {
           day: after.day,
           date: monthName(after.month) + " " + after.day,
           title: eventData.classification || "Event",
-          text: buildEventJournalEntry(eventData, res),
+          text: buildEventReflection(eventData, res, weather, cart),
           dice: res && res.roll !== null ? `Rolled ${res.roll} \u2014 need ${res.dc}+ \u2014 ${res.success ? "\u2713 Success" : "\u2717 Failure"}` : null,
           mech: mechParts.join(" \xB7 "),
-          collapsed: true
+          collapsed: false
         });
       }
       diceResult = null;
       eventData = null;
+    } else {
+      if (eventData) {
+        const after = game.getState();
+        const cart = game.getCart();
+        const weather = after.weather || "clear";
+        const beforeState = eventBefore || after;
+        const mechParts = [];
+        if (after.food !== beforeState.food) mechParts.push(`${after.food - beforeState.food >= 0 ? "+" : ""}${(after.food - beforeState.food).toFixed(1)} Food`);
+        if (after.wear !== beforeState.wear) mechParts.push(`Wear ${after.wear - beforeState.wear >= 0 ? "+" : ""}${after.wear - beforeState.wear}`);
+        journalLog({
+          day: after.day,
+          date: monthName(after.month) + " " + after.day,
+          title: eventData.classification || "Event",
+          text: buildEventAutoEntry(eventData.text || "", weather, cart),
+          mech: mechParts.join(" \xB7 "),
+          collapsed: false
+        });
+        eventData = null;
+        eventBefore = null;
+      }
     }
     continueEl.style.display = "none";
     const overlay = document.getElementById("event-overlay");
@@ -19354,6 +20156,8 @@ function showEvent(game) {
   if (!ev.choices || ev.choices.length === 0) {
     continueEl.style.display = "inline-block";
     continueEl.classList.add("ready");
+    eventData = { classification: ev.classification, text: ev.text };
+    eventBefore = { ...game.getState() };
   }
   document.getElementById("event-overlay")?.classList.add("active");
 }
@@ -19423,7 +20227,7 @@ function showSettlement(game) {
     costRow.textContent = `Cost: ${action.cost}`;
     const riskRow = document.createElement("div");
     riskRow.className = "settlement-action-card-risk";
-    riskRow.textContent = action.risk ? `Risk: ${action.risk}` : "";
+    riskRow.textContent = action.risk ? `Receive: ${action.risk}` : "";
     const flavorRow = document.createElement("div");
     flavorRow.className = "settlement-action-card-flavor";
     flavorRow.textContent = action.flavor;
@@ -19432,26 +20236,16 @@ function showSettlement(game) {
     btn.textContent = "Do It";
     const st2 = game.getState();
     const cart = game.getCart();
-    const credit = st2.credit?.[node.type] || 0;
     let canDo = true;
     switch (action.id) {
       case "trade":
         canDo = cart.some((i) => i.type === "trade" && i.count > 0);
         break;
-      case "buy_supplies":
-        canDo = credit > 0;
-        break;
       case "rest":
         canDo = st2.food >= 1;
         break;
-      case "get_intel":
-        canDo = credit >= 1;
-        break;
       case "trade_gossip":
         canDo = true;
-        break;
-      case "recruit_crew":
-        canDo = credit >= 2 && st2.food >= 1 && (st2.crewCount || 3) < 6;
         break;
       case "dance":
         canDo = st2.food >= 1;
@@ -19465,20 +20259,11 @@ function showSettlement(game) {
         canDo = (hides?.count || 0) >= 3 && (shag?.count || 0) >= 1;
         break;
       }
-      case "pay_fines":
-        canDo = (st2.fines || 0) > 0 && credit >= (st2.fines || 0);
-        break;
-      case "get_permits":
-        canDo = credit >= 2;
-        break;
       case "report_duty":
         canDo = true;
         break;
-      case "buy_ammo":
-        canDo = credit >= 1.5;
-        break;
       case "heal_crew":
-        canDo = credit >= 2 || (cart.find((i) => i.name === "Medicine Pouch")?.count || 0) >= 1;
+        canDo = (cart.find((i) => i.name === "Medicine Pouch")?.count || 0) >= 1;
         break;
       case "get_blessing":
         canDo = st2.food >= 1;
@@ -19521,7 +20306,9 @@ function showSettlement(game) {
           const intel = afterState.trailIntel || [];
           if (intel.length > 0) intelText = intel[intel.length - 1].text;
         }
-        const flavor = buildSettlementJournalText(action.id, node, intelText);
+        const flavor = buildSettlementActionEntry(action.id, action.cost, action.risk || action.flavor);
+        const reflectionText = buildSettlementReflection(node, afterState, afterCart);
+        const fullText = flavor + " " + reflectionText;
         const mechParts = [];
         if (afterState.food !== beforeState.food) mechParts.push(`${afterState.food - beforeState.food >= 0 ? "+" : ""}${(afterState.food - beforeState.food).toFixed(1)} Food`);
         if (afterState.wear !== beforeState.wear) mechParts.push(`Wear ${afterState.wear - beforeState.wear >= 0 ? "+" : ""}${afterState.wear - beforeState.wear}`);
@@ -19536,7 +20323,7 @@ function showSettlement(game) {
         resultCard.appendChild(rcName);
         const rcFlavor = document.createElement("div");
         rcFlavor.className = "settlement-action-card-flavor";
-        rcFlavor.textContent = flavor;
+        rcFlavor.textContent = fullText;
         resultCard.appendChild(rcFlavor);
         if (mechParts.length) {
           const rcMech = document.createElement("div");
@@ -19556,9 +20343,9 @@ function showSettlement(game) {
             day: afterState.day,
             date: monthName(afterState.month) + " " + afterState.day,
             title: `${action.label} at ${node.name}`,
-            text: flavor,
+            text: fullText,
             mech: mechParts.join(" \xB7 "),
-            collapsed: true
+            collapsed: false
           });
           document.getElementById("settlement-overlay")?.classList.remove("active");
           window.__METIS_RENDER__();
@@ -19618,12 +20405,8 @@ function buildSettlementOutcome(action, before, after, beforeCart, afterCart) {
   if (after.day !== before.day) msgs.push(`${after.day - before.day} Day(s)`);
   if (action === "trade") {
     const lost = beforeCart.reduce((s, i) => s + i.count, 0) - afterCart.reduce((s, i) => s + i.count, 0);
-    if (lost > 0) msgs.push(`Traded ${lost} good(s) for MB credit.`);
+    if (lost > 0) msgs.push(`Traded ${lost} good(s) for supplies.`);
   }
-  if (action === "buy_food") msgs.push("Bought food with MB credit.");
-  if (action === "buy_repair") msgs.push("Repaired cart with MB credit.");
-  if (action === "buy_heal") msgs.push("Healed crew with MB credit.");
-  if (action === "buy_info") msgs.push("Gathered trail intelligence.");
   if (action === "repair") msgs.push("Cart repaired.");
   if (action === "grease") msgs.push("Axle greased.");
   if (action === "heal") msgs.push("Healed.");
@@ -19655,7 +20438,7 @@ function showCart(game) {
     const canUnload = i.count > 0;
     const hint = i.category ? getCategoryHint(i.category) : "";
     const desc = i.desc ? `<div style="font-size:0.8em;color:#5a4a3a;margin-top:2px;">${i.desc}</div>` : "";
-    const mbStr = (i.type === "trade" || i.category === "furs") && i.mbValue ? `<span style="color:var(--clr-accent);font-size:0.85em;margin-left:4px;">${i.mbValue} \u20A5</span>` : "";
+    const mbStr = i.type === "trade" || i.category === "furs" ? `<span style="color:var(--clr-accent);font-size:0.85em;margin-left:4px;">Trade good</span>` : "";
     return `
     <div class="cart-row" style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;padding:6px 0;border-bottom:1px solid rgba(0,0,0,0.08);">
       <span style="flex:1;"><span style="font-weight:600;">${getItemIcon(i.name)} ${i.name} \xD7${i.count} (${(i.wt * i.count).toFixed(1)} kg)</span>${mbStr}${hint ? `<div style="font-size:0.75em;color:#6b5c4a;margin-top:1px;">${hint}</div>` : ""}${desc}</span>
@@ -19684,7 +20467,7 @@ function getCategoryHint(category) {
     provisions: "1 food/day keeps the crew alive. Running out means death.",
     repair: "Reduces cart wear. No repair supplies = stranded when cart breaks.",
     parts: "Needed for cart repair and crafting recipes at settlements.",
-    furs: "Trade goods. Sell at settlements for \u20A5 credit. Need \u20A5 to win.",
+    furs: "Trade goods. Deliver to Fort Edmonton for endgame score.",
     shelter: "Cold nights and river crossings. Tarp doubles as raft.",
     fuel: "Required for cold nights. Without fire, crew condition drops.",
     hunting: "Ammo enables hunting camp action. Also used in defensive events.",
@@ -19702,152 +20485,138 @@ function showShop(game) {
   const currentEl = document.getElementById("pd-weight-current");
   const statusEl = document.getElementById("pd-weight-status");
   const confirmBtn = document.getElementById("pd-confirm");
+  if (!listEl || !weightEl || !currentEl || !statusEl || !confirmBtn) return;
   const balanceEl = document.getElementById("shop-balance");
   const shopStatusEl = document.getElementById("shop-status");
   const foodCountEl = document.getElementById("shop-food-count");
-  if (!listEl || !weightEl || !currentEl || !statusEl || !confirmBtn || !balanceEl || !shopStatusEl || !foodCountEl) return;
-  let balance = game.getCart().reduce((sum, i) => sum + (i.mbValue || 0) * i.count, 0);
-  const startingBalance = balance;
-  const shopItems = [
-    { name: "Pemmican Rations", desc: "Dried meat and fat. 1 food/day keeps the crew alive.", price: 2.5, category: "provisions", wt: 2.5, count: 5 },
-    { name: "Spare Axle", desc: "Hard maple. Heavy but essential for a Red River cart.", price: 3, category: "parts", wt: 15, count: 1 },
-    { name: "Shaganappi", desc: "Rawhide strips. Binding, lashing, and cart repair.", price: 1.5, category: "repair", wt: 3, count: 3 },
-    { name: "Tool Kit", desc: "Axe, auger, drawknife. Required for major repairs.", price: 2.5, category: "parts", wt: 8, count: 1 },
-    { name: "Canvas Tarp", desc: "Waterproof. Shelter and cart-raft conversion.", price: 2, category: "shelter", wt: 4, count: 1 },
-    { name: "Firewood Bundle", desc: "Dried poplar. Required for cold nights.", price: 1, category: "fuel", wt: 6, count: 2 },
-    { name: "Rope (50ft)", desc: "Hemp. Crossings, repairs, binding.", price: 1.5, category: "parts", wt: 3, count: 1 },
-    { name: "Ammunition Belt", desc: "Shot and ball. For hunting and defence.", price: 2, category: "hunting", wt: 2, count: 1 },
-    { name: "Medicine Pouch", desc: "Herbal remedies and bandages.", price: 3, category: "medical", wt: 1.5, count: 1 },
-    { name: "Blanket", desc: "Wool. Winter survival.", price: 2, category: "shelter", wt: 3, count: 2 }
-  ];
-  const purchased = {};
-  shopItems.forEach((item) => {
-    purchased[item.name] = 0;
-  });
-  window.__METIS_SHOP_ITEMS = shopItems;
-  window.__METIS_SHOP_PURCHASED = purchased;
-  function recalc() {
-    let totalWeight2 = 0;
-    let totalFood = 0;
-    shopItems.forEach((item) => {
-      totalWeight2 += item.wt * purchased[item.name];
-      if (item.category === "provisions") totalFood += purchased[item.name] * 5;
-    });
-    const cart = game.getCart();
-    cart.forEach((i) => {
-      totalWeight2 += i.wt * i.count;
-    });
-    currentEl.textContent = totalWeight2.toFixed(1);
-    balanceEl.textContent = Math.round(balance);
-    foodCountEl.textContent = "Food: " + totalFood;
-    const capacity = state.capacity;
-    weightEl.classList.remove("over", "at-capacity", "under");
-    statusEl.classList.remove("over", "at-capacity", "under");
-    if (totalWeight2 > capacity) {
-      weightEl.classList.add("over");
-      statusEl.classList.add("over");
-      statusEl.textContent = `${(totalWeight2 - capacity).toFixed(1)} kg over`;
-      confirmBtn.disabled = true;
-    } else {
-      weightEl.classList.add("under");
-      statusEl.classList.add("under");
-      statusEl.textContent = `${(capacity - totalWeight2).toFixed(1)} kg spare`;
-      confirmBtn.disabled = totalFood < 10;
-      if (totalFood < 10) {
-        shopStatusEl.textContent = `Need ${10 - totalFood} more food to begin.`;
-        shopStatusEl.style.color = "var(--clr-danger)";
-      } else {
-        shopStatusEl.textContent = "Ready to depart!";
-        shopStatusEl.style.color = "var(--clr-success)";
+  const isPreDeparture = !!state.preDeparture;
+  if (isPreDeparture) {
+    let recalc = function() {
+      let totalWeight2 = 0;
+      const cart2 = game.getCart();
+      cart2.forEach((i) => {
+        totalWeight2 += i.wt * i.count;
+      });
+      starterItems.forEach((item) => {
+        totalWeight2 += item.wt * item.count;
+      });
+      if (selectedExtra) {
+        totalWeight2 += selectedExtra.wt * selectedExtra.count;
       }
-    }
-  }
-  __name(recalc, "recalc");
-  function renderList() {
-    const cart = game.getCart();
-    const tradeGoods = cart.filter((i) => i.type === "trade" || i.category === "furs");
-    let html = "";
-    if (tradeGoods.length > 0) {
-      html += `<div style="font-family:var(--font-heading);font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:var(--clr-accent);margin:10px 0 6px;">Your Trade Goods</div>`;
-      tradeGoods.forEach((item) => {
-        const mbVal = item.mbValue || 1;
+      currentEl.textContent = totalWeight2.toFixed(1);
+      weightEl.classList.remove("over", "at-capacity", "under");
+      statusEl.classList.remove("over", "at-capacity", "under");
+      if (totalWeight2 > state.capacity) {
+        weightEl.classList.add("over");
+        statusEl.classList.add("over");
+        statusEl.textContent = `${(totalWeight2 - state.capacity).toFixed(1)} kg over`;
+        confirmBtn.disabled = true;
+      } else {
+        weightEl.classList.add("under");
+        statusEl.classList.add("under");
+        statusEl.textContent = `${(state.capacity - totalWeight2).toFixed(1)} kg spare`;
+        confirmBtn.disabled = false;
+      }
+    }, renderList = function() {
+      let html = '<div style="font-family:var(--font-heading);font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:var(--clr-accent);margin:10px 0 6px;">Starter Kit (auto-included)</div>';
+      starterItems.forEach((item) => {
+        html += `<div class="pd-row" style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--clr-muted);">
+          <div class="pd-item-info">
+            <span class="pd-name">${item.name}</span>
+            <div style="font-size:0.75em;color:var(--clr-muted);margin-top:2px;">${item.wt} kg</div>
+          </div>
+        </div>`;
+      });
+      html += '<div style="font-family:var(--font-heading);font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:var(--clr-accent);margin:14px 0 6px;">Pick ONE Extra Item</div>';
+      extraItems.forEach((item) => {
+        const isSelected = selectedExtra && selectedExtra.name === item.name;
         const itemWeight = (item.wt * item.count).toFixed(1);
-        html += `
-    <div class="pd-row" data-trade-item="${item.name}">
-      <div class="pd-item-info">
-        <span class="pd-icon">${getItemIcon(item.name)}</span>
-        <span class="pd-name">${item.name} \xD7${item.count}</span>
-        <div style="font-size:0.75em;color:var(--clr-accent);margin-top:2px;">${mbVal} \u20A5 each \xB7 ${itemWeight} kg total</div>
-      </div>
-      <div class="pd-controls">
-        <button class="pd-sell" data-item="${item.name}" style="padding:4px 12px;font-size:0.85em;background:var(--clr-danger);color:#fff;border:2px solid var(--clr-danger);font-family:var(--font-heading);font-weight:600;cursor:pointer;">Sell 1</button>
-        <span class="pd-weight" style="color:var(--clr-muted);">${item.wt} kg ea</span>
-      </div>
-    </div>`;
+        html += `<div class="pd-row extra-item-row" data-item="${item.name}" style="display:flex;justify-content:space-between;align-items:center;padding:10px;border:2px solid ${isSelected ? "var(--clr-accent)" : "var(--clr-muted)"};background:${isSelected ? "rgba(139,105,20,0.1)" : "transparent"};cursor:pointer;border-radius:0;transition:border-color 0.15s,background 0.15s;" onmouseover="this.style.borderColor='var(--clr-accent)'" onmouseout="this.style.borderColor='${isSelected ? "var(--clr-accent)" : "var(--clr-muted)"}'">
+          <div class="pd-item-info" style="flex:1;">
+            <span class="pd-name" style="font-weight:${isSelected ? "700" : "600"};">${item.name} \xD7${item.count}</span>
+            <div style="font-size:0.75em;color:var(--clr-muted);margin-top:2px;">${item.desc}</div>
+            <div style="font-size:0.7em;color:var(--clr-accent);margin-top:2px;">${itemWeight} kg total</div>
+          </div>
+          <div class="pd-controls" style="display:flex;align-items:center;gap:8px;">
+            ${isSelected ? '<span style="color:var(--clr-accent);font-family:var(--font-heading);font-size:14px;">\u2713 Selected</span>' : '<button class="pd-extra-pick" data-item="' + item.name + '" style="padding:6px 14px;background:var(--clr-accent);color:var(--clr-bg);border:2px solid var(--clr-accent);font-family:var(--font-heading);font-weight:600;cursor:pointer;">Pick This</button>'}
+          </div>
+        </div>`;
       });
-    }
-    html += `<div style="font-family:var(--font-heading);font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:var(--clr-accent);margin:14px 0 6px;">Buy Supplies</div>`;
-    html += shopItems.map((item) => {
-      const canBuy = balance >= item.price;
-      const itemWeight = (item.wt * item.count).toFixed(1);
-      const qty = purchased[item.name];
-      return `
-    <div class="pd-row" data-item="${item.name}">
-      <div class="pd-item-info">
-        <span class="pd-icon">${getItemIcon(item.name)}</span>
-        <span class="pd-name">${item.name}</span>
-        <div style="font-size:0.75em;color:var(--clr-muted);margin-top:2px;">${item.desc}</div>
-      </div>
-      <div class="pd-controls">
-        <span class="pd-count">${qty > 0 ? "\xD7" + qty : "\u2014"}</span>
-        ${qty > 0 ? `<button class="pd-remove" data-item="${item.name}" style="padding:4px 12px;font-size:0.85em;background:transparent;color:var(--clr-danger);border:2px solid var(--clr-danger);font-family:var(--font-heading);font-weight:600;cursor:pointer;">Remove</button>` : ""}
-        <button class="pd-buy" data-item="${item.name}" ${canBuy ? "" : "disabled"} style="padding:4px 12px;font-size:0.85em;background:var(--clr-success);color:#fff;border:2px solid var(--clr-success);font-family:var(--font-heading);font-weight:600;cursor:pointer;">+ Buy (${item.price} \u20A5)</button>
-        <span class="pd-weight">${itemWeight} kg</span>
-      </div>
-    </div>`;
-    }).join("");
-    listEl.innerHTML = html;
-    listEl.querySelectorAll(".pd-sell").forEach((btn) => {
-      btn.addEventListener("click", () => {
-        const name3 = btn.dataset.item;
-        const item = cart.find((i) => i.name === name3);
-        if (item && item.count > 0) {
-          game.offloadItem(name3);
-          balance += item.mbValue || 1;
+      if (cart.length > 0) {
+        html += '<div style="font-family:var(--font-heading);font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:var(--clr-accent);margin:14px 0 6px;">Your Trade Goods</div>';
+        cart.forEach((item) => {
+          const itemWeight = (item.wt * item.count).toFixed(1);
+          html += `<div class="pd-row" style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--clr-muted);">
+            <div class="pd-item-info">
+              <span class="pd-name">${item.name} \xD7${item.count}</span>
+              <div style="font-size:0.75em;color:var(--clr-muted);margin-top:2px;">${itemWeight} kg total</div>
+            </div>
+          </div>`;
+        });
+      }
+      listEl.innerHTML = html;
+      listEl.querySelectorAll(".pd-extra-pick").forEach((btn) => {
+        btn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          const name3 = btn.dataset.item;
+          selectedExtra = extraItems.find((i) => i.name === name3);
           recalc();
           renderList();
-        }
+        });
       });
-    });
-    listEl.querySelectorAll(".pd-buy").forEach((btn) => {
-      btn.addEventListener("click", () => {
-        const name3 = btn.dataset.item;
-        const item = shopItems.find((i) => i.name === name3);
-        if (item && balance >= item.price) {
-          balance -= item.price;
-          purchased[item.name]++;
+      listEl.querySelectorAll(".extra-item-row").forEach((row) => {
+        row.addEventListener("click", () => {
+          if (!selectedExtra || selectedExtra.name !== row.dataset.item) {
+            selectedExtra = extraItems.find((i) => i.name === row.dataset.item);
+          } else {
+            selectedExtra = null;
+          }
           recalc();
           renderList();
+        });
+      });
+    };
+    __name(recalc, "recalc");
+    __name(renderList, "renderList");
+    document.getElementById("predeparture-overlay")?.classList.add("active");
+    document.getElementById("predeparture-overlay")?.removeAttribute("hidden");
+    const starterItems = [
+      { name: "Medicine Pouch", wt: 1.5, category: "medical", count: 1 },
+      { name: "Ammunition Belt", wt: 2, category: "hunting", count: 1 },
+      { name: "Canvas Tarp", wt: 4, category: "shelter", count: 1 }
+    ];
+    const extraItems = [
+      { name: "Pemmican Rations", wt: 2.5, category: "provisions", count: 7, desc: "Dried meat and fat. The staple of the prairie." },
+      { name: "Spare Axle", wt: 15, category: "parts", count: 1, desc: "Hard maple. Heavy but essential for a Red River cart." },
+      { name: "Shaganappi", wt: 3, category: "repair", count: 3, desc: "Rawhide strips. Binding, lashing, and cart repair." },
+      { name: "Tool Kit", wt: 8, category: "parts", count: 1, desc: "Axe, auger, drawknife. Required for major repairs." },
+      { name: "Firewood Bundle", wt: 6, category: "fuel", count: 1, desc: "Dried poplar. Required for cold nights." },
+      { name: "Rope (50ft)", wt: 3, category: "parts", count: 1, desc: "Hemp. Crossings, repairs, binding." },
+      { name: "Blanket", wt: 3, category: "shelter", count: 2, desc: "Wool. Winter survival." }
+    ];
+    let selectedExtra = null;
+    const cart = game.getCart();
+    recalc();
+    renderList();
+    confirmBtn.onclick = () => {
+      const game2 = window._metisGame;
+      starterItems.forEach((item) => {
+        for (let i = 0; i < item.count; i++) {
+          game2.buyItem(item.name, item.wt, item.category);
         }
       });
-    });
-    listEl.querySelectorAll(".pd-remove").forEach((btn) => {
-      btn.addEventListener("click", () => {
-        const name3 = btn.dataset.item;
-        const item = shopItems.find((i) => i.name === name3);
-        if (item && purchased[item.name] > 0) {
-          balance += item.price;
-          purchased[item.name]--;
-          recalc();
-          renderList();
+      if (selectedExtra) {
+        for (let i = 0; i < selectedExtra.count; i++) {
+          game2.buyItem(selectedExtra.name, selectedExtra.wt, selectedExtra.category);
         }
-      });
-    });
+      }
+      game2.addFood(18);
+      game2.confirmPreDeparture();
+      document.getElementById("predeparture-overlay")?.classList.remove("active");
+      window.__METIS_RENDER__();
+    };
+    return;
   }
-  __name(renderList, "renderList");
-  recalc();
-  renderList();
-  document.getElementById("predeparture-overlay")?.classList.add("active");
 }
 __name(showShop, "showShop");
 function showCrew(game) {
@@ -20140,7 +20909,7 @@ function showCamp(game) {
       costRow.textContent = `Cost: ${a.cost}`;
       const riskRow = document.createElement("div");
       riskRow.className = "camp-card-risk";
-      riskRow.textContent = `Risk: ${a.risk}`;
+      riskRow.textContent = `Receive: ${a.risk}`;
       const flavorRow = document.createElement("div");
       flavorRow.className = "camp-card-flavor";
       flavorRow.textContent = a.flavor;
@@ -20173,13 +20942,16 @@ function showCamp(game) {
               title: "Camp: Push On",
               text: a.flavor,
               mech: `-1.5 Food \xB7 +1 Wear \xB7 -5 Morale`,
-              collapsed: true
+              collapsed: false
             });
             document.getElementById("camp-overlay")?.classList.remove("active");
             window.__METIS_RENDER__();
             return;
           } else {
             result = game.campAction(a.type);
+          }
+          if (result && !result.error) {
+            result.foodAfter = game.getState().food;
           }
           const errEl = document.getElementById("camp-result");
           const rollEl = document.getElementById("camp-roll-display");
@@ -20224,29 +20996,35 @@ function showCamp(game) {
               <div class="roll-total">Need ${DC}+ ${isSuccess ? "\u2713" : "\u2717"}</div>
             `;
             const dieEl = document.getElementById("camp-die");
-            let ticks = 0;
-            const maxTicks = 6 + Math.floor(Math.random() * 4);
-            const spinId = setInterval(() => {
-              dieEl.textContent = String(Math.floor(Math.random() * 20) + 1);
-              ticks++;
-              if (ticks >= maxTicks) {
-                clearInterval(spinId);
-                dieEl.textContent = String(result.roll);
-                dieEl.className = "die small font-spectral settled " + (isSuccess ? "pass" : "fail");
-                haptics_default.uiTap();
-                if (errEl) {
-                  errEl.style.display = "block";
-                  let html = "";
-                  if (result.critical) {
-                    html += `<div class="camp-critical">\u26A0 Critical Failure</div>`;
-                  }
-                  html += flavorText;
-                  errEl.innerHTML = html;
+            if (dieEl) {
+              let ticks = 0;
+              const maxTicks = 6 + Math.floor(Math.random() * 4);
+              const spinId = setInterval(() => {
+                if (!dieEl.parentNode) {
+                  clearInterval(spinId);
+                  return;
                 }
-                const continueEl = document.getElementById("camp-continue");
-                if (continueEl) continueEl.style.display = "inline-block";
-              }
-            }, 60);
+                dieEl.textContent = String(Math.floor(Math.random() * 20) + 1);
+                ticks++;
+                if (ticks >= maxTicks) {
+                  clearInterval(spinId);
+                  dieEl.textContent = String(result.roll);
+                  dieEl.className = "die small font-spectral settled " + (isSuccess ? "pass" : "fail");
+                  if (haptics_default) haptics_default.uiTap();
+                  if (errEl) {
+                    errEl.style.display = "block";
+                    let html = "";
+                    if (result.critical) {
+                      html += '<div class="camp-critical">\u26A0 Critical Failure</div>';
+                    }
+                    html += flavorText;
+                    errEl.innerHTML = html;
+                  }
+                  const continueEl = document.getElementById("camp-continue");
+                  if (continueEl) continueEl.style.display = "inline-block";
+                }
+              }, 60);
+            }
           } else {
             if (errEl) {
               errEl.style.display = "block";
@@ -20274,19 +21052,30 @@ function showCamp(game) {
           if (after.wear !== state.wear) mechParts.push(`Wear ${after.wear - state.wear >= 0 ? "+" : ""}${after.wear - state.wear}`);
           if (after.morale !== state.morale) mechParts.push(`Morale ${after.morale - state.morale >= 0 ? "+" : ""}${after.morale - state.morale}`);
           if (after.crew !== state.crew) mechParts.push(`Crew: ${state.crew} \u2192 ${after.crew}`);
+          const cart = game.getCart();
+          const weather = after.weather || "clear";
+          const campEntry = buildCampEntry(a.type, result, 0, cart, weather);
+          const campReflection = buildCampReflection(a.type, result, cart, weather, after.day);
           journalLog({
             day: after.day,
             date: monthName(after.month) + " " + after.day,
             title: `Camp: ${actionLabels[a.type] || a.type}`,
-            text: a.flavor,
+            text: campReflection,
             dice: result.roll !== null ? `Rolled ${result.roll} \u2014 need ${{ rest: 12, forage: 10, hunt: 10, repair: 8, scout: 9, dance: 8, pemmican_process: 10 }[a.type] || 10}+ \u2014 ${result.rollTotal >= ({ rest: 12, forage: 10, hunt: 10, repair: 8, scout: 9, dance: 8, pemmican_process: 10 }[a.type] || 10) ? "\u2713 Success" : "\u2717 Failure"}${result.critical ? " \u2014 \u26A0 CRITICAL" : ""}` : null,
             mech: mechParts.join(" \xB7 "),
-            collapsed: true
+            collapsed: false
           });
         });
       }
       actionsEl.appendChild(card);
     });
+  }
+  const campContinueBtn = document.getElementById("camp-continue");
+  if (campContinueBtn) {
+    campContinueBtn.onclick = () => {
+      document.getElementById("camp-overlay")?.classList.remove("active");
+      window.__METIS_RENDER__();
+    };
   }
   document.getElementById("camp-overlay")?.classList.add("active");
 }
@@ -20333,7 +21122,7 @@ function showEnd(game) {
     }, "safeNum");
     scoreLines = [
       { label: "Base score", value: safeNum(breakdown?.base) },
-      { label: `MB value (${safeNum(state.mbValue)} \xD7 80)`, value: safeNum(breakdown?.mbValue) },
+      { label: "Trade goods delivered", value: safeNum(breakdown?.tradeBonus) },
       { label: `Food bonus (${Math.min(safeNum(state.food), 25)} \xD7 12)`, value: safeNum(breakdown?.foodBonus) },
       { label: `Crew condition (${state.crew || "unknown"})`, value: safeNum(breakdown?.crewCondition) },
       { label: `Days on trail (${safeNum(state.day)} \xD7 -8)`, value: safeNum(breakdown?.daysPenalty) },
@@ -20499,49 +21288,6 @@ function escapeHtml(str) {
   return div.innerHTML;
 }
 __name(escapeHtml, "escapeHtml");
-function buildSettlementJournalText(action, st2, intelText) {
-  const stName = st2?.name || "the settlement";
-  const stType = st2?.type || "unknown";
-  if (intelText && (action === "get_intel" || action === "trade_gossip" || action === "gossip" || action === "buy_info" || action === "rumours")) {
-    return `At ${stName}, a traveller tells you: "${intelText}"`;
-  }
-  if (action === "trade_gossip" || action === "gossip" || action === "rumours") {
-    const gossipByType = {
-      hbc: `At ${stName}, a clerk leans in: "The Company keeps its ledgers tight, but the trail keeps its own accounts. I've heard tell of what lies ahead."`,
-      metis: `At ${stName}, the women gather and talk. News passes between camps faster than the wind across the prairie. "${stName} knows all the trails."`,
-      mission: `At ${stName}, the sisters share what they've learned from travellers. "God watches over the road," they say, "but the road has its own ways."`,
-      nwmp: `At ${stName}, a constable shares the latest reports. "The law rides slow, but word rides faster. Here's what we know."`,
-      trading: `At ${stName}, traders swap stories with their wares. "Every cart that passes carries news. Sit, and you'll hear it all."`
-    };
-    return gossipByType[stType] || gossipByType.trading;
-  }
-  const texts = {
-    rest: `A day of rest at ${stName}. The crew recovers, the oxen graze. The weight of the trail lifts, if only for a day.`,
-    trade: `Trade goods exchanged at ${stName}. The ledgers are updated, the cart a little lighter, the credit a little heavier.`,
-    repair: `The cart is tended at ${stName}. Shaganappi and effort \u2014 the wheels turn smoother.`,
-    heal: `The crew is tended at ${stName}. Wounds dressed, spirits mended.`,
-    buy_food: `Supplies taken on at ${stName}. The cart grows heavier with food for the trail ahead.`,
-    buy_repair: `Cart repaired at ${stName}. The wear comes off, the wheels turn true.`,
-    buy_heal: `The crew is healed at ${stName}. Morale restored, strength returned.`,
-    buy_info: `News gathered at ${stName}. The trail ahead becomes a little less uncertain.`,
-    craft: `Work done at ${stName}. Raw materials become something more useful.`,
-    forage: `Foraging around ${stName}. The land yields what it can.`,
-    recruit: `New hands found at ${stName}. The crew grows by one.`,
-    get_intel: `Intelligence gathered at ${stName}. The map of the trail ahead grows clearer.`,
-    get_blessing: `A blessing received at ${stName}. The journey ahead feels lighter, the burden shared.`,
-    share_food: `Food shared with the community at ${stName}. Generosity on the trail builds its own credit.`,
-    dance: `An evening of music and dance at ${stName}. The fiddle plays and the trail's weight lifts, if only for a night.`,
-    pay_fines: `Fines settled at ${stName}. The ledger balanced, the road open again.`,
-    get_permits: `Permits obtained at ${stName}. The paperwork of empire, but it keeps the cart moving.`,
-    report_duty: `Duty reported at ${stName}. The forms filled, the wait endured.`,
-    buy_ammo: `Ammunition purchased at ${stName}. The belt heavier, the hunt more certain.`,
-    heal_crew: `The crew tended at ${stName}. Wounds dressed, strength returned.`,
-    craft_hides: `Hides worked at ${stName}. The women's hands turn raw pelts into trade goods.`,
-    trade_limited: `A cautious trade at ${stName}. Not everything is for sale, but something can be found.`
-  };
-  return texts[action] || `Time spent at ${stName}.`;
-}
-__name(buildSettlementJournalText, "buildSettlementJournalText");
 window.__METIS_RENDER__ = render;
 document.addEventListener("click", (e) => {
   const tabBtn = e.target.closest(".lb-tab");

@@ -2,6 +2,7 @@ import { NODES } from '../data/nodes.js';
 import { applyTheme } from './theme.js';
 import cartMarkerUrl from '../../art/cart_marker.png';
 import { CONSTANTS } from '../core/constants.js';
+import { getFoodDescription, getFoodStatusLabel } from './journalNarrative.js';
 
 const MONTH_NAMES = ['', 'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
@@ -39,7 +40,7 @@ export function initMap() {
   if (map) return;
   if (!window.__METIS_READY__) return;
 
-  applyTheme(el);
+  applyTheme(document.documentElement);
 
   const { center, zoom } = getInitialView();
 
@@ -176,6 +177,8 @@ export function renderStatusBar(state) {
   const foodEl = document.getElementById('s-food');
   const wearEl = document.getElementById('s-wear');
   const crewEl = document.getElementById('s-crew');
+  const moraleEl = document.getElementById('s-morale');
+  const tradeEl = document.getElementById('s-trade');
 
   if (dayEl) dayEl.textContent = String(state.day);
   if (monthEl) monthEl.textContent = monthName(state.month);
@@ -185,7 +188,7 @@ export function renderStatusBar(state) {
     if (state.pendingSettlement) {
       segEl.textContent = `At: ${node?.name || 'camp'}`;
     } else if (next) {
-      segEl.textContent = `Next: ${next.name} (${next.dist} day segment)`;
+      segEl.textContent = `${node?.name || 'Camp'} → ${next.name} · Segment ${state.segment || 1} of ${NODES.length - 1}`;
     } else {
       segEl.textContent = node?.name || 'Arrived';
     }
@@ -196,29 +199,41 @@ export function renderStatusBar(state) {
   if (crewState === 'tired') crewCls += ' crew-tired';
   else if (crewState === 'exhausted') crewCls += ' crew-exhausted';
   else if (crewState === 'rested') crewCls += ' crew-rested';
-  crewEl.textContent = String(state.crew);
-  crewEl.className = crewCls;
-  foodEl.textContent = String(Math.floor(state.food));
-  foodEl.className = 'stat-value' + (state.food <= 5 ? ' food-low' : '');
-  wearEl.textContent = String(state.wear);
-  wearEl.className = 'stat-value' + (state.wear >= 4 ? ' wear-high' : '');
+  if (crewEl) {
+    crewEl.textContent = String(state.crew);
+    crewEl.className = crewCls;
+  }
+
+  if (foodEl) {
+    foodEl.textContent = String(Math.floor(state.food));
+    foodEl.title = getFoodDescription(state.food);
+    foodEl.className = 'stat-value' + (state.food <= 5 ? ' food-low' : '');
+  }
+
+  if (wearEl) {
+    wearEl.textContent = String(state.wear);
+    wearEl.className = 'stat-value' + (state.wear >= 4 ? ' wear-high' : '');
+  }
+
+  if (moraleEl) {
+    moraleEl.textContent = String(state.morale);
+    moraleEl.className = 'stat-value';
+  }
+
+  if (tradeEl) {
+    const tradeCount = (window._metisGame?.getCart?.() || []).filter(i => i.type === 'trade' || i.category === 'furs').reduce((s, i) => s + i.count, 0);
+    tradeEl.textContent = String(tradeCount);
+    tradeEl.className = 'stat-value';
+  }
 
   const weatherEl = document.getElementById('s-weather');
   if (weatherEl) {
     const w = state.weather || 'clear';
     weatherEl.textContent = CONSTANTS.WEATHER_LABELS[w] || 'Clear';
-    weatherEl.className = 'stat-value weather-' + w;
+    weatherEl.className = 'stat-value';
   }
 
-  // MB (Made Beaver) currency display
-  const mbEl = document.getElementById('s-mb');
-  if (mbEl) {
-    const mb = Math.round(state.mbValue || 0);
-    mbEl.textContent = `${mb} ₥`;
-    mbEl.className = 'stat-value' + (mb < CONSTANTS.MB_WIN_THRESHOLD ? ' mb-low' : ' mb-ok');
-  }
-
-  // #80 — Blessing indicator
+  // Blessing indicator — show as a stat-value if active
   const blessingWrap = document.getElementById('s-blessing-wrap');
   const blessingEl = document.getElementById('s-blessing');
   if (blessingWrap && blessingEl) {
@@ -228,6 +243,22 @@ export function renderStatusBar(state) {
       blessingWrap.style.display = 'inline';
     } else {
       blessingWrap.style.display = 'none';
+    }
+  }
+
+  // Update button visibility based on game state
+  const travelBtn = document.getElementById('btn-travel');
+  const campBtn = document.getElementById('btn-camp');
+  if (travelBtn && campBtn) {
+    if (state.pendingEvent || state.pendingSettlement || state.over || state.preDeparture) {
+      travelBtn.style.display = 'none';
+      campBtn.style.display = 'none';
+    } else if (state.traveledToday) {
+      travelBtn.style.display = 'none';
+      campBtn.style.display = 'flex';
+    } else {
+      travelBtn.style.display = 'flex';
+      campBtn.style.display = 'none';
     }
   }
 
