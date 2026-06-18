@@ -52,13 +52,19 @@
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html, body { height: 100%; overflow: hidden; }
   body { font-family: var(--font-body); color: var(--clr-ink); background: var(--clr-bg); }
-  #game-root { height: 100dvh; }
+  #game-root { height: 100svh; }
+  @supports not (height: 100svh) {
+    #game-root { height: 100vh; }
+  }
 
   #game-container {
     display: flex;
     flex-direction: column;
-    height: 100dvh;
+    height: 100svh;
     overflow: hidden;
+  }
+  @supports not (height: 100svh) {
+    #game-container { height: 100vh; }
   }
 
   /* ── Status Bar ─────────────────────────────────────────────── */
@@ -151,7 +157,7 @@
   }
   @media (max-width: 420px) {
     #status-bar { padding: 4px 8px; height: 34px; gap: 4px; }
-    .stat-label { display: none; }
+    .stat-label { font-size: 8px; }
     .stat-value { font-size: 10px; }
     .segment-progress { display: none; }
   }
@@ -305,6 +311,33 @@
     font-style: italic;
   }
 
+  /* Stat-tap affordance — visible cue on tappable stats */
+  .stat.tappable {
+    cursor: pointer;
+    border: 1px solid transparent;
+    border-radius: 0;
+    padding: 2px 6px;
+    transition: border-color 0.15s, background 0.15s;
+    position: relative;
+  }
+  .stat.tappable::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 6px;
+    right: 6px;
+    height: 1px;
+    background: rgba(200,168,26,0.3);
+    transition: background 0.15s;
+  }
+  .stat.tappable:hover {
+    border-color: var(--clr-accent);
+    background: rgba(200,168,26,0.06);
+  }
+  .stat.tappable:hover::after {
+    background: var(--clr-accent);
+  }
+
   /* Journal entries */
   .journal-day-group {
     margin-bottom: 6px;
@@ -432,10 +465,13 @@
   @media (max-width: 768px) {
     #journal { height: 25vh; max-height: 25vh; padding: 8px 12px 8px 20px; font-size: 12px; }
     #controls { padding: 6px 10px; gap: 6px; }
+    .stat-tappable::after { display: none; } /* hide underline on mobile */
+    .stat.tappable { border: 1px solid rgba(200,168,26,0.25); }
   }
   @media (max-width: 420px) {
     #journal { height: 20vh; max-height: 20vh; }
     #controls .ctrl-btn { min-height: 44px; font-size: 12px; }
+    .stat-tappable { padding: 1px 4px; border: 1px solid rgba(200,168,26,0.3); }
   }
 
   .overlay {
@@ -1016,17 +1052,26 @@
     font-size: 15px;
     font-weight: 700;
     color: var(--clr-ink-panel);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
   .settlement-action-card-cost {
     font-size: 11px;
     color: var(--clr-accent);
     font-family: var(--font-heading);
     letter-spacing: 0.03em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
   .settlement-action-card-risk {
     font-size: 11px;
     color: var(--clr-danger);
     line-height: 1.3;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
   .settlement-action-card-flavor {
     font-size: 12px;
@@ -1454,16 +1499,17 @@
     margin-top: 4px;
   }
   .camp-card-btn:hover:not(:disabled) {
-    background: var(--clr-bg);
-    color: var(--clr-ink);
-  }
-  .camp-card-btn:hover:not(:disabled) {
     background: var(--clr-btn-hover);
     color: var(--clr-btn-text);
   }
   .camp-card-btn:disabled {
     opacity: 0.4;
     cursor: not-allowed;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .camp-card-btn, .ctrl-btn, .choice-btn, .settlement-action-card-btn {
+      transition: none;
+    }
   }
   .camp-critical {
     font-family: var(--font-heading);

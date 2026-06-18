@@ -25,120 +25,120 @@ function weightedChoiceIndex(choices, rand) {
 }
 
 // ─── Settlement action weighting ───────────────────────────────────
-// MB-based economy: trade goods → MB credit → spend on food/repair/heal
-// Actions are now objects with {id, label, cost, risk, flavor}
+// Barter economy: trade furs for food/supplies at settlements
 function pickSettlementAction(actions, state, rand) {
   // actions is array of {id, label, cost, risk, flavor}
   const actionIds = actions.map(a => typeof a === 'string' ? a : a.id);
   const weights = actionIds.map(a => {
-    if (a === 'continue') return 15;
-    if (a === 'rest' && (state.crew !== 'rested' || state.morale < 50)) return 30;
-    if (a === 'rest') {
-      const credit = state.credit?.[state.pendingSettlementType || 'hbc'] || 0;
-      if (credit >= 0.5 && state.food < 10) return 5;
+    // Continue - low priority unless desperate
+    if (a === 'continue') return 5;
+    
+    // Rest actions (rest_0 for all settlement types)
+    if (a.startsWith('rest')) {
+      if (state.crew === 'exhausted') return 40;
+      if (state.crew === 'tired') return 25;
+      if (state.morale < 40) return 15;
+      return 8;
+    }
+    
+    // Mission rest_blessing - free rest + morale + blessing
+    if (a === 'rest_blessing_0') {
+      if (state.crew !== 'rested' || state.morale < 60) return 35;
+      if (state.blessingDays > 0) return 3; // already blessed
+      return 15;
+    }
+    
+    // Mission heal_crew - costs medicine pouch or 2 food
+    if (a.startsWith('heal_crew')) {
+      const hasMedicine = state.cart?.some(i => i.name === 'Medicine Pouch' && i.count > 0) || false;
+      if (!hasMedicine && state.food < 2) return 0;
+      if (state.morale < 30) return 30;
+      if (state.morale < 50) return 20;
+      return 5;
+    }
+    
+    // Trade furs for food - primary food source (higher weight when hungry)
+    if (a.startsWith('trade_furs_food')) {
+      const hasFur = state.cart?.some(i => (i.type === 'trade' || i.category === 'furs') && i.count > 0) || false;
+      if (!hasFur) return 0;
+      if (state.food < 3) return 60;
+      if (state.food < 6) return 45;
+      if (state.food < 10) return 30;
+      if (state.food < 15) return 15;
+      return 5;
+    }
+    
+    // Trade furs for supplies (ammo, shaganappi, medicine, rope)
+    if (a.startsWith('trade_furs_supplies')) {
+      const hasFur = state.cart?.some(i => (i.type === 'trade' || i.category === 'furs') && i.count > 0) || false;
+      if (!hasFur) return 0;
+      // Check which supply
+      if (a.includes('ammunition')) {
+        const hasAmmo = state.cart?.some(i => i.name === 'Ammunition Belt' && i.count > 0) || false;
+        if (hasAmmo) return 3;
+        return 15; // useful for hunting
+      }
+      if (a.includes('shaganappi')) {
+        if (state.wear >= 3) return 30;
+        if (state.wear >= 1) return 15;
+        return 5;
+      }
+      if (a.includes('medicine')) {
+        const hasMedicine = state.cart?.some(i => i.name === 'Medicine Pouch' && i.count > 0) || false;
+        if (hasMedicine) return 3;
+        return 10;
+      }
+      if (a.includes('rope')) return 5;
       return 10;
     }
-    // Trade: convert goods to MB credit
-    if (a === 'trade' || a === 'trade_limited') {
-      const mb = state.mbValue || 0;
-      if (mb >= 8) return 2;
-      if (state.food > 15) return 20;
-      if (state.food > 10) return 12;
+    
+    // Métis trade_gossip - free intel + morale
+    if (a === 'trade_gossip_0') return 15;
+    
+    // Métis dance - costs 1 food, big morale boost
+    if (a === 'dance_0') {
+      if (state.food < 1) return 0;
+      if (state.morale < 30) return 25;
+      if (state.morale < 50) return 15;
+      return 8;
+    }
+    
+    // Métis share_food - costs 2 food, morale + reputation
+    if (a === 'share_food_0') {
+      if (state.food < 4) return 0;
+      if (state.morale < 40) return 20;
+      return 8;
+    }
+    
+    // NWMP permit - trade 1 fur for permit
+    if (a === 'permit_0') {
+      const hasFur = state.cart?.some(i => (i.type === 'trade' || i.category === 'furs') && i.count > 0) || false;
+      if (!hasFur) return 0;
+      if (!state.hasPermit) return 12;
       return 2;
     }
-    // Buy food with MB credit
-    if (a === 'buy_food') {
-      const credit = state.credit?.[state.pendingSettlementType || 'hbc'] || 0;
-      if (credit < 0.5) return 0;
-      if (state.food < 3) return 80;
-      if (state.food < 6) return 60;
-      if (state.food < 10) return 45;
-      if (state.food < 15) return 30;
-      return 10;
-    }
-    // Buy repair with MB credit
-    if (a === 'buy_repair') {
-      const credit = state.credit?.[state.pendingSettlementType || 'hbc'] || 0;
-      if (credit < 2 || state.wear <= 0) return 0;
-      if (state.wear >= 4) return 35;
-      if (state.wear >= 2) return 20;
-      return 5;
-    }
-    // Buy heal with MB credit
-    if (a === 'buy_heal' || a === 'heal_crew') {
-      const credit = state.credit?.[state.pendingSettlementType || 'hbc'] || 0;
-      if (credit < 1) return 0;
-      if (state.morale < 30) return 30;
-      if (state.morale < 50) return 15;
-      return 3;
-    }
-    // Buy info / get intel with MB credit
-    if (a === 'buy_info' || a === 'get_intel') {
-      const credit = state.credit?.[state.pendingSettlementType || 'hbc'] || 0;
-      if (credit < 0.5) return 0;
-      return 5;
-    }
-    // Trade gossip (free, gives intel + morale)
-    if (a === 'trade_gossip') {
-      return 12;
-    }
-    // Recruit crew (costs 2 credit + 1 food)
-    if (a === 'recruit_crew') {
-      const credit = state.credit?.[state.pendingSettlementType || 'hbc'] || 0;
-      if (credit < 2 || state.food < 1) return 0;
-      if (state.crew === 'exhausted') return 25;
-      if (state.crew === 'tired') return 15;
-      return 5;
-    }
-    // Dance (costs 1 food, boosts morale)
-    if (a === 'dance') {
-      if (state.food < 1) return 0;
-      if (state.morale < 30) return 20;
-      if (state.morale < 50) return 12;
-      return 5;
-    }
-    // Share food (costs 2+ food, boosts morale + reputation)
-    if (a === 'share_food') {
-      if (state.food < 4) return 0;
-      if (state.morale < 40) return 15;
-      return 5;
-    }
-    // Get blessing (costs 1 food, gives roll buff)
-    if (a === 'get_blessing') {
-      if (state.food < 1) return 0;
-      if (state.blessingDays > 0) return 2; // already blessed
-      return 10;
-    }
-    // Craft hides
-    if (a === 'craft' || a === 'craft_hides') return 12;
-    // Pay fines
-    if (a === 'pay_fines') {
+    
+    // NWMP pay_fine - trade 1 fur to clear fines
+    if (a === 'pay_fine_0') {
       if ((state.fines || 0) <= 0) return 0;
+      const hasFur = state.cart?.some(i => (i.type === 'trade' || i.category === 'furs') && i.count > 0) || false;
+      if (!hasFur) return 0;
       return 30;
     }
-    // Get permits
-    if (a === 'get_permits') {
-      const credit = state.credit?.[state.pendingSettlementType || 'hbc'] || 0;
-      if (credit < 2) return 0;
-      return 8;
+    
+    // NWMP buy_ammo - trade 1 fur for 2 ammo belts
+    if (a === 'buy_ammo_0') {
+      const hasFur = state.cart?.some(i => (i.type === 'trade' || i.category === 'furs') && i.count > 0) || false;
+      if (!hasFur) return 0;
+      const hasAmmo = state.cart?.some(i => i.name === 'Ammunition Belt' && i.count > 0) || false;
+      if (hasAmmo) return 5;
+      return 15;
     }
-    // Report duty (free, gives credit but costs time)
-    if (a === 'report_duty') return 6;
-    // Buy ammo
-    if (a === 'buy_ammo') {
-      const credit = state.credit?.[state.pendingSettlementType || 'hbc'] || 0;
-      if (credit < 1.5) return 0;
-      return 8;
-    }
-    // Legacy repair/heal (free)
-    if (a === 'repair' && state.wear >= 3) return 30;
-    if (a === 'repair' && state.wear >= 1) return 15;
-    if (a === 'repair') return 3;
-    if (a === 'heal' && (state.crew !== 'rested' || state.morale < 60)) return 20;
-    if (a === 'heal') return 5;
-    return 10;
+    
+    return 8; // default weight
   });
   const total = weights.reduce((s, w) => s + w, 0);
+  if (total === 0) return actions[0]; // fallback
   let r = rand() * total;
   for (let i = 0; i < actions.length; i++) {
     r -= weights[i];
@@ -236,6 +236,9 @@ function pickCampAction(state, cart, rand) {
 function runSim(seed) {
   const game = createGame(seed);
 
+  // Add starting food (simulates pre-departure confirm)
+  game.addFood(18);
+
   // ── Offload to capacity ──
   let weight = game.totalWeight();
   const cap = game.getState().capacity;
@@ -313,33 +316,25 @@ function runSim(seed) {
       if (actions.type === 'settlement') {
         // #81 — One action per settlement visit
         const settleType = s.pendingSettlement?.type || 'hbc';
-        const stateForWeights = { ...s, pendingSettlementType: settleType };
+        const cart = game.getCart();
+        const stateForWeights = { ...s, pendingSettlementType: settleType, cart };
         // pickSettlementAction now receives action objects and returns an action ID string
-        const actionId = pickSettlementAction(actions.actions, game.getState(), Math.random);
+        const actionId = pickSettlementAction(actions.actions, stateForWeights, Math.random);
         if (actionId === 'continue') {
           continueCount++;
         } else if (actionId) {
-          // Track the action type
-          if (actionId === 'rest') restCount++;
-          else if (actionId === 'trade') tradeCount++;
-          else if (actionId === 'buy_food') buyFoodCount++;
-          else if (actionId === 'buy_repair') buyRepairCount++;
-          else if (actionId === 'buy_heal') buyHealCount++;
-          else if (actionId === 'buy_info') buyInfoCount++;
-          else if (actionId === 'repair') repairCount++;
-          else if (actionId === 'craft' || actionId === 'craft_hides') craftCount++;
-          else if (actionId === 'trade_gossip') gossipCount++;
-          else if (actionId === 'get_intel') getIntelCount++;
-          else if (actionId === 'recruit_crew') recruitCount++;
-          else if (actionId === 'dance') danceCount++;
-          else if (actionId === 'share_food') shareFoodCount++;
-          else if (actionId === 'get_blessing') blessingCount++;
-          else if (actionId === 'pay_fines') payFinesCount++;
-          else if (actionId === 'get_permits') getPermitsCount++;
-          else if (actionId === 'report_duty') reportDutyCount++;
-          else if (actionId === 'buy_ammo') buyAmmoCount++;
-          else if (actionId === 'heal_crew') healCrewCount++;
-          else if (actionId === 'trade_limited') tradeLimitedCount++;
+          // Track the action type (new barter action IDs)
+          if (actionId.startsWith('rest')) restCount++;
+          else if (actionId.startsWith('trade_furs_food')) tradeCount++;
+          else if (actionId.startsWith('trade_furs_supplies')) tradeCount++;
+          else if (actionId === 'trade_gossip_0') gossipCount++;
+          else if (actionId === 'dance_0') danceCount++;
+          else if (actionId === 'share_food_0') shareFoodCount++;
+          else if (actionId === 'heal_crew_0' || actionId === 'heal_crew_1') healCrewCount++;
+          else if (actionId === 'rest_blessing_0') blessingCount++;
+          else if (actionId === 'permit_0') getPermitsCount++;
+          else if (actionId === 'pay_fine_0') payFinesCount++;
+          else if (actionId === 'buy_ammo_0') buyAmmoCount++;
           game.settlementAction(actionId);
         }
         // Continue west after one action

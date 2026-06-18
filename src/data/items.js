@@ -1,11 +1,10 @@
-const ITEMS = [
+export const ITEMS = [
   {
     name: 'Pemmican Rations',
     wt: 2.5,
     count: 7,
     type: 'food',
     category: 'provisions',
-    mbValue: 0.4,
     perishable: true,
     desc: 'Dried meat and fat. The staple of the prairie. Never truly spoils.',
     source: {
@@ -22,7 +21,6 @@ const ITEMS = [
     count: 1,
     type: 'repair',
     category: 'parts',
-    mbValue: 1.2,
     perishable: false,
     desc: 'Hard maple. Heavy but essential for a Red River cart.',
   },
@@ -32,7 +30,6 @@ const ITEMS = [
     count: 3,
     type: 'repair',
     category: 'repair',
-    mbValue: 0.6,
     perishable: false,
     desc: 'Rawhide strips. Binding, lashing, and cart repair.',
     source: {
@@ -49,7 +46,6 @@ const ITEMS = [
     count: 1,
     type: 'tool',
     category: 'parts',
-    mbValue: 1.8,
     perishable: false,
     desc: 'Axe, auger, drawknife. Required for major repairs.',
   },
@@ -59,9 +55,9 @@ const ITEMS = [
     count: 4,
     type: 'trade',
     category: 'furs',
-    mbValue: 1.25,
     perishable: false,
-    desc: 'Folded. Trade value: ~1.25 MB each at any post.',
+    mbValue: 6,
+    desc: 'Folded. Trade value at any post.',
   },
   {
     name: 'Canvas Tarp',
@@ -69,7 +65,6 @@ const ITEMS = [
     count: 2,
     type: 'shelter',
     category: 'shelter',
-    mbValue: 1.0,
     perishable: false,
     desc: 'Waterproof. Shelter and cart-raft conversion.',
   },
@@ -79,7 +74,6 @@ const ITEMS = [
     count: 1,
     type: 'fuel',
     category: 'fuel',
-    mbValue: 0.2,
     perishable: false,
     desc: 'Dried poplar. Required for cold nights.',
   },
@@ -89,7 +83,6 @@ const ITEMS = [
     count: 1,
     type: 'tool',
     category: 'parts',
-    mbValue: 0.5,
     perishable: false,
     desc: 'Hemp. Crossings, repairs, binding.',
   },
@@ -99,7 +92,6 @@ const ITEMS = [
     count: 1,
     type: 'ammo',
     category: 'hunting',
-    mbValue: 0.9,
     perishable: false,
     desc: 'Shot and ball. For hunting and defence.',
   },
@@ -109,7 +101,6 @@ const ITEMS = [
     count: 1,
     type: 'medical',
     category: 'medical',
-    mbValue: 1.8,
     perishable: true,
     desc: 'Herbal remedies and bandages.',
   },
@@ -119,7 +110,6 @@ const ITEMS = [
     count: 2,
     type: 'shelter',
     category: 'shelter',
-    mbValue: 2.2,
     perishable: false,
     desc: 'Wool. Winter survival.',
   },
@@ -129,9 +119,9 @@ const ITEMS = [
     count: 3,
     type: 'trade',
     category: 'furs',
-    mbValue: 3.0,
     perishable: false,
-    desc: 'Prime bundle. The foundation of the northern trade. ~3 MB each.',
+    mbValue: 10,
+    desc: 'Prime bundle. The foundation of the northern trade.',
     source: {
       quote: 'Beaver... the very foundation of the northern trade.',
       author: 'HBC Archives',
@@ -143,10 +133,10 @@ const ITEMS = [
 
 export function startingCart() {
   // New game: start with trade goods only (no supplies)
-  // Player buys everything at the Fort Garry shop
+  // Player buys everything at the Fort Garry pre-departure
   return [
-    { name: 'Bison Hide', wt: 6, count: 4, type: 'trade', category: 'furs', mbValue: 1.25, perishable: false, desc: 'Folded. Trade value: ~1.25 ₥ each at any post.' },
-    { name: 'Beaver Pelts', wt: 4, count: 3, type: 'trade', category: 'furs', mbValue: 3.0, perishable: false, desc: 'Prime bundle. The foundation of the northern trade. ~3 ₥ each.' },
+    { name: 'Bison Hide', wt: 6, count: 4, type: 'trade', category: 'furs', perishable: false, mbValue: 6, desc: 'Folded. Trade value at any post.' },
+    { name: 'Beaver Pelts', wt: 4, count: 3, type: 'trade', category: 'furs', perishable: false, mbValue: 10, desc: 'Prime bundle. The foundation of the northern trade.' },
   ];
 }
 

@@ -5,23 +5,23 @@ export const ENDINGS = {
     id: 'victory',
     title: 'Fort Edmonton at Last!',
     narrative: {
-      high: "The palisade walls at Edmonton. Your cart made it — axle held, wheels still on. The crew's behind you, hollow-eyed but standing. You've still got MB credit to your name. The Company men will pay well.",
-      humble: "You reach Fort Edmonton with nothing left to give but your word. The cart groans as you roll through the gate — held together by rope and stubbornness. The crew is hollow-eyed but standing. Your MB credit is thin, but you arrived. Against the prairie, the weather, and every broken trail between Garry and Edmonton, you arrived.",
+      high: "The palisade walls at Edmonton. Your cart made it — axle held, wheels still on. The crew's behind you, hollow-eyed but standing. Your holds are full of pelts and hides. The Company men will pay well.",
+      humble: "You reach Fort Edmonton with nothing left to give but your word. The cart groans as you roll through the gate — held together by rope and stubbornness. The crew is hollow-eyed but standing. Your cart is bare, but you arrived. Against the prairie, the weather, and every broken trail between Garry and Edmonton, you arrived.",
     },
     quote: getSource('FORT_EDMONTON'),
     quoteHigh: getSource('SAWYER_TRIAL'),
-    tip: "Tip: Trade goods for MB credit at settlements, then spend MB on food and repairs. Keep your total MB value above 8 when you reach Edmonton. Repair wear early — letting the cart degrade costs points fast.",
+    tip: "Tip: Trade goods (furs, hides) at settlements for food and repairs. Keep your trade goods count high when you reach Edmonton — each is worth 50 points. Repair wear early — letting the cart degrade costs points fast.",
   },
 
   no_trade: {
     id: 'no_trade',
     title: 'Empty-Handed at Edmonton',
     narrative: {
-      high: "You reach Fort Edmonton, but your MB credit is gone. Every fur and hide was traded along the way to survive — food, repairs, medicine. You made the journey, but the Company men at the post look at your bare cart and empty ledger and shake their heads. A trip without profit is just a long walk.",
-      humble: "The gates of Fort Edmonton are open before you, but there is nothing to show for the journey. No furs, no hides, no MB credit to your name. You spent everything to keep the crew alive through the hardest stretches. You survived — but the ledger will not remember this trip.",
+      high: "You reach Fort Edmonton, but your cart holds no trade goods. Every fur and hide was bartered along the way to survive — food, repairs, medicine. You made the journey, but the Company men at the post look at your bare cart and empty ledger and shake their heads. A trip without profit is just a long walk.",
+      humble: "The gates of Fort Edmonton are open before you, but there is nothing to show for the journey. No furs, no hides, no trade goods to your name. You spent everything to keep the crew alive through the hardest stretches. You survived — but the ledger will not remember this trip.",
     },
     quote: getSource('HBC_JOURNAL'),
-    tip: "Tip: Trade goods for MB credit at settlements, then spend MB on food and repairs. Keep your total MB value above 8 when you reach Edmonton. Balance survival with profit — forage and hunt to supplement food instead of trading away all your cargo.",
+    tip: "Tip: Barter goods for supplies at settlements, then hold onto trade goods (furs, hides) for the end score. Keep your trade goods count above 5 when you reach Edmonton. Balance survival with profit — forage and hunt to supplement food instead of bartering away all your cargo.",
   },
 
   starvation: {

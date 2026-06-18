@@ -3,7 +3,7 @@ import { applyTheme } from './theme.js';
 export function mount() {
   const gameRoot = document.getElementById('game-root');
   if (!gameRoot) throw new Error('#game-root missing');
-  applyTheme(gameRoot);
+  applyTheme(document.documentElement);
   return gameRoot;
 }
 

@@ -19842,6 +19842,21 @@ function bootstrap(seed = null) {
 }
 __name(bootstrap, "bootstrap");
 window.__METIS_BOOT__ = bootstrap;
+(/* @__PURE__ */ __name(function fixMobileViewport() {
+  const root = document.getElementById("game-root");
+  const container = document.getElementById("game-container");
+  if (!root) return;
+  function setHeight() {
+    const h = window.innerHeight;
+    root.style.height = h + "px";
+    if (container) container.style.height = h + "px";
+  }
+  __name(setHeight, "setHeight");
+  if (window.innerWidth < 768) {
+    setHeight();
+    window.addEventListener("resize", setHeight);
+  }
+}, "fixMobileViewport"))();
 function publishResult(text) {
   window.__METIS_PENDING_RESULT__ = text;
 }

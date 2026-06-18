@@ -3,7 +3,7 @@ import { crewMod, wearMod, totalMod } from '../core/constants.js';
 import { advanceDate, seasonFor } from '../core/calendar.js';
 import { makeRNG, d20 } from '../core/seed.js';
 import { NODES } from '../data/nodes.js';
-import { startingCart, totalWeight } from '../data/items.js';
+import { startingCart, totalWeight, ITEMS } from '../data/items.js';
 import { getSource } from '../data/sources/index.js';
 import { pickEventForTerrain, pickSettlementEvent } from '../data/events.js';
 
@@ -57,7 +57,7 @@ export function createGame(seed = null) {
     date: { month: CONSTANTS.START_MONTH, day: CONSTANTS.START_DAY },
     season: seasonFor(CONSTANTS.START_MONTH),
     crew: 'rested',
-    food: 23,
+    food: 0,  // starting food added via pre-departure confirm
     wear: 0,
     morale: 70,
     node: 0,
@@ -75,23 +75,14 @@ export function createGame(seed = null) {
     reputation: { hbc: 0, nwmp: 0, metis: 0, mission: 0, cree: 0 },
     capacity: 100,
     usedWeight: 0,
-    credit: { hbc: 0, metis: 0, nwmp: 0, mission: 0 },
-    mbValue: 0,          // total MB value of all trade goods in cart
     perishable: {},
     preDeparture: true,
     weather: initWeather(),
     blessingDays: 0,
+    trailIntel: [],
+    hasPermit: false,
+    fines: 0,
   };
-
-  // ── MB helpers ────────────────────────────────────────────────────
-  function calcMB() {
-    return cart.filter(i => i.type === 'trade' || i.category === 'furs')
-      .reduce((s, i) => s + (i.mbValue || 0) * i.count, 0);
-  }
-
-  function recalcMB() {
-    S.mbValue = Math.round(calcMB() * 100) / 100;
-  }
 
   function checkGameOver() {
     if (S.over) return;
@@ -196,14 +187,12 @@ export function createGame(seed = null) {
           result.effects.push(`+${g.amt} ${g.name}`);
         }
       });
-      recalcMB();
     }
     if (ch.consumesItem) {
       const idx = cart.findIndex((i) => i.name === ch.consumesItem);
       if (idx !== -1 && cart[idx].count > 0) {
         cart[idx].count--;
         result.effects.push(`-1 ${ch.consumesItem}`);
-        recalcMB();
       }
     }
     if (ch.extraProgress) {
@@ -245,14 +234,18 @@ export function createGame(seed = null) {
     const wearPenalty = S.wear * S.wear;
     const foodBonus = Math.min(S.food, 25);
     const crewBonus = S.crew === 'rested' ? 30 : S.crew === 'tired' ? 10 : 0;
-    const noRestPenalty = Math.max(0, S.travelDaysWithoutRest - 3) * 15;
+    const noRestPenalty = Math.max(0, S.travelDaysWithoutRest - 3) * 10;
+    // Trade goods count as endgame score (furs remaining)
+    const tradeGoodsCount = cart.filter(i => i.type === 'trade' || i.category === 'furs')
+      .reduce((s, i) => s + i.count, 0);
+    const tradeBonus = tradeGoodsCount * 150;
 
     let score = 1000;
-    score += Math.round(S.mbValue * 80);
-    score += foodBonus * 12;
+    score += tradeBonus;
+    score += foodBonus * 15;
     score += crewBonus;
-    score -= daysPenalty * 8;
-    score -= wearPenalty * 40;
+    score -= daysPenalty * 5;
+    score -= wearPenalty * 25;
     score -= noRestPenalty;
     return Math.max(0, Math.round(score));
   }
@@ -263,12 +256,28 @@ export function createGame(seed = null) {
     if (S.over || S.pendingSettlement) return stepLog;
     const nextDist = NODES[S.node + 1]?.dist || 1;
 
+    // Weight physics: calculate weight ratio for travel/wear modifiers
+    const usedWeight = totalWeight(cart);
+    const weightRatio = usedWeight / CONSTANTS.CART_CAPACITY; // 0.0 to 1.5+
+    const travelMult = 1 + weightRatio * CONSTANTS.WEIGHT_TRAVEL_MULT;
+    const wearMult = 1 + weightRatio * CONSTANTS.WEIGHT_WEAR_MULT;
+
     // Advance weather at start of day
     advanceWeather();
 
     const weatherFood = CONSTANTS.WEATHER_FOOD_MOD[S.weather] || 0;
+    const foodBefore = S.food;
     S.food = Math.max(0, Math.round((S.food - CONSTANTS.DAILY_FOOD - weatherFood) * 10) / 10);
-    S.segmentDay++;
+    
+    // Starvation mechanics: food ≤ 0 triggers penalties
+    if (S.food <= 0) {
+      S.morale = Math.max(0, S.morale - 10);
+      S.crew = 'exhausted';
+      S.wear = Math.min(CONSTANTS.MAX_WEAR, S.wear + 1);
+      // Note: checkGameOver() will set S.over = true if food <= 0
+    }
+
+    S.segmentDay += travelMult; // heavier cart = slower progress per day
     S.travelDaysWithoutRest++;
     advance();
     // #80 — Decrement blessing days
@@ -276,7 +285,7 @@ export function createGame(seed = null) {
 
     const wearChance = { plains: 0.10, river_valley: 0.15, wooded: 0.20 };
     const weatherWearMult = CONSTANTS.WEATHER_WEAR_MULT[S.weather] || 1;
-    if (rand() < (wearChance[NODES[S.node].terrain] || 0.2) * weatherWearMult) S.wear++;
+    if (rand() < (wearChance[NODES[S.node].terrain] || 0.2) * weatherWearMult * wearMult) S.wear++;
 
     // Squeal event: at high wear, the axle's scream draws attention
     if (S.wear >= 4 && rand() < 0.35) {
@@ -307,8 +316,6 @@ export function createGame(seed = null) {
         return stepLog;
       }
       if (S.node >= NODES.length - 1) {
-        const hasTrade = cart.some((i) => i.type === 'trade' && i.count > 0);
-        recalcMB();
         S.over = true;
         // Check starvation/wear before declaring victory
         if (S.food <= 0) {
@@ -318,9 +325,9 @@ export function createGame(seed = null) {
         } else if (S.morale <= 0) {
           S.endReason = 'abandoned';
         } else {
-          S.won = S.mbValue >= CONSTANTS.MB_WIN_THRESHOLD;
+          S.won = true; // Reaching the end alive = victory
           S.score = calcScore();
-          S.endReason = S.won ? 'victory' : 'no_trade';
+          S.endReason = 'victory';
         }
         return stepLog;
       }
@@ -352,10 +359,8 @@ export function createGame(seed = null) {
       S.node++;
       S.segmentDay = 0;
       if (S.node >= NODES.length - 1) {
-        const hasTrade = cart.some((i) => i.type === 'trade' && i.count > 0);
-        recalcMB();
         S.over = true;
-        S.won = S.mbValue >= CONSTANTS.MB_WIN_THRESHOLD && S.wear < CONSTANTS.MAX_WEAR;
+        S.won = true; // Reaching the end alive = victory
         S.score = calcScore();
       } else {
         const n = NODES[S.node];
@@ -398,99 +403,81 @@ export function createGame(seed = null) {
     checkGameOver();
   }
 
-  function settlementAction(action) {
-    if (!S.pendingSettlement) return [];
-    // Clear pendingSettlement on 'continue' or after any other action (one action per visit)
-    if (action === 'continue') {
-      S.pendingSettlement = null;
-      return [];
-    }
-    if (action === 'rest') {
-      S.crew = 'rested';
-      S.food = Math.max(0, S.food - 1); // Costs 1 food to rest
-      S.travelDaysWithoutRest = 0;
-      S.morale = Math.min(100, S.morale + 15);
-    }
-    // Legacy repair/heal (free, no MB cost) — kept for backward compat
-    if (action === 'repair') {
-      const shag = cart.find((i) => i.name === 'Shaganappi');
-      if (S.wear > 0 && shag && shag.count > 0) {
-        shag.count--;
-        S.wear = Math.max(0, S.wear - 2);
-        recalcMB();
-      } else if (S.wear > 0) {
-        S.wear = Math.max(0, S.wear - 2);
-      }
-    }
-    if (action === 'heal') {
-      S.crew = 'rested';
-      S.morale = Math.min(100, S.morale + 20);
-    }
-    if (action === 'trade') {
-      const tg = cart.find((i) => i.type === 'trade' && i.count > 0);
-      if (tg) {
-        tg.count--;
-        recalcMB();
-        const mbGain = tg.mbValue || 1;
-        S.credit[S.pendingSettlement?.type || 'hbc'] =
-          (S.credit[S.pendingSettlement?.type || 'hbc'] || 0) + mbGain;
-        S.tradesMade++;
-      }
-    }
-    if (action === 'buy_food') {
-      const cost = CONSTANTS.MB_FOOD_COST;
-      const settleType = S.pendingSettlement?.type || 'hbc';
-      if ((S.credit[settleType] || 0) >= cost) {
-        S.credit[settleType] -= cost;
-        S.food += Math.floor(1 / cost); // 0.5 MB → 2 food
-      }
-    }
-    if (action === 'buy_repair') {
-      const cost = CONSTANTS.MB_REPAIR_COST;
-      const settleType = S.pendingSettlement?.type || 'hbc';
-      if ((S.credit[settleType] || 0) >= cost && S.wear > 0) {
-        S.credit[settleType] -= cost;
-        S.wear = Math.max(0, S.wear - 2);
-      }
-    }
-    if (action === 'buy_heal') {
-      const cost = CONSTANTS.MB_HEAL_COST;
-      const settleType = S.pendingSettlement?.type || 'hbc';
-      if ((S.credit[settleType] || 0) >= cost) {
-        S.credit[settleType] -= cost;
-        S.morale = Math.min(100, S.morale + 20);
-        S.crew = 'rested';
-      }
-    }
-    if (action === 'buy_info') {
-      const cost = CONSTANTS.MB_INFO_COST;
-      const settleType = S.pendingSettlement?.type || 'hbc';
-      if ((S.credit[settleType] || 0) >= cost) {
-        S.credit[settleType] -= cost;
-        // Trail intel: small morale boost + flag
-        S.morale = Math.min(100, S.morale + 5);
-        S.flags['trail_intel_' + S.node] = true;
-      }
-    }
-    if (action === 'craft') {
-      const recipes = this.getAvailableRecipes();
-      if (recipes.length === 0) return { error: 'No recipes available' };
-      // Note: The actual crafting is done via the UI buttons which call game.craftRecipe()
-      // This just advances time for the crafting activity
-      advance();
-    }
-    checkGameOver();
-    // One action per visit: clear pendingSettlement after any non-continue action
-    S.pendingSettlement = null;
-    return [];
+  function getSettlementActionsByType(type) {
+  const barter = CONSTANTS.SETTLEMENT_BARTER[type] || CONSTANTS.SETTLEMENT_BARTER.hbc;
+  const actions = [];
+
+  // Display name mapping for internal item names
+  const DISPLAY_NAMES = {
+    'any_fur': 'Any Fur/Pelt',
+    'Pemmican Rations': 'Pemmican Rations',
+    'rested': 'Rested',
+    'Morale': 'Morale',
+    'blessingDays': 'Blessing',
+    'trail_intel': 'Trail Intel',
+    'hasPermit': 'Permit',
+    'finesCleared': 'Fines Cleared',
+    'ReputationMetis': 'Reputation',
+  };
+
+  function displayName(name) {
+    return DISPLAY_NAMES[name] || name.replace(/_/g, ' ');
   }
+
+  // Add each barter option as an action
+  for (const [actionId, trade] of Object.entries(barter)) {
+    if (trade.giveOptions) {
+      // Multiple give options (e.g., mission heal_crew)
+      trade.giveOptions.forEach((opt, idx) => {
+        const giveDesc = opt.give.map(g => `${g.count} ${displayName(g.name)}`).join(' + ');
+        const receiveDesc = opt.receive.map(r => `${r.count} ${displayName(r.name)}`).join(', ');
+        actions.push({
+          id: `${actionId}_${idx}`,
+          label: actionId.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()),
+          cost: giveDesc || 'Free',
+          risk: receiveDesc,
+          flavor: trade.flavor,
+        });
+      });
+    } else if (trade.options) {
+      // Multiple receive options (e.g., trade_furs_supplies)
+      trade.options.forEach(opt => {
+        const giveDesc = trade.give.map(g => `${g.count} ${displayName(g.name)}`).join(' + ');
+        const receiveDesc = opt.receive.map(r => `${r.count} ${displayName(r.name)}`).join(', ');
+        actions.push({
+          id: `${actionId}_${opt.id}`,
+          label: `${actionId.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}: ${opt.id.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}`,
+          cost: giveDesc || 'Free',
+          risk: receiveDesc,
+          flavor: opt.flavor,
+        });
+      });
+    } else {
+      // Simple single give/receive
+      const giveDesc = trade.give.map(g => `${g.count} ${displayName(g.name)}`).join(' + ');
+      const receiveDesc = trade.receive.map(r => `${r.count} ${displayName(r.name)}`).join(', ');
+      actions.push({
+        id: actionId,
+        label: actionId.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()),
+        cost: giveDesc || 'Free',
+        risk: receiveDesc,
+        flavor: trade.flavor,
+      });
+    }
+  }
+
+  return actions;
+}
 
   return {
     travelOneDay,
     makeCamp,
     pushOn,
     chooseEventChoice,
+    getSettlementActionsByType,
     getState() {
+      const usedWeight = totalWeight(cart);
+      const weightRatio = usedWeight / CONSTANTS.CART_CAPACITY;
       return {
         day: S.day,
         month: S.month,
@@ -508,16 +495,23 @@ export function createGame(seed = null) {
         score: S.score,
         pendingEvent: S.pendingEvent,
         pendingSettlement: S.pendingSettlement,
-        usedWeight: totalWeight(cart),
+        usedWeight,
         capacity: S.capacity,
+        weightRatio: Math.round(weightRatio * 100) / 100,
         preDeparture: S.preDeparture,
         weather: S.weather,
         currentTerrain: NODES[S.node]?.terrain || 'plains',
         travelDaysWithoutRest: S.travelDaysWithoutRest,
-        mbValue: S.mbValue,
-        credit: { ...S.credit },
         blessingDays: S.blessingDays,
         trailIntel: S.trailIntel ? [...S.trailIntel] : [],
+        camps: S.camps,
+        eventsResolved: S.eventsResolved,
+        tradesMade: S.tradesMade,
+        flags: S.flags,
+        reputation: S.reputation,
+        credit: S.credit || {},
+        perishable: S.perishable,
+        seed: S.seed,
       };
     },
     getCart() {
@@ -527,13 +521,12 @@ export function createGame(seed = null) {
       const idx = cart.findIndex((i) => i.name === name);
       if (idx === -1 || cart[idx].count <= 0) return false;
       cart[idx].count--;
-      recalcMB();
       return true;
     },
     getTradeEstimate(itemId, quantity, settlementType) {
       const item = cart.find(i => i.name === itemId);
       if (!item) return null;
-      const basePrice = item.mbValue || 1;
+      const basePrice = 1;
       const mult = getSettlementPriceMultiplier(settlementType, item.category);
       const distanceFactor = S.node / (NODES.length - 1);
       const buyPrice = Math.round(basePrice * mult.buy * (1 + distanceFactor * 0.15) * 100) / 100;
@@ -576,8 +569,8 @@ export function createGame(seed = null) {
       const type = S.pendingSettlement.type;
       const state = S;
       const result = executeSettlementAction(actionId, type, state, cart, params);
-      // One action per visit: clear pendingSettlement after any successful non-continue action
-      if (actionId !== 'continue' && result && !result.error) {
+      // One action per visit: clear pendingSettlement after any successful action (including continue)
+      if (result && !result.error) {
         S.pendingSettlement = null;
       }
       checkGameOver();
@@ -585,33 +578,87 @@ export function createGame(seed = null) {
     },
 
     getEndgameScore() {
-      const mbVal = S.mbValue || 0;
-      const foodBonus = Math.min(S.food, 25);
-      const crewBonus = S.crew === 'rested' ? 30 : S.crew === 'tired' ? 10 : 0;
-      const daysPenalty = S.day * 8;
-      const wearPenalty = S.wear * S.wear * 40;
+      const state = S;
+      const foodBonus = Math.min(state.food, 25);
+      const crewBonus = state.crew === 'rested' ? 30 : state.crew === 'tired' ? 10 : 0;
+      const daysPenalty = state.day * 8;
+      const wearPenalty = state.wear * state.wear * 40;
       const baseScore = 500;
-      const mbScore = Math.round(mbVal * 80);
+
+      // Rarity multipliers for trade goods (per PHASE_0_PLAN)
+      const RARITY_MULT = {
+        'Prime Bison Hide': 5,
+        'Prime Elk Hide': 5,
+        'Prime Beaver Pelt': 5,
+        'Prime Wolf Pelt': 5,
+        'Bison Hide': 3,
+        'Elk Hide': 3,
+        'Beaver Pelt': 2,
+        'Wolf Pelt': 2,
+      };
+
+      // Calculate trade goods score with rarity multipliers
+      let tradeBonus = 0;
+      let tradeGoodsCount = 0;
+      let primeCount = 0;
+      let typesCollected = new Set();
+      const tradeItems = cart.filter(i => i.type === 'trade' || i.category === 'furs');
+      for (const item of tradeItems) {
+        const mult = RARITY_MULT[item.name] || 1;
+        tradeBonus += item.count * 50 * mult;
+        tradeGoodsCount += item.count;
+        if (mult >= 5) primeCount += item.count;
+        typesCollected.add(item.name);
+      }
+
+      // Survival bonuses
+      const moraleBonus = Math.floor(state.morale / 2); // up to 50
+      const blessingBonus = (state.blessingDays || 0) * 10; // up to 30
+      const speedBonus = state.day <= 40 ? 100 : state.day <= 50 ? 50 : 0; // faster journey bonus
+
       const foodScore = foodBonus * 12;
-      const total = S.won
-        ? baseScore + mbScore + foodScore + crewBonus - daysPenalty - wearPenalty
+
+      const total = state.won
+        ? baseScore + tradeBonus + foodScore + crewBonus + moraleBonus + blessingBonus + speedBonus - daysPenalty - wearPenalty
         : 0;
-      let tier;
-      if (!S.won) tier = 'Defeat';
-      else if (total < 500) tier = 'Barely Survived';
-      else if (total < 1200) tier = 'Solid Profit';
-      else tier = 'Legendary Haul';
+
+      // Tiered win conditions (PHASE_0_PLAN)
+      let tier = 'Defeat';
+      if (state.won) {
+        const hasAllTypes = typesCollected.size >= 4; // at least 4 different trade good types
+        const noStarvation = state.food > 0;
+        const lowWear = state.wear <= 2;
+
+        if (tradeGoodsCount >= 5 && state.crew === 'rested') {
+          if (hasAllTypes && noStarvation && lowWear && primeCount >= 2) {
+            tier = 'Legendary';
+          } else {
+            tier = 'Prosperous';
+          }
+        } else if (tradeGoodsCount >= 3 && state.food > 0) {
+          tier = 'Trader';
+        } else {
+          tier = 'Survivor';
+        }
+      }
+
       return {
         score: Math.max(0, Math.round(total)),
         breakdown: {
           base: Math.round(baseScore),
-          mbValue: Math.round(mbScore),
+          tradeGoods: Math.round(tradeBonus),
           foodBonus: Math.round(foodScore),
           crewCondition: Math.round(crewBonus),
+          morale: Math.round(moraleBonus),
+          blessings: Math.round(blessingBonus),
+          speed: Math.round(speedBonus),
           daysPenalty: Math.round(-daysPenalty),
           wearPenalty: Math.round(-wearPenalty),
         },
         tier,
+        tradeGoodsCount,
+        primeCount,
+        typesCollected: typesCollected.size,
       };
     },
 
@@ -639,7 +686,7 @@ export function createGame(seed = null) {
             { name: 'Bison Hide', count: 2 },
             { name: 'Shaganappi', count: 1 },
           ],
-          output: { name: 'Finished Hides', icon: '🟫', mbValue: 3.5 },
+          output: { name: 'Finished Hides', icon: '🟫' },
           settlement: 'hbc',
         },
         {
@@ -649,7 +696,7 @@ export function createGame(seed = null) {
             { name: 'Shaganappi', count: 2 },
             { name: 'Rope (50ft)', count: 1 },
           ],
-          output: { name: 'Travois Kit', icon: '🛒', mbValue: 2.5 },
+          output: { name: 'Travois Kit', icon: '🛒' },
           settlement: 'metis',
         },
         {
@@ -659,7 +706,7 @@ export function createGame(seed = null) {
             { name: 'Ammunition Belt', count: 1 },
             { name: 'Tool Kit', count: 1 },
           ],
-          output: { name: 'Gunpowder Pack', icon: '💥', mbValue: 4.0 },
+          output: { name: 'Gunpowder Pack', icon: '💥' },
           settlement: 'nwmp',
         },
       ];
@@ -677,20 +724,46 @@ export function createGame(seed = null) {
           }),
         }));
     },
-    campAction(type) {
+    campAction(type, extraFood = 0) {
       const action = String(type || '').toLowerCase();
       const costItems = [];
       const effects = [];
+      const itemEffects = [];
       let roll = null;
       let rollTotal = null;
       let critical = false;
 
       if (action === 'rest') {
-        if (S.food < 1) return { error: 'Not enough food to rest.' };
-        S.food -= 1;
-        costItems.push({ name: 'Food', count: -1 });
+        const foodCost = 1 + extraFood;
+        if (S.food < foodCost) return { error: 'Not enough food to rest.' };
+        S.food -= foodCost;
+        costItems.push({ name: 'Food', count: -foodCost });
+        
+        // Check for shelter/fuel items for rest bonuses
+        const hasTarp = cart.some(i => i.name === 'Canvas Tarp' && i.count > 0);
+        const hasBlanket = cart.some(i => i.name === 'Blanket' && i.count > 0);
+        const hasFirewood = cart.some(i => i.name === 'Firewood Bundle' && i.count > 0);
+        const isWetWeather = ['rain', 'storm', 'snow'].includes(S.weather);
+        const isColdWeather = ['snow'].includes(S.weather);
+        
         roll = d();
-        rollTotal = roll + crewMod(S);
+        // Extra food gives +2 to roll per extra food spent (up to +4)
+        const restBonus = Math.min(extraFood, 2) * 2;
+        // Item bonuses
+        let itemBonus = 0;
+        if (hasTarp && isWetWeather) {
+          itemBonus += 2;
+          itemEffects.push('Canvas Tarp kept the damp off. +2 rest bonus.');
+        }
+        if (hasBlanket && isColdWeather) {
+          itemBonus += 3;
+          itemEffects.push('Blankets held the cold at bay. +3 rest bonus.');
+        }
+        if (hasFirewood && isColdWeather) {
+          itemBonus += 2;
+          itemEffects.push('Firewood warmed the camp. +2 rest bonus.');
+        }
+        rollTotal = roll + crewMod(S) + restBonus + itemBonus;
         if (roll === 1) {
           critical = true;
           S.crew = 'tired';
@@ -699,38 +772,39 @@ export function createGame(seed = null) {
           effects.push('Critical failure: the camp is a disaster — cold, sleepless, demoralizing.', 'Morale -3', 'Crew tired');
         } else if (rollTotal >= 15) {
           S.crew = 'rested';
-          S.morale = Math.max(0, Math.min(100, S.morale + 20));
+          S.morale = Math.max(0, Math.min(100, S.morale + 20 + extraFood * 5 + itemBonus));
           S.wear = Math.max(0, S.wear - 1);
           S.travelDaysWithoutRest = 0;
-          effects.push('Wonderful rest.', 'Crew rested', 'Morale +20', 'Wear -1');
+          effects.push('Wonderful rest.', 'Crew rested', `Morale +${20 + extraFood * 5 + itemBonus}`, 'Wear -1');
         } else if (rollTotal >= 8) {
           S.crew = 'rested';
-          S.morale = Math.max(0, Math.min(100, S.morale + 15));
+          S.morale = Math.max(0, Math.min(100, S.morale + 15 + extraFood * 3 + itemBonus));
           S.wear = Math.max(0, S.wear - 1);
           S.travelDaysWithoutRest = 0;
-          effects.push('Crew rested', 'Morale +15', 'Wear -1');
+          effects.push('Crew rested', `Morale +${15 + extraFood * 3 + itemBonus}`, 'Wear -1');
         } else {
           S.crew = 'tired';
-          S.morale = Math.max(0, Math.min(100, S.morale + 5));
+          S.morale = Math.max(0, Math.min(100, S.morale + 5 + extraFood * 2 + itemBonus));
           S.travelDaysWithoutRest = 0;
-          effects.push('Rough night.', 'Morale +5', 'Crew tired');
+          effects.push('Rough night.', `Morale +${5 + extraFood * 2 + itemBonus}`, 'Crew tired');
         }
       } else if (action === 'forage') {
         roll = d();
-        rollTotal = roll + crewMod(S);
+        const forageBonus = Math.min(extraFood, 2) * 2;
+        rollTotal = roll + crewMod(S) + forageBonus;
         if (roll === 1) {
           critical = true;
           advance(); // lose an extra day
           effects.push('Critical failure: wasted the whole day. Found nothing.', '+1 day lost');
         }
         const baseGain = Math.floor(Math.random() * 6) + (rollTotal >= 12 ? 6 : rollTotal >= 8 ? 4 : 1);
-        S.food += baseGain;
+        S.food += baseGain + extraFood;
         if (rollTotal >= 12) {
-          effects.push(`Excellent foraging. +${baseGain} Food`);
+          effects.push(`Excellent foraging. +${baseGain + extraFood} Food`);
         } else if (rollTotal >= 8) {
-          effects.push(`Foraged +${baseGain} Food`);
+          effects.push(`Foraged +${baseGain + extraFood} Food`);
         } else if (rollTotal >= 5) {
-          effects.push(`Lean haul. +${baseGain} Food`);
+          effects.push(`Lean haul. +${baseGain + extraFood} Food`);
         } else {
           effects.push('Found little today.');
         }
@@ -739,36 +813,91 @@ export function createGame(seed = null) {
         if (!ammo || ammo.count < 1) return { error: 'Need 1 Ammunition Belt to hunt.' };
         ammo.count -= 1;
         costItems.push({ name: 'Ammunition Belt', count: -1 });
+        // Extra food for better preparation (+1 food per extra)
+        const foodCost = extraFood;
+        if (foodCost > 0) {
+          if (S.food < foodCost) return { error: 'Not enough food for extra supplies.' };
+          S.food -= foodCost;
+          costItems.push({ name: 'Food', count: -foodCost });
+        }
         advance();
         roll = d();
-        rollTotal = roll + crewMod(S);
+        const huntBonus = Math.min(extraFood, 2) * 2;
+        rollTotal = roll + crewMod(S) + huntBonus;
+        
+        const resultItems = [];
+        let meatGain = 0;
+        
         if (roll === 1) {
           critical = true;
           S.morale = Math.max(0, S.morale - 2);
           effects.push('Critical failure: shot went wide, startled the game, lost ammo.', 'Morale -2');
         } else if (rollTotal >= 10) {
-          // Success: add trade goods (pelts/hides) based on terrain
+          // Success: determine yield based on terrain and rarity weights
           const terrain = NODES[S.node]?.terrain || 'plains';
-          let prey;
-          if (terrain === 'river_valley') {
-            prey = { name: 'Beaver Pelt', icon: '🦫', mbValue: 3.0 };
-          } else if (terrain === 'uplands') {
-            prey = { name: 'Elk Hide', icon: '🫎', mbValue: 2.5 };
-          } else if (terrain === 'wooded') {
-            prey = { name: 'Deer Hide', icon: '🦌', mbValue: 1.8 };
+          const yields = CONSTANTS.HUNT_YIELDS[terrain] || CONSTANTS.HUNT_YIELDS.plains;
+          const weights = CONSTANTS.HUNT_RARITY_WEIGHTS;
+          
+          // Roll for rarity: 70% food only, 25% common pelt, 5% rare hide
+          const rarityRoll = Math.random();
+          let yieldResult = { type: 'food', item: null };
+          
+          if (rarityRoll < weights.food) {
+            yieldResult.type = 'food';
+          } else if (rarityRoll < weights.food + weights.common) {
+            yieldResult.type = 'common';
+            yieldResult.item = yields.common;
           } else {
-            prey = { name: 'Bison Hide', icon: '🐃', mbValue: 1.25 };
+            yieldResult.type = 'rare';
+            yieldResult.item = yields.rare;
           }
-          const existing = cart.find((c) => c.name === prey.name);
-          if (existing) {
-            existing.count++;
+          
+          // Food amount based on yield type
+          if (yieldResult.type === 'food') {
+            meatGain = Math.floor(Math.random() * (yields.foodMax - yields.foodMin + 1)) + yields.foodMin;
+          } else if (yieldResult.type === 'common') {
+            meatGain = Math.floor(yields.foodMin / 2) + 1; // 1-2 food for common
           } else {
-            cart.push({ name: prey.name, icon: prey.icon, type: 'trade', category: 'furs', wt: 4, count: 1, mbValue: prey.mbValue, desc: `Hunted on the ${terrain.replace(/_/g, ' ')}.` });
+            meatGain = Math.floor(yields.foodMin / 2) + 1; // 1-2 food for rare
           }
-          recalcMB();
-          effects.push(`Clean kill. +1 ${prey.name} (trade good)`);
+          
+          // Extra food spent gives +1 food yield per extra
+          meatGain += extraFood;
+          
+          S.food += meatGain;
+          effects.push(`Clean kill. +${meatGain} Food`);
+          
+          // Add pelt/hide if not food-only
+          if (yieldResult.item) {
+            const item = yieldResult.item;
+            const existing = cart.find((c) => c.name === item.name);
+            if (existing) {
+              existing.count++;
+            } else {
+              cart.push({
+                name: item.name,
+                icon: item.icon,
+                type: 'trade',
+                category: 'furs',
+                wt: item.wt,
+                count: 1,
+                desc: item.desc,
+              });
+            }
+            resultItems.push({
+              name: item.name,
+              wt: item.wt,
+              rarity: yieldResult.type, // 'common' or 'rare'
+            });
+            effects.push(`+1 ${item.name} (${item.wt} kg)`);
+          }
         } else {
           effects.push('Shot went wide. No pelts gained.');
+        }
+        
+        // Return structured result for hunt
+        if (roll !== 1 && rollTotal >= 10) {
+          return { day: S.day, effects, costItems, roll, rollTotal, critical, food: meatGain, items: resultItems };
         }
       } else if (action === 'repair') {
         const shag = cart.find((i) => i.name === 'Shaganappi');
@@ -843,12 +972,25 @@ export function createGame(seed = null) {
         effects.push('+2 Food spent', 'Crew rested', 'Morale +30', 'Wear -2');
         advance();
         advance();
+      } else if (action === 'cook') {
+        const firewood = cart.find((i) => i.name === 'Firewood Bundle');
+        if (!firewood || firewood.count < 1) return { error: 'Need Firewood to cook.' };
+        if (S.food < 1) return { error: 'Need 1 Food to cook.' };
+        firewood.count -= 1;
+        S.food -= 1;
+        costItems.push({ name: 'Firewood Bundle', count: -1 }, { name: 'Food', count: -1 });
+        S.crew = 'rested';
+        S.morale = Math.max(0, Math.min(100, S.morale + 10));
+        const healAmt = S.crew === 'exhausted' ? 30 : 20;
+        S.morale = Math.max(0, Math.min(100, S.morale + healAmt));
+        S.travelDaysWithoutRest = 0;
+        effects.push('Cooked a hot meal.', 'Firewood used', 'Morale +' + (10 + healAmt), 'Crew rested');
       } else {
         return { error: 'Unknown camp action.' };
       }
 
       if (effects.length === 0 && costItems.length === 0) effects.push('Nothing changes.');
-      return { day: S.day, effects, costItems, roll, rollTotal, critical };
+      return { day: S.day, effects, costItems, roll, rollTotal, critical, itemEffects };
     },
 
     craftRecipe(recipeId) {
@@ -890,7 +1032,6 @@ export function createGame(seed = null) {
           category: 'furs',
           wt: 3,
           count: 1,
-          mbValue: recipe.output.mbValue,
           desc: `Crafted: ${recipe.output.name}.`,
         });
       }
@@ -939,7 +1080,7 @@ export function createGame(seed = null) {
         return {
           type: 'settlement',
           name: S.pendingSettlement.name,
-          actions: availableSettlementActions(S.pendingSettlement.type),
+          actions: getSettlementActionsByType(S.pendingSettlement.type).map(a => a.id),
         };
       return { type: 'travel' };
     },
@@ -960,8 +1101,7 @@ export function createGame(seed = null) {
         currentCount: item.count,
         category: item.category,
         desc: item.desc,
-        icon: item.icon,
-        mbValue: item.mbValue,
+        icon: item.icon
       }));
     },
     setPreDepartureCount(itemName, newCount) {
@@ -971,13 +1111,11 @@ export function createGame(seed = null) {
       const clamped = Math.max(0, Math.min(newCount, maxCount));
       item.count = clamped;
       S.usedWeight = totalWeight(cart);
-      recalcMB();
       return true;
     },
     confirmPreDeparture() {
       S.preDeparture = false;
       S.usedWeight = totalWeight(cart);
-      recalcMB();
       return cart.map((i) => ({ name: i.name, count: i.count, wt: i.wt }));
     },
     getScoreData() {
@@ -998,7 +1136,6 @@ export function createGame(seed = null) {
         weather: S.weather,
         cartItems: cart.reduce((s, i) => s + i.count, 0),
         tradeGoods: tradeGoods.reduce((s, i) => s + i.count, 0),
-        mbValue: S.mbValue,
         distance: S.node,
         seed: S.seed,
       };
@@ -1008,339 +1145,182 @@ export function createGame(seed = null) {
       if (existing) {
         existing.count++;
       } else {
-        cart.push({ name, wt, count: 1, category, type: category === 'provisions' ? 'food' : 'item', mbValue: 0 });
+        cart.push({ name, wt, count: 1, category, type: category === 'provisions' ? 'food' : 'item' });
       }
-      recalcMB();
     },
     addFood(amount) {
       S.food += amount;
     },
-    clearTradeGoods() {
-      // Remove all trade goods (they were converted to ₥ at the shop)
-      for (let i = cart.length - 1; i >= 0; i--) {
-        if (cart[i].type === 'trade' || cart[i].category === 'furs') {
-          cart.splice(i, 1);
-        }
-      }
-      recalcMB();
-    },
   };
 }
-
-function getSettlementPriceMultiplier(type, category) {
-  const multipliers = {
-    hbc: { buy: 1.0, sell: 1.0, categories: { furs: { buy: 1.0, sell: 1.0 }, provisions: { buy: 1.0, sell: 1.0 }, repair: { buy: 1.0, sell: 1.0 }, medical: { buy: 1.0, sell: 1.0 }, shelter: { buy: 1.0, sell: 1.0 }, fuel: { buy: 1.0, sell: 1.0 }, tool: { buy: 1.0, sell: 1.0 }, hunting: { buy: 1.0, sell: 1.0 } } },
-    metis: { buy: 0.9, sell: 1.1, categories: { furs: { buy: 0.9, sell: 1.1 }, provisions: { buy: 0.95, sell: 1.05 }, repair: { buy: 1.0, sell: 1.0 }, medical: { buy: 1.0, sell: 1.0 }, shelter: { buy: 1.0, sell: 1.0 }, fuel: { buy: 1.0, sell: 1.0 }, tool: { buy: 1.0, sell: 1.0 }, hunting: { buy: 1.0, sell: 1.0 } } },
-    nwmp: { buy: 1.2, sell: 0.8, categories: { furs: { buy: 1.1, sell: 0.9 }, provisions: { buy: 1.2, sell: 0.8 }, repair: { buy: 1.2, sell: 0.8 }, medical: { buy: 1.0, sell: 1.0 }, shelter: { buy: 1.0, sell: 1.0 }, fuel: { buy: 1.0, sell: 1.0 }, tool: { buy: 1.0, sell: 1.0 }, hunting: { buy: 0.8, sell: 1.2 } } }, // ammo cheaper
-    mission: { buy: 0.8, sell: 1.5, categories: { furs: { buy: 0.8, sell: 1.5 }, provisions: { buy: 0.7, sell: 1.3 }, repair: { buy: 1.0, sell: 1.0 }, medical: { buy: 0.8, sell: 1.2 }, shelter: { buy: 1.0, sell: 1.0 }, fuel: { buy: 1.0, sell: 1.0 }, tool: { buy: 1.0, sell: 1.0 }, hunting: { buy: 1.0, sell: 1.0 } } },
-    trading: { buy: 1.1, sell: 0.9, categories: { furs: { buy: 1.1, sell: 0.9 }, provisions: { buy: 1.1, sell: 0.9 }, repair: { buy: 1.1, sell: 0.9 }, medical: { buy: 1.0, sell: 1.0 }, shelter: { buy: 1.0, sell: 1.0 }, fuel: { buy: 1.0, sell: 1.0 }, tool: { buy: 1.0, sell: 1.0 }, hunting: { buy: 1.0, sell: 1.0 } } },
-  };
-  const m = multipliers[type] || multipliers.hbc;
-  const cat = m.categories[category] || { buy: m.buy, sell: m.sell };
-  return { buy: cat.buy, sell: cat.sell };
-}
-
-function getSettlementActionsByType(type) {
-  switch (type) {
-    case 'hbc':
-      return [
-        { id: 'trade', label: 'Trade Goods for ₥', cost: '1 trade good', risk: 'Best rates for pelts/hides', flavor: 'The Company factors weigh your furs in silence. The ledger decides your worth.' },
-        { id: 'buy_supplies', label: 'Buy Supplies', cost: '₥ varies', risk: 'Full inventory available', flavor: 'Pemmican, axes, shaganappi, tools — everything a carter needs for the long trail.' },
-        { id: 'rest', label: 'Rest at the Fort', cost: '1 food', risk: 'Crew rested, morale +15', flavor: 'A warm fire in the mess hall, dry blankets, and a night without the wind.' },
-        { id: 'get_intel', label: 'Get Trail Intel', cost: '1 ₥', risk: 'Reveals next 2 nodes', flavor: 'The clerk unfolds a map stained with ink and tea. He marks the hazards ahead.' },
-      ];
-    case 'metis':
-      return [
-        { id: 'trade_gossip', label: 'Trade Gossip', cost: 'Free', risk: 'Reveals 1 gossip entry', flavor: 'News travels faster than carts on the prairie. The women know everything.' },
-        { id: 'recruit_crew', label: 'Recruit Crew', cost: '2 ₥ + 1 food', risk: '+1 crew member (max 6)', flavor: 'A young hand looking for work. Strong back, willing heart — if you can feed him.' },
-        { id: 'dance', label: 'Dance', cost: '1 food', risk: 'Morale +10, no day advance', flavor: 'The fiddle starts. A Red River jig. Boots on hard ground. Nobody thinks about tomorrow.' },
-        { id: 'share_food', label: 'Share Food', cost: 'Give 2+ food', risk: 'Morale +5 per food', flavor: 'Generosity on the trail is its own currency. What you give returns in loyalty.' },
-        { id: 'craft_hides', label: 'Craft Finished Hides', cost: '3 raw hides + 1 shaganappi', risk: 'Creates finished_hide (worth 2× ₥)', flavor: 'The women scrape, stretch, and smoke the hides. Patience turns rawhide into profit.' },
-      ];
-    case 'nwmp':
-      return [
-        { id: 'pay_fines', label: 'Pay Fines', cost: '₥ varies', risk: 'Clears fines if any', flavor: 'The sergeant reads your name from the ledger. The amount is not negotiable.' },
-        { id: 'get_permits', label: 'Get Permits', cost: '2 ₥', risk: 'Required for river crossings', flavor: 'A stamp, a signature, and the Queen\'s law lets you cross the water legal.' },
-        { id: 'report_duty', label: 'Report for Duty', cost: '1 day', risk: '₥ reward, morale −5', flavor: 'Red coats, drill, and the weight of Ottawa\'s authority. The pay is fair but the pride costs.' },
-        { id: 'buy_ammo', label: 'Buy Ammo', cost: '1.5 ₥ per Belt', risk: 'Cheaper than HBC', flavor: 'Ball and powder, measured honest. The Mounties don\'t cheat a carter on shot.' },
-        { id: 'rest', label: 'Rest', cost: '1 food', risk: 'Crew rested (no morale bonus)', flavor: 'A cot in the barracks. Clean, quiet, and the sentry paces all night.' },
-      ];
-    case 'mission':
-      return [
-        { id: 'heal_crew', label: 'Heal Crew', cost: '1 Medicine Pouch or 2 ₥', risk: 'Clears injury/illness, morale +10', flavor: 'The Grey Nuns tend the sick without asking who you are or where you come from.' },
-        { id: 'rest', label: 'Free Rest + Blessing', cost: 'Free', risk: 'Crew rested, morale +15', flavor: 'A chapel bell at evening. You sleep on straw but wake with a lighter spirit.' },
-        { id: 'get_blessing', label: 'Get Blessing', cost: '1 food', risk: 'Morale +10, +1 to dice rolls for 3 days', flavor: 'The priest\'s hand on your brow. The trail feels less hostile after prayer.' },
-        { id: 'trade_limited', label: 'Trade (Limited)', cost: 'Buy pemmican 0.5 ₥, sell blankets 1.5 ₥', risk: 'Charity rates', flavor: 'The mission garden feeds the body. The trade feeds the journey.' },
-      ];
-    case 'trading':
-      return [
-        { id: 'trade', label: 'Trade Goods', cost: '1 trade good', risk: 'Standard rates', flavor: 'A free trader with no Company badge. His prices are his own.' },
-        { id: 'buy_supplies', label: 'Buy Supplies', cost: '₥ varies', risk: 'Basic inventory', flavor: 'What the Company posts run out of, the free traders sometimes have.' },
-        { id: 'rest', label: 'Rest', cost: '1 food', risk: 'Crew rested, morale +10', flavor: 'A lean-to by the fire. Simple shelter, honest company.' },
-        { id: 'get_intel', label: 'Get Trail Intel', cost: '1 ₥', risk: 'Reveals next node', flavor: 'He rides the trail weekly. His news is fresh and his memory long.' },
-      ];
-    default:
-      return [
-        { id: 'trade', label: 'Trade Goods', cost: '1 trade good', risk: 'Standard rates', flavor: 'The factor weighs your furs. The ledger is final.' },
-        { id: 'rest', label: 'Rest', cost: '1 food', risk: 'Crew rested, morale +10', flavor: 'A night under roof and beam. The trail waits for morning.' },
-      ];
-  }
-}
-
 function executeSettlementAction(actionId, type, state, cart, params) {
-  const credit = state.credit?.[type] || 0;
-
-  // HBC Actions
-  if (actionId === 'trade') {
-    const tradeItems = cart.filter(i => i.type === 'trade' && i.count > 0);
-    if (tradeItems.length === 0) return { error: 'No trade goods to trade' };
-    // Trade the first trade good (UI handles selection)
-    const item = tradeItems[0];
-    item.count--;
-    const mbGain = item.mbValue || 1;
-    state.credit[type] = (state.credit[type] || 0) + mbGain;
-    state.tradesMade++;
-    return { traded: item.name, mbGain, credit: state.credit[type] };
-  }
-
-  if (actionId === 'buy_supplies') {
-    // Open shop-like interface - for now just return info
-    return { action: 'buy_supplies', message: 'Opens supply purchase interface', credit: state.credit[type] };
-  }
-
-  if (actionId === 'rest') {
-    if (state.food < 1) return { error: 'Need 1 food to rest' };
-    state.food -= 1;
-    state.crew = 'rested';
-    state.travelDaysWithoutRest = 0;
-    state.morale = Math.min(100, state.morale + (type === 'hbc' ? 15 : type === 'mission' ? 15 : 10));
-    return { rested: true, moraleGain: type === 'hbc' ? 15 : type === 'mission' ? 15 : 10 };
-  }
-
-  if (actionId === 'get_intel') {
-    if ((state.credit[type] || 0) < 1) return { error: 'Need 1 ₥ for intelligence' };
-    state.credit[type] -= 1;
-    // Add trail intel for next 1-2 nodes
-    const nextNode1 = NODES[state.node + 1];
-    const nextNode2 = NODES[state.node + 2];
-    state.trailIntel = state.trailIntel || [];
-    if (nextNode1) {
-      state.trailIntel.push({
-        fromDay: state.day,
-        text: `${nextNode1.name}: ${nextNode1.terrain.replace(/_/g, ' ')} terrain. ${nextNode1.desc?.substring(0, 80)}...`,
-        bonus: { dcBonus: 1 },
-      });
-    }
-    if (nextNode2 && type === 'hbc') {
-      state.trailIntel.push({
-        fromDay: state.day,
-        text: `${nextNode2.name}: ${nextNode2.terrain.replace(/_/g, ' ')} terrain.`,
-        bonus: { dcBonus: 1 },
-      });
-    }
-    state.morale = Math.min(100, state.morale + 5);
-    return { intelGathered: true, moraleGain: 5, credit: state.credit[type] };
-  }
-
-  // Métis Actions
-  if (actionId === 'trade_gossip') {
-    state.trailIntel = state.trailIntel || [];
-    const nextNode = NODES[state.node + 1];
-    if (nextNode) {
-      state.trailIntel.push({
-        fromDay: state.day,
-        text: `Gossip from ${state.pendingSettlement?.name}: ${nextNode.name} has ${nextNode.terrain.replace(/_/g, ' ')} ahead.`,
-        bonus: { dcBonus: 1 },
-      });
-    }
-    state.morale = Math.min(100, state.morale + 3);
-    return { gossipGathered: true, moraleGain: 3 };
-  }
-
-  if (actionId === 'recruit_crew') {
-    if ((state.credit[type] || 0) < 2) return { error: 'Need 2 ₥ to recruit' };
-    if (state.food < 1) return { error: 'Need 1 food to recruit' };
-    if ((state.crewCount || 3) >= 6) return { error: 'Maximum crew (6) reached' };
-    state.credit[type] -= 2;
-    state.food -= 1;
-    state.crewCount = (state.crewCount || 3) + 1;
-    state.morale = Math.min(100, state.morale + 5);
-    return { recruited: true, crewCount: state.crewCount, moraleGain: 5, credit: state.credit[type] };
-  }
-
-  if (actionId === 'dance') {
-    if (state.food < 1) return { error: 'Need 1 food to dance' };
-    state.food -= 1;
-    state.morale = Math.min(100, state.morale + 10);
-    return { danced: true, moraleGain: 10 };
-  }
-
-  if (actionId === 'share_food') {
-    const foodToGive = params.food || 2;
-    if (state.food < foodToGive) return { error: `Need ${foodToGive} food to share` };
-    state.food -= foodToGive;
-    const moraleGain = foodToGive * 5;
-    state.morale = Math.min(100, state.morale + moraleGain);
-    state.reputation.metis = (state.reputation.metis || 0) + 1;
-    return { shared: true, foodGiven: foodToGive, moraleGain, reputationGain: 1 };
-  }
-
-  if (actionId === 'craft_hides') {
-    const hides = cart.find(i => ['Bison Hide', 'Beaver Pelts', 'Elk Hide', 'Deer Hide'].includes(i.name));
-    const shag = cart.find(i => i.name === 'Shaganappi');
-    if (!hides || hides.count < 3) return { error: 'Need 3 raw hides' };
-    if (!shag || shag.count < 1) return { error: 'Need 1 shaganappi' };
-    hides.count -= 3;
-    shag.count -= 1;
-    const finished = cart.find(i => i.name === 'Finished Hides');
-    if (finished) finished.count++;
-    else cart.push({ name: 'Finished Hides', wt: 3, count: 1, type: 'trade', category: 'furs', mbValue: 3.5, desc: 'Expertly prepared hides. Worth double at market.', perishable: false });
-    // Recalculate MB value
-    state.mbValue = cart.filter(i => i.type === 'trade' || i.category === 'furs').reduce((s, i) => s + (i.mbValue || 0) * i.count, 0);
-    return { crafted: 'Finished Hides', mbValue: state.mbValue };
-  }
-
-  // NWMP Actions
-  if (actionId === 'pay_fines') {
-    const fines = state.fines || 0;
-    if (fines === 0) return { error: 'No fines to pay' };
-    if ((state.credit[type] || 0) < fines) return { error: `Need ${fines} ₥ to pay fines` };
-    state.credit[type] -= fines;
-    state.fines = 0;
-    return { finesPaid: fines, credit: state.credit[type] };
-  }
-
-  if (actionId === 'get_permits') {
-    if ((state.credit[type] || 0) < 2) return { error: 'Need 2 ₥ for permit' };
-    state.credit[type] -= 2;
-    state.hasPermit = true;
-    return { permitObtained: true, credit: state.credit[type] };
-  }
-
-  if (actionId === 'report_duty') {
-    // Reward scales with distance
-    const reward = Math.round((state.node / NODES.length) * 10) + 2;
-    state.credit[type] = (state.credit[type] || 0) + reward;
-    state.morale = Math.max(0, state.morale - 5);
-    // Advance time by 1 day using imported advanceDate
-    const nextDate = advanceDate(state.date.month, state.date.day, state.year);
-    state.date = nextDate;
-    state.month = nextDate.month;
-    state.day++;
-    state.segmentDay = 0;
-    return { dutyDone: true, reward, moraleLoss: 5, credit: state.credit[type] };
-  }
-
-  if (actionId === 'buy_ammo') {
-    if ((state.credit[type] || 0) < 1.5) return { error: 'Need 1.5 ₥ for ammunition' };
-    state.credit[type] -= 1.5;
-    const ammo = cart.find(i => i.name === 'Ammunition Belt');
-    if (ammo) ammo.count++;
-    else cart.push({ name: 'Ammunition Belt', wt: 2, count: 1, type: 'ammo', category: 'hunting', mbValue: 0.9, desc: 'Shot and ball. For hunting and defence.', perishable: false });
-    return { bought: 'Ammunition Belt', credit: state.credit[type] };
-  }
-
-  // Mission Actions
-  if (actionId === 'heal_crew') {
-    const med = cart.find(i => i.name === 'Medicine Pouch');
-    if ((state.credit[type] || 0) >= 2) {
-      state.credit[type] -= 2;
-    } else if (med && med.count > 0) {
-      med.count--;
-    } else {
-      return { error: 'Need 2 ₥ or 1 Medicine Pouch' };
-    }
-    state.crew = 'rested';
-    state.morale = Math.min(100, state.morale + 10);
-    // Clear any illness/injury flags
-    state.flags.injured = false;
-    state.flags.ill = false;
-    return { healed: true, moraleGain: 10, credit: state.credit[type] };
-  }
-
-  if (actionId === 'get_blessing') {
-    if (state.food < 1) return { error: 'Need 1 food for blessing' };
-    state.food -= 1;
-    state.morale = Math.min(100, state.morale + 10);
-    state.blessingDays = 3;
-    return { blessed: true, moraleGain: 10, blessingDays: 3 };
-  }
-
-  if (actionId === 'trade_limited') {
-    // Limited trade: buy pemmican at 0.5 ₥, sell blankets at 1.5 ₥
-    return { action: 'trade_limited', message: 'Limited trade available: buy pemmican (0.5 ₥), sell blankets (1.5 ₥)', credit: state.credit[type] };
-  }
-
-  // Legacy actions (for backward compatibility)
-  if (actionId === 'buy_food') {
-    const cost = 0.5;
-    if ((state.credit[type] || 0) < cost) return { error: 'Need 0.5 ₥ credit' };
-    state.credit[type] -= cost;
-    state.food += 2;
-    return { bought: 'food', amount: 2, credit: state.credit[type] };
-  }
-
-  if (actionId === 'buy_repair') {
-    const cost = 2;
-    if ((state.credit[type] || 0) < cost) return { error: 'Need 2 ₥ credit' };
-    if (state.wear <= 0) return { error: 'Cart does not need repair' };
-    state.credit[type] -= cost;
-    state.wear = Math.max(0, state.wear - 2);
-    return { repaired: true, wearReduced: 2, credit: state.credit[type] };
-  }
-
-  if (actionId === 'buy_heal') {
-    const cost = 1;
-    if ((state.credit[type] || 0) < cost) return { error: 'Need 1 ₥ credit' };
-    state.credit[type] -= cost;
-    state.morale = Math.min(100, state.morale + 20);
-    state.crew = 'rested';
-    return { healed: true, moraleGain: 20, credit: state.credit[type] };
-  }
-
-  if (actionId === 'buy_info') {
-    const cost = 0.5;
-    if ((state.credit[type] || 0) < cost) return { error: 'Need 0.5 ₥ credit' };
-    state.credit[type] -= cost;
-    state.morale = Math.min(100, state.morale + 5);
-    state.flags['trail_intel_' + state.node] = true;
-    return { intel: true, moraleGain: 5, credit: state.credit[type] };
-  }
-
-  if (actionId === 'repair') {
-    const shag = cart.find(i => i.name === 'Shaganappi');
-    if (state.wear > 0 && shag && shag.count > 0) {
-      shag.count--;
-      state.wear = Math.max(0, state.wear - 2);
-      state.mbValue = cart.filter(i => i.type === 'trade' || i.category === 'furs').reduce((s, i) => s + (i.mbValue || 0) * i.count, 0);
-    } else if (state.wear > 0) {
-      state.wear = Math.max(0, state.wear - 2);
-    }
-    return { repaired: true };
-  }
-
-  if (actionId === 'heal') {
-    state.crew = 'rested';
-    state.morale = Math.min(100, state.morale + 20);
-    return { healed: true };
-  }
-
+  // Handle 'continue' action - just clear the settlement
   if (actionId === 'continue') {
     state.pendingSettlement = null;
     return { continued: true };
   }
 
-  return { error: `Unknown action: ${actionId}` };
-}
+  const barter = CONSTANTS.SETTLEMENT_BARTER[type] || CONSTANTS.SETTLEMENT_BARTER.hbc;
+  
+  // Handle compound action IDs (e.g., trade_furs_supplies_ammunition)
+  // Find the base action and option
+  let matchedTrade = null;
+  let matchedOption = null;
+  
+  // First check for exact match
+  if (barter[actionId]) {
+    matchedTrade = barter[actionId];
+  } else {
+    // Check for compound IDs
+    for (const [baseId, trade] of Object.entries(barter)) {
+      if (trade.options) {
+        for (const opt of trade.options) {
+          if (`${baseId}_${opt.id}` === actionId) {
+            matchedTrade = trade;
+            matchedOption = opt;
+            break;
+          }
+        }
+      } else if (trade.giveOptions) {
+        for (let i = 0; i < trade.giveOptions.length; i++) {
+          if (`${baseId}_${i}` === actionId) {
+            matchedTrade = trade;
+            matchedOption = trade.giveOptions[i];
+            break;
+          }
+        }
+      }
+      if (matchedTrade) break;
+    }
+  }
+  
+  if (!matchedTrade) {
+    return { error: `Unknown action: ${actionId}` };
+  }
 
-function availableSettlementActions(type) {
-  const base = ['rest', 'trade', 'buy_food'];
-  if (type === 'hbc') return [...base, 'buy_repair', 'craft', 'buy_info'];
-  if (type === 'metis') return [...base, 'craft', 'buy_info'];
-  if (type === 'trading') return [...base, 'buy_repair', 'buy_info'];
-  if (type === 'mission') return [...base, 'buy_heal', 'buy_info'];
-  if (type === 'nwmp') return [...base, 'craft', 'buy_info'];
-  return base;
+  // Helper: find first fur/trade good
+  const furItems = cart.filter(i => (i.type === 'trade' || i.category === 'furs') && i.count > 0);
+  const hasFur = furItems.length > 0;
+  const furItem = furItems[0];
+
+  // Determine what to give and receive
+  let giveItems = matchedTrade.give || [];
+  let receiveItems = matchedOption?.receive || matchedTrade.receive || [];
+
+  // Handle giveOptions (e.g., mission heal_crew)
+  if (matchedOption && matchedOption.give) {
+    giveItems = matchedOption.give;
+  }
+
+  // Check if we can afford the give items
+  for (const give of giveItems) {
+    if (give.name === 'any_fur') {
+      if (!hasFur) return { error: 'No furs to trade' };
+    } else if (give.name === 'Pemmican Rations') {
+      if (state.food < give.count) return { error: `Need ${give.count} food` };
+    } else {
+      const item = cart.find(i => i.name === give.name);
+      if (!item || item.count < give.count) return { error: `Need ${give.count} ${give.name}` };
+    }
+  }
+
+  // Execute the trade - remove give items
+  for (const give of giveItems) {
+    if (give.name === 'any_fur') {
+      // Remove one fur/trade good
+      const idx = cart.findIndex(i => (i.type === 'trade' || i.category === 'furs') && i.count > 0);
+      if (idx !== -1) {
+        cart[idx].count--;
+        if (cart[idx].count === 0) cart.splice(idx, 1);
+      }
+    } else if (give.name === 'Pemmican Rations') {
+      state.food -= give.count;
+    } else {
+      const idx = cart.findIndex(i => i.name === give.name);
+      if (idx !== -1) {
+        cart[idx].count -= give.count;
+        if (cart[idx].count === 0) cart.splice(idx, 1);
+      }
+    }
+  }
+
+  // Settlement rest item bonuses (Tarp/Blanket/Firewood) - similar to camp rest
+  const isRestAction = receiveItems.some(r => r.name === 'rested');
+  const isHealAction = actionId === 'heal_crew_0' || actionId === 'heal_crew_1';
+  const itemEffects = [];
+
+  if (isRestAction || isHealAction) {
+    const hasTarp = cart.some(i => i.name === 'Canvas Tarp' && i.count > 0);
+    const hasBlanket = cart.some(i => i.name === 'Blanket' && i.count > 0);
+    const hasFirewood = cart.some(i => i.name === 'Firewood Bundle' && i.count > 0);
+    const isWetWeather = ['rain', 'storm', 'snow'].includes(state.weather);
+    const isColdWeather = ['snow'].includes(state.weather);
+
+    if (hasTarp && isWetWeather) {
+      itemEffects.push('Canvas Tarp kept the damp off. +5 Morale.');
+      state.morale = Math.min(100, state.morale + 5);
+    }
+    if (hasBlanket && isColdWeather) {
+      itemEffects.push('Blankets held the cold at bay. +8 Morale.');
+      state.morale = Math.min(100, state.morale + 8);
+    }
+    if (hasFirewood && isColdWeather) {
+      itemEffects.push('Firewood warmed the shelter. +5 Morale.');
+      state.morale = Math.min(100, state.morale + 5);
+    }
+  }
+
+  // Add receive items
+  const results = { flavor: matchedTrade.flavor || matchedOption?.flavor, itemEffects };
+  for (const receive of receiveItems) {
+    if (receive.name === 'Pemmican Rations') {
+      state.food += receive.count;
+      results.foodGain = (results.foodGain || 0) + receive.count;
+    } else if (receive.name === 'rested') {
+      state.crew = 'rested';
+      state.travelDaysWithoutRest = 0;
+      results.rested = true;
+    } else if (receive.name === 'Morale') {
+      state.morale = Math.min(100, state.morale + receive.count);
+      results.moraleGain = (results.moraleGain || 0) + receive.count;
+    } else if (receive.name === 'blessingDays') {
+      state.blessingDays = receive.count;
+      results.blessingDays = receive.count;
+    } else if (receive.name === 'ReputationMetis') {
+      state.reputation.metis = (state.reputation.metis || 0) + receive.count;
+      results.reputationGain = receive.count;
+    } else if (receive.name === 'trail_intel') {
+      state.trailIntel = state.trailIntel || [];
+      const next = NODES[state.node + 1];
+      if (next) state.trailIntel.push({ fromDay: state.day, text: `Gossip from ${state.pendingSettlement?.name}: ${next.name} has ${next.terrain.replace(/_/g, ' ')} ahead.`, bonus: { dcBonus: 1 } });
+      results.gossipGathered = true;
+    } else if (receive.name === 'hasPermit') {
+      state.hasPermit = true;
+      results.permitObtained = true;
+    } else if (receive.name === 'finesCleared') {
+      state.fines = 0;
+      results.finesPaid = true;
+    } else {
+      // Regular item
+      const existing = cart.find(i => i.name === receive.name);
+      if (existing) {
+        existing.count += receive.count;
+      } else {
+        // Get item data from ITEMS array
+        const itemData = ITEMS.find(i => i.name === receive.name);
+        if (itemData) {
+          cart.push({ ...itemData, count: receive.count });
+        } else {
+          // Fallback
+          cart.push({ name: receive.name, wt: 1, count: receive.count, type: 'item', category: 'item', mbValue: 0, perishable: false, desc: '' });
+        }
+      }
+      results[`got_${receive.name.replace(/\s+/g, '_').toLowerCase()}`] = receive.count;
+    }
+  }
+
+  state.tradesMade++;
+  return results;
 }
 
 function getSquealEvent() {
@@ -1375,29 +1355,4 @@ function getSquealEvent() {
       },
     ],
   };
-}
-
-const EVENTS = {
-  plains: [
-    { id: 'plains_rough', text: "The prairie trail is rutted and slow. Your ox leans into the traces, but the ground saps momentum.", choices: [{ text: 'Press on carefully', dc: null, ok: '', bad: '', always: 'The cart creaks forward. Nothing breaks, but the day is long.', alwaysWear: 0 }, { text: 'Push the pace', dc: 10, ok: 'You find firmer ground ahead. Progress is better than expected.', bad: 'A hidden rut jolts the cart. The axle complains.', wear: 1 }] },
-    { id: 'plains_wind', text: "A hot wind pushes at your back. The prairie grass ripples like water.", choices: [{ text: 'Let the wind carry you', dc: null, ok: '', bad: '', always: 'You make excellent time.' }, { text: 'Hunker against expected rain', dc: null, ok: '', bad: '', always: 'You wrap the load and keep moving. No rain comes.' }] },
-  ],
-  river_valley: [
-    { id: 'river_high', text: "The river is running high and fast. The bank trail is muddy and narrow.", choices: [{ text: 'Ford carefully', dc: 12, ok: 'The ox keeps footing and you stay dry enough.', bad: 'The cart tilts in the current. Repairs are needed after crossing.', wear: 1 }, { text: 'Wait for afternoon', dc: null, ok: '', bad: '', always: 'You camp and cross later when the water drops.', time: 1 }] },
-  ],
-  wooded: [
-    { id: 'wooded_brush', text: "A windfall blocks the trail through the trees.", choices: [{ text: 'Unload and drag the cart clear', dc: null, ok: '', bad: '', always: 'You clear it. Half an hour lost.', time: 1 }, { text: 'Blaze a bypass', dc: 9, ok: 'A narrow detour avoids the mess.', bad: 'You scratch the paint and lose twenty minutes.', time: 1, wear: 0 }] },
-  ],
-  uplands: [
-    { id: 'upland_gust', text: "The wind on the ridge cuts through your clothes. The cart groans.", choices: [{ text: 'Descend to shelter', dc: null, ok: '', bad: '', always: 'You lose elevation but keep the crew safe.', time: 1 }, { text: 'Push through the wind', dc: 11, ok: 'The gust passes. The crew holds together.', bad: 'A sudden gust slams the cart body.', wear: 1 }] },
-  ],
-  river: [
-    { id: 'river_crossing', text: "You reach the river crossing and check the depth.", choices: [{ text: 'Ford it', dc: 12, ok: 'The water is high but passable.', bad: 'A wheel drops into a hole mid-crossing.', wear: 1 }, { text: 'Wait for safer water', dc: null, ok: '', bad: '', always: 'You wait a day and cross when levels drop.', time: 1 }] },
-  ],
-};
-
-function getEventsForTerrain(t) {
-  const primary = EVENTS[t];
-  if (primary && primary.length) return primary;
-  return FALLBACK_EVENTS[t] || FALLBACK_EVENTS.plains;
 }
