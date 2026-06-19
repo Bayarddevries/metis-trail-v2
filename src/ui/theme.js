@@ -69,7 +69,7 @@ export function applyTheme(root) {
   // Category legend / item rows
   root.style.setProperty('--clr-catitem-bg', 'rgba(200,168,26,0.08)');
   root.style.setProperty('--clr-catitem-border', 'rgba(200,168,26,0.18)');
-  root.style.setProperty('--clr-muted', '#8a7a60');
+  root.style.setProperty('--clr-muted', '#b8a890');
   root.style.setProperty('--clr-pdrow-bg', 'rgba(200,168,26,0.06)');
   root.style.setProperty('--clr-pdrow-border', 'rgba(200,168,26,0.12)');
 

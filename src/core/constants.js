@@ -86,6 +86,12 @@ export const CONSTANTS = Object.freeze({
       },
     },
     metis: {
+      // Rest - costs 1 food
+      rest: {
+        give: [{ name: 'Pemmican Rations', count: 1 }],
+        receive: [{ name: 'rested', count: 1 }, { name: 'Morale', count: 10 }],
+        flavor: 'A warm fire and a place by the hearth. The Métis camp is generous to travellers.',
+      },
       // Trade gossip - free, gives intel
       trade_gossip: {
         give: [],
@@ -126,6 +132,12 @@ export const CONSTANTS = Object.freeze({
       },
     },
     mission: {
+      // Plain rest - costs 1 food
+      rest: {
+        give: [{ name: 'Pemmican Rations', count: 1 }],
+        receive: [{ name: 'rested', count: 1 }, { name: 'Morale', count: 8 }],
+        flavor: 'A quiet room in the mission house. Simple food, plain beds, and the sound of evening prayer.',
+      },
       // Heal crew - 1 Medicine Pouch (preferred)
       heal_crew: {
         giveOptions: [

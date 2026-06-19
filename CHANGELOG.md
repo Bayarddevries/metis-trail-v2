@@ -1127,4 +1127,36 @@ Files: `src/systems/engine.js`.
 - Settlement action card text truncation (6× ellipsis rules)
 - Pre-departure save migration (SAVE_VERSION = 2)
 
+## [v14] — 2026-06-19
+
+### Sprint A: Critical Bug Fixes + Core Loop Integrity
+
+**Event Resolution (A1):**
+- Conditional food/morale/crew on success/failure: ok*/bad* fields now applied correctly
+- ItemBonus DC reduction: items like Ammunition Belt reduce event roll DC
+- okWear/badWear: wear changes conditional on success/failure
+- Effects array populated for give/consume/itemBonus — visible in outcome display
+
+**Settlement Actions (A2):**
+- Added `rest` action to `metis` settlement type (was missing)
+- Added `rest` action to `mission` settlement type (was missing)
+- All 5 settlement types now have a plain rest option
+
+**End Screen (A3):**
+- Fixed field name mismatch: `breakdown.tradeBonus` → `breakdown.tradeGoods`
+
+**CSS Readability (A4):**
+- `--clr-muted` bumped from `#8a7a60` → `#b8a890` for readable contrast on dark backgrounds
+- Removed `font-style: italic` from non-quote UI text (settlement flavor, camp descriptions, hints, etc.)
+- Kept italic on actual quotes (`.src-quote`, `.src-context`, `.outcome-flavor`)
+
+**Settlement Status Display (A5):**
+- Added food/wear/morale/crew pills to settlement overlay header
+- Color-coded: red for danger (food ≤ 5, wear ≥ 4, crew exhausted), yellow for warning (crew tired)
+
+**Hall of Fame (B6):**
+- Already had offline fallback: "Leaderboard unavailable — playing offline"
+
+**Files modified:** `src/systems/engine.js`, `src/main.js`, `src/core/constants.js`, `src/ui/theme.js`, `src/template.html`, `HANDOFF.md`, `CHANGELOG.md`
+
 **Verified:** Full playtest pre-departure → travel → settlement → camp; 0 JS errors

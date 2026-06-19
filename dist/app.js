@@ -101,6 +101,12 @@ var CONSTANTS = Object.freeze({
       }
     },
     metis: {
+      // Rest - costs 1 food
+      rest: {
+        give: [{ name: "Pemmican Rations", count: 1 }],
+        receive: [{ name: "rested", count: 1 }, { name: "Morale", count: 10 }],
+        flavor: "A warm fire and a place by the hearth. The M\xE9tis camp is generous to travellers."
+      },
       // Trade gossip - free, gives intel
       trade_gossip: {
         give: [],
@@ -142,6 +148,12 @@ var CONSTANTS = Object.freeze({
       }
     },
     mission: {
+      // Plain rest - costs 1 food
+      rest: {
+        give: [{ name: "Pemmican Rations", count: 1 }],
+        receive: [{ name: "rested", count: 1 }, { name: "Morale", count: 8 }],
+        flavor: "A quiet room in the mission house. Simple food, plain beds, and the sound of evening prayer."
+      },
       // Heal crew - 1 Medicine Pouch (preferred)
       heal_crew: {
         giveOptions: [
@@ -3389,7 +3401,7 @@ function applyTheme(root) {
   root.style.setProperty("--clr-ok-text", "#7aa85a");
   root.style.setProperty("--clr-catitem-bg", "rgba(200,168,26,0.08)");
   root.style.setProperty("--clr-catitem-border", "rgba(200,168,26,0.18)");
-  root.style.setProperty("--clr-muted", "#8a7a60");
+  root.style.setProperty("--clr-muted", "#b8a890");
   root.style.setProperty("--clr-pdrow-bg", "rgba(200,168,26,0.06)");
   root.style.setProperty("--clr-pdrow-border", "rgba(200,168,26,0.12)");
   root.style.setProperty("--clr-camp-border", "var(--clr-accent)");
@@ -20260,6 +20272,18 @@ function showSettlement(game) {
   const distKm = Math.round((node.dist || 0) * 50);
   distanceEl.textContent = `${distKm} km from Fort Garry`;
   descEl.textContent = node.desc || "";
+  const statusEl = document.getElementById("settlement-status");
+  if (statusEl) {
+    const foodCls = state.food <= 5 ? ' style="color:var(--clr-danger)"' : "";
+    const wearCls = state.wear >= 4 ? ' style="color:var(--clr-danger)"' : "";
+    const crewCls = state.crew === "exhausted" ? ' style="color:var(--clr-danger)"' : state.crew === "tired" ? ' style="color:var(--clr-warn)"' : "";
+    statusEl.innerHTML = `
+      <span class="pill"${foodCls}>\u{1F356} ${Math.floor(state.food)} Food</span>
+      <span class="pill"${wearCls}>\u{1F527} ${state.wear} Wear</span>
+      <span class="pill">\u{1F60A} ${state.morale} Morale</span>
+      <span class="pill"${crewCls}>\u{1F465} ${state.crew}</span>
+    `;
+  }
   actionsEl.innerHTML = "";
   if (rollEl) {
     rollEl.style.display = "none";

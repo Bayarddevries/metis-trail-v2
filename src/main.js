@@ -950,6 +950,21 @@ function showSettlement(game) {
   const distKm = Math.round((node.dist || 0) * 50);
   distanceEl.textContent = `${distKm} km from Fort Garry`;
   descEl.textContent = node.desc || '';
+
+  // Render status pills (food/wear/morale/crew)
+  const statusEl = document.getElementById('settlement-status');
+  if (statusEl) {
+    const foodCls = state.food <= 5 ? ' style="color:var(--clr-danger)"' : '';
+    const wearCls = state.wear >= 4 ? ' style="color:var(--clr-danger)"' : '';
+    const crewCls = state.crew === 'exhausted' ? ' style="color:var(--clr-danger)"' : state.crew === 'tired' ? ' style="color:var(--clr-warn)"' : '';
+    statusEl.innerHTML = `
+      <span class="pill"${foodCls}>🍖 ${Math.floor(state.food)} Food</span>
+      <span class="pill"${wearCls}>🔧 ${state.wear} Wear</span>
+      <span class="pill">😊 ${state.morale} Morale</span>
+      <span class="pill"${crewCls}>👥 ${state.crew}</span>
+    `;
+  }
+
   actionsEl.innerHTML = '';
   if (rollEl) { rollEl.style.display = 'none'; rollEl.innerHTML = ''; }
   if (resultEl) { resultEl.style.display = 'none'; resultEl.textContent = ''; }
