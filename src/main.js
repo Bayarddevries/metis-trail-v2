@@ -997,6 +997,10 @@ function showSettlement(game) {
     flavorRow.className = 'settlement-action-card-flavor';
     flavorRow.textContent = action.flavor;
 
+    const descRow = document.createElement('div');
+    descRow.className = 'settlement-action-card-desc';
+    descRow.textContent = action.desc || '';
+
     const btn = document.createElement('button');
     btn.className = 'settlement-action-card-btn';
     btn.textContent = 'Do It';
@@ -1035,6 +1039,7 @@ function showSettlement(game) {
     card.appendChild(costRow);
     if (riskRow.textContent) card.appendChild(riskRow);
     card.appendChild(flavorRow);
+    if (descRow.textContent) card.appendChild(descRow);
     card.appendChild(btn);
     actionsEl.appendChild(card);
 
@@ -1578,7 +1583,7 @@ const CAMP_FLAVOR = {
   },
 };
 
-function getCampFlavorText(type, rollTotal, effects) {
+function getCampFlavorText(type, rollTotal, effects, items) {
   const pool = CAMP_FLAVOR[type];
   if (!pool) return (effects || []).join('\n');
   let tier;
@@ -1605,7 +1610,12 @@ function getCampFlavorText(type, rollTotal, effects) {
   }
   const options = pool[tier] || pool.mid || [];
   if (!options.length) return (effects || []).join('\n');
-  const flavor = options[Math.floor(Math.random() * options.length)];
+  let flavor = options[Math.floor(Math.random() * options.length)];
+  // Hunt: append pelt info if items were dropped
+  if (type === 'hunt' && items && items.length > 0) {
+    const peltNames = items.map(i => `${i.name} (${i.rarity})`).join(', ');
+    flavor += ` You also recover: ${peltNames}.`;
+  }
   return flavor + '\n' + (effects || []).join('\n');
 }
 
@@ -1792,7 +1802,7 @@ function showCamp(game) {
           document.querySelectorAll('.camp-card').forEach(c => { c.style.display = 'none'; });
 
           // Build rich flavor text for the result
-          const flavorText = getCampFlavorText(a.type, result.rollTotal, result.effects);
+          const flavorText = getCampFlavorText(a.type, result.rollTotal, result.effects, result.items);
 
           // Show dice roll if this action used one
           if (a.needRoll && result.roll !== null && rollEl) {

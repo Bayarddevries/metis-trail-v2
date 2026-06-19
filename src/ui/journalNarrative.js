@@ -275,9 +275,9 @@ const CAMP_PUSH_ON = [
 // ── Settlement templates ────────────────────────────────────────────
 
 const SETTLEMENT_ARRIVAL = [
-  (name, type) => `The spires of ${name} rose from the river bottom. A ${type} post — we'd heard tell.`,
+  (name, type) => `We saw the spires of ${name} rise from the river bottom. A ${type} post — we'd heard tell.`,
   (name, type) => `${name} ahead. Smoke from chimneys, the smell of woodsmoke and cattle. Civilization, of a sort.`,
-  (name, type) => `Rode into ${name} as the bell rang vespers. ${type} folk, but the trade\'s honest.`,
+  (name, type) => `We rode into ${name} as the bell rang vespers. ${type} folk, but the trade's honest.`,
 ];
 
 const SETTLEMENT_TRADE = [

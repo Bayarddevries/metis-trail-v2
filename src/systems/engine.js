@@ -514,6 +514,7 @@ export function createGame(seed = null) {
           cost: giveDesc || 'Free',
           risk: receiveDesc,
           flavor: trade.flavor,
+          desc: trade.desc,
         });
       });
     } else if (trade.options) {
@@ -527,6 +528,7 @@ export function createGame(seed = null) {
           cost: giveDesc || 'Free',
           risk: receiveDesc,
           flavor: opt.flavor,
+          desc: trade.desc,
         });
       });
     } else {
@@ -535,10 +537,11 @@ export function createGame(seed = null) {
       const receiveDesc = trade.receive.map(r => `${r.count} ${displayName(r.name)}`).join(', ');
       actions.push({
         id: actionId,
-        label: actionId.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()),
+        label: actionId.replace(/_/g, ' ').replace(/\\b\\w/g, c => c.toUpperCase()),
         cost: giveDesc || 'Free',
         risk: receiveDesc,
         flavor: trade.flavor,
+        desc: trade.desc,
       });
     }
   }

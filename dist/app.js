@@ -111,7 +111,8 @@ var CONSTANTS = Object.freeze({
       trade_gossip: {
         give: [],
         receive: [{ name: "trail_intel", count: 1 }, { name: "Morale", count: 3 }],
-        flavor: "News travels faster than carts on the prairie. The women know everything."
+        flavor: "News travels faster than carts on the prairie. The women know everything.",
+        desc: "Trail Intel reveals the terrain and conditions ahead for the next trail segment. Intel is most useful when fresh \u2014 it fades after a few days."
       },
       // Dance - costs 1 food, big morale boost
       dance: {
@@ -2503,7 +2504,8 @@ function createGame(seed = null) {
             label: `${baseLabel} (${giveDesc})`,
             cost: giveDesc || "Free",
             risk: receiveDesc,
-            flavor: trade.flavor
+            flavor: trade.flavor,
+            desc: trade.desc
           });
         });
       } else if (trade.options) {
@@ -2515,7 +2517,8 @@ function createGame(seed = null) {
             label: `${actionId.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}: ${opt.id.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}`,
             cost: giveDesc || "Free",
             risk: receiveDesc,
-            flavor: opt.flavor
+            flavor: opt.flavor,
+            desc: trade.desc
           });
         });
       } else {
@@ -2523,10 +2526,11 @@ function createGame(seed = null) {
         const receiveDesc = trade.receive.map((r) => `${r.count} ${displayName(r.name)}`).join(", ");
         actions.push({
           id: actionId,
-          label: actionId.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()),
+          label: actionId.replace(/_/g, " ").replace(/\\b\\w/g, (c) => c.toUpperCase()),
           cost: giveDesc || "Free",
           risk: receiveDesc,
-          flavor: trade.flavor
+          flavor: trade.flavor,
+          desc: trade.desc
         });
       }
     }
@@ -3656,9 +3660,9 @@ var CAMP_PUSH_ON = [
   "The trail doesn't wait. Neither do we. Wear on the cart, wear on the people."
 ];
 var SETTLEMENT_ARRIVAL = [
-  (name3, type) => `The spires of ${name3} rose from the river bottom. A ${type} post \u2014 we'd heard tell.`,
+  (name3, type) => `We saw the spires of ${name3} rise from the river bottom. A ${type} post \u2014 we'd heard tell.`,
   (name3, type) => `${name3} ahead. Smoke from chimneys, the smell of woodsmoke and cattle. Civilization, of a sort.`,
-  (name3, type) => `Rode into ${name3} as the bell rang vespers. ${type} folk, but the trade's honest.`
+  (name3, type) => `We rode into ${name3} as the bell rang vespers. ${type} folk, but the trade's honest.`
 ];
 var SETTLEMENT_TRADE = [
   (give, receive) => `Traded ${give} for ${receive}. Fair measure. The factor nodded, weighed honest.`,
@@ -20311,6 +20315,9 @@ function showSettlement(game) {
     const flavorRow = document.createElement("div");
     flavorRow.className = "settlement-action-card-flavor";
     flavorRow.textContent = action.flavor;
+    const descRow = document.createElement("div");
+    descRow.className = "settlement-action-card-desc";
+    descRow.textContent = action.desc || "";
     const btn = document.createElement("button");
     btn.className = "settlement-action-card-btn";
     btn.textContent = "Do It";
@@ -20362,6 +20369,7 @@ function showSettlement(game) {
     card.appendChild(costRow);
     if (riskRow.textContent) card.appendChild(riskRow);
     card.appendChild(flavorRow);
+    if (descRow.textContent) card.appendChild(descRow);
     card.appendChild(btn);
     actionsEl.appendChild(card);
     if (canDo) {
@@ -20849,7 +20857,7 @@ var CAMP_FLAVOR = {
     ]
   }
 };
-function getCampFlavorText(type, rollTotal, effects) {
+function getCampFlavorText(type, rollTotal, effects, items) {
   const pool = CAMP_FLAVOR[type];
   if (!pool) return (effects || []).join("\n");
   let tier;
@@ -20876,7 +20884,11 @@ function getCampFlavorText(type, rollTotal, effects) {
   }
   const options = pool[tier] || pool.mid || [];
   if (!options.length) return (effects || []).join("\n");
-  const flavor = options[Math.floor(Math.random() * options.length)];
+  let flavor = options[Math.floor(Math.random() * options.length)];
+  if (type === "hunt" && items && items.length > 0) {
+    const peltNames = items.map((i) => `${i.name} (${i.rarity})`).join(", ");
+    flavor += ` You also recover: ${peltNames}.`;
+  }
   return flavor + "\n" + (effects || []).join("\n");
 }
 __name(getCampFlavorText, "getCampFlavorText");
@@ -21063,7 +21075,7 @@ function showCamp(game) {
           document.querySelectorAll(".camp-card").forEach((c) => {
             c.style.display = "none";
           });
-          const flavorText = getCampFlavorText(a.type, result.rollTotal, result.effects);
+          const flavorText = getCampFlavorText(a.type, result.rollTotal, result.effects, result.items);
           if (a.needRoll && result.roll !== null && rollEl) {
             const DC = {
               rest: 12,

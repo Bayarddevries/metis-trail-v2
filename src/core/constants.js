@@ -97,6 +97,7 @@ export const CONSTANTS = Object.freeze({
         give: [],
         receive: [{ name: 'trail_intel', count: 1 }, { name: 'Morale', count: 3 }],
         flavor: 'News travels faster than carts on the prairie. The women know everything.',
+        desc: 'Trail Intel reveals the terrain and conditions ahead for the next trail segment. Intel is most useful when fresh — it fades after a few days.',
       },
       // Dance - costs 1 food, big morale boost
       dance: {
