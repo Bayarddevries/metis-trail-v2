@@ -641,6 +641,7 @@ export function createGame(seed = null) {
         cost: a.cost,
         risk: a.risk,
         flavor: a.flavor,
+        desc: a.desc,
       }));
     },
 

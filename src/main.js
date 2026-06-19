@@ -1948,18 +1948,19 @@ function showEnd(game) {
   // Detailed scoring breakdown — use engine's getEndgameScore
   let scoreLines;
   try {
-    const breakdown = game.getEndgameScore();
+    const scoreData = game.getEndgameScore();
+    const bd = scoreData?.breakdown || {};
     const safeNum = (v) => {
       const n = Number(v);
       return Number.isFinite(n) ? Math.round(n) : 0;
     };
     scoreLines = [
-      { label: 'Base score', value: safeNum(breakdown?.base) },
-      { label: 'Trade goods delivered', value: safeNum(breakdown?.tradeBonus) },
-      { label: `Food bonus (${Math.min(safeNum(state.food), 25)} × 12)`, value: safeNum(breakdown?.foodBonus) },
-      { label: `Crew condition (${state.crew || 'unknown'})`, value: safeNum(breakdown?.crewCondition) },
-      { label: `Days on trail (${safeNum(state.day)} × -8)`, value: safeNum(breakdown?.daysPenalty) },
-      { label: `Cart wear (${safeNum(state.wear)}² × -40)`, value: safeNum(breakdown?.wearPenalty) },
+      { label: 'Base score', value: safeNum(bd.base) },
+      { label: 'Trade goods delivered', value: safeNum(bd.tradeGoods) },
+      { label: `Food bonus (${Math.min(safeNum(state.food), 25)} × 12)`, value: safeNum(bd.foodBonus) },
+      { label: `Crew condition (${state.crew || 'unknown'})`, value: safeNum(bd.crewCondition) },
+      { label: `Days on trail (${safeNum(state.day)} × -8)`, value: safeNum(bd.daysPenalty) },
+      { label: `Cart wear (${safeNum(state.wear)}² × -40)`, value: safeNum(bd.wearPenalty) },
     ];
   } catch(e) {
     console.warn('[Metis] Score calc error:', e);
