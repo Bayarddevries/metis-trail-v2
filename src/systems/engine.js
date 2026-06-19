@@ -132,21 +132,43 @@ export function createGame(seed = null) {
       }
     }
 
+    // ── ItemBonus: reduce DC if player has the required item ──
+    let dcReduction = 0;
+    let bonusItemName = null;
+    if (ch.itemBonus) {
+      const hasItem = cart.some((i) => i.name === ch.itemBonus.name && i.count > 0);
+      if (hasItem) {
+        dcReduction = ch.itemBonus.dcBonus || 0;
+        bonusItemName = ch.itemBonus.name;
+      }
+    }
+
     if (ch.dc !== null) {
       const roll = d();
+      const effectiveDC = ch.dc - dcReduction;
       const total = roll + totalMod(S);
-      const success = total >= ch.dc;
+      const success = total >= effectiveDC;
       result.roll = roll;
       result.total = total;
-      result.dc = ch.dc;
+      result.dc = effectiveDC;
       result.success = success;
       result.text = success ? `Success. ${ch.ok}` : `Failure. ${ch.bad}`;
+      if (bonusItemName) {
+        result.effects.push(`(${bonusItemName} −${dcReduction} DC)`);
+      }
+      // Wear: on failure use badWear if defined, on success use okWear if defined, else fall back to ch.wear
       if (!success) {
-        S.wear = Math.max(0, S.wear + (ch.wear || 0));
-        result.effects.push(`${ch.wear || 0 >= 0 ? '+' : ''}${ch.wear || 0} Wear`);
-      } else if (ch.wear) {
-        S.wear = Math.max(0, S.wear + ch.wear);
-        result.effects.push(`${ch.wear >= 0 ? '+' : ''}${ch.wear} Wear`);
+        const w = ch.badWear !== undefined ? ch.badWear : (ch.wear || 0);
+        if (w) {
+          S.wear = Math.max(0, S.wear + w);
+          result.effects.push(`${w >= 0 ? '+' : ''}${w} Wear`);
+        }
+      } else {
+        const w = ch.okWear !== undefined ? ch.okWear : ch.wear;
+        if (w) {
+          S.wear = Math.max(0, S.wear + w);
+          result.effects.push(`${w >= 0 ? '+' : ''}${w} Wear`);
+        }
       }
     } else if (ch.always) {
       result.text = ch.always;
@@ -167,18 +189,72 @@ export function createGame(seed = null) {
         result.effects.push(`${ch.time} day(s)`);
       }
     }
-    if (ch.food) {
-      S.food += ch.food;
-      result.effects.push(`${ch.food > 0 ? '+' : ''}${ch.food} Food`);
+
+    // ── Food/Morale/Crew: conditional on success/failure ──
+    // If ok*/bad* fields exist, use them conditionally.
+    // Otherwise fall back to always-applying base fields (legacy behavior).
+    const success = result.success === true;
+    const failure = result.success === false;
+
+    if (success) {
+      // Success path: use okFood/okMorale if defined, else fall back to base food/morale
+      if (ch.okFood !== undefined) {
+        S.food += ch.okFood;
+        result.effects.push(`${ch.okFood > 0 ? '+' : ''}${ch.okFood} Food`);
+      } else if (ch.food) {
+        S.food += ch.food;
+        result.effects.push(`${ch.food > 0 ? '+' : ''}${ch.food} Food`);
+      }
+      if (ch.okMorale !== undefined) {
+        S.morale = Math.max(0, Math.min(100, S.morale + ch.okMorale));
+        result.effects.push(`${ch.okMorale >= 0 ? '+' : ''}${ch.okMorale} Morale`);
+      } else if (ch.morale) {
+        S.morale = Math.max(0, Math.min(100, S.morale + ch.morale));
+        result.effects.push(`${ch.morale >= 0 ? '+' : ''}${ch.morale} Morale`);
+      }
+      // okCrew: only apply crew change on success if explicitly defined
+      if (ch.okCrew) {
+        S.crew = ch.okCrew;
+        result.effects.push(`Crew: ${ch.okCrew}`);
+      }
+    } else if (failure) {
+      // Failure path: use badFood/badMorale if defined, else fall back to base food/morale
+      if (ch.badFood !== undefined) {
+        S.food += ch.badFood;
+        result.effects.push(`${ch.badFood > 0 ? '+' : ''}${ch.badFood} Food`);
+      } else if (ch.food) {
+        S.food += ch.food;
+        result.effects.push(`${ch.food > 0 ? '+' : ''}${ch.food} Food`);
+      }
+      if (ch.badMorale !== undefined) {
+        S.morale = Math.max(0, Math.min(100, S.morale + ch.badMorale));
+        result.effects.push(`${ch.badMorale >= 0 ? '+' : ''}${ch.badMorale} Morale`);
+      } else if (ch.morale) {
+        S.morale = Math.max(0, Math.min(100, S.morale + ch.morale));
+        result.effects.push(`${ch.morale >= 0 ? '+' : ''}${ch.morale} Morale`);
+      }
+      // badCrew: only apply crew change on failure if explicitly defined
+      if (ch.badCrew) {
+        S.crew = ch.badCrew;
+        result.effects.push(`Crew: ${ch.badCrew}`);
+      }
     }
-    if (ch.crew) {
-      S.crew = ch.crew;
-      result.effects.push(`Crew: ${ch.crew}`);
+    // Non-dice (always) path: apply base fields unconditionally
+    if (result.success === null || (ch.dc === null && !ch.always)) {
+      if (ch.food) {
+        S.food += ch.food;
+        result.effects.push(`${ch.food > 0 ? '+' : ''}${ch.food} Food`);
+      }
+      if (ch.morale) {
+        S.morale = Math.max(0, Math.min(100, S.morale + ch.morale));
+        result.effects.push(`${ch.morale >= 0 ? '+' : ''}${ch.morale} Morale`);
+      }
+      if (ch.crew) {
+        S.crew = ch.crew;
+        result.effects.push(`Crew: ${ch.crew}`);
+      }
     }
-    if (ch.morale) {
-      S.morale = Math.max(0, Math.min(100, S.morale + ch.morale));
-      result.effects.push(`${ch.morale >= 0 ? '+' : ''}${ch.morale} Morale`);
-    }
+
     if (ch.give) {
       ch.give.forEach((g) => {
         const item = cart.find((i) => i.name === g.name);

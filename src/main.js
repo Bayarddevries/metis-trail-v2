@@ -662,8 +662,10 @@ function revealDiceOutcome(diceResult) {
   const result = diceResult.result;
   const outcomeEl = document.getElementById('event-dice-outcome');
   if (outcomeEl) {
-    // Roll line
-    const rollHtml = `<span class="outcome-roll">Rolled ${result.roll} — need ${result.dc}+</span>`;
+    // Roll line — show raw roll + modifiers = total, and effective DC
+    const mod = result.total - result.roll;
+    const modStr = mod !== 0 ? ` (${mod >= 0 ? '+' : ''}${mod})` : '';
+    const rollHtml = `<span class="outcome-roll">Rolled ${result.roll}${modStr} = ${result.total} — need ${result.dc}+</span>`;
     const resultHtml = result.success
       ? '<span class="outcome-pass">Success</span>'
       : '<span class="outcome-fail">Failure</span>';
@@ -783,7 +785,7 @@ function showEvent(game) {
           date: monthName(after.month) + ' ' + after.day,
           title: eventData.classification || 'Event',
           text: buildEventReflection(eventData, res, weather, cart),
-          dice: res && res.roll !== null ? `Rolled ${res.roll} — need ${res.dc}+ — ${res.success ? '✓ Success' : '✗ Failure'}` : null,
+          dice: res && res.roll !== null ? `Rolled ${res.roll}${res.total - res.roll !== 0 ? ` (${res.total - res.roll >= 0 ? '+' : ''}${res.total - res.roll})` : ''} = ${res.total} — need ${res.dc}+ — ${res.success ? '✓ Success' : '✗ Failure'}` : null,
           mech: mechParts.join(' · '),
           collapsed: false,
         });
@@ -905,7 +907,9 @@ function buildEventChoiceOutcome(stepLog, before, after) {
   const entry = stepLog && stepLog[0] ? stepLog[0] : null;
   const res = entry && entry.result ? entry.result : entry;
   if (res && res.roll !== null && res.dc !== null) {
-    msgs.push(`Rolled ${res.roll} (needed ${res.dc}+): ${res.success ? 'Success' : 'Failure'}`);
+    const mod = res.total - res.roll;
+    const modStr = mod !== 0 ? ` (${mod >= 0 ? '+' : ''}${mod})` : '';
+    msgs.push(`Rolled ${res.roll}${modStr} = ${res.total} (needed ${res.dc}+): ${res.success ? 'Success' : 'Failure'}`);
   }
   if (res && res.text) msgs.push(res.text);
   if (after.food !== before.food) msgs.push(`${after.food - before.food >= 0 ? '+' : ''}${after.food - before.food} Food`);

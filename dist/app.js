@@ -2160,21 +2160,40 @@ function createGame(seed = null) {
         return result;
       }
     }
+    let dcReduction = 0;
+    let bonusItemName = null;
+    if (ch.itemBonus) {
+      const hasItem = cart.some((i) => i.name === ch.itemBonus.name && i.count > 0);
+      if (hasItem) {
+        dcReduction = ch.itemBonus.dcBonus || 0;
+        bonusItemName = ch.itemBonus.name;
+      }
+    }
     if (ch.dc !== null) {
       const roll = d();
+      const effectiveDC = ch.dc - dcReduction;
       const total = roll + totalMod(S2);
-      const success = total >= ch.dc;
+      const success2 = total >= effectiveDC;
       result.roll = roll;
       result.total = total;
-      result.dc = ch.dc;
-      result.success = success;
-      result.text = success ? `Success. ${ch.ok}` : `Failure. ${ch.bad}`;
-      if (!success) {
-        S2.wear = Math.max(0, S2.wear + (ch.wear || 0));
-        result.effects.push(`${ch.wear || 0 >= 0 ? "+" : ""}${ch.wear || 0} Wear`);
-      } else if (ch.wear) {
-        S2.wear = Math.max(0, S2.wear + ch.wear);
-        result.effects.push(`${ch.wear >= 0 ? "+" : ""}${ch.wear} Wear`);
+      result.dc = effectiveDC;
+      result.success = success2;
+      result.text = success2 ? `Success. ${ch.ok}` : `Failure. ${ch.bad}`;
+      if (bonusItemName) {
+        result.effects.push(`(${bonusItemName} \u2212${dcReduction} DC)`);
+      }
+      if (!success2) {
+        const w = ch.badWear !== void 0 ? ch.badWear : ch.wear || 0;
+        if (w) {
+          S2.wear = Math.max(0, S2.wear + w);
+          result.effects.push(`${w >= 0 ? "+" : ""}${w} Wear`);
+        }
+      } else {
+        const w = ch.okWear !== void 0 ? ch.okWear : ch.wear;
+        if (w) {
+          S2.wear = Math.max(0, S2.wear + w);
+          result.effects.push(`${w >= 0 ? "+" : ""}${w} Wear`);
+        }
       }
     } else if (ch.always) {
       result.text = ch.always;
@@ -2194,17 +2213,60 @@ function createGame(seed = null) {
         result.effects.push(`${ch.time} day(s)`);
       }
     }
-    if (ch.food) {
-      S2.food += ch.food;
-      result.effects.push(`${ch.food > 0 ? "+" : ""}${ch.food} Food`);
+    const success = result.success === true;
+    const failure = result.success === false;
+    if (success) {
+      if (ch.okFood !== void 0) {
+        S2.food += ch.okFood;
+        result.effects.push(`${ch.okFood > 0 ? "+" : ""}${ch.okFood} Food`);
+      } else if (ch.food) {
+        S2.food += ch.food;
+        result.effects.push(`${ch.food > 0 ? "+" : ""}${ch.food} Food`);
+      }
+      if (ch.okMorale !== void 0) {
+        S2.morale = Math.max(0, Math.min(100, S2.morale + ch.okMorale));
+        result.effects.push(`${ch.okMorale >= 0 ? "+" : ""}${ch.okMorale} Morale`);
+      } else if (ch.morale) {
+        S2.morale = Math.max(0, Math.min(100, S2.morale + ch.morale));
+        result.effects.push(`${ch.morale >= 0 ? "+" : ""}${ch.morale} Morale`);
+      }
+      if (ch.okCrew) {
+        S2.crew = ch.okCrew;
+        result.effects.push(`Crew: ${ch.okCrew}`);
+      }
+    } else if (failure) {
+      if (ch.badFood !== void 0) {
+        S2.food += ch.badFood;
+        result.effects.push(`${ch.badFood > 0 ? "+" : ""}${ch.badFood} Food`);
+      } else if (ch.food) {
+        S2.food += ch.food;
+        result.effects.push(`${ch.food > 0 ? "+" : ""}${ch.food} Food`);
+      }
+      if (ch.badMorale !== void 0) {
+        S2.morale = Math.max(0, Math.min(100, S2.morale + ch.badMorale));
+        result.effects.push(`${ch.badMorale >= 0 ? "+" : ""}${ch.badMorale} Morale`);
+      } else if (ch.morale) {
+        S2.morale = Math.max(0, Math.min(100, S2.morale + ch.morale));
+        result.effects.push(`${ch.morale >= 0 ? "+" : ""}${ch.morale} Morale`);
+      }
+      if (ch.badCrew) {
+        S2.crew = ch.badCrew;
+        result.effects.push(`Crew: ${ch.badCrew}`);
+      }
     }
-    if (ch.crew) {
-      S2.crew = ch.crew;
-      result.effects.push(`Crew: ${ch.crew}`);
-    }
-    if (ch.morale) {
-      S2.morale = Math.max(0, Math.min(100, S2.morale + ch.morale));
-      result.effects.push(`${ch.morale >= 0 ? "+" : ""}${ch.morale} Morale`);
+    if (result.success === null || ch.dc === null && !ch.always) {
+      if (ch.food) {
+        S2.food += ch.food;
+        result.effects.push(`${ch.food > 0 ? "+" : ""}${ch.food} Food`);
+      }
+      if (ch.morale) {
+        S2.morale = Math.max(0, Math.min(100, S2.morale + ch.morale));
+        result.effects.push(`${ch.morale >= 0 ? "+" : ""}${ch.morale} Morale`);
+      }
+      if (ch.crew) {
+        S2.crew = ch.crew;
+        result.effects.push(`Crew: ${ch.crew}`);
+      }
     }
     if (ch.give) {
       ch.give.forEach((g) => {
@@ -19951,7 +20013,9 @@ function revealDiceOutcome(diceResult) {
   const result = diceResult.result;
   const outcomeEl = document.getElementById("event-dice-outcome");
   if (outcomeEl) {
-    const rollHtml = `<span class="outcome-roll">Rolled ${result.roll} \u2014 need ${result.dc}+</span>`;
+    const mod = result.total - result.roll;
+    const modStr = mod !== 0 ? ` (${mod >= 0 ? "+" : ""}${mod})` : "";
+    const rollHtml = `<span class="outcome-roll">Rolled ${result.roll}${modStr} = ${result.total} \u2014 need ${result.dc}+</span>`;
     const resultHtml = result.success ? '<span class="outcome-pass">Success</span>' : '<span class="outcome-fail">Failure</span>';
     let flavorText = result.text || "";
     flavorText = flavorText.replace(/^(Success|Failure)\.\s*/, "");
@@ -20046,7 +20110,7 @@ function showEvent(game) {
           date: monthName(after.month) + " " + after.day,
           title: eventData.classification || "Event",
           text: buildEventReflection(eventData, res, weather, cart),
-          dice: res && res.roll !== null ? `Rolled ${res.roll} \u2014 need ${res.dc}+ \u2014 ${res.success ? "\u2713 Success" : "\u2717 Failure"}` : null,
+          dice: res && res.roll !== null ? `Rolled ${res.roll}${res.total - res.roll !== 0 ? ` (${res.total - res.roll >= 0 ? "+" : ""}${res.total - res.roll})` : ""} = ${res.total} \u2014 need ${res.dc}+ \u2014 ${res.success ? "\u2713 Success" : "\u2717 Failure"}` : null,
           mech: mechParts.join(" \xB7 "),
           collapsed: false
         });
@@ -20156,7 +20220,9 @@ function buildEventChoiceOutcome(stepLog, before, after) {
   const entry = stepLog && stepLog[0] ? stepLog[0] : null;
   const res = entry && entry.result ? entry.result : entry;
   if (res && res.roll !== null && res.dc !== null) {
-    msgs.push(`Rolled ${res.roll} (needed ${res.dc}+): ${res.success ? "Success" : "Failure"}`);
+    const mod = res.total - res.roll;
+    const modStr = mod !== 0 ? ` (${mod >= 0 ? "+" : ""}${mod})` : "";
+    msgs.push(`Rolled ${res.roll}${modStr} = ${res.total} (needed ${res.dc}+): ${res.success ? "Success" : "Failure"}`);
   }
   if (res && res.text) msgs.push(res.text);
   if (after.food !== before.food) msgs.push(`${after.food - before.food >= 0 ? "+" : ""}${after.food - before.food} Food`);
