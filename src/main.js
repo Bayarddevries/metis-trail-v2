@@ -159,7 +159,9 @@ export function bootstrap(seed = null) {
       const prevWear = game.getState().wear;
       const blocked = travelOneDay();
       Haptics.travel();
-      if (blocked === true) return;
+      if (blocked === true) return; // overload guard
+      // If travelOneDay() returned truthy (not true), it opened camp — don't re-render
+      if (blocked) return;
       const after = game.getState();
       if (after.wear > prevWear) Haptics.wear();
       // Log travel to journal
@@ -1360,7 +1362,7 @@ function showShop(game) {
         btn.addEventListener('click', (e) => {
           e.stopPropagation();
           const name3 = btn.getAttribute('data-item');
-          selectedExtra = extraItems.find(i => i.name === name);
+          selectedExtra = extraItems.find(i => i.name === name3);
           recalc();
           renderList();
         });
