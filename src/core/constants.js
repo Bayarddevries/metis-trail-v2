@@ -3,7 +3,7 @@ export const CONSTANTS = Object.freeze({
   START_MONTH: 6,
   START_DAY: 15,
   MAX_WEAR: 8,
-  DAILY_FOOD: 0.6,           // Base food consumed per travel day (was 1.0 - reduced for survivability)
+  DAILY_FOOD: 0.65,          // Base food consumed per travel day (was 0.6 - tightened for balance)
   CAMP_BASE_FOOD: 0.5,        // Base food cost per camp night (for 2 actions) (was 1.0)
   EVENT_CHANCE: 0.45,
   DAYS_PER_WEEK: 7,

@@ -1438,7 +1438,7 @@ function showShop(game) {
           game.buyItem(selectedExtra.name, selectedExtra.wt, selectedExtra.category);
         }
       }
-      game.addFood(18);
+      game.addFood(15);
       game.confirmPreDeparture();
       document.getElementById('predeparture-overlay')?.classList.remove('active');
       window.__METIS_RENDER__();

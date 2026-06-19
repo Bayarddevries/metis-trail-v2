@@ -1184,3 +1184,48 @@ Files: `src/systems/engine.js`.
 - Trail Intel description visible on St. Norbert gossip card
 - Settlement status pills visible on all settlement types
 - Settlement flavor text readable (not dark-on-dark), not italic
+
+## [v14.2] — 2026-06-19
+
+### Sprint C: Remaining Bug Fixes
+
+**Starvation Game Over (C4):**
+- Added `checkGameOver()` call after starvation block in `travelOneDay()`
+- Game now ends immediately when food hits 0 during travel (was: player could continue indefinitely at 0 food with exhausted crew and accumulating wear)
+- Early return after game over prevents further travel day processing
+
+**Event Effects Display (C3):**
+- `res.effects` (item give/consume, reputation changes, time delays) now appended to outcome text in all 3 UI paths:
+  - `buildEventChoiceOutcome()` — Continue button path
+  - `revealDiceOutcome()` — dice roll animation path
+  - Non-dice outcome path in `showEvent()`
+- Item changes like "+1 Bison Hide" or "-1 Rope (50ft)" now visible to player in event outcome
+
+**Files modified:** `src/systems/engine.js`, `src/main.js`
+
+**Verified:**
+- Sim to starvation: game over after 19 days, food=0, endReason=starvation ✅
+- 0 JS errors in browser after full playtest
+- Event outcome text includes effects from engine (code path verified)
+
+## [v14.3] — 2026-06-19
+
+### Balance Pass — Food Economy Tuning
+
+**Goal:** Reduce win rate from 70% → 60% (target range for playtesting).
+
+**Changes:**
+- `DAILY_FOOD`: 0.6 → 0.65 (8% increase in daily consumption)
+- Starting food: 18 → 15 (removes ~5 days of buffer)
+
+**Sim results (200 runs):**
+- Win rate: 61.5% (123/200) ✅ on target
+- Deaths: 38% starvation, 2.5% timeout, 0.5% cart failure
+- Tiers: 89% Survivor, 10.2% Trader, 0.8% Prosperous
+- Avg score: 238 (median 241)
+- Avg days survived: 46.3
+- Death hotspot: nodes 6-11 (mid-trail starvation)
+
+**Files modified:** `src/core/constants.js`, `src/main.js`, `tests/simulate-entry.js`
+
+**Verified:** 0 JS errors in browser after build

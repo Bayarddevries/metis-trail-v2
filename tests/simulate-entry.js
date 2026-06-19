@@ -223,7 +223,7 @@ function runSim(seed) {
   const game = createGame(seed);
 
   // Add starting food then confirm pre-departure
-  game.addFood(18);
+  game.addFood(15);
   game.confirmPreDeparture();
 
   // ── Offload to capacity if needed ──
