@@ -25,40 +25,38 @@ function weightedChoiceIndex(choices, rand) {
 }
 
 // ─── Settlement action weighting ───────────────────────────────────
-// Barter economy: trade furs for food/supplies at settlements
 function pickSettlementAction(actions, state, rand) {
-  // actions is array of {id, label, cost, risk, flavor}
-  const actionIds = actions.map(a => typeof a === 'string' ? a : a.id);
-  const weights = actionIds.map(a => {
+  // actions is array of {id, label, cost, risk, flavor, desc}
+  const weights = actions.map(a => {
+    const id = typeof a === 'string' ? a : a.id;
+
     // Continue - low priority unless desperate
-    if (a === 'continue') return 5;
-    
-    // Rest actions (rest_0 for all settlement types)
-    if (a.startsWith('rest')) {
+    if (id === 'continue') return 5;
+
+    // Rest actions
+    if (id.startsWith('rest_blessing')) {
+      if (state.crew !== 'rested' || state.morale < 60) return 35;
+      if (state.blessingDays > 0) return 3;
+      return 15;
+    }
+    if (id.startsWith('rest')) {
       if (state.crew === 'exhausted') return 40;
       if (state.crew === 'tired') return 25;
       if (state.morale < 40) return 15;
       return 8;
     }
-    
-    // Mission rest_blessing - free rest + morale + blessing
-    if (a === 'rest_blessing_0') {
-      if (state.crew !== 'rested' || state.morale < 60) return 35;
-      if (state.blessingDays > 0) return 3; // already blessed
-      return 15;
-    }
-    
-    // Mission heal_crew - costs medicine pouch or 2 food
-    if (a.startsWith('heal_crew')) {
+
+    // Heal crew
+    if (id.startsWith('heal_crew')) {
       const hasMedicine = state.cart?.some(i => i.name === 'Medicine Pouch' && i.count > 0) || false;
       if (!hasMedicine && state.food < 2) return 0;
       if (state.morale < 30) return 30;
       if (state.morale < 50) return 20;
       return 5;
     }
-    
-    // Trade furs for food - primary food source (higher weight when hungry)
-    if (a.startsWith('trade_furs_food')) {
+
+    // Trade furs for food
+    if (id.startsWith('trade_furs_food')) {
       const hasFur = state.cart?.some(i => (i.type === 'trade' || i.category === 'furs') && i.count > 0) || false;
       if (!hasFur) return 0;
       if (state.food < 3) return 60;
@@ -67,93 +65,91 @@ function pickSettlementAction(actions, state, rand) {
       if (state.food < 15) return 15;
       return 5;
     }
-    
-    // Trade furs for supplies (ammo, shaganappi, medicine, rope)
-    if (a.startsWith('trade_furs_supplies')) {
+
+    // Trade furs for supplies
+    if (id.startsWith('trade_furs_supplies')) {
       const hasFur = state.cart?.some(i => (i.type === 'trade' || i.category === 'furs') && i.count > 0) || false;
       if (!hasFur) return 0;
-      // Check which supply
-      if (a.includes('ammunition')) {
+      if (id.includes('ammunition')) {
         const hasAmmo = state.cart?.some(i => i.name === 'Ammunition Belt' && i.count > 0) || false;
         if (hasAmmo) return 3;
-        return 15; // useful for hunting
+        return 15;
       }
-      if (a.includes('shaganappi')) {
+      if (id.includes('shaganappi')) {
         if (state.wear >= 3) return 30;
         if (state.wear >= 1) return 15;
         return 5;
       }
-      if (a.includes('medicine')) {
+      if (id.includes('medicine')) {
         const hasMedicine = state.cart?.some(i => i.name === 'Medicine Pouch' && i.count > 0) || false;
         if (hasMedicine) return 3;
         return 10;
       }
-      if (a.includes('rope')) return 5;
+      if (id.includes('rope')) return 5;
       return 10;
     }
-    
-    // Métis trade_gossip - free intel + morale
-    if (a === 'trade_gossip_0') return 15;
-    
-    // Métis dance - costs 1 food, big morale boost
-    if (a === 'dance_0') {
+
+    // Métis gossip (trail intel)
+    if (id === 'trade_gossip_0') return 15;
+
+    // Métis dance
+    if (id === 'dance_0') {
       if (state.food < 1) return 0;
       if (state.morale < 30) return 25;
       if (state.morale < 50) return 15;
       return 8;
     }
-    
-    // Métis share_food - costs 2 food, morale + reputation
-    if (a === 'share_food_0') {
+
+    // Métis share food
+    if (id === 'share_food_0') {
       if (state.food < 4) return 0;
       if (state.morale < 40) return 20;
       return 8;
     }
-    
-    // NWMP permit - trade 1 fur for permit
-    if (a === 'permit_0') {
+
+    // NWMP permit
+    if (id === 'permit_0') {
       const hasFur = state.cart?.some(i => (i.type === 'trade' || i.category === 'furs') && i.count > 0) || false;
       if (!hasFur) return 0;
       if (!state.hasPermit) return 12;
       return 2;
     }
-    
-    // NWMP pay_fine - trade 1 fur to clear fines
-    if (a === 'pay_fine_0') {
+
+    // NWMP pay fine
+    if (id === 'pay_fine_0') {
       if ((state.fines || 0) <= 0) return 0;
       const hasFur = state.cart?.some(i => (i.type === 'trade' || i.category === 'furs') && i.count > 0) || false;
       if (!hasFur) return 0;
       return 30;
     }
-    
-    // NWMP buy_ammo - trade 1 fur for 2 ammo belts
-    if (a === 'buy_ammo_0') {
+
+    // NWMP buy ammo
+    if (id === 'buy_ammo_0') {
       const hasFur = state.cart?.some(i => (i.type === 'trade' || i.category === 'furs') && i.count > 0) || false;
       if (!hasFur) return 0;
       const hasAmmo = state.cart?.some(i => i.name === 'Ammunition Belt' && i.count > 0) || false;
       if (hasAmmo) return 5;
       return 15;
     }
-    
-    return 8; // default weight
+
+    return 8;
   });
+
   const total = weights.reduce((s, w) => s + w, 0);
-  if (total === 0) return actions[0]; // fallback
+  if (total === 0) return actions[0]?.id || 'continue';
   let r = rand() * total;
   for (let i = 0; i < actions.length; i++) {
     r -= weights[i];
-    if (r <= 0) return actions[i];
+    if (r <= 0) return typeof actions[i] === 'string' ? actions[i] : actions[i].id;
   }
-  return actions[0];
+  return typeof actions[0] === 'string' ? actions[0] : actions[0]?.id || 'continue';
 }
 
 // ─── Camp action weighting ─────────────────────────────────────────
-// Simulates the player choosing a camp action after makeCamp().
-// Context-aware: respects terrain, items, crew state, food.
 function pickCampAction(state, cart, rand) {
   const actions = [];
+  const terrain = state.currentTerrain || 'plains';
 
-  // Rest: always available if food >= 1
   if (state.food >= 1) {
     let restWeight = 20;
     if (state.crew === 'exhausted') restWeight = 50;
@@ -162,8 +158,6 @@ function pickCampAction(state, cart, rand) {
     actions.push({ type: 'rest', weight: restWeight });
   }
 
-  // Forage: available in river_valley/wooded (not plains)
-  const terrain = state.currentTerrain || 'plains';
   if (terrain !== 'plains') {
     let forageWeight = 15;
     if (state.food < 6) forageWeight = 40;
@@ -171,7 +165,6 @@ function pickCampAction(state, cart, rand) {
     actions.push({ type: 'forage', weight: forageWeight });
   }
 
-  // Hunt: requires Ammunition Belt + open terrain (not wooded)
   const hasAmmo = cart.some(i => i.name === 'Ammunition Belt' && i.count > 0);
   if (hasAmmo && terrain !== 'wooded') {
     let huntWeight = 10;
@@ -180,7 +173,6 @@ function pickCampAction(state, cart, rand) {
     actions.push({ type: 'hunt', weight: huntWeight });
   }
 
-  // Repair: requires wear > 0 + Shaganappi
   const hasShag = cart.some(i => i.name === 'Shaganappi' && i.count > 0);
   if (state.wear > 0 && hasShag) {
     let repairWeight = 10;
@@ -189,23 +181,19 @@ function pickCampAction(state, cart, rand) {
     actions.push({ type: 'repair', weight: repairWeight });
   }
 
-  // Scout: requires next node exists (not at final destination)
   if (state.node < 12) {
     actions.push({ type: 'scout', weight: 8 });
   }
 
-  // Dance: always available
   let danceWeight = 8;
   if (state.morale < 30) danceWeight = 20;
   else if (state.morale < 50) danceWeight = 12;
   actions.push({ type: 'dance', weight: danceWeight });
 
-  // Process Pemmican: requires food >= 3
   if (state.food >= 3) {
     actions.push({ type: 'pemmican_process', weight: 10 });
   }
 
-  // Deep Rest: requires food >= 2
   if (state.food >= 2) {
     let deepRestWeight = 8;
     if (state.crew === 'exhausted') deepRestWeight = 30;
@@ -213,15 +201,13 @@ function pickCampAction(state, cart, rand) {
     actions.push({ type: 'deeprest', weight: deepRestWeight });
   }
 
-  // Push On: skip camp benefits, take penalties
-  // Only consider if crew is not exhausted and morale is decent
   if (state.crew !== 'exhausted' && state.morale > 20) {
     let pushOnWeight = 3;
     if (state.food > 15 && state.morale > 60) pushOnWeight = 8;
     actions.push({ type: 'push_on', weight: pushOnWeight });
   }
 
-  if (actions.length === 0) return 'rest'; // fallback
+  if (actions.length === 0) return 'rest';
 
   const total = actions.reduce((s, a) => s + a.weight, 0);
   let r = rand() * total;
@@ -236,10 +222,11 @@ function pickCampAction(state, cart, rand) {
 function runSim(seed) {
   const game = createGame(seed);
 
-  // Add starting food (simulates pre-departure confirm)
+  // Add starting food then confirm pre-departure
   game.addFood(18);
+  game.confirmPreDeparture();
 
-  // ── Offload to capacity ──
+  // ── Offload to capacity if needed ──
   let weight = game.totalWeight();
   const cap = game.getState().capacity;
   if (weight > cap) {
@@ -248,7 +235,8 @@ function runSim(seed) {
       const cart = game.getCart();
       const loaded = cart.filter(i => i.count > 0);
       if (loaded.length === 0) break;
-      const lowest = loaded.sort((a, b) => (a.mbValue || 0) - (b.mbValue || 0))[0];
+      // Offload heaviest non-essential items first
+      const lowest = loaded.sort((a, b) => (b.wt || 0) - (a.wt || 0))[0];
       game.offloadItem(lowest.name);
     }
   }
@@ -258,13 +246,8 @@ function runSim(seed) {
   let pushOnCount = 0;
   let eventCount = 0;
   let tradeCount = 0;
-  let buyFoodCount = 0;
-  let buyRepairCount = 0;
-  let buyHealCount = 0;
-  let buyInfoCount = 0;
   let repairCount = 0;
   let restCount = 0;
-  let continueCount = 0;
   let travelCount = 0;
   let forageCount = 0;
   let huntCount = 0;
@@ -274,19 +257,13 @@ function runSim(seed) {
   let deepRestCount = 0;
   let squealCount = 0;
   let sundayRestCount = 0;
-  // New settlement action trackers
   let gossipCount = 0;
-  let getIntelCount = 0;
-  let recruitCount = 0;
   let shareFoodCount = 0;
   let blessingCount = 0;
   let payFinesCount = 0;
   let getPermitsCount = 0;
-  let reportDutyCount = 0;
   let buyAmmoCount = 0;
   let healCrewCount = 0;
-  let craftCount = 0;
-  let tradeLimitedCount = 0;
 
   const foodHistory = [];
   const wearHistory = [];
@@ -299,7 +276,6 @@ function runSim(seed) {
 
     const s = game.getState();
 
-    // Snapshot every 5 days for trend analysis
     if (step % 5 === 0) {
       foodHistory.push({ step, food: s.food, wear: s.wear, morale: s.morale, node: s.node });
     }
@@ -307,92 +283,80 @@ function runSim(seed) {
     if (s.pendingEvent) {
       eventCount++;
       const ev = game.getPendingEvent();
-      if (ev && ev.choices.length > 0) {
+      if (ev && ev.choices && ev.choices.length > 0) {
         const ci = weightedChoiceIndex(ev.choices, Math.random);
         game.chooseEventChoice(ci);
       }
     } else if (s.pendingSettlement) {
-      const actions = game.getAvailableActions();
-      if (actions.type === 'settlement') {
-        // #81 — One action per settlement visit
-        const settleType = s.pendingSettlement?.type || 'hbc';
+      // Get settlement actions using the current engine API
+      const node = game.getCurrentNode();
+      const settleType = node?.type || 'hbc';
+      const actions = game.getSettlementActions(settleType);
+
+      if (actions && actions.length > 0) {
         const cart = game.getCart();
-        const stateForWeights = { ...s, pendingSettlementType: settleType, cart };
-        // pickSettlementAction now receives action objects and returns an action ID string
-        const actionId = pickSettlementAction(actions.actions, stateForWeights, Math.random);
-        if (actionId === 'continue') {
-          continueCount++;
-        } else if (actionId) {
-          // Track the action type (new barter action IDs)
+        const stateForWeights = { ...s, cart };
+        const actionId = pickSettlementAction(actions, stateForWeights, Math.random);
+
+        if (actionId && actionId !== 'continue') {
+          // Track action type
           if (actionId.startsWith('rest')) restCount++;
           else if (actionId.startsWith('trade_furs_food')) tradeCount++;
           else if (actionId.startsWith('trade_furs_supplies')) tradeCount++;
           else if (actionId === 'trade_gossip_0') gossipCount++;
           else if (actionId === 'dance_0') danceCount++;
           else if (actionId === 'share_food_0') shareFoodCount++;
-          else if (actionId === 'heal_crew_0' || actionId === 'heal_crew_1') healCrewCount++;
-          else if (actionId === 'rest_blessing_0') blessingCount++;
+          else if (actionId.startsWith('heal_crew')) healCrewCount++;
+          else if (actionId.startsWith('rest_blessing')) blessingCount++;
           else if (actionId === 'permit_0') getPermitsCount++;
           else if (actionId === 'pay_fine_0') payFinesCount++;
           else if (actionId === 'buy_ammo_0') buyAmmoCount++;
+
           game.settlementAction(actionId);
         }
-        // Continue west after one action
-        game.settlementAction('continue');
+        // settlementAction already clears pendingSettlement on success
+        // No need to call 'continue' separately
       }
     } else {
-      const actions = game.getAvailableActions();
-      if (actions.type === 'travel') {
-        // Decide: travel or camp
-        // Camp if crew is exhausted, morale is critically low, or food is very low
-        const needsCamp = s.crew === 'exhausted' || s.morale < 15 || s.food < 3;
-        // Also camp periodically if crew is tired or morale is middling
-        const wantsCamp = s.crew === 'tired' && s.travelDaysWithoutRest >= 3;
-        const campRoll = Math.random() < 0.15; // 15% chance to camp opportunistically
+      const needsCamp = s.crew === 'exhausted' || s.morale < 15 || s.food < 3;
+      const wantsCamp = s.crew === 'tired' && s.travelDaysWithoutRest >= 3;
+      const campRoll = Math.random() < 0.15;
 
-        if (needsCamp || wantsCamp || campRoll) {
-          // Decide which camp action to take BEFORE calling makeCamp
-          // "push_on" means skip makeCamp entirely and apply penalties
-          const cart = game.getCart();
-          const campAction = pickCampAction(s, cart, Math.random);
+      if (needsCamp || wantsCamp || campRoll) {
+        const cart = game.getCart();
+        const campAction = pickCampAction(s, cart, Math.random);
 
-          if (campAction === 'push_on') {
-            // Push On: skip camp, apply penalties directly
-            game.pushOn();
-            pushOnCount++;
-          } else {
-            // Normal camp: make camp first, then execute action
-            game.makeCamp();
-            campCount++;
+        if (campAction === 'push_on') {
+          game.pushOn();
+          pushOnCount++;
+        } else {
+          game.makeCamp();
+          campCount++;
 
-            const result = game.campAction(campAction);
-            if (result && !result.error) {
-              switch (campAction) {
-                case 'forage': forageCount++; break;
-                case 'hunt': huntCount++; break;
-                case 'repair': repairCount++; break;
-                case 'scout': scoutCount++; break;
-                case 'dance': danceCount++; break;
-                case 'pemmican_process': pemmicanCount++; break;
-                case 'deeprest': deepRestCount++; break;
-                case 'rest': restCount++; break;
-              }
+          const result = game.campAction(campAction);
+          if (result && !result.error) {
+            switch (campAction) {
+              case 'forage': forageCount++; break;
+              case 'hunt': huntCount++; break;
+              case 'repair': repairCount++; break;
+              case 'scout': scoutCount++; break;
+              case 'dance': danceCount++; break;
+              case 'pemmican_process': pemmicanCount++; break;
+              case 'deeprest': deepRestCount++; break;
+              case 'rest': restCount++; break;
             }
           }
-        } else {
-          game.travelOneDay();
-          travelCount++;
+        }
+      } else {
+        game.travelOneDay();
+        travelCount++;
 
-          // Check if travel triggered a squeal event (wear >= 4)
-          const afterState = game.getState();
-          if (afterState.pendingEvent && afterState.pendingEvent.id === 'squeal_event') {
-            squealCount++;
-          }
-
-          // Check if Sunday Rest was triggered (every 7th day)
-          if (afterState.day > 0 && afterState.day % 7 === 0) {
-            sundayRestCount++;
-          }
+        const afterState = game.getState();
+        if (afterState.pendingEvent && afterState.pendingEvent.id === 'squeal_axle') {
+          squealCount++;
+        }
+        if (afterState.day > 0 && afterState.day % 7 === 0) {
+          sundayRestCount++;
         }
       }
     }
@@ -400,14 +364,20 @@ function runSim(seed) {
 
   const final = game.getState();
   const finalCart = game.getCart();
-  const tradeGoods = finalCart.filter(i => i.type === 'trade' && i.count > 0).reduce((s, i) => s + i.count, 0);
+  const tradeGoods = finalCart.filter(i => (i.type === 'trade' || i.category === 'furs') && i.count > 0)
+    .reduce((s, i) => s + i.count, 0);
+
+  // Get endgame score (returns {score, breakdown, tier, ...})
+  const endgameScore = game.getEndgameScore();
 
   return {
     seed,
     won: game.hasWon(),
     over: game.isOver(),
     endReason: final.endReason || 'timeout',
-    score: game.getScore(),
+    score: endgameScore?.score || 0,
+    tier: endgameScore?.tier || 'Defeat',
+    breakdown: endgameScore?.breakdown || {},
     days: final.day,
     finalFood: final.food,
     finalWear: final.wear,
@@ -417,17 +387,11 @@ function runSim(seed) {
     finalSeason: final.season,
     finalWeather: final.weather,
     tradeGoodsRemaining: tradeGoods,
-    mbValue: final.mbValue || 0,
-    credit: final.credit || {},
     campCount,
     pushOnCount,
     travelCount,
     eventCount,
     tradeCount,
-    buyFoodCount,
-    buyRepairCount,
-    buyHealCount,
-    buyInfoCount,
     forageCount,
     huntCount,
     scoutCount,
@@ -435,23 +399,16 @@ function runSim(seed) {
     pemmicanCount,
     deepRestCount,
     restCount,
-    continueCount,
     repairCount,
     squealCount,
     sundayRestCount,
     gossipCount,
-    getIntelCount,
-    recruitCount,
     shareFoodCount,
     blessingCount,
     payFinesCount,
     getPermitsCount,
-    reportDutyCount,
     buyAmmoCount,
     healCrewCount,
-    craftCount,
-    tradeLimitedCount,
-    totalActions: eventCount + tradeCount + forageCount + huntCount + scoutCount + danceCount + pemmicanCount + deepRestCount + restCount + continueCount + travelCount + campCount + gossipCount + getIntelCount + recruitCount + shareFoodCount + blessingCount + payFinesCount + getPermitsCount + reportDutyCount + buyAmmoCount + healCrewCount + craftCount + tradeLimitedCount,
     foodHistory,
   };
 }
@@ -463,18 +420,15 @@ function aggregate(results) {
   const victories = results.filter(r => r.endReason === 'victory');
   const losses = results.filter(r => !r.won);
 
-  // Death reasons
   const reasons = {};
   results.forEach(r => { reasons[r.endReason] = (reasons[r.endReason] || 0) + 1; });
 
-  // Score stats
   const scores = victories.map(r => r.score);
   const avgScore = scores.length ? Math.round(scores.reduce((s, v) => s + v, 0) / scores.length) : 0;
   const medianScore = scores.length ? [...scores].sort((a, b) => a - b)[Math.floor(scores.length / 2)] : 0;
   const maxScore = scores.length ? Math.max(...scores) : 0;
   const minScore = scores.length ? Math.min(...scores) : 0;
 
-  // Score buckets
   const buckets = { '0-499': 0, '500-799': 0, '800-999': 0, '1000-1199': 0, '1200-1399': 0, '1400+': 0 };
   scores.forEach(s => {
     if (s < 500) buckets['0-499']++;
@@ -485,34 +439,24 @@ function aggregate(results) {
     else buckets['1400+']++;
   });
 
-  // Ending quality
-  const triumphant = victories.filter(r => r.score >= 1100).length;
-  const humble = victories.filter(r => r.score < 1100).length;
+  // Tier distribution
+  const tiers = {};
+  victories.forEach(r => { tiers[r.tier] = (tiers[r.tier] || 0) + 1; });
 
-  // Averages
   const avg = key => results.map(r => r[key]).reduce((s, v) => s + v, 0) / total;
 
-  // Trade goods remaining for winners
   const avgTradeGoodsAtEnd = victories.length
     ? victories.reduce((s, r) => s + r.tradeGoodsRemaining, 0) / victories.length
     : 0;
 
-  // MB value for winners
-  const avgMBAtEnd = victories.length
-    ? victories.reduce((s, r) => s + (r.mbValue || 0), 0) / victories.length
-    : 0;
-
-  // How far did losses get?
   const lossNodes = losses.map(r => r.finalNode);
   const avgLossNode = lossNodes.length ? Math.round(lossNodes.reduce((s, v) => s + v, 0) * 10 / lossNodes.length) / 10 : 0;
 
-  // Food at death for starvation
   const starvationDeaths = results.filter(r => r.endReason === 'starvation');
   const avgFoodAtStarvation = starvationDeaths.length
     ? starvationDeaths.reduce((s, r) => s + r.finalFood, 0) / starvationDeaths.length
     : 0;
 
-  // Days survived by ending type
   const daysByReason = {};
   results.forEach(r => {
     if (!daysByReason[r.endReason]) daysByReason[r.endReason] = [];
@@ -523,7 +467,6 @@ function aggregate(results) {
     avgDaysByReason[k] = Math.round(arr.reduce((s, v) => s + v, 0) / arr.length);
   });
 
-  // Node reached by ending type
   const nodeByReason = {};
   results.forEach(r => {
     if (!nodeByReason[r.endReason]) nodeByReason[r.endReason] = [];
@@ -534,24 +477,18 @@ function aggregate(results) {
     avgNodeByReason[k] = Math.round(arr.reduce((s, v) => s + v, 0) * 10 / arr.length) / 10;
   });
 
-  // Weather distribution at end
   const weatherDist = {};
   results.forEach(r => {
     const w = r.finalWeather || 'unknown';
     weatherDist[w] = (weatherDist[w] || 0) + 1;
   });
 
-  // Action frequencies
   const actionFreq = {
     travel: avg('travelCount'),
     camp: avg('campCount'),
     pushOn: avg('pushOnCount'),
     events: avg('eventCount'),
     trade: avg('tradeCount'),
-    buyFood: avg('buyFoodCount'),
-    buyRepair: avg('buyRepairCount'),
-    buyHeal: avg('buyHealCount'),
-    buyInfo: avg('buyInfoCount'),
     forage: avg('forageCount'),
     hunt: avg('huntCount'),
     scout: avg('scoutCount'),
@@ -560,33 +497,26 @@ function aggregate(results) {
     deepRest: avg('deepRestCount'),
     rest: avg('restCount'),
     repair: avg('repairCount'),
-    continueThrough: avg('continueCount'),
     squealEvents: avg('squealCount'),
     sundayRests: avg('sundayRestCount'),
     gossip: avg('gossipCount'),
-    getIntel: avg('getIntelCount'),
-    recruit: avg('recruitCount'),
     shareFood: avg('shareFoodCount'),
     blessing: avg('blessingCount'),
     payFines: avg('payFinesCount'),
     getPermits: avg('getPermitsCount'),
-    reportDuty: avg('reportDutyCount'),
     buyAmmo: avg('buyAmmoCount'),
     healCrew: avg('healCrewCount'),
-    craft: avg('craftCount'),
-    tradeLimited: avg('tradeLimitedCount'),
   };
 
   return {
     total, wins: wins.length, winRate: Math.round(wins.length / total * 1000) / 10,
-    victories: victories.length, triumphant, humble,
+    victories: victories.length, tiers,
     avgScore, medianScore, minScore, maxScore, buckets,
     avgDays: avg('days'), avgFinalFood: Math.round(avg('finalFood') * 10) / 10,
     avgFinalWear: Math.round(avg('finalWear') * 10) / 10,
     avgFinalMorale: Math.round(avg('finalMorale')),
     avgFinalNode: Math.round(avg('finalNode') * 10) / 10,
     avgTradeGoodsAtEnd: Math.round(avgTradeGoodsAtEnd * 10) / 10,
-    avgMBAtEnd: Math.round(avgMBAtEnd * 10) / 10,
     avgLossNode,
     avgFoodAtStarvation: Math.round(avgFoodAtStarvation * 10) / 10,
     reasons, avgDaysByReason, avgNodeByReason, actionFreq, weatherDist,
@@ -607,15 +537,20 @@ const s = aggregate(results);
 
 // ─── Report ────────────────────────────────────────────────────────
 console.log(`\n═══════════════════════════════════════════════════════════════`);
-console.log(`  METIS TRAIL V2 — PLAYTEST RESULTS (v79 camp overhaul)`);
+console.log(`  METIS TRAIL V2 — BALANCE REPORT (v14.2)`);
 console.log(`  ${s.total} simulations | ${new Date().toISOString().slice(0, 10)}`);
 console.log(`═══════════════════════════════════════════════════════════════\n`);
 
 console.log(`OVERALL RESULTS`);
 console.log(`  Win rate:     ${s.winRate}% (${s.wins}/${s.total})`);
-console.log(`  — Triumphant (≥1100): ${s.triumphant}  (${Math.round(s.triumphant / s.total * 100)}% of all)`);
-console.log(`  — Humble (<1100):     ${s.humble}  (${Math.round(s.humble / s.total * 100)}% of all)`);
-console.log(`  — Losses:              ${s.total - s.wins}  (${Math.round((s.total - s.wins) / s.total * 100)}% of all)\n`);
+if (s.victories > 0) {
+  console.log(`  Tier distribution (wins):`);
+  Object.entries(s.tiers).forEach(([tier, count]) => {
+    const pct = Math.round(count / s.victories * 1000) / 10;
+    console.log(`    ${tier.padEnd(14)} ${count} (${pct}%)`);
+  });
+}
+console.log(`  Losses:       ${s.total - s.wins} (${Math.round((s.total - s.wins) / s.total * 100)}%)\n`);
 
 console.log(`DEATH BREAKDOWN`);
 s.deathDistribution.forEach(([reason, count]) => {
@@ -644,9 +579,8 @@ console.log(`  Avg days survived:      ${s.avgDays}`);
 console.log(`  Avg final food:         ${s.avgFinalFood}`);
 console.log(`  Avg final wear:         ${s.avgFinalWear}`);
 console.log(`  Avg final morale:       ${s.avgFinalMorale}`);
-console.log(`  Avg furthest node:      ${s.avgFinalNode}/12 (12 = Fort Edmonton)`);
+console.log(`  Avg furthest node:      ${s.avgFinalNode}/13 (13 = Fort Edmonton)`);
 console.log(`  Avg trade goods at end: ${s.avgTradeGoodsAtEnd} (winners)`);
-console.log(`  Avg MB value at end:    ${s.avgMBAtEnd} (winners, need ${CONSTANTS.MB_WIN_THRESHOLD} to win)`);
 console.log(`  Avg node at death:      ${s.avgLossNode} (losers)`);
 console.log(`  Avg food at starvation: ${s.avgFoodAtStarvation}\n`);
 
@@ -668,150 +602,58 @@ console.log(`══════════════════════�
 console.log(`  BALANCE RECOMMENDATIONS`);
 console.log(`═══════════════════════════════════════════════════════════════\n`);
 
-// Win rate assessment
+const dailyFood = CONSTANTS.DAILY_FOOD || 0.6;
+console.log(`  DAILY_FOOD: ${dailyFood} | Starting food: 18 | Max wear: ${CONSTANTS.MAX_WEAR || 8}`);
+console.log(`  Event chance: ${CONSTANTS.EVENT_CHANCE || 0.45} | Nodes: 14\n`);
+
 if (s.winRate < 8) {
   console.log(`🔴 CRITICALLY HARD (${s.winRate}% win rate)`);
   console.log(`   Most players cannot reach Edmonton. Urgent rebalancing needed.`);
-  console.log(`   → Increase food from events (many events give 0 food)`);
-  console.log(`   → Reduce DAILY_FOOD consumption from 1.35 to 1.1`);
-  console.log(`   → Lower event DCs by 1-2 across the board`);
-  console.log(`   → Add more foraging opportunities or increase forage yield`);
 } else if (s.winRate < 20) {
   console.log(`🟠 HARD (${s.winRate}% win rate)`);
   console.log(`   Challenging but possible. Good for hardcore, frustrating for casual.`);
-  console.log(`   → Consider adding a "novice" difficulty with +5 starting food`);
-  console.log(`   → Increase food yield from trade events`);
-  console.log(`   → Reduce wear accumulation on plains terrain`);
 } else if (s.winRate < 40) {
   console.log(`🟡 MODERATE (${s.winRate}% win rate)`);
   console.log(`   Good challenge level for most players. Fine-tune specific pain points.`);
 } else if (s.winRate < 60) {
   console.log(`🟢 FAIRLY EASY (${s.winRate}% win rate)`);
   console.log(`   Most players win. May lack tension for experienced players.`);
-  console.log(`   → Consider scaling difficulty with fewer items or harsher events`);
 } else {
   console.log(`🔵 VERY EASY (${s.winRate}% win rate)`);
   console.log(`   Near-universal victory. Game needs more challenge.`);
-  console.log(`   → Increase DAILY_FOOD consumption`);
-  console.log(`   → Raise event DCs by 1-2`);
-  console.log(`   → Add weather penalties`);
-  console.log(`   → Reduce starting food`);
 }
 console.log();
 
-// Death-specific analysis
 const starvationPct = (s.reasons.starvation || 0) / s.total * 100;
 const winterPct = (s.reasons.winter || 0) / s.total * 100;
 const abandonedPct = (s.reasons.abandoned || 0) / s.total * 100;
 const cartFailPct = (s.reasons.cart_failure || 0) / s.total * 100;
-const noTradePct = (s.reasons.no_trade || 0) / s.total * 100;
 
 if (starvationPct > 25) {
-  console.log(`🔴 FOOD ECONOMY CRITICAL: ${Math.round(starvationPct)}% of games end in starvation`);
-  console.log(`   → Add more food-positive event choices`);
-  console.log(`   → Increase base food yield from trading`);
-  console.log(`   → Reduce daily food consumption`);
-  console.log(`   → Give players +3 starting food or a free foraging day`);
+  console.log(`🔴 FOOD CRITICAL: ${Math.round(starvationPct)}% starvation deaths`);
+  console.log(`   → Increase food from events or reduce DAILY_FOOD (${dailyFood})`);
+  console.log(`   → Add more foraging opportunities`);
   console.log();
 }
 if (winterPct > 15) {
-  console.log(`🟠 SPEED TRIAL ISSUE: ${Math.round(winterPct)}% caught by winter`);
-  console.log(`   → Trail is too long for the season window`);
-  console.log(`   → Reduce segment distances by 1-2 on late nodes`);
-  console.log(`   → Start season earlier (May instead of June 15)`);
-  console.log(`   → Add "express" trail choices that save a day at risk`);
+  console.log(`🟠 WINTER WALL: ${Math.round(winterPct)}% caught by winter`);
+  console.log(`   → Trail may be too long for season window`);
+  console.log(`   → Consider starting earlier or reducing node distances`);
   console.log();
 }
 if (abandonedPct > 15) {
-  console.log(`🟠 MORALE TOO PUNISHING: ${Math.round(abandonedPct)}% crew abandonment`);
-  console.log(`   → Reduce morale penalties on events (many are -8 to -20)`);
+  console.log(`🟠 MORALE CRITICAL: ${Math.round(abandonedPct)}% crew abandonment`);
+  console.log(`   → Reduce morale penalties on events`);
   console.log(`   → Increase morale recovery from camping`);
-  console.log(`   → Add more positive-morale events`);
-  console.log(`   → Raise starting morale from 70 to 80`);
   console.log();
 }
 if (cartFailPct > 15) {
-  console.log(`🟠 WEAR TOO AGGRESSIVE: ${Math.round(cartFailPct)}% cart failure deaths`);
-  console.log(`   → Reduce wear accumulation probability on events`);
-  console.log(`   → Make repair at settlement more effective`);
-  console.log(`   → Add a "spare parts" starting item`);
-  console.log(`   → Lower wear event DCs so repairs succeed more often`);
-  console.log();
-}
-if (noTradePct > 20) {
-  console.log(`🟠 NO_TRADE LOSSES: ${Math.round(noTradePct)}% reach Edmonton without enough MB`);
-  console.log(`   → MB win threshold may be too high (currently ${CONSTANTS.MB_WIN_THRESHOLD})`);
-  console.log(`   → Add more trade-good-giving events`);
-  console.log(`   → Reduce trade good weight`);
-  console.log(`   → Make trading at settlements more rewarding`);
+  console.log(`🟠 WEAR CRITICAL: ${Math.round(cartFailPct)}% cart failure deaths`);
+  console.log(`   → Reduce wear accumulation or improve repair effectiveness`);
   console.log();
 }
 
-// Score spread
-if (s.victories > 0) {
-  if (s.triumphant === 0) {
-    console.log(`🟠 NO TRIUMPHANT ENDINGS: 1100 threshold unreachable`);
-    console.log(`   → Verify calcScore() formula gives reachable scores`);
-    console.log(`   → Consider lowering threshold to 900`);
-    console.log(`   → Or increase trade goods scoring`);
-    console.log();
-  }
-  if (s.triumphant > 0 && s.humble > 0) {
-    const ratio = Math.round(s.triumphant / s.humble * 10) / 10;
-    if (ratio > 5) {
-      console.log(`🟡 TOO MANY TRIUMPHANT (${ratio}:1 vs humble)`);
-      console.log(`   → Victory is too consistent once reached`);
-      console.log(`   → Consider: score ≥ 1300 for Triumphant, or increase days penalty`);
-      console.log();
-    }
-  }
-}
-
-// Camp action analysis
-if (s.actionFreq.camp > 20) {
-  console.log(`🟡 EXCESSIVE CAMPING (${s.actionFreq.camp.toFixed(1)}/game average)`);
-  console.log(`   → Crew exhaustion happens too often`);
-  console.log(`   → May need more frequent rest points`);
-  console.log(`   → Or reduce crew exhaustion threshold from 5 to 6 days`);
-  console.log();
-}
-
-if (s.actionFreq.pushOn > 5) {
-  console.log(`🟡 HIGH PUSH-ON RATE (${s.actionFreq.pushOn.toFixed(1)}/game)`);
-  console.log(`   → Players are skipping camp too often`);
-  console.log(`   → Push On penalties may need to be harsher`);
-  console.log();
-}
-
-if (s.actionFreq.forage > 8) {
-  console.log(`🟡 FORAGE SPAMMING (${s.actionFreq.forage.toFixed(1)}/game)`);
-  console.log(`   → Forage may be the dominant strategy`);
-  console.log(`   → Consider: reduce forage success chance, add diminishing returns`);
-  console.log();
-}
-
-if (s.actionFreq.hunt > 5) {
-  console.log(`🟡 HUNT HEAVY (${s.actionFreq.hunt.toFixed(1)}/game)`);
-  console.log(`   → Hunt is being used frequently; check if it's overpowered`);
-  console.log(`   → Ammunition Belt scarcity should limit this`);
-  console.log();
-}
-
-if (s.actionFreq.events < 5) {
-  console.log(`🟡 TOO FEW EVENTS (${s.actionFreq.events.toFixed(1)}/game average)`);
-  console.log(`   → Players see only a few events per playthrough`);
-  console.log(`   → Increase EVENT_CHANCE or add more event content`);
-  console.log();
-}
-
-if (s.actionFreq.squealEvents > 3) {
-  console.log(`🟠 SQUEAL EVENTS HIGH (${s.actionFreq.squealEvents.toFixed(1)}/game)`);
-  console.log(`   → Wear accumulation is triggering too many squeal events`);
-  console.log(`   → Consider: raise wear threshold from 4 to 5`);
-  console.log();
-}
-
-// Per-node death analysis
+// Node-by-node death map
 console.log(`═══════════════════════════════════════════════════════════════`);
 console.log(`  NODE-BY-NODE DEATH MAP`);
 console.log(`═══════════════════════════════════════════════════════════════\n`);
@@ -829,7 +671,7 @@ nodes.forEach(n => {
 });
 console.log();
 
-// Spot-check last 5
+// Sample replays
 console.log(`═══════════════════════════════════════════════════════════════`);
 console.log(`  SAMPLE REPLAYS (last 5)`);
 console.log(`═══════════════════════════════════════════════════════════════\n`);
