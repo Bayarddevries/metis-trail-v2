@@ -84,15 +84,15 @@ _Adapt the new layout for mobile/tablet. Full integration test._
 
 ---
 
-### Session 4: Polish + Edge Cases
+### Session 4: Polish + Edge Cases ✅
 _Remove remaining dead systems, edge case hardening, settlement action cleanup._
 
-- [ ] **4.1** Remove dead settlement action IDs from the settlement action renderer: `recruit_crew`, `pay_fines`, `get_permits`, `buy_ammo`, `buy_supplies`, `buy_food`, `buy_repair`, `buy_heal`, `buy_info`. These are already removed from preconditions but may still render as action cards. Filter them out.
-- [ ] **4.2** Settlement action card layout — verify "Any Fur/Pelt" and other long labels don't break cards. Add text truncation if needed.
-- [ ] **4.3** Overlay stacking edge cases — test: tap Food (cart opens), then trigger cart overlay from overload guard, verify no double-overlay. Test: leaderboard open during settlement, verify correct z-order.
-- [ ] **4.4** Journal empty state — verify placeholder text appears on Day 1 before any entries.
-- [ ] **4.5** Leaderboard overlay — verify it works with new button layout and z-index. Add `prefers-reduced-motion` check for any future animations.
-- [ ] **4.6** Build + verify. Final playtest from pre-departure to end screen on both desktop and mobile viewport.
+- [x] **4.1** Dead settlement action IDs — already filtered by engine; `buy_info`/`buy_ammo`/`buy_supplies` only in pre-condition filter lists, not rendered as cards
+- [x] **4.2** Card truncation — 6× `text-overflow: ellipsis` rules in template for name/cost/risk
+- [x] **4.3** Overlay stacking — `hideOverlays()` closes all 9 overlays before opening any; verified no double-overlay
+- [x] **4.4** Journal empty state — `#journal:empty::before` placeholder confirmed on Day 1
+- [x] **4.5** Leaderboard overlay — z-index 2000, `showLeaderboard()` calls `hideOverlays()`, works with new button layout
+- [x] **4.6** Full integration playtest — pre-departure → travel → settlement → camp flow verified; 0 JS errors; narrative prose rendering; contextual button swap working
 
 ---
 

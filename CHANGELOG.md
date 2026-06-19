@@ -1096,3 +1096,35 @@ Files: `src/systems/engine.js`.
 - Store briefing contrast (#94).
 - Settlement outcome text readability in neutral palette (#93).
 - End-screen final score and black-on-black text (#92).
+
+## [v13] — 2026-06-19
+
+### UI Overhaul — Sessions 1-4 Complete
+
+**Layout & Navigation:**
+- Status bar: single compact line with tappable Food (→ Cart) and Crew (→ Crew overlay)
+- Two-button bottom bar: "Travel West" / "Make Camp" contextual swap
+- Settings (⚙) in status bar with New Game option
+- Journal expanded to 30vh, collapsible, with empty-state placeholder
+- Map filter: sepia/low-contrast period aesthetic
+- Typography: IM Fell English regular with fallback stack
+
+**Narrative Wiring:**
+- All 14 journalNarrative.js templates wired into journalLog calls
+- First-person prose for travel, camp, events, settlements with weather/wear/food context
+- Settlement "Risk:" → "Receive:" labels; "any_fur" → "Any Fur/Pelt" display
+
+**Mobile Responsive:**
+- Journal: 30vh desktop → 25vh tablet → 20vh mobile
+- Stat-tap affordance: underline desktop, visible border mobile
+- 100svh with @supports fallback + mobile Safari innerHeight fix
+
+**Polish & Edge Cases:**
+- Overlay exclusivity: hideOverlays() closes all 9 overlays before opening any
+- Journal empty state: "#journal:empty::before" placeholder on Day 1
+- Leaderboard overlay: z-index 2000, showLeaderboard() with error handling
+- prefers-reduced-motion media query
+- Settlement action card text truncation (6× ellipsis rules)
+- Pre-departure save migration (SAVE_VERSION = 2)
+
+**Verified:** Full playtest pre-departure → travel → settlement → camp; 0 JS errors

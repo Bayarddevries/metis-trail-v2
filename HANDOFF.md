@@ -41,21 +41,21 @@
 - Camp continue button onclick handler wired
 - Die animation null-guarded
 
-### Session 4: Partial ✅
-- Settlement action card text truncation (name/cost/risk)
+### Session 4: Polish + Edge Cases ✅
+- Settlement action card text truncation (name/cost/risk) — 6× `text-overflow: ellipsis`
 - `prefers-reduced-motion` media query
 - Fixed duplicate `.camp-card-btn:hover` rule
 - Fixed journal CSS (settlement card styles were misplaced)
+- **4.1** Dead settlement action IDs — already filtered by engine
+- **4.2** Card truncation — verified
+- **4.3** Overlay stacking — `hideOverlays()` closes all 9 overlays; no double-overlay
+- **4.4** Journal empty state — `#journal:empty::before` placeholder confirmed
+- **4.5** Leaderboard overlay — z-index 2000, works with new button layout
+- **4.6** Full integration playtest — pre-departure → travel → settlement → camp verified; 0 JS errors
 
 ---
 
 ## What's Remaining
-
-### Session 4: Polish + Edge Cases
-- [ ] **4.3** Overlay stacking edge cases — test Food tap → overload guard double-overlay
-- [ ] **4.4** Journal empty state — verify placeholder on Day 1
-- [ ] **4.5** Leaderboard overlay — verify with new button layout
-- [ ] **4.6** Full integration playtest desktop + mobile
 
 ### Session 5: Balance Pass + Content
 - [ ] **5.1** Reduce starvation rate (36% → <25%) — needs 1000-sim

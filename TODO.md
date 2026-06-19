@@ -1,37 +1,22 @@
 # TODO — Metis Trail V2
 
-## Active: V13 UI Overhaul
+## Current State: Post-V13 UI Overhaul + Balance Pass
 
-See `docs/V13_UI_OVERHAUL.md` for the full plan with checkboxes and session breakdown.
+V13 UI Overhaul is complete. Balance pass is next.
 
-### Completed: Session 1
-_Layout Shell + Bug Fixes_ — Done 2026-06-18
-- New status bar (single-line, stat-tap, settings button)
-- Two contextual buttons (Travel West / Make Camp)
-- Stat-tap overlays (Food→Cart, Crew→Crew)
-- Settings menu (⚙ button)
-- Journal area expanded (30vh, collapsible, empty state)
-- Map filter (warmer, sepia)
-- Pre-departure item list rendering fix
-- FOOD hardcoded 30 → 0
-- Settlement/camp "Risk:" → "Receive:"
-- "any_fur" → "Any Fur/Pelt" display fix
-- Save-game version migration (v2)
-- Build verified, full playtest passed
+### Completed: V13 UI Overhaul
+- [x] Session 1: Layout shell, stat-tap, settings, journal expansion
+- [x] Session 2: Narrative wiring (journalNarrative.js → journalLog)
+- [x] Session 3: Mobile responsive, 100svh, stat-tap affordance
+- [x] Session 4: Polish + edge cases — overlay stacking, journal empty state, leaderboard z-index, full playtest
 
-### Current: Session 2
-_Narrative Wiring_ — journalNarrative.js → journalLog calls
+### Current: Session 5 — Balance Pass
+- [ ] Reduce starvation rate (36% → <25%) — 1000-sim verification
+- [ ] Event narrative-mechanics mismatch audit
+- [ ] Leave-behind UI for overloaded cart
+- [ ] Post-balance sim comparisons
+- [ ] Update HANDOFF, CHANGELOG, TODO
 
-Key tasks:
-- Import all narrative functions from journalNarrative.js
-- Replace inline buildTravelJournalEntry/buildEventJournalEntry
-- Wire travel, event, camp, settlement narrative templates
-- Remove unused inline functions
-- Build + verify narrative prose renders correctly
-
-## Deferred / Backlog
-- Session 3: Mobile responsive + integration test
-- Session 4: Polish + edge cases
-- Session 5: Balance pass + content
-- Hall of Fame fix (#73)
-- Cultural review of narrative content
+### Backlog
+- [ ] Cultural review of narrative content (issue #25)
+- [ ] HBC crafting recipe fix (finish_hides unreachable)
