@@ -2,7 +2,41 @@
 
 All notable changes are documented here. Format loosely follows Keep a Changelog.
 
-## [v10] — 2026-06-11
+## [v12] — 2026-06-17
+
+### Phase 1 Plan Documented — Item Integration, Narrative Depth & Polish
+
+**Created:** `docs/PHASE_1_PLAN.md` — 6-session plan covering:
+- Session 1: Item Integration Engine (event choice fields, camp bonuses, settlement rest consumption)
+- Session 2: Item Integration + Journal (item-use templates, settlement arrival specificity)
+- Session 3: Weather Sensory Layer (prose variants, item-aware weather lines)
+- Session 4: Journal First-Person Depth (camp/event templates, specific node arrivals)
+- Session 5: Journal Polish + Event Math Audit (leave-behind, trade, injury entries; outcome alignment)
+- Session 6: Bug Fix Sprint (all 9 logged issues)
+
+**Key Technical Focus:**
+- Engine already supports `requiresItem`, `consumesItem`, `itemBonus` on event choices — Phase 1 activates them for all 10 starter items
+- Every item use shows in BOTH journal narrative AND results panel (like roll display)
+- Items available at pre-departure: Medicine Pouch, Ammunition Belt, Canvas Tarp, Firewood, Blanket(2), Rope, Shaganappi, Spare Axle, Tool Kit + trade goods
+- Hunt drop rates adjusted: food 60%, common 30%, rare 10%
+- Weather sensory prose layer: item-aware variants (Tarp/Firewood/Blanket)
+- Event math alignment audit: positive outcomes must not have negative resource deltas
+- Font: System serif (Georgia/Charter/Crimson) for body; IM Fell for titles only
+- Map: Darker filter `grayscale(1) contrast(1.3) brightness(0.7) sepia(0.3)`
+
+**Bug Fix Sprint (Session 6):**
+- #43 Settlement re-render | #44 FOOD 30 template | #73 Hall of Fame
+- #74 Duplicate heal_crew | #75 Settlement result duplicate flavor | #76 Duplicate Continue West
+- #77 New Game button visibility | #78 Missing Camp button | #79 Empty-handed scoring
+
+**Document Hygiene:**
+- Created `docs/PHASE_1_PLAN.md` (active plan)
+- Archived `PHASE_0_PLAN.md` → `docs/ARCHIVE_PHASE_0_PLAN.md`
+- Updated `HANDOFF.md` (v12), `AGENTS.md`, `ISSUES.md` with Phase 1 context
+
+Files modified: `docs/PHASE_1_PLAN.md`, `docs/ARCHIVE_PHASE_0_PLAN.md`, `HANDOFF.md`, `AGENTS.md`, `ISSUES.md`
+
+## [v11] — 2026-06-17
 
 ### Sprint 6/7 — Gameplay Polish (Phase A + B + C)
 

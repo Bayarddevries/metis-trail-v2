@@ -1216,7 +1216,7 @@ function showCart(game) {
 
   listEl.querySelectorAll('.unload-btn').forEach((btn) => {
     btn.addEventListener('click', () => {
-      const itemName = btn.dataset.item;
+      const itemName = btn.getAttribute('data-item');
       game.offloadItem(itemName);
       const newState = game.getState();
       if (overloaded && newState.usedWeight <= newState.capacity) {
@@ -1359,7 +1359,7 @@ function showShop(game) {
       listEl.querySelectorAll('.pd-extra-pick').forEach(btn => {
         btn.addEventListener('click', (e) => {
           e.stopPropagation();
-          const name = btn.dataset.item;
+          const name3 = btn.getAttribute('data-item');
           selectedExtra = extraItems.find(i => i.name === name);
           recalc();
           renderList();
@@ -1369,8 +1369,9 @@ function showShop(game) {
       // Also allow clicking the whole row
       listEl.querySelectorAll('.extra-item-row').forEach(row => {
         row.addEventListener('click', () => {
-          if (!selectedExtra || selectedExtra.name !== row.dataset.item) {
-            selectedExtra = extraItems.find(i => i.name === row.dataset.item);
+          const rowItem = row.getAttribute('data-item');
+          if (!selectedExtra || selectedExtra.name !== rowItem) {
+            selectedExtra = extraItems.find(i => i.name === rowItem);
           } else {
             selectedExtra = null;
           }
@@ -2100,7 +2101,7 @@ document.addEventListener('click', (e) => {
   if (tabBtn) {
     document.querySelectorAll('.lb-tab').forEach((t) => t.classList.remove('active'));
     tabBtn.classList.add('active');
-    const tab = tabBtn.dataset.tab;
+    const tab = tabBtn.getAttribute('data-tab');
     document.getElementById('lb-hall-of-fame').style.display = tab === 'hall-of-fame' ? 'block' : 'none';
     document.getElementById('lb-my-scores').style.display = tab === 'my-scores' ? 'block' : 'none';
   }

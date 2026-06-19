@@ -89,8 +89,7 @@ var CONSTANTS = Object.freeze({
         options: [
           { id: "ammunition", receive: [{ name: "Ammunition Belt", count: 2 }], flavor: "Pemmican, axes, shaganappi, tools \u2014 everything a carter needs for the long trail." },
           { id: "shaganappi", receive: [{ name: "Shaganappi", count: 3 }], flavor: "Rawhide strips. Binding, lashing, and cart repair." },
-          { id: "medicine", receive: [{ name: "Medicine Pouch", count: 1 }], flavor: "Herbal remedies and bandages." },
-          { id: "rope", receive: [{ name: "Rope (50ft)", count: 1 }], flavor: "Hemp. Crossings, repairs, binding." }
+          { id: "medicine", receive: [{ name: "Medicine Pouch", count: 1 }], flavor: "Herbal remedies and bandages." }
         ],
         flavor: "The Company store has what you need \u2014 at Company prices."
       },
@@ -129,18 +128,6 @@ var CONSTANTS = Object.freeze({
       }
     },
     nwmp: {
-      // Safe passage permit - trade 1 fur
-      permit: {
-        give: [{ name: "any_fur", count: 1 }],
-        receive: [{ name: "hasPermit", count: 1 }],
-        flavor: "A stamp, a signature, and the Queen's law lets you cross the water legal."
-      },
-      // Pay fine - trade 1 fur
-      pay_fine: {
-        give: [{ name: "any_fur", count: 1 }],
-        receive: [{ name: "finesCleared", count: 1 }],
-        flavor: "The sergeant reads your name from the ledger. The debt is cleared."
-      },
       // Buy ammo - trade 1 fur for 2 ammo belts
       buy_ammo: {
         give: [{ name: "any_fur", count: 1 }],
@@ -155,7 +142,7 @@ var CONSTANTS = Object.freeze({
       }
     },
     mission: {
-      // Heal crew - 1 Medicine Pouch OR 2 food
+      // Heal crew - 1 Medicine Pouch (preferred)
       heal_crew: {
         giveOptions: [
           { give: [{ name: "Medicine Pouch", count: 1 }], receive: [{ name: "rested", count: 1 }, { name: "Morale", count: 10 }] },
@@ -2427,8 +2414,8 @@ function createGame(seed = null) {
       "finesCleared": "Fines Cleared",
       "ReputationMetis": "Reputation"
     };
-    function displayName(name3) {
-      return DISPLAY_NAMES[name3] || name3.replace(/_/g, " ");
+    function displayName(name4) {
+      return DISPLAY_NAMES[name4] || name4.replace(/_/g, " ");
     }
     __name(displayName, "displayName");
     for (const [actionId, trade] of Object.entries(barter)) {
@@ -2436,9 +2423,10 @@ function createGame(seed = null) {
         trade.giveOptions.forEach((opt, idx) => {
           const giveDesc = opt.give.map((g) => `${g.count} ${displayName(g.name)}`).join(" + ");
           const receiveDesc = opt.receive.map((r) => `${r.count} ${displayName(r.name)}`).join(", ");
+          const baseLabel = actionId.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
           actions.push({
             id: `${actionId}_${idx}`,
-            label: actionId.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()),
+            label: `${baseLabel} (${giveDesc})`,
             cost: giveDesc || "Free",
             risk: receiveDesc,
             flavor: trade.flavor
@@ -2519,8 +2507,8 @@ function createGame(seed = null) {
     getCart() {
       return JSON.parse(JSON.stringify(cart));
     },
-    offloadItem(name3) {
-      const idx = cart.findIndex((i) => i.name === name3);
+    offloadItem(name4) {
+      const idx = cart.findIndex((i) => i.name === name4);
       if (idx === -1 || cart[idx].count <= 0) return false;
       cart[idx].count--;
       return true;
@@ -3092,12 +3080,12 @@ function createGame(seed = null) {
         seed: S2.seed
       };
     },
-    buyItem(name3, wt, category) {
-      const existing = cart.find((i) => i.name === name3);
+    buyItem(name4, wt, category) {
+      const existing = cart.find((i) => i.name === name4);
       if (existing) {
         existing.count++;
       } else {
-        cart.push({ name: name3, wt, count: 1, category, type: category === "provisions" ? "food" : "item" });
+        cart.push({ name: name4, wt, count: 1, category, type: category === "provisions" ? "food" : "item" });
       }
     },
     addFood(amount) {
@@ -3594,9 +3582,9 @@ var CAMP_PUSH_ON = [
   "The trail doesn't wait. Neither do we. Wear on the cart, wear on the people."
 ];
 var SETTLEMENT_ARRIVAL = [
-  (name3, type) => `The spires of ${name3} rose from the river bottom. A ${type} post \u2014 we'd heard tell.`,
-  (name3, type) => `${name3} ahead. Smoke from chimneys, the smell of woodsmoke and cattle. Civilization, of a sort.`,
-  (name3, type) => `Rode into ${name3} as the bell rang vespers. ${type} folk, but the trade's honest.`
+  (name4, type) => `The spires of ${name4} rose from the river bottom. A ${type} post \u2014 we'd heard tell.`,
+  (name4, type) => `${name4} ahead. Smoke from chimneys, the smell of woodsmoke and cattle. Civilization, of a sort.`,
+  (name4, type) => `Rode into ${name4} as the bell rang vespers. ${type} folk, but the trade's honest.`
 ];
 var SETTLEMENT_TRADE = [
   (give, receive) => `Traded ${give} for ${receive}. Fair measure. The factor nodded, weighed honest.`,
@@ -3634,16 +3622,6 @@ var SETTLEMENT_ACTION = {
     "Shared our rations with a family waiting for hunters. Their gratitude was a warm thing.",
     "The M\xE9tis remember generosity. Gave two rations, earned their respect for leagues."
   ],
-  permit: [
-    "A stamp, a signature, and the Queen's law lets you cross the water legal.",
-    "The sergeant reviewed our papers. Permit granted \u2014 no trouble at the crossings ahead.",
-    "Official parchment in hand. The Mounties' word carries weight on the river."
-  ],
-  pay_fine: [
-    "The sergeant reads your name from the ledger. The debt is cleared.",
-    "Fur for the fine. No questions, no hard feelings. The law is the law.",
-    "Paid the Mounties their due. Clean slate for the rest of the trail."
-  ],
   buy_ammo: [
     `"Ball and powder, measured honest. The Mounties don't cheat a carter on shot."`,
     "Two belts of ammunition for a beaver pelt. Fair trade from the Queen's men.",
@@ -3663,11 +3641,6 @@ var SETTLEMENT_ACTION = {
     "Medicine pouch for a wolf pelt. The herbs smell of sage and willow bark.",
     "The factor handed over a pouch. Said it'd break a fever by morning.",
     "Traded fur for medicine. The Company knows what keeps carters alive."
-  ],
-  trade_furs_supplies_rope: [
-    "Fifty feet of hemp for a bison hide. Crossings and repairs, all in one coil.",
-    "Good rope. The Company doesn't skimp on cordage.",
-    "Rope for the river crossings ahead. Traded a hide and slept easier for it."
   ],
   rest: [
     "A warm fire in the mess hall, dry blankets, and a night without the wind.",
@@ -3735,11 +3708,11 @@ var EVENT_REFLECTIONS = {
   ]
 };
 var SETTLEMENT_REFLECTIONS = [
-  (name3, day) => `${name3} behind us. Day ${day} on the trail. The map shrinks in my hands but the distance feels longer.`,
-  (name3, day) => `Traded, rested, prayed at ${name3}. The ledger balances but the soul's account is harder to tally. Day ${day}.`,
-  (name3, day) => `Left ${name3} with full bellies and lighter hearts. The trail waits for no man. Day ${day} and counting.`,
-  (name3, day) => `The factor's scales were honest. The priest's blessing felt true. Even the Mountie nodded respect. Day ${day}.`,
-  (name3, day) => `Rode out of ${name3} before the bell finished ringing. The road does not care for goodbyes. Day ${day}.`
+  (name4, day) => `${name4} behind us. Day ${day} on the trail. The map shrinks in my hands but the distance feels longer.`,
+  (name4, day) => `Traded, rested, prayed at ${name4}. The ledger balances but the soul's account is harder to tally. Day ${day}.`,
+  (name4, day) => `Left ${name4} with full bellies and lighter hearts. The trail waits for no man. Day ${day} and counting.`,
+  (name4, day) => `The factor's scales were honest. The priest's blessing felt true. Even the Mountie nodded respect. Day ${day}.`,
+  (name4, day) => `Rode out of ${name4} before the bell finished ringing. The road does not care for goodbyes. Day ${day}.`
 ];
 function pick(arr) {
   return arr[Math.floor(Math.random() * arr.length)];
@@ -4874,8 +4847,8 @@ var _Component = class _Component {
    * @param instanceFactory Service factory responsible for creating the public interface
    * @param type whether the service provided by the component is public or private
    */
-  constructor(name3, instanceFactory, type) {
-    this.name = name3;
+  constructor(name4, instanceFactory, type) {
+    this.name = name4;
     this.instanceFactory = instanceFactory;
     this.type = type;
     this.multipleInstances = false;
@@ -4904,8 +4877,8 @@ __name(_Component, "Component");
 var Component = _Component;
 var DEFAULT_ENTRY_NAME = "[DEFAULT]";
 var _Provider = class _Provider {
-  constructor(name3, container) {
-    this.name = name3;
+  constructor(name4, container) {
+    this.name = name4;
     this.container = container;
     this.component = null;
     this.instances = /* @__PURE__ */ new Map();
@@ -5112,8 +5085,8 @@ function isComponentEager(component) {
 }
 __name(isComponentEager, "isComponentEager");
 var _ComponentContainer = class _ComponentContainer {
-  constructor(name3) {
-    this.name = name3;
+  constructor(name4) {
+    this.name = name4;
     this.providers = /* @__PURE__ */ new Map();
   }
   /**
@@ -5146,12 +5119,12 @@ var _ComponentContainer = class _ComponentContainer {
    * Firebase SDKs providing services should extend NameServiceMapping interface to register
    * themselves.
    */
-  getProvider(name3) {
-    if (this.providers.has(name3)) {
-      return this.providers.get(name3);
+  getProvider(name4) {
+    if (this.providers.has(name4)) {
+      return this.providers.get(name4);
     }
-    const provider = new Provider(name3, this);
-    this.providers.set(name3, provider);
+    const provider = new Provider(name4, this);
+    this.providers.set(name4, provider);
     return provider;
   }
   getProviders() {
@@ -5207,8 +5180,8 @@ var _Logger = class _Logger {
    *
    * @param name The name that the logs will be associated with
    */
-  constructor(name3) {
-    this.name = name3;
+  constructor(name4) {
+    this.name = name4;
     this._logLevel = defaultLogLevel;
     this._logHandler = defaultLogHandler;
     this._userLogHandler = null;
@@ -5421,8 +5394,8 @@ __name(wrap, "wrap");
 var unwrap = /* @__PURE__ */ __name((value) => reverseTransformCache.get(value), "unwrap");
 
 // node_modules/idb/build/index.js
-function openDB(name3, version3, { blocked, upgrade, blocking, terminated } = {}) {
-  const request = indexedDB.open(name3, version3);
+function openDB(name4, version3, { blocked, upgrade, blocking, terminated } = {}) {
+  const request = indexedDB.open(name4, version3);
   const openPromise = wrap(request);
   if (upgrade) {
     request.addEventListener("upgradeneeded", (event) => {
@@ -5540,7 +5513,7 @@ var name$4 = "@firebase/storage-compat";
 var name$3 = "@firebase/firestore";
 var name$2 = "@firebase/ai";
 var name$1 = "@firebase/firestore-compat";
-var name = "firebase";
+var name2 = "firebase";
 var version = "12.14.0";
 var DEFAULT_ENTRY_NAME2 = "[DEFAULT]";
 var PLATFORM_LOG_STRING = {
@@ -5572,7 +5545,7 @@ var PLATFORM_LOG_STRING = {
   [name$2]: "fire-vertex",
   "fire-js": "fire-js",
   // Platform identifier for JS SDK.
-  [name]: "fire-js-all"
+  [name2]: "fire-js-all"
 };
 var _apps = /* @__PURE__ */ new Map();
 var _serverApps = /* @__PURE__ */ new Map();
@@ -5601,12 +5574,12 @@ function _registerComponent(component) {
   return true;
 }
 __name(_registerComponent, "_registerComponent");
-function _getProvider(app2, name3) {
+function _getProvider(app2, name4) {
   const heartbeatController = app2.container.getProvider("heartbeat").getImmediate({ optional: true });
   if (heartbeatController) {
     void heartbeatController.triggerHeartbeat();
   }
-  return app2.container.getProvider(name3);
+  return app2.container.getProvider(name4);
 }
 __name(_getProvider, "_getProvider");
 function _isFirebaseServerApp(obj) {
@@ -5735,18 +5708,18 @@ var SDK_VERSION = version;
 function initializeApp(_options, rawConfig = {}) {
   let options = _options;
   if (typeof rawConfig !== "object") {
-    const name4 = rawConfig;
-    rawConfig = { name: name4 };
+    const name5 = rawConfig;
+    rawConfig = { name: name5 };
   }
   const config = {
     name: DEFAULT_ENTRY_NAME2,
     automaticDataCollectionEnabled: true,
     ...rawConfig
   };
-  const name3 = config.name;
-  if (typeof name3 !== "string" || !name3) {
+  const name4 = config.name;
+  if (typeof name4 !== "string" || !name4) {
     throw ERROR_FACTORY.create("bad-app-name", {
-      appName: String(name3)
+      appName: String(name4)
     });
   }
   options || (options = getDefaultAppConfig());
@@ -5756,30 +5729,30 @@ function initializeApp(_options, rawConfig = {}) {
       /* AppError.NO_OPTIONS */
     );
   }
-  const existingApp = _apps.get(name3);
+  const existingApp = _apps.get(name4);
   if (existingApp) {
     if (deepEqual(options, existingApp.options) && deepEqual(config, existingApp.config)) {
       return existingApp;
     } else {
-      throw ERROR_FACTORY.create("duplicate-app", { appName: name3 });
+      throw ERROR_FACTORY.create("duplicate-app", { appName: name4 });
     }
   }
-  const container = new ComponentContainer(name3);
+  const container = new ComponentContainer(name4);
   for (const component of _components.values()) {
     container.addComponent(component);
   }
   const newApp = new FirebaseAppImpl(options, config, container);
-  _apps.set(name3, newApp);
+  _apps.set(name4, newApp);
   return newApp;
 }
 __name(initializeApp, "initializeApp");
-function getApp(name3 = DEFAULT_ENTRY_NAME2) {
-  const app2 = _apps.get(name3);
-  if (!app2 && name3 === DEFAULT_ENTRY_NAME2 && getDefaultAppConfig()) {
+function getApp(name4 = DEFAULT_ENTRY_NAME2) {
+  const app2 = _apps.get(name4);
+  if (!app2 && name4 === DEFAULT_ENTRY_NAME2 && getDefaultAppConfig()) {
     return initializeApp();
   }
   if (!app2) {
-    throw ERROR_FACTORY.create("no-app", { appName: name3 });
+    throw ERROR_FACTORY.create("no-app", { appName: name4 });
   }
   return app2;
 }
@@ -6100,9 +6073,9 @@ __name(registerCoreComponents, "registerCoreComponents");
 registerCoreComponents("");
 
 // node_modules/firebase/app/dist/esm/index.esm.js
-var name2 = "firebase";
+var name3 = "firebase";
 var version2 = "12.14.0";
-registerVersion(name2, version2, "app");
+registerVersion(name3, version2, "app");
 
 // node_modules/@firebase/webchannel-wrapper/dist/bloom-blob/esm/bloom_blob_es2018.js
 var commonjsGlobal = typeof globalThis !== "undefined" ? globalThis : typeof window !== "undefined" ? window : typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : {};
@@ -19525,12 +19498,12 @@ async function getTopScores() {
   }
 }
 __name(getTopScores, "getTopScores");
-async function getMyScores(name3) {
-  if (!name3) return [];
+async function getMyScores(name4) {
+  if (!name4) return [];
   try {
     const q2 = query(
       collection(db, "scores"),
-      where("name", "==", name3),
+      where("name", "==", name4),
       orderBy("date", "desc"),
       limit(20)
     );
@@ -19622,8 +19595,8 @@ var ICONS = {
   "Travois Kit": "\u{1F6D2}",
   "Gunpowder Pack": "\u{1F4A3}"
 };
-function getItemIcon(name3) {
-  return ICONS[name3] || "\u2022";
+function getItemIcon(name4) {
+  return ICONS[name4] || "\u2022";
 }
 __name(getItemIcon, "getItemIcon");
 
@@ -20279,7 +20252,7 @@ function showSettlement(game) {
         canDo = true;
         break;
       case "heal_crew":
-        canDo = (cart.find((i) => i.name === "Medicine Pouch")?.count || 0) >= 1;
+        canDo = (cart.find((i) => i.name === "Medicine Pouch")?.count || 0) >= 1 || st2.food >= 2;
         break;
       case "get_blessing":
         canDo = st2.food >= 1;
@@ -20368,10 +20341,11 @@ function showSettlement(game) {
         };
         resultCard.appendChild(continueBtn);
         actionsEl.appendChild(resultCard);
-        const needRoll = !["trade", "buy_supplies", "share_food", "get_permits", "report_duty", "buy_ammo", "trade_limited", "get_intel"].includes(action.id);
+        const needRoll = !["trade", "buy_supplies", "share_food", "report_duty", "buy_ammo", "trade_limited", "get_intel"].includes(action.id);
         if (needRoll && result && result.roll !== null && result.roll !== void 0) {
           const DC_MAP = { rest: 12, get_blessing: 8, dance: 8, craft_hides: 8, heal_crew: 8 };
-          const DC = DC_MAP[action.id] || 10;
+          const actionBase = action.id.replace(/_\d+$/, "");
+          const DC = DC_MAP[actionBase] || DC_MAP[action.id] || 10;
           const isSuccess = (result.rollTotal || 0) >= DC;
           if (rollEl) {
             rollEl.style.display = "flex";
@@ -20465,7 +20439,7 @@ function showCart(game) {
   listEl.innerHTML = weightBar + items;
   listEl.querySelectorAll(".unload-btn").forEach((btn) => {
     btn.addEventListener("click", () => {
-      const itemName = btn.dataset.item;
+      const itemName = btn.getAttribute("data-item");
       game.offloadItem(itemName);
       const newState = game.getState();
       if (overloaded && newState.usedWeight <= newState.capacity) {
@@ -20575,16 +20549,17 @@ function showShop(game) {
       listEl.querySelectorAll(".pd-extra-pick").forEach((btn) => {
         btn.addEventListener("click", (e) => {
           e.stopPropagation();
-          const name3 = btn.dataset.item;
-          selectedExtra = extraItems.find((i) => i.name === name3);
+          const name32 = btn.getAttribute("data-item");
+          selectedExtra = extraItems.find((i) => i.name === name);
           recalc();
           renderList();
         });
       });
       listEl.querySelectorAll(".extra-item-row").forEach((row) => {
         row.addEventListener("click", () => {
-          if (!selectedExtra || selectedExtra.name !== row.dataset.item) {
-            selectedExtra = extraItems.find((i) => i.name === row.dataset.item);
+          const rowItem = row.getAttribute("data-item");
+          if (!selectedExtra || selectedExtra.name !== rowItem) {
+            selectedExtra = extraItems.find((i) => i.name === rowItem);
           } else {
             selectedExtra = null;
           }
@@ -21233,12 +21208,12 @@ function loadMyScores() {
   const container = document.getElementById("lb-my-list");
   if (!container) return;
   container.innerHTML = '<div class="lb-loading">Loading...</div>';
-  const name3 = localStorage.getItem("metisPlayerName") || "";
-  if (!name3) {
+  const name4 = localStorage.getItem("metisPlayerName") || "";
+  if (!name4) {
     container.innerHTML = '<div class="lb-empty">Set your party name in the intro to track personal scores.</div>';
     return;
   }
-  getMyScores(name3).then((scores) => {
+  getMyScores(name4).then((scores) => {
     cachedMyScores = scores;
     if (!scores) {
       document.getElementById("lb-my-list").innerHTML = '<div class="lb-error">Unable to load personal scores \u2014 playing offline</div>';
@@ -21314,7 +21289,7 @@ document.addEventListener("click", (e) => {
   if (tabBtn) {
     document.querySelectorAll(".lb-tab").forEach((t) => t.classList.remove("active"));
     tabBtn.classList.add("active");
-    const tab = tabBtn.dataset.tab;
+    const tab = tabBtn.getAttribute("data-tab");
     document.getElementById("lb-hall-of-fame").style.display = tab === "hall-of-fame" ? "block" : "none";
     document.getElementById("lb-my-scores").style.display = tab === "my-scores" ? "block" : "none";
   }

@@ -86,3 +86,20 @@ balance(constants): DAILY_FOOD 1.2 → 1.35 for win rate normalization
 - **Playtesting harness should use randomized choices**: Don't script optimal play — random choices surface real balance issues. Weight choices reasonably (e.g., 70% "sensible" vs 30% "risky") for more realistic simulation.
 - **Stale cart reference in offload loops**: When offloading items to reach capacity, never cache `game.getCart()` in a variable and then loop — `offloadItem()` mutates the internal cart, so cached references go stale. Always call `game.totalWeight()` and `game.getCart()` fresh inside the loop. See `tests/simulate-entry.js` for correct pattern.
 - **Item field name is `wt` not `weight`**: Items in `src/data/items.js` use `wt` for weight. Using `weight` returns undefined and silently breaks calculations.
+- **Settlement action `beforeJournal` pitfall**: If adding new settlement action sub-buttons, ensure all variables are defined in scope. An undefined reference silently kills the entire click handler — no overlay appears, no error shown.
+- **Pre-departure double-food bug**: Engine starts with `food: 0`, then pre-departure confirm adds 18. If engine starts with food + pre-departure adds food, player gets double. Keep engine at 0, add all starting food in pre-departure confirm.
+- **Balance tuning: DAILY_FOOD sensitivity**: Small changes to `DAILY_FOOD` (0.025 steps) cause large win rate swings. Test with 1000 sims after any food economy change. Current 0.6 gives ~70% win rate.
+- **Simulation harness must mirror UI action IDs**: When settlement actions change, `pickSettlementAction()` in `tests/simulate-entry.js` MUST be updated to match new action IDs exactly, otherwise sim will only use `continue` and ignore barter economy.
+- **Phase 1: Camp system exists with 9 actions** — do not rebuild; wire item bonuses into existing `campAction()` in engine.js.
+- **Phase 1: Event hooks `requiresItem`/`consumesItem`/`itemBonus` work** — do not reimplement; extend to more events in `events.js`.
+- **Phase 1: 9 events already give items via `give:`** — audit coverage in `events.js` before adding new item awards.
+- **Phase 1: `buildItemUseEntry()` doesn't exist** — create in `journalNarrative.js` for journal + results panel item logging.
+- **Phase 1: `TRAVEL_WEATHER_LINES` exists in `journalNarrative.js`** — extend with item-aware variants, don't recreate.
+- **Phase 1: Win rate 71% ("Very Easy")** — run sim after each session; adding item uses will increase win rate unless balanced.
+- **Phase 1: Pre-departure has 6 spare choices (not 10)** — starter kit auto-includes Medicine/Ammo/Tarp; plan matches actual UI.
+- **Phase 1: Pre-departure confirm must call `window.__METIS_RENDER__()`** — settlement actions need same fix (#43).
+- **Item integration fields**: Engine supports `requiresItem`, `consumesItem`, `itemBonus` on event choices — but no events use them yet. Phase 1 priority.
+- **Font readability**: IM Fell for body text is hard to read. Use system serif (Georgia/Charter/Crimson) for prose; keep IM Fell for titles only.
+- **Map contrast**: Current filter `grayscale(1) contrast(1.1) brightness(0.9)` too bright. Target `grayscale(1) contrast(1.3) brightness(0.7) sepia(0.3)` for aged parchment feel.
+- **Event math alignment**: Positive narrative outcomes must not have negative resource deltas (food/morale/wear). Audit all 55 events in Phase 1.5.
+- **Journal collapse by day**: Current collapse behavior is flaky. Keep day-grouped UX but fix toggle logic in `journalNarrative.js` / main.js.
