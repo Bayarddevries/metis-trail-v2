@@ -75,7 +75,6 @@ export const CONSTANTS = Object.freeze({
           { id: 'ammunition', receive: [{ name: 'Ammunition Belt', count: 2 }], flavor: 'Pemmican, axes, shaganappi, tools — everything a carter needs for the long trail.' },
           { id: 'shaganappi', receive: [{ name: 'Shaganappi', count: 3 }], flavor: 'Rawhide strips. Binding, lashing, and cart repair.' },
           { id: 'medicine', receive: [{ name: 'Medicine Pouch', count: 1 }], flavor: 'Herbal remedies and bandages.' },
-          { id: 'rope', receive: [{ name: 'Rope (50ft)', count: 1 }], flavor: 'Hemp. Crossings, repairs, binding.' },
         ],
         flavor: 'The Company store has what you need — at Company prices.',
       },
@@ -113,18 +112,6 @@ export const CONSTANTS = Object.freeze({
       },
     },
     nwmp: {
-      // Safe passage permit - trade 1 fur
-      permit: {
-        give: [{ name: 'any_fur', count: 1 }],
-        receive: [{ name: 'hasPermit', count: 1 }],
-        flavor: "A stamp, a signature, and the Queen's law lets you cross the water legal.",
-      },
-      // Pay fine - trade 1 fur
-      pay_fine: {
-        give: [{ name: 'any_fur', count: 1 }],
-        receive: [{ name: 'finesCleared', count: 1 }],
-        flavor: 'The sergeant reads your name from the ledger. The debt is cleared.',
-      },
       // Buy ammo - trade 1 fur for 2 ammo belts
       buy_ammo: {
         give: [{ name: 'any_fur', count: 1 }],
@@ -139,7 +126,7 @@ export const CONSTANTS = Object.freeze({
       },
     },
     mission: {
-      // Heal crew - 1 Medicine Pouch OR 2 food
+      // Heal crew - 1 Medicine Pouch (preferred)
       heal_crew: {
         giveOptions: [
           { give: [{ name: 'Medicine Pouch', count: 1 }], receive: [{ name: 'rested', count: 1 }, { name: 'Morale', count: 10 }] },

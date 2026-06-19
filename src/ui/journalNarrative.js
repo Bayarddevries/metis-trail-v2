@@ -317,16 +317,7 @@ const SETTLEMENT_ACTION = {
     'Shared our rations with a family waiting for hunters. Their gratitude was a warm thing.',
     'The Métis remember generosity. Gave two rations, earned their respect for leagues.',
   ],
-  permit: [
-    'A stamp, a signature, and the Queen\'s law lets you cross the water legal.',
-    'The sergeant reviewed our papers. Permit granted — no trouble at the crossings ahead.',
-    'Official parchment in hand. The Mounties\' word carries weight on the river.',
-  ],
-  pay_fine: [
-    'The sergeant reads your name from the ledger. The debt is cleared.',
-    'Fur for the fine. No questions, no hard feelings. The law is the law.',
-    'Paid the Mounties their due. Clean slate for the rest of the trail.',
-  ],
+
   buy_ammo: [
     '"Ball and powder, measured honest. The Mounties don\'t cheat a carter on shot."',
     'Two belts of ammunition for a beaver pelt. Fair trade from the Queen\'s men.',
@@ -347,11 +338,7 @@ const SETTLEMENT_ACTION = {
     'The factor handed over a pouch. Said it\'d break a fever by morning.',
     'Traded fur for medicine. The Company knows what keeps carters alive.',
   ],
-  trade_furs_supplies_rope: [
-    'Fifty feet of hemp for a bison hide. Crossings and repairs, all in one coil.',
-    'Good rope. The Company doesn\'t skimp on cordage.',
-    'Rope for the river crossings ahead. Traded a hide and slept easier for it.',
-  ],
+
   rest: [
     'A warm fire in the mess hall, dry blankets, and a night without the wind.',
     'Cot in the barracks. Clean, quiet, and the sentry paces all night.',

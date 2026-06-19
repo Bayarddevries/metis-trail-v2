@@ -431,9 +431,10 @@ export function createGame(seed = null) {
       trade.giveOptions.forEach((opt, idx) => {
         const giveDesc = opt.give.map(g => `${g.count} ${displayName(g.name)}`).join(' + ');
         const receiveDesc = opt.receive.map(r => `${r.count} ${displayName(r.name)}`).join(', ');
+        const baseLabel = actionId.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
         actions.push({
           id: `${actionId}_${idx}`,
-          label: actionId.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()),
+          label: `${baseLabel} (${giveDesc})`,
           cost: giveDesc || 'Free',
           risk: receiveDesc,
           flavor: trade.flavor,

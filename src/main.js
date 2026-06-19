@@ -999,7 +999,7 @@ function showSettlement(game) {
         break;
       }
       case 'report_duty': canDo = true; break;
-      case 'heal_crew': canDo = (cart.find(i => i.name === 'Medicine Pouch')?.count || 0) >= 1; break;
+      case 'heal_crew': canDo = (cart.find(i => i.name === 'Medicine Pouch')?.count || 0) >= 1 || st.food >= 2; break;
       case 'get_blessing': canDo = st.food >= 1; break;
       case 'trade_limited': canDo = true; break;
       default: canDo = true;
@@ -1103,10 +1103,11 @@ function showSettlement(game) {
         actionsEl.appendChild(resultCard);
 
         // Show roll display for actions that have dice
-        const needRoll = !['trade','buy_supplies','share_food','get_permits','report_duty','buy_ammo','trade_limited','get_intel'].includes(action.id);
+        const needRoll = !['trade','buy_supplies','share_food','report_duty','buy_ammo','trade_limited','get_intel'].includes(action.id);
         if (needRoll && result && result.roll !== null && result.roll !== undefined) {
           const DC_MAP = { rest: 12, get_blessing: 8, dance: 8, craft_hides: 8, heal_crew: 8 };
-          const DC = DC_MAP[action.id] || 10;
+          const actionBase = action.id.replace(/_\d+$/, '');
+          const DC = DC_MAP[actionBase] || DC_MAP[action.id] || 10;
           const isSuccess = (result.rollTotal || 0) >= DC;
           if (rollEl) {
             rollEl.style.display = 'flex';
