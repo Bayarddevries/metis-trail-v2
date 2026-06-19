@@ -2414,8 +2414,8 @@ function createGame(seed = null) {
       "finesCleared": "Fines Cleared",
       "ReputationMetis": "Reputation"
     };
-    function displayName(name4) {
-      return DISPLAY_NAMES[name4] || name4.replace(/_/g, " ");
+    function displayName(name3) {
+      return DISPLAY_NAMES[name3] || name3.replace(/_/g, " ");
     }
     __name(displayName, "displayName");
     for (const [actionId, trade] of Object.entries(barter)) {
@@ -2507,8 +2507,8 @@ function createGame(seed = null) {
     getCart() {
       return JSON.parse(JSON.stringify(cart));
     },
-    offloadItem(name4) {
-      const idx = cart.findIndex((i) => i.name === name4);
+    offloadItem(name3) {
+      const idx = cart.findIndex((i) => i.name === name3);
       if (idx === -1 || cart[idx].count <= 0) return false;
       cart[idx].count--;
       return true;
@@ -3080,12 +3080,12 @@ function createGame(seed = null) {
         seed: S2.seed
       };
     },
-    buyItem(name4, wt, category) {
-      const existing = cart.find((i) => i.name === name4);
+    buyItem(name3, wt, category) {
+      const existing = cart.find((i) => i.name === name3);
       if (existing) {
         existing.count++;
       } else {
-        cart.push({ name: name4, wt, count: 1, category, type: category === "provisions" ? "food" : "item" });
+        cart.push({ name: name3, wt, count: 1, category, type: category === "provisions" ? "food" : "item" });
       }
     },
     addFood(amount) {
@@ -3582,9 +3582,9 @@ var CAMP_PUSH_ON = [
   "The trail doesn't wait. Neither do we. Wear on the cart, wear on the people."
 ];
 var SETTLEMENT_ARRIVAL = [
-  (name4, type) => `The spires of ${name4} rose from the river bottom. A ${type} post \u2014 we'd heard tell.`,
-  (name4, type) => `${name4} ahead. Smoke from chimneys, the smell of woodsmoke and cattle. Civilization, of a sort.`,
-  (name4, type) => `Rode into ${name4} as the bell rang vespers. ${type} folk, but the trade's honest.`
+  (name3, type) => `The spires of ${name3} rose from the river bottom. A ${type} post \u2014 we'd heard tell.`,
+  (name3, type) => `${name3} ahead. Smoke from chimneys, the smell of woodsmoke and cattle. Civilization, of a sort.`,
+  (name3, type) => `Rode into ${name3} as the bell rang vespers. ${type} folk, but the trade's honest.`
 ];
 var SETTLEMENT_TRADE = [
   (give, receive) => `Traded ${give} for ${receive}. Fair measure. The factor nodded, weighed honest.`,
@@ -3708,11 +3708,11 @@ var EVENT_REFLECTIONS = {
   ]
 };
 var SETTLEMENT_REFLECTIONS = [
-  (name4, day) => `${name4} behind us. Day ${day} on the trail. The map shrinks in my hands but the distance feels longer.`,
-  (name4, day) => `Traded, rested, prayed at ${name4}. The ledger balances but the soul's account is harder to tally. Day ${day}.`,
-  (name4, day) => `Left ${name4} with full bellies and lighter hearts. The trail waits for no man. Day ${day} and counting.`,
-  (name4, day) => `The factor's scales were honest. The priest's blessing felt true. Even the Mountie nodded respect. Day ${day}.`,
-  (name4, day) => `Rode out of ${name4} before the bell finished ringing. The road does not care for goodbyes. Day ${day}.`
+  (name3, day) => `${name3} behind us. Day ${day} on the trail. The map shrinks in my hands but the distance feels longer.`,
+  (name3, day) => `Traded, rested, prayed at ${name3}. The ledger balances but the soul's account is harder to tally. Day ${day}.`,
+  (name3, day) => `Left ${name3} with full bellies and lighter hearts. The trail waits for no man. Day ${day} and counting.`,
+  (name3, day) => `The factor's scales were honest. The priest's blessing felt true. Even the Mountie nodded respect. Day ${day}.`,
+  (name3, day) => `Rode out of ${name3} before the bell finished ringing. The road does not care for goodbyes. Day ${day}.`
 ];
 function pick(arr) {
   return arr[Math.floor(Math.random() * arr.length)];
@@ -4847,8 +4847,8 @@ var _Component = class _Component {
    * @param instanceFactory Service factory responsible for creating the public interface
    * @param type whether the service provided by the component is public or private
    */
-  constructor(name4, instanceFactory, type) {
-    this.name = name4;
+  constructor(name3, instanceFactory, type) {
+    this.name = name3;
     this.instanceFactory = instanceFactory;
     this.type = type;
     this.multipleInstances = false;
@@ -4877,8 +4877,8 @@ __name(_Component, "Component");
 var Component = _Component;
 var DEFAULT_ENTRY_NAME = "[DEFAULT]";
 var _Provider = class _Provider {
-  constructor(name4, container) {
-    this.name = name4;
+  constructor(name3, container) {
+    this.name = name3;
     this.container = container;
     this.component = null;
     this.instances = /* @__PURE__ */ new Map();
@@ -5085,8 +5085,8 @@ function isComponentEager(component) {
 }
 __name(isComponentEager, "isComponentEager");
 var _ComponentContainer = class _ComponentContainer {
-  constructor(name4) {
-    this.name = name4;
+  constructor(name3) {
+    this.name = name3;
     this.providers = /* @__PURE__ */ new Map();
   }
   /**
@@ -5119,12 +5119,12 @@ var _ComponentContainer = class _ComponentContainer {
    * Firebase SDKs providing services should extend NameServiceMapping interface to register
    * themselves.
    */
-  getProvider(name4) {
-    if (this.providers.has(name4)) {
-      return this.providers.get(name4);
+  getProvider(name3) {
+    if (this.providers.has(name3)) {
+      return this.providers.get(name3);
     }
-    const provider = new Provider(name4, this);
-    this.providers.set(name4, provider);
+    const provider = new Provider(name3, this);
+    this.providers.set(name3, provider);
     return provider;
   }
   getProviders() {
@@ -5180,8 +5180,8 @@ var _Logger = class _Logger {
    *
    * @param name The name that the logs will be associated with
    */
-  constructor(name4) {
-    this.name = name4;
+  constructor(name3) {
+    this.name = name3;
     this._logLevel = defaultLogLevel;
     this._logHandler = defaultLogHandler;
     this._userLogHandler = null;
@@ -5394,8 +5394,8 @@ __name(wrap, "wrap");
 var unwrap = /* @__PURE__ */ __name((value) => reverseTransformCache.get(value), "unwrap");
 
 // node_modules/idb/build/index.js
-function openDB(name4, version3, { blocked, upgrade, blocking, terminated } = {}) {
-  const request = indexedDB.open(name4, version3);
+function openDB(name3, version3, { blocked, upgrade, blocking, terminated } = {}) {
+  const request = indexedDB.open(name3, version3);
   const openPromise = wrap(request);
   if (upgrade) {
     request.addEventListener("upgradeneeded", (event) => {
@@ -5513,7 +5513,7 @@ var name$4 = "@firebase/storage-compat";
 var name$3 = "@firebase/firestore";
 var name$2 = "@firebase/ai";
 var name$1 = "@firebase/firestore-compat";
-var name2 = "firebase";
+var name = "firebase";
 var version = "12.14.0";
 var DEFAULT_ENTRY_NAME2 = "[DEFAULT]";
 var PLATFORM_LOG_STRING = {
@@ -5545,7 +5545,7 @@ var PLATFORM_LOG_STRING = {
   [name$2]: "fire-vertex",
   "fire-js": "fire-js",
   // Platform identifier for JS SDK.
-  [name2]: "fire-js-all"
+  [name]: "fire-js-all"
 };
 var _apps = /* @__PURE__ */ new Map();
 var _serverApps = /* @__PURE__ */ new Map();
@@ -5574,12 +5574,12 @@ function _registerComponent(component) {
   return true;
 }
 __name(_registerComponent, "_registerComponent");
-function _getProvider(app2, name4) {
+function _getProvider(app2, name3) {
   const heartbeatController = app2.container.getProvider("heartbeat").getImmediate({ optional: true });
   if (heartbeatController) {
     void heartbeatController.triggerHeartbeat();
   }
-  return app2.container.getProvider(name4);
+  return app2.container.getProvider(name3);
 }
 __name(_getProvider, "_getProvider");
 function _isFirebaseServerApp(obj) {
@@ -5708,18 +5708,18 @@ var SDK_VERSION = version;
 function initializeApp(_options, rawConfig = {}) {
   let options = _options;
   if (typeof rawConfig !== "object") {
-    const name5 = rawConfig;
-    rawConfig = { name: name5 };
+    const name4 = rawConfig;
+    rawConfig = { name: name4 };
   }
   const config = {
     name: DEFAULT_ENTRY_NAME2,
     automaticDataCollectionEnabled: true,
     ...rawConfig
   };
-  const name4 = config.name;
-  if (typeof name4 !== "string" || !name4) {
+  const name3 = config.name;
+  if (typeof name3 !== "string" || !name3) {
     throw ERROR_FACTORY.create("bad-app-name", {
-      appName: String(name4)
+      appName: String(name3)
     });
   }
   options || (options = getDefaultAppConfig());
@@ -5729,30 +5729,30 @@ function initializeApp(_options, rawConfig = {}) {
       /* AppError.NO_OPTIONS */
     );
   }
-  const existingApp = _apps.get(name4);
+  const existingApp = _apps.get(name3);
   if (existingApp) {
     if (deepEqual(options, existingApp.options) && deepEqual(config, existingApp.config)) {
       return existingApp;
     } else {
-      throw ERROR_FACTORY.create("duplicate-app", { appName: name4 });
+      throw ERROR_FACTORY.create("duplicate-app", { appName: name3 });
     }
   }
-  const container = new ComponentContainer(name4);
+  const container = new ComponentContainer(name3);
   for (const component of _components.values()) {
     container.addComponent(component);
   }
   const newApp = new FirebaseAppImpl(options, config, container);
-  _apps.set(name4, newApp);
+  _apps.set(name3, newApp);
   return newApp;
 }
 __name(initializeApp, "initializeApp");
-function getApp(name4 = DEFAULT_ENTRY_NAME2) {
-  const app2 = _apps.get(name4);
-  if (!app2 && name4 === DEFAULT_ENTRY_NAME2 && getDefaultAppConfig()) {
+function getApp(name3 = DEFAULT_ENTRY_NAME2) {
+  const app2 = _apps.get(name3);
+  if (!app2 && name3 === DEFAULT_ENTRY_NAME2 && getDefaultAppConfig()) {
     return initializeApp();
   }
   if (!app2) {
-    throw ERROR_FACTORY.create("no-app", { appName: name4 });
+    throw ERROR_FACTORY.create("no-app", { appName: name3 });
   }
   return app2;
 }
@@ -6073,9 +6073,9 @@ __name(registerCoreComponents, "registerCoreComponents");
 registerCoreComponents("");
 
 // node_modules/firebase/app/dist/esm/index.esm.js
-var name3 = "firebase";
+var name2 = "firebase";
 var version2 = "12.14.0";
-registerVersion(name3, version2, "app");
+registerVersion(name2, version2, "app");
 
 // node_modules/@firebase/webchannel-wrapper/dist/bloom-blob/esm/bloom_blob_es2018.js
 var commonjsGlobal = typeof globalThis !== "undefined" ? globalThis : typeof window !== "undefined" ? window : typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : {};
@@ -19498,12 +19498,12 @@ async function getTopScores() {
   }
 }
 __name(getTopScores, "getTopScores");
-async function getMyScores(name4) {
-  if (!name4) return [];
+async function getMyScores(name3) {
+  if (!name3) return [];
   try {
     const q2 = query(
       collection(db, "scores"),
-      where("name", "==", name4),
+      where("name", "==", name3),
       orderBy("date", "desc"),
       limit(20)
     );
@@ -19595,8 +19595,8 @@ var ICONS = {
   "Travois Kit": "\u{1F6D2}",
   "Gunpowder Pack": "\u{1F4A3}"
 };
-function getItemIcon(name4) {
-  return ICONS[name4] || "\u2022";
+function getItemIcon(name3) {
+  return ICONS[name3] || "\u2022";
 }
 __name(getItemIcon, "getItemIcon");
 
@@ -19717,6 +19717,7 @@ function bootstrap(seed = null) {
       const blocked = travelOneDay();
       haptics_default.travel();
       if (blocked === true) return;
+      if (blocked) return;
       const after = game.getState();
       if (after.wear > prevWear) haptics_default.wear();
       const node = NODES[after.node];
@@ -20549,8 +20550,8 @@ function showShop(game) {
       listEl.querySelectorAll(".pd-extra-pick").forEach((btn) => {
         btn.addEventListener("click", (e) => {
           e.stopPropagation();
-          const name32 = btn.getAttribute("data-item");
-          selectedExtra = extraItems.find((i) => i.name === name);
+          const name3 = btn.getAttribute("data-item");
+          selectedExtra = extraItems.find((i) => i.name === name3);
           recalc();
           renderList();
         });
@@ -21208,12 +21209,12 @@ function loadMyScores() {
   const container = document.getElementById("lb-my-list");
   if (!container) return;
   container.innerHTML = '<div class="lb-loading">Loading...</div>';
-  const name4 = localStorage.getItem("metisPlayerName") || "";
-  if (!name4) {
+  const name3 = localStorage.getItem("metisPlayerName") || "";
+  if (!name3) {
     container.innerHTML = '<div class="lb-empty">Set your party name in the intro to track personal scores.</div>';
     return;
   }
-  getMyScores(name4).then((scores) => {
+  getMyScores(name3).then((scores) => {
     cachedMyScores = scores;
     if (!scores) {
       document.getElementById("lb-my-list").innerHTML = '<div class="lb-error">Unable to load personal scores \u2014 playing offline</div>';
