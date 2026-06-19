@@ -350,7 +350,8 @@ export function createGame(seed = null) {
       S.morale = Math.max(0, S.morale - 10);
       S.crew = 'exhausted';
       S.wear = Math.min(CONSTANTS.MAX_WEAR, S.wear + 1);
-      // Note: checkGameOver() will set S.over = true if food <= 0
+      checkGameOver();
+      if (S.over) return stepLog;
     }
 
     S.segmentDay += travelMult; // heavier cart = slower progress per day

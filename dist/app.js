@@ -2362,6 +2362,8 @@ function createGame(seed = null) {
       S2.morale = Math.max(0, S2.morale - 10);
       S2.crew = "exhausted";
       S2.wear = Math.min(CONSTANTS.MAX_WEAR, S2.wear + 1);
+      checkGameOver();
+      if (S2.over) return stepLog;
     }
     S2.segmentDay += travelMult;
     S2.travelDaysWithoutRest++;
@@ -20045,6 +20047,9 @@ function revealDiceOutcome(diceResult) {
     if (after.wear !== before.wear) mechMsgs.push(`Wear ${after.wear - before.wear >= 0 ? "+" : ""}${after.wear - before.wear}`);
     if (after.morale !== before.morale) mechMsgs.push(`Morale ${after.morale - before.morale >= 0 ? "+" : ""}${after.morale - before.morale}`);
     if (after.crew !== before.crew) mechMsgs.push(`Crew: ${before.crew} \u2192 ${after.crew}`);
+    if (result.effects && result.effects.length) {
+      mechMsgs.push(...result.effects);
+    }
     const mechHtml = mechMsgs.length ? `<div class="outcome-mechanical">${mechMsgs.join(" \xB7 ")}</div>` : "";
     outcomeEl.innerHTML = `${rollHtml} \u2014 ${resultHtml}${flavorHtml}${mechHtml}`;
     outcomeEl.classList.add("visible");
@@ -20212,6 +20217,9 @@ function showEvent(game) {
         if (afterState.wear !== prev.wear) mechMsgs.push(`Wear ${afterState.wear - prev.wear >= 0 ? "+" : ""}${afterState.wear - prev.wear}`);
         if (afterState.morale !== prev.morale) mechMsgs.push(`Morale ${afterState.morale - prev.morale >= 0 ? "+" : ""}${afterState.morale - prev.morale}`);
         if (afterState.crew !== prev.crew) mechMsgs.push(`Crew: ${prev.crew} \u2192 ${afterState.crew}`);
+        if (res && res.effects && res.effects.length) {
+          mechMsgs.push(...res.effects);
+        }
         if (mechMsgs.length) {
           html += `<div class="outcome-mechanical">${mechMsgs.join(" \xB7 ")}</div>`;
         }
@@ -20251,6 +20259,9 @@ function buildEventChoiceOutcome(stepLog, before, after) {
   if (res && res.reps && res.reps.length) {
     const r = res.reps[0];
     msgs.push(`Reputation ${r.key}: ${r.delta >= 0 ? "+" : ""}${r.delta} (now ${r.value})`);
+  }
+  if (res && res.effects && res.effects.length) {
+    msgs.push(...res.effects);
   }
   if (!msgs.length) return "The day passes without change.";
   return msgs.join(", ");
