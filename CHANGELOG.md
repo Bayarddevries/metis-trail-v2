@@ -1160,3 +1160,27 @@ Files: `src/systems/engine.js`.
 **Files modified:** `src/systems/engine.js`, `src/main.js`, `src/core/constants.js`, `src/ui/theme.js`, `src/template.html`, `HANDOFF.md`, `CHANGELOG.md`
 
 **Verified:** Full playtest pre-departure → travel → settlement → camp; 0 JS errors
+
+## [v14.1] — 2026-06-19
+
+### Post-Test Fixes
+
+**Score Breakdown Display:**
+- Fixed: `getEndgameScore()` returns `{score, breakdown: {...}, tier, ...}` — display code was reading `.base` from the outer object (undefined) instead of `.breakdown.base`
+- Fixed: `tradeBonus` → `tradeGoods` field name (previous patch was reverted by git checkout)
+- Score breakdown now shows correct values: base +500, tradeGoods +100, food +300, etc.
+
+**Trail Intel Description:**
+- Added `desc` field to `trade_gossip` barter entry explaining what Trail Intel does
+- Added `desc` passthrough in `getSettlementActions()` API method (was missing from the map)
+- `.settlement-action-card-desc` CSS added for styled description text
+- Description renders below flavor text on gossip action card
+
+**Files modified:** `src/main.js`, `src/systems/engine.js`
+
+**Verified:** 
+- Full sim to victory (day 38, score 391, 0 JS errors)
+- Score breakdown shows correct values per line item
+- Trail Intel description visible on St. Norbert gossip card
+- Settlement status pills visible on all settlement types
+- Settlement flavor text readable (not dark-on-dark), not italic
