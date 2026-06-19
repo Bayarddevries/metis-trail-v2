@@ -156,10 +156,19 @@
     .segment-progress { font-size: 10px; padding: 0 4px; }
   }
   @media (max-width: 420px) {
-    #status-bar { padding: 4px 8px; height: 34px; gap: 4px; }
-    .stat-label { font-size: 8px; }
+    #status-bar { padding: 4px 4px; height: 34px; gap: 1px; }
+    .stat { padding: 0; }
+    .stat-label { font-size: 7px; }
     .stat-value { font-size: 10px; }
     .segment-progress { display: none; }
+    #stat-weather { display: none; }
+  }
+  @media (max-width: 375px) {
+    #status-bar { padding: 2px 6px; height: 32px; gap: 3px; }
+    .stat { padding: 0 2px; }
+    .stat-label { display: none; }
+    .stat-value { font-size: 11px; }
+    #settings-btn { padding: 2px 5px; font-size: 10px; }
   }
 
   #map-panel {
@@ -1850,7 +1859,7 @@
     <span class="stat"><span class="stat-value" id="s-month">June 15</span></span>
     <span class="stat"><span class="stat-value" id="s-season">Summer</span></span>
     <span class="segment-progress" id="s-segment">Fort Garry — begin your journey</span>
-    <span class="stat"><span class="stat-label">Weather</span><span class="stat-value" id="s-weather">Clear</span></span>
+    <span class="stat" id="stat-weather"><span class="stat-label">Weather</span><span class="stat-value" id="s-weather">Clear</span></span>
     <span class="stat tappable" id="stat-food"><span class="stat-label">Food</span><span class="stat-value" id="s-food">0</span></span>
     <span class="stat"><span class="stat-label">Wear</span><span class="stat-value" id="s-wear">0</span></span>
     <span class="stat"><span class="stat-label">Morale</span><span class="stat-value" id="s-morale">70</span></span>
@@ -1925,8 +1934,7 @@
         <span id="journal-toggle-label">Journal</span>
         <span id="journal-toggle-icon">▼</span>
       </div>
-      <div id="journal">
-      </div>
+      <div id="journal"></div>
       <div id="trail-intel" style="display:none;padding:6px 10px;background:var(--clr-gold-faint);border-top:1px solid var(--clr-accent);font-size:0.85em;color:var(--clr-accent);"></div>
       <div id="controls">
         <button class="ctrl-btn primary" id="btn-travel">Travel West</button>

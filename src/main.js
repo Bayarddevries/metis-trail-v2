@@ -107,7 +107,7 @@ export function bootstrap(seed = null) {
 
   // ── Overlay exclusivity ────────────────────────────────────────
   // When any overlay opens, close others
-  const overlayIds = ['event-overlay', 'settlement-overlay', 'cart-overlay', 'crew-overlay', 'predeparture-overlay', 'settings-overlay'];
+  const overlayIds = ['event-overlay', 'settlement-overlay', 'cart-overlay', 'crew-overlay', 'camp-overlay', 'predeparture-overlay', 'settings-overlay'];
   function closeAllOverlays() {
     overlayIds.forEach(id => document.getElementById(id)?.classList.remove('active'));
   }
@@ -605,7 +605,7 @@ function renderTrailIntel(state) {
 }
 
 function hideOverlays() {
-  ['intro-overlay', 'event-overlay', 'settlement-overlay', 'cart-overlay', 'crew-overlay', 'settings-overlay'].forEach((id) => {
+  ['intro-overlay', 'event-overlay', 'settlement-overlay', 'cart-overlay', 'crew-overlay', 'camp-overlay', 'predeparture-overlay', 'settings-overlay', 'leaderboard-overlay', 'end-overlay'].forEach((id) => {
     const el = document.getElementById(id);
     if (el) el.classList.remove('active');
   });
@@ -921,6 +921,7 @@ function buildEventChoiceOutcome(stepLog, before, after) {
 }
 
 function showSettlement(game) {
+  hideOverlays();
   Haptics.arrive();
   const state = game.getState();
   const node = game.getCurrentNode();
@@ -1181,6 +1182,7 @@ function buildSettlementOutcome(action, before, after, beforeCart, afterCart) {
 }
 
 function showCart(game) {
+  hideOverlays();
   const state = game.getState();
   const cart = game.getCart();
   const listEl = document.getElementById('inv-list');
@@ -1406,6 +1408,7 @@ function showShop(game) {
 }
 
 function showCrew(game) {
+  hideOverlays();
   const c = game.getCrew();
   const el = document.getElementById('crew-status');
   if (!el) return;
@@ -1584,6 +1587,7 @@ function getCampFlavorText(type, rollTotal, effects) {
 }
 
 function showCamp(game) {
+  hideOverlays();
   const state = game.getState();
   if (state.over || state.pendingEvent || state.pendingSettlement) return;
   const foodEl = document.getElementById('camp-food');
@@ -1866,6 +1870,7 @@ function showCamp(game) {
 }
 
 function showEnd(game) {
+  hideOverlays();
   const state = game.getState();
   const cart = game.getCart();
   const titleEl = document.getElementById('end-title');
@@ -1987,7 +1992,7 @@ let cachedTopScores = null;
 let cachedMyScores = null;
 
 function showLeaderboard() {
-  document.getElementById('end-overlay')?.classList.remove('active');
+  hideOverlays();
   document.getElementById('leaderboard-overlay')?.classList.add('active');
   loadHallOfFame();
   loadMyScores();
