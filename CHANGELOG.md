@@ -1229,3 +1229,22 @@ Files: `src/systems/engine.js`.
 **Files modified:** `src/core/constants.js`, `src/main.js`, `tests/simulate-entry.js`
 
 **Verified:** 0 JS errors in browser after build
+
+## [v14.4] — 2026-06-20
+
+### Fort Trade UI Grouping
+
+**Problem:** `trade_furs_supplies` generated 3 separate action cards (Ammunition, Shaganappi, Medicine) each with their own "Do It" button. Visually noisy and confusing.
+
+**Fix:**
+- **Engine** (`src/systems/engine.js`): Actions with `options` arrays now get `groupId`, `groupLabel`, `groupIndex` fields. All `trade_furs_supplies_*` actions share `groupId: "trade_furs_supplies"`.
+- **UI** (`src/main.js`): Rewrote settlement action renderer to group actions by `groupId`. Grouped actions render as a single card with radio-button sub-options and one shared "Do It" button. Ungrouped actions render as before.
+- **CSS** (`src/template.html`): Added `.settlement-action-group-options`, `.settlement-action-group-option`, `.settlement-action-group-radio`, `.settlement-action-group-label`, `.settlement-action-group-detail` styles.
+
+**Verified:**
+- Portage la Prairie (trading post): "Trade Furs Supplies" shows as single card with 3 radio options ✅
+- Fort Ellice (HBC): Same grouping ✅
+- Sim runs without errors (50 runs, 66% win rate) ✅
+- 0 JS errors in browser ✅
+
+**Files modified:** `src/systems/engine.js`, `src/main.js`, `src/template.html`

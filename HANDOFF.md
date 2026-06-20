@@ -10,10 +10,11 @@
 
 ### Phase Status
 - **V13 UI Overhaul Sessions 1–4**: ✅ Complete
-- **Sprint A (Critical Bugs)**: ✅ Complete — all items verified
-- **Sprint B (Content Quality)**: ✅ Complete — all items verified
-- **Sprint C (Remaining Bug Fixes)**: ✅ Complete — all items verified
+- **Sprint A (Critical Bugs)**: ✅ Complete
+- **Sprint B (Content Quality)**: ✅ Complete
+- **Sprint C (Remaining Bug Fixes)**: ✅ Complete
 - **v14.3 Balance Pass**: ✅ Complete — sim updated, food economy tuned
+- **v14.4 Trade Grouping**: ✅ Complete — grouped settlement action cards with radio sub-options
 
 ### Completed Fixes
 
@@ -64,7 +65,6 @@
 
 ## Known Issues (Not Yet Addressed)
 
-- **Fort trade buttons**: `trade_furs_supplies` still generates 3 separate buttons (one per option). Needs UI grouping. Low priority.
 - **Settlement result redundancy**: Result card shows both flavor text and mechanical outcome, which can overlap. Minor.
 - **`badGive` not handled in engine**: Events have `badGive` fields (e.g., supply_cache bad path gives fewer items) but engine only processes `ch.give`, not `ch.badGive`. Pre-existing, out of scope.
 - **Roll display**: Die face shows raw d20 roll (standard TTRPG convention). Outcome text shows total + modifiers. Working as intended.

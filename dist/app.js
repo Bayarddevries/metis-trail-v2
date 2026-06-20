@@ -2511,16 +2511,20 @@ function createGame(seed = null) {
           });
         });
       } else if (trade.options) {
-        trade.options.forEach((opt) => {
+        const baseLabel = actionId.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+        trade.options.forEach((opt, idx) => {
           const giveDesc = trade.give.map((g) => `${g.count} ${displayName(g.name)}`).join(" + ");
           const receiveDesc = opt.receive.map((r) => `${r.count} ${displayName(r.name)}`).join(", ");
           actions.push({
             id: `${actionId}_${opt.id}`,
-            label: `${actionId.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}: ${opt.id.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}`,
+            label: opt.id.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()),
             cost: giveDesc || "Free",
             risk: receiveDesc,
             flavor: opt.flavor,
-            desc: trade.desc
+            desc: trade.desc,
+            groupId: actionId,
+            groupLabel: baseLabel,
+            groupIndex: idx
           });
         });
       } else {
@@ -2630,7 +2634,10 @@ function createGame(seed = null) {
         cost: a.cost,
         risk: a.risk,
         flavor: a.flavor,
-        desc: a.desc
+        desc: a.desc,
+        groupId: a.groupId || null,
+        groupLabel: a.groupLabel || null,
+        groupIndex: a.groupIndex || 0
       }));
     },
     settlementAction(actionId, params = {}) {
@@ -20311,8 +20318,169 @@ function showSettlement(game) {
   }
   if (continueEl) continueEl.style.display = "none";
   const actions = game.getSettlementActions(node.type);
+  const grouped = {};
+  const ungrouped = [];
+  actions.forEach((a) => {
+    if (a.groupId) {
+      if (!grouped[a.groupId]) grouped[a.groupId] = [];
+      grouped[a.groupId].push(a);
+    } else {
+      ungrouped.push(a);
+    }
+  });
   let settlementActionPerformed = false;
-  actions.forEach((action) => {
+  function checkCanDo(action) {
+    const st2 = game.getState();
+    const cart = game.getCart();
+    switch (action.groupId || action.id) {
+      case "trade_furs_food":
+        return cart.some((i) => (i.type === "trade" || i.category === "furs") && i.count > 0);
+      case "trade_furs_supplies":
+        return cart.some((i) => (i.type === "trade" || i.category === "furs") && i.count > 0);
+      case "rest":
+        return st2.food >= 1;
+      case "trade_gossip":
+        return true;
+      case "dance":
+        return st2.food >= 1;
+      case "share_food":
+        return st2.food >= 2;
+      case "rest_blessing":
+        return true;
+      case "buy_ammo":
+        return cart.some((i) => (i.type === "trade" || i.category === "furs") && i.count > 0);
+      case "heal_crew":
+        return (cart.find((i) => i.name === "Medicine Pouch")?.count || 0) >= 1 || st2.food >= 2;
+      default:
+        return true;
+    }
+  }
+  __name(checkCanDo, "checkCanDo");
+  function renderGroupedCard(groupActions) {
+    const groupId = groupActions[0].groupId;
+    const groupLabel = groupActions[0].groupLabel;
+    const card = document.createElement("div");
+    card.className = "settlement-action-card settlement-action-group";
+    const nameRow = document.createElement("div");
+    nameRow.className = "settlement-action-card-name";
+    nameRow.textContent = groupLabel;
+    card.appendChild(nameRow);
+    const sharedDesc = groupActions[0].desc;
+    if (sharedDesc) {
+      const descRow = document.createElement("div");
+      descRow.className = "settlement-action-card-desc";
+      descRow.textContent = sharedDesc;
+      card.appendChild(descRow);
+    }
+    const optionsWrap = document.createElement("div");
+    optionsWrap.className = "settlement-action-group-options";
+    let selectedIndex = 0;
+    groupActions.forEach((action, idx) => {
+      const canDo = !settlementActionPerformed && checkCanDo(action);
+      const optRow = document.createElement("label");
+      optRow.className = "settlement-action-group-option" + (canDo ? "" : " disabled");
+      const radio = document.createElement("input");
+      radio.type = "radio";
+      radio.name = `group_${groupId}`;
+      radio.value = idx;
+      radio.checked = idx === 0;
+      radio.disabled = !canDo;
+      radio.className = "settlement-action-group-radio";
+      const optLabel = document.createElement("span");
+      optLabel.className = "settlement-action-group-label";
+      optLabel.textContent = action.label;
+      const optDetail = document.createElement("span");
+      optDetail.className = "settlement-action-group-detail";
+      optDetail.textContent = `Cost: ${action.cost} \u2192 ${action.risk}`;
+      optRow.appendChild(radio);
+      optRow.appendChild(optLabel);
+      optRow.appendChild(optDetail);
+      optionsWrap.appendChild(optRow);
+    });
+    card.appendChild(optionsWrap);
+    const btn = document.createElement("button");
+    btn.className = "settlement-action-card-btn";
+    btn.textContent = "Do It";
+    const canDoAny = groupActions.some((a) => checkCanDo(a));
+    if (!canDoAny) {
+      btn.disabled = true;
+      btn.classList.add("disabled");
+    }
+    card.appendChild(btn);
+    actionsEl.appendChild(card);
+    if (canDoAny) {
+      btn.addEventListener("click", () => {
+        if (settlementActionPerformed) return;
+        settlementActionPerformed = true;
+        const checked = optionsWrap.querySelector('input[type="radio"]:checked');
+        const selectedGroupIndex = checked ? parseInt(checked.value, 10) : 0;
+        const selectedAction = groupActions[selectedGroupIndex];
+        actionsEl.querySelectorAll(".settlement-action-card-btn").forEach((b2) => {
+          b2.disabled = true;
+          b2.classList.add("disabled");
+        });
+        const beforeState = game.getState();
+        const beforeCart = game.getCart();
+        const result = game.settlementAction(selectedAction.id);
+        const afterState = game.getState();
+        const afterCart = game.getCart();
+        actionsEl.querySelectorAll(".settlement-action-card").forEach((c) => {
+          c.style.display = "none";
+        });
+        const flavor = buildSettlementActionEntry(selectedAction.id, selectedAction.cost, selectedAction.risk || selectedAction.flavor);
+        const reflectionText = buildSettlementReflection(node, afterState, afterCart);
+        const fullText = flavor + " " + reflectionText;
+        const mechParts = [];
+        if (afterState.food !== beforeState.food) mechParts.push(`${afterState.food - beforeState.food >= 0 ? "+" : ""}${(afterState.food - beforeState.food).toFixed(1)} Food`);
+        if (afterState.wear !== beforeState.wear) mechParts.push(`Wear ${afterState.wear - beforeState.wear >= 0 ? "+" : ""}${afterState.wear - beforeState.wear}`);
+        if (afterState.morale !== beforeState.morale) mechParts.push(`Morale ${afterState.morale - beforeState.morale >= 0 ? "+" : ""}${afterState.morale - beforeState.morale}`);
+        if (afterState.crew !== beforeState.crew) mechParts.push(`Crew: ${beforeState.crew} \u2192 ${afterState.crew}`);
+        const resultCard = document.createElement("div");
+        resultCard.className = "settlement-action-card";
+        resultCard.style.borderColor = "var(--clr-accent)";
+        const rcName = document.createElement("div");
+        rcName.className = "settlement-action-card-name";
+        rcName.textContent = selectedAction.label;
+        resultCard.appendChild(rcName);
+        const rcFlavor = document.createElement("div");
+        rcFlavor.className = "settlement-action-card-flavor";
+        rcFlavor.textContent = fullText;
+        resultCard.appendChild(rcFlavor);
+        if (mechParts.length) {
+          const rcMech = document.createElement("div");
+          rcMech.className = "settlement-action-card-cost";
+          rcMech.textContent = mechParts.join(" \xB7 ");
+          resultCard.appendChild(rcMech);
+        }
+        if (intelText(groupActions[0].id)) {
+          const rcIntel = document.createElement("div");
+          rcIntel.className = "settlement-action-card-desc";
+          const intel = afterState.trailIntel || [];
+          if (intel.length > 0) rcIntel.textContent = intel[intel.length - 1].text;
+          resultCard.appendChild(rcIntel);
+        }
+        const rcBtn = document.createElement("button");
+        rcBtn.className = "settlement-action-card-btn";
+        rcBtn.textContent = "Continue West";
+        rcBtn.addEventListener("click", () => {
+          actionsEl.querySelectorAll(".settlement-action-card").forEach((c) => {
+            c.style.display = "none";
+          });
+          if (continueEl) continueEl.style.display = "none";
+          game.settlementAction("continue");
+          window.__METIS_RENDER__();
+        });
+        resultCard.appendChild(rcBtn);
+        actionsEl.appendChild(resultCard);
+      });
+    }
+  }
+  __name(renderGroupedCard, "renderGroupedCard");
+  function intelText(id) {
+    return ["get_intel", "trade_gossip", "gossip", "buy_info", "rumours"].includes(id);
+  }
+  __name(intelText, "intelText");
+  function renderSingleCard(action) {
     const card = document.createElement("div");
     card.className = "settlement-action-card";
     const nameRow = document.createElement("div");
@@ -20333,46 +20501,7 @@ function showSettlement(game) {
     const btn = document.createElement("button");
     btn.className = "settlement-action-card-btn";
     btn.textContent = "Do It";
-    const st2 = game.getState();
-    const cart = game.getCart();
-    let canDo = true;
-    switch (action.id) {
-      case "trade":
-        canDo = cart.some((i) => i.type === "trade" && i.count > 0);
-        break;
-      case "rest":
-        canDo = st2.food >= 1;
-        break;
-      case "trade_gossip":
-        canDo = true;
-        break;
-      case "dance":
-        canDo = st2.food >= 1;
-        break;
-      case "share_food":
-        canDo = st2.food >= 2;
-        break;
-      case "craft_hides": {
-        const hides = cart.find((i) => ["Bison Hide", "Beaver Pelts", "Elk Hide", "Deer Hide"].includes(i.name));
-        const shag = cart.find((i) => i.name === "Shaganappi");
-        canDo = (hides?.count || 0) >= 3 && (shag?.count || 0) >= 1;
-        break;
-      }
-      case "report_duty":
-        canDo = true;
-        break;
-      case "heal_crew":
-        canDo = (cart.find((i) => i.name === "Medicine Pouch")?.count || 0) >= 1 || st2.food >= 2;
-        break;
-      case "get_blessing":
-        canDo = st2.food >= 1;
-        break;
-      case "trade_limited":
-        canDo = true;
-        break;
-      default:
-        canDo = true;
-    }
+    const canDo = !settlementActionPerformed && checkCanDo(action);
     if (!canDo) {
       btn.disabled = true;
       btn.classList.add("disabled");
@@ -20400,12 +20529,6 @@ function showSettlement(game) {
         actionsEl.querySelectorAll(".settlement-action-card").forEach((c) => {
           c.style.display = "none";
         });
-        const outcome = buildSettlementOutcome(action.id, beforeState, afterState, beforeCart, afterCart);
-        let intelText = null;
-        if (["get_intel", "trade_gossip", "gossip", "buy_info", "rumours"].includes(action.id)) {
-          const intel = afterState.trailIntel || [];
-          if (intel.length > 0) intelText = intel[intel.length - 1].text;
-        }
         const flavor = buildSettlementActionEntry(action.id, action.cost, action.risk || action.flavor);
         const reflectionText = buildSettlementReflection(node, afterState, afterCart);
         const fullText = flavor + " " + reflectionText;
@@ -20431,102 +20554,35 @@ function showSettlement(game) {
           rcMech.textContent = mechParts.join(" \xB7 ");
           resultCard.appendChild(rcMech);
         }
-        const rcOutcome = document.createElement("div");
-        rcOutcome.className = "settlement-action-card-risk";
-        rcOutcome.textContent = outcome;
-        resultCard.appendChild(rcOutcome);
-        const continueBtn = document.createElement("button");
-        continueBtn.className = "settlement-action-card-btn";
-        continueBtn.textContent = "Continue West";
-        continueBtn.onclick = () => {
-          journalLog({
-            day: afterState.day,
-            date: monthName(afterState.month) + " " + afterState.day,
-            title: `${action.label} at ${node.name}`,
-            text: fullText,
-            mech: mechParts.join(" \xB7 "),
-            collapsed: false
-          });
-          document.getElementById("settlement-overlay")?.classList.remove("active");
-          window.__METIS_RENDER__();
-        };
-        resultCard.appendChild(continueBtn);
-        actionsEl.appendChild(resultCard);
-        const needRoll = !["trade", "buy_supplies", "share_food", "report_duty", "buy_ammo", "trade_limited", "get_intel"].includes(action.id);
-        if (needRoll && result && result.roll !== null && result.roll !== void 0) {
-          const DC_MAP = { rest: 12, get_blessing: 8, dance: 8, craft_hides: 8, heal_crew: 8 };
-          const actionBase = action.id.replace(/_\d+$/, "");
-          const DC = DC_MAP[actionBase] || DC_MAP[action.id] || 10;
-          const isSuccess = (result.rollTotal || 0) >= DC;
-          if (rollEl) {
-            rollEl.style.display = "flex";
-            rollEl.innerHTML = `
-              <div class="roll-label">Roll</div>
-              <div class="die small font-spectral spin" id="settlement-die">${result.roll}</div>
-              <div class="roll-total">Need ${DC}+ ${isSuccess ? "\u2713" : "\u2717"}</div>
-            `;
-            const dieEl = document.getElementById("settlement-die");
-            let ticks = 0;
-            const maxTicks = 6 + Math.floor(Math.random() * 4);
-            const spinId = setInterval(() => {
-              dieEl.textContent = String(Math.floor(Math.random() * 20) + 1);
-              ticks++;
-              if (ticks >= maxTicks) {
-                clearInterval(spinId);
-                dieEl.textContent = String(result.roll);
-                dieEl.className = "die small font-spectral settled " + (isSuccess ? "pass" : "fail");
-                haptics_default.uiTap();
-                if (resultEl) {
-                  resultEl.style.display = "block";
-                  resultEl.innerHTML = flavor;
-                }
-                continueBtn.style.display = "inline-block";
-              }
-            }, 60);
-          }
-        } else {
-          if (resultEl) {
-            resultEl.style.display = "block";
-            resultEl.innerHTML = flavor;
-          }
-          continueBtn.style.display = "inline-block";
+        if (intelText(action.id)) {
+          const rcIntel = document.createElement("div");
+          rcIntel.className = "settlement-action-card-desc";
+          const intel = afterState.trailIntel || [];
+          if (intel.length > 0) rcIntel.textContent = intel[intel.length - 1].text;
+          resultCard.appendChild(rcIntel);
         }
+        const rcBtn = document.createElement("button");
+        rcBtn.className = "settlement-action-card-btn";
+        rcBtn.textContent = "Continue West";
+        rcBtn.addEventListener("click", () => {
+          actionsEl.querySelectorAll(".settlement-action-card").forEach((c) => {
+            c.style.display = "none";
+          });
+          if (continueEl) continueEl.style.display = "none";
+          game.settlementAction("continue");
+          window.__METIS_RENDER__();
+        });
+        resultCard.appendChild(rcBtn);
+        actionsEl.appendChild(resultCard);
       });
     }
-  });
+  }
+  __name(renderSingleCard, "renderSingleCard");
+  Object.values(grouped).forEach(renderGroupedCard);
+  ungrouped.forEach(renderSingleCard);
   document.getElementById("settlement-overlay")?.classList.add("active");
 }
 __name(showSettlement, "showSettlement");
-function buildSettlementOutcome(action, before, after, beforeCart, afterCart) {
-  const msgs = [];
-  if (after.food !== before.food) msgs.push(`${after.food - before.food >= 0 ? "+" : ""}${after.food - before.food} Food`);
-  if (after.wear !== before.wear) msgs.push(`Wear ${after.wear - before.wear >= 0 ? "+" : ""}${after.wear - before.wear}`);
-  if (after.morale !== before.morale) msgs.push(`Morale ${after.morale - before.morale >= 0 ? "+" : ""}${after.morale - before.morale}`);
-  if (after.crew !== before.crew) msgs.push(`Crew: ${before.crew} -> ${after.crew}`);
-  if (after.day !== before.day) msgs.push(`${after.day - before.day} Day(s)`);
-  if (action === "trade") {
-    const lost = beforeCart.reduce((s, i) => s + i.count, 0) - afterCart.reduce((s, i) => s + i.count, 0);
-    if (lost > 0) msgs.push(`Traded ${lost} good(s) for supplies.`);
-  }
-  if (action === "repair") msgs.push("Cart repaired.");
-  if (action === "grease") msgs.push("Axle greased.");
-  if (action === "heal") msgs.push("Healed.");
-  if (action === "forage") msgs.push("Foraging...");
-  if (action === "get_intel") msgs.push("Gathered trail intelligence.");
-  if (action === "gossip" || action === "trade_gossip" || action === "rumours") {
-    const intel = after.trailIntel && after.trailIntel.length > 0 ? after.trailIntel[after.trailIntel.length - 1] : null;
-    if (intel && intel.text) {
-      msgs.push(`You spend a day gossiping. "${intel.text}"`);
-    } else {
-      msgs.push("You spend a day gossiping. The locals share what they know.");
-    }
-  }
-  if (action === "rest") msgs.push("Rest. Crew and supplies refreshed.");
-  if (action === "craft") msgs.push("Item crafted.");
-  if (!msgs.length) return "Nothing changed.";
-  return msgs.join(", ");
-}
-__name(buildSettlementOutcome, "buildSettlementOutcome");
 function showCart(game) {
   hideOverlays();
   const state = game.getState();

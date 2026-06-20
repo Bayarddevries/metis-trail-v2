@@ -519,17 +519,21 @@ export function createGame(seed = null) {
         });
       });
     } else if (trade.options) {
-      // Multiple receive options (e.g., trade_furs_supplies)
-      trade.options.forEach(opt => {
+      // Multiple receive options (e.g., trade_furs_supplies) — group under one card
+      const baseLabel = actionId.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+      trade.options.forEach((opt, idx) => {
         const giveDesc = trade.give.map(g => `${g.count} ${displayName(g.name)}`).join(' + ');
         const receiveDesc = opt.receive.map(r => `${r.count} ${displayName(r.name)}`).join(', ');
         actions.push({
           id: `${actionId}_${opt.id}`,
-          label: `${actionId.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}: ${opt.id.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}`,
+          label: opt.id.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()),
           cost: giveDesc || 'Free',
           risk: receiveDesc,
           flavor: opt.flavor,
           desc: trade.desc,
+          groupId: actionId,
+          groupLabel: baseLabel,
+          groupIndex: idx,
         });
       });
     } else {
@@ -643,6 +647,9 @@ export function createGame(seed = null) {
         risk: a.risk,
         flavor: a.flavor,
         desc: a.desc,
+        groupId: a.groupId || null,
+        groupLabel: a.groupLabel || null,
+        groupIndex: a.groupIndex || 0,
       }));
     },
 
