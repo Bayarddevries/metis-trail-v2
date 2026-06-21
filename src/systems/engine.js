@@ -145,13 +145,21 @@ export function createGame(seed = null) {
 
     if (ch.dc !== null) {
       const roll = d();
+      const crewBonus = crewMod(S);
+      const wearBonus = wearMod(S.wear);
+      const blessingBonus = S.blessingDays > 0 ? 1 : 0;
       const effectiveDC = ch.dc - dcReduction;
-      const total = roll + totalMod(S);
+      const total = roll + crewBonus + wearBonus + blessingBonus;
       const success = total >= effectiveDC;
       result.roll = roll;
       result.total = total;
       result.dc = effectiveDC;
       result.success = success;
+      result.mod = total - roll;
+      result.modBreakdown = [];
+      if (crewBonus) result.modBreakdown.push(`Crew ${crewBonus >= 0 ? '+' : ''}${crewBonus}`);
+      if (wearBonus) result.modBreakdown.push(`Wear ${wearBonus >= 0 ? '+' : ''}${wearBonus}`);
+      if (blessingBonus) result.modBreakdown.push('Blessing +1');
       result.text = success ? `Success. ${ch.ok}` : `Failure. ${ch.bad}`;
       if (bonusItemName) {
         result.effects.push(`(${bonusItemName} −${dcReduction} DC)`);

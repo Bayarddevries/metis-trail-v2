@@ -664,7 +664,7 @@ function revealDiceOutcome(diceResult) {
   if (outcomeEl) {
     // Roll line — show raw roll + modifiers = total, and effective DC
     const mod = result.total - result.roll;
-    const modStr = mod !== 0 ? ` (${mod >= 0 ? '+' : ''}${mod})` : '';
+    const modStr = mod !== 0 ? ` (${mod >= 0 ? '+' : ''}${mod}${result.modBreakdown && result.modBreakdown.length ? ': ' + result.modBreakdown.join(', ') : ''})` : '';
     const rollHtml = `<span class="outcome-roll">Rolled ${result.roll}${modStr} = ${result.total} — need ${result.dc}+</span>`;
     const resultHtml = result.success
       ? '<span class="outcome-pass">Success</span>'
@@ -790,7 +790,7 @@ function showEvent(game) {
           date: monthName(after.month) + ' ' + after.day,
           title: eventData.classification || 'Event',
           text: buildEventReflection(eventData, res, weather, cart),
-          dice: res && res.roll !== null ? `Rolled ${res.roll}${res.total - res.roll !== 0 ? ` (${res.total - res.roll >= 0 ? '+' : ''}${res.total - res.roll})` : ''} = ${res.total} — need ${res.dc}+ — ${res.success ? '✓ Success' : '✗ Failure'}` : null,
+          dice: res && res.roll !== null ? `Rolled ${res.roll}${res.total - res.roll !== 0 ? ` (${res.total - res.roll >= 0 ? '+' : ''}${res.total - res.roll}${res.modBreakdown && res.modBreakdown.length ? ': ' + res.modBreakdown.join(', ') : ''})` : ''} = ${res.total} — need ${res.dc}+ — ${res.success ? '✓ Success' : '✗ Failure'}` : null,
           mech: mechParts.join(' · '),
           collapsed: false,
         });
@@ -917,7 +917,7 @@ function buildEventChoiceOutcome(stepLog, before, after) {
   const res = entry && entry.result ? entry.result : entry;
   if (res && res.roll !== null && res.dc !== null) {
     const mod = res.total - res.roll;
-    const modStr = mod !== 0 ? ` (${mod >= 0 ? '+' : ''}${mod})` : '';
+    const modStr = mod !== 0 ? ` (${mod >= 0 ? '+' : ''}${mod}${res.modBreakdown && res.modBreakdown.length ? ': ' + res.modBreakdown.join(', ') : ''})` : '';
     msgs.push(`Rolled ${res.roll}${modStr} = ${res.total} (needed ${res.dc}+): ${res.success ? 'Success' : 'Failure'}`);
   }
   if (res && res.text) msgs.push(res.text);
