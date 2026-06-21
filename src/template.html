@@ -706,16 +706,27 @@
   }
   .restart-btn {
     padding: 10px 32px;
-    background: var(--clr-btn-bg);
-    color: var(--clr-btn-text);
-    border: none;
+    background: var(--clr-panel-bg);
+    color: var(--clr-ink-on-dark);
+    border: 2px solid var(--clr-accent);
     border-radius: 0;
     font-family: var(--font-heading);
     font-size: 16px;
     font-weight: 600;
+    letter-spacing: 0.06em;
     cursor: pointer;
+    text-transform: uppercase;
+    transition: transform 0.12s ease, box-shadow 0.15s ease, background 0.15s, border-color 0.15s;
   }
-  .restart-btn:hover { background: var(--clr-btn-hover); }
+  .restart-btn:hover {
+    background: var(--clr-panel-bg-2);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 0 var(--clr-accent);
+  }
+  .restart-btn:active {
+    transform: translateY(1px);
+    box-shadow: 0 0 0 var(--clr-accent);
+  }
   .end-btn { margin-top: 10px; }
 
   .intro-card {
@@ -768,17 +779,28 @@
   .intro-card .tutorial-text strong { color: var(--clr-ink-on-dark); font-weight: 700; }
   .intro-card .start-btn {
     padding: 10px 32px;
-    background: var(--clr-btn-bg);
-    color: var(--clr-btn-text);
-    border: none;
+    background: var(--clr-panel-bg);
+    color: var(--clr-ink-on-dark);
+    border: 2px solid var(--clr-accent);
     border-radius: 0;
     font-family: var(--font-heading);
     font-size: 16px;
     font-weight: 600;
+    letter-spacing: 0.06em;
     cursor: pointer;
     width: 100%;
+    text-transform: uppercase;
+    transition: transform 0.12s ease, box-shadow 0.15s ease, background 0.15s, border-color 0.15s;
   }
-  .intro-card .start-btn:hover { background: var(--clr-btn-hover); }
+  .intro-card .start-btn:hover {
+    background: var(--clr-panel-bg-2);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 0 var(--clr-accent);
+  }
+  .intro-card .start-btn:active {
+    transform: translateY(1px);
+    box-shadow: 0 0 0 var(--clr-accent);
+  }
 
   .predeparture-subtitle {
     font-size: 13px;
@@ -1479,16 +1501,27 @@
   }
   .restart-btn {
     padding: 10px 32px;
-    background: var(--clr-btn-bg);
-    color: var(--clr-btn-text);
-    border: none;
+    background: var(--clr-panel-bg);
+    color: var(--clr-ink-on-dark);
+    border: 2px solid var(--clr-accent);
     border-radius: 0;
     font-family: var(--font-heading);
     font-size: 16px;
     font-weight: 600;
+    letter-spacing: 0.06em;
     cursor: pointer;
+    text-transform: uppercase;
+    transition: transform 0.12s ease, box-shadow 0.15s ease, background 0.15s, border-color 0.15s;
   }
-  .restart-btn:hover { background: var(--clr-btn-hover); }
+  .restart-btn:hover {
+    background: var(--clr-panel-bg-2);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 0 var(--clr-accent);
+  }
+  .restart-btn:active {
+    transform: translateY(1px);
+    box-shadow: 0 0 0 var(--clr-accent);
+  }
   .end-btn { margin-top: 10px; }
 
   /* Camp overlay — evening campfire aesthetic */
@@ -2155,6 +2188,6 @@
     </div>
   </div>
 </div>
-  <script type="module" src="app.js?v=15"></script>
+  <script type="module" src="app.js?v=16"></script>
 </body>
 </html>
