@@ -14,9 +14,9 @@
     --clr-ink-on-light: #1f1811;
     --clr-accent: #4a6b4a;
     --clr-accent-alt: #6b4c7a;
-    --clr-bg-dark: #2d241a;
+    --clr-bg-dark: #3f3529;
     --clr-panel-bg: #e3d8b8;
-    --clr-panel-bg-2: #ddd0aa;
+    --clr-panel-bg-2: #c9b896;
     --clr-overlay-bg: rgba(31,24,17,0.95);
     --clr-danger: #8a3324;
     --clr-success: #4a6b4a;
@@ -465,9 +465,9 @@
   .ctrl-btn:focus { outline: 1px solid var(--clr-ink); outline-offset: 2px; }
   .ctrl-btn:disabled { opacity: 0.45; cursor: not-allowed; }
   .ctrl-btn.secondary { background: transparent; color: var(--clr-accent); }
-  .ctrl-btn.secondary:hover { background: rgba(200, 168, 26, 0.12); }
-  .ctrl-btn.ghost { background: transparent; border-color: transparent; color: var(--clr-accent); padding: 8px 12px; }
-  .ctrl-btn.ghost:hover { background: rgba(200, 168, 26, 0.08); }
+  .ctrl-btn.secondary:hover { background: var(--clr-border); }
+  .ctrl-btn.ghost { background: transparent; border-color: transparent; color: var(--clr-accent-alt); padding: 8px 12px; }
+  .ctrl-btn.ghost:hover { background: var(--clr-border); }
 
   #controls .ctrl-btn {
     flex: 1;

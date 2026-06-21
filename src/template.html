@@ -14,9 +14,9 @@
     --clr-ink-on-light: #1f1811;
     --clr-accent: #4a6b4a;
     --clr-accent-alt: #6b4c7a;
-    --clr-bg-dark: #2d241a;
+    --clr-bg-dark: #3f3529;
     --clr-panel-bg: #e3d8b8;
-    --clr-panel-bg-2: #ddd0aa;
+    --clr-panel-bg-2: #c9b896;
     --clr-overlay-bg: rgba(31,24,17,0.95);
     --clr-danger: #8a3324;
     --clr-success: #4a6b4a;
@@ -274,7 +274,7 @@
     align-items: center;
     justify-content: space-between;
     padding: 6px 14px;
-    background: var(--clr-bg-dark);
+    background: var(--clr-panel-bg);
     border-bottom: 1px solid rgba(139,105,20,0.2);
     cursor: pointer;
     user-select: none;
@@ -438,7 +438,7 @@
     display: flex;
     gap: 8px;
     padding: 8px 14px;
-    background: var(--clr-bg-dark);
+    background: var(--clr-panel-bg);
     border-top: 2px solid var(--clr-accent);
     flex-shrink: 0;
   }
@@ -465,9 +465,9 @@
   .ctrl-btn:focus { outline: 1px solid var(--clr-ink); outline-offset: 2px; }
   .ctrl-btn:disabled { opacity: 0.45; cursor: not-allowed; }
   .ctrl-btn.secondary { background: transparent; color: var(--clr-accent); }
-  .ctrl-btn.secondary:hover { background: rgba(200, 168, 26, 0.12); }
-  .ctrl-btn.ghost { background: transparent; border-color: transparent; color: var(--clr-accent); padding: 8px 12px; }
-  .ctrl-btn.ghost:hover { background: rgba(200, 168, 26, 0.08); }
+  .ctrl-btn.secondary:hover { background: var(--clr-border); }
+  .ctrl-btn.ghost { background: transparent; border-color: transparent; color: var(--clr-accent-alt); padding: 8px 12px; }
+  .ctrl-btn.ghost:hover { background: var(--clr-border); }
 
   #controls .ctrl-btn {
     flex: 1;
@@ -672,7 +672,7 @@
     white-space: pre-line;
   }
   .end-stats {
-    background: var(--clr-bg-dark);
+    background: var(--clr-panel-bg);
     border: 1px solid var(--clr-accent);
     border-radius: 0;
     padding: 14px;
@@ -750,7 +750,7 @@
     line-height: 1.6;
     margin-bottom: 18px;
     text-align: left;
-    background: var(--clr-bg-dark);
+    background: var(--clr-panel-bg);
     border: 1px solid var(--clr-accent);
     border-radius: 0;
     padding: 12px;
@@ -1203,7 +1203,7 @@
     margin-bottom: 12px;
     padding: 8px 12px;
     border-left: 2px solid var(--clr-accent);
-    background: var(--clr-bg-dark);
+    background: var(--clr-panel-bg);
     color: var(--clr-ink-on-dark);
   }
   .event-source .src-quote {
@@ -1269,7 +1269,7 @@
     align-items: flex-start;
     width: 100%;
     padding: 10px 14px;
-    background: var(--clr-bg-dark);
+    background: var(--clr-panel-bg);
     border: 2px solid var(--clr-accent);
     border-radius: 0;
     font-family: var(--font-body);
@@ -1311,7 +1311,7 @@
     justify-content: center;
     gap: 12px;
     padding: 12px;
-    background: var(--clr-bg-dark);
+    background: var(--clr-panel-bg);
     border: 2px solid var(--clr-accent);
     border-radius: 0;
     margin-bottom: 14px;
@@ -1445,7 +1445,7 @@
     white-space: pre-line;
   }
   .end-stats {
-    background: var(--clr-bg-dark);
+    background: var(--clr-panel-bg);
     border: 1px solid var(--clr-accent);
     border-radius: 0;
     padding: 14px;
@@ -1683,7 +1683,7 @@
       z-index: 100;
       padding: 4px 8px;
       gap: 3px;
-      background: var(--clr-bg-dark);
+      background: var(--clr-panel-bg);
       border-top: 1px solid var(--clr-accent);
     }
     .ctrl-btn { flex: 1; padding: 12px 4px; font-size: 13px; font-weight: 600; min-height: 44px; border-radius: 0; }
