@@ -719,7 +719,8 @@ function showEvent(game) {
   const sourceEl = document.getElementById('event-source');
   if (sourceEl) {
     if (ev.source && ev.source.quote) {
-      const quote = ev.source.quote;
+      const rawQuote = ev.source.quote;
+      const quote = rawQuote.replace(/^"|"$/g, '');
       const author = ev.source.author || '';
       const work = ev.source.work || '';
       const year = ev.source.year || '';
@@ -2050,11 +2051,13 @@ function showEnd(game) {
   if (sourceEl) {
     const quoteData = isHighScore && ending.quoteHigh ? ending.quoteHigh : ending.quote;
     if (quoteData && quoteData.quote) {
+      const rawQuote = quoteData.quote;
+      const quote = rawQuote.replace(/^"|"$/g, '');
       const author = quoteData.author || '';
       const work = quoteData.work || '';
       const year = quoteData.year || '';
       const attrib = [author, work, year].filter(Boolean).join(', ');
-      sourceEl.innerHTML = `<span class="src-quote">"${quoteData.quote}"</span>` + (attrib ? `<span class="src-attrib">— ${attrib}</span>` : '') + (quoteData.context ? `<span class="src-context">${quoteData.context}</span>` : '');
+      sourceEl.innerHTML = `<span class="src-quote">"${quote}"</span>` + (attrib ? `<span class="src-attrib">— ${attrib}</span>` : '') + (quoteData.context ? `<span class="src-context">${quoteData.context}</span>` : '');
       sourceEl.style.display = 'block';
     } else {
       sourceEl.style.display = 'none';
