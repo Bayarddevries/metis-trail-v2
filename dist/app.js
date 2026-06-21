@@ -2301,6 +2301,15 @@ function createGame(seed = null) {
       S2.segmentDay += ch.extraProgress;
       result.effects.push(`+${ch.extraProgress} progress`);
     }
+    if (result.success === false && ch.badGive) {
+      ch.badGive.forEach((g) => {
+        const item = cart.find((i) => i.name === g.name);
+        if (item) {
+          item.count += g.amt;
+          result.effects.push(`${g.amt >= 0 ? "+" : ""}${g.amt} ${g.name}`);
+        }
+      });
+    }
     if (ch.setsFlag) {
       S2.flags[ch.setsFlag] = true;
       result.flags.push(ch.setsFlag);
@@ -2619,11 +2628,12 @@ function createGame(seed = null) {
       const idx = cart.findIndex((i) => i.name === itemName);
       if (idx === -1 || cart[idx].count <= 0) return null;
       cart[idx].count--;
-      const est = this.getTradeEstimate(itemName);
-      const foodGain = Math.floor(rand() * (est.max - est.min + 1)) + est.min;
-      S2.food += foodGain;
+      const item = cart[idx];
+      const est = this.getTradeEstimate(itemName, 1, S2.pendingSettlement?.type || item?.category || "hbc");
+      if (!est) return null;
+      S2.food += est.sellPrice;
       S2.tradesMade++;
-      return { item: itemName, foodGain };
+      return { item: itemName, foodGain: est.sellPrice };
     },
     // ── NEW Engine API for Sprint 3 ───────────────────────────────────
     getSettlementActions(settlementType) {

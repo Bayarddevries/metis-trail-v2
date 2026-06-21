@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Metis Trail — UI Style Options</title>
+<style>
+  :root {
+    --clr-bg: #1a1410;
+    --clr-ink-on-dark: #e8dcc8;
+    --clr-ink-on-light: #e8dcc8;
+    --clr-accent: #c8a81a;
+    --clr-bg-dark: #0f0c08;
+    --clr-panel-bg: #2d241a;
+    --clr-overlay-bg: rgba(20,18,14,0.95);
+    --clr-danger: #c85040;
+    --clr-success: #7aa85a;
+    --clr-warn: #e0c030;
+    --clr-muted: #8a7a60;
+    --font-heading: 'IM Fell Double Pica', Georgia, 'Times New Roman', serif;
+    --font-body: 'IM Fell English', Georgia, 'Times New Roman', serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: var(--font-body);
+    color: var(--clr-ink-on-dark);
+    background: #0e0b08;
+    padding: 24px;
+  }
+  h1 { font-family: var(--font-heading); font-size: 28px; margin-bottom: 4px; color: var(--clr-accent); }
+  .subtitle { font-size: 13px; color: var(--clr-muted); margin-bottom: 24px; font-style: italic; }
+  .tabs { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+  .tab {
+    padding: 8px 16px;
+    background: transparent;
+    border: 1px solid var(--clr-accent);
+    color: var(--clr-accent);
+    font-family: var(--font-heading);
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    cursor: pointer;
+  }
+  .tab.active { background: var(--clr-accent); color: var(--clr-bg); }
+  .panel { display: none; }
+  .panel.active { display: block; }
+  .col {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+  .card {
+    background: var(--clr-panel-bg);
+    border: 2px solid var(--clr-accent);
+    padding: 18px;
+  }
+  .card h3 { font-family: var(--font-heading); font-size: 14px; color: var(--clr-accent); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.06em; }
+  .row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; align-items: center; }
+  .label { font-size: 11px; color: var(--clr-muted); text-transform: uppercase; letter-spacing: 0.06em; font-family: var(--font-heading); margin-bottom: 6px; }
+
+  /* CURRENT */
+  .current .ctrl-btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    padding: 10px 24px; font-family: var(--font-heading); font-size: 14px; font-weight: 600;
+    letter-spacing: 0.04em; cursor: pointer; border-radius: 0;
+    border: 2px solid var(--clr-accent); background: var(--clr-accent); color: var(--clr-btn-text);
+    min-height: 44px; text-transform: uppercase; transition: background 0.15s, border-color 0.15s;
+  }
+  .current .ctrl-btn:hover { background: var(--clr-btn-hover); }
+  .current .choice-btn {
+    display: flex; flex-direction: column; gap: 2px; align-items: flex-start; width: 100%;
+    padding: 10px 14px; background: var(--clr-bg-dark); border: 2px solid var(--clr-accent);
+    border-radius: 0; font-family: var(--font-body); font-size: 14px; color: var(--clr-ink-on-dark);
+    cursor: pointer; text-align: left; min-height: 44px;
+  }
+  .current .choice-cost { font-size: 12px; color: var(--clr-muted); letter-spacing: 0.02em; }
+  .current .overlay-card {
+    background: var(--clr-panel-bg); border: 2px solid var(--clr-accent); border-radius: 0;
+    box-shadow: none; max-width: 580px; width: 92%; max-height: 85%; overflow-y: auto; padding: 22px; position: relative;
+  }
+
+  /* OPTION A — Elevated Modern */
+  .optA .ctrl-btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    padding: 11px 26px; font-family: var(--font-heading); font-size: 14px; font-weight: 600;
+    letter-spacing: 0.05em; cursor: pointer; border-radius: 2px;
+    border: 1.5px solid var(--clr-accent); background: linear-gradient(180deg, rgba(200,168,26,0.18), rgba(200,168,26,0.08));
+    color: var(--clr-ink-on-dark); min-height: 46px; text-transform: uppercase;
+    box-shadow: 0 1px 0 rgba(255,255,255,0.04), 0 4px 12px rgba(0,0,0,0.35);
+    transition: transform 0.08s, background 0.2s, border-color 0.2s, box-shadow 0.2s;
+  }
+  .optA .ctrl-btn:hover {
+    background: linear-gradient(180deg, rgba(200,168,26,0.30), rgba(200,168,26,0.14));
+    border-color: #ddb52b;
+    box-shadow: 0 1px 0 rgba(255,255,255,0.06), 0 6px 18px rgba(0,0,0,0.45);
+    transform: translateY(-1px);
+  }
+  .optA .ctrl-btn:active { transform: translateY(0); box-shadow: 0 1px 0 rgba(255,255,255,0.03), 0 2px 6px rgba(0,0,0,0.35); }
+  .optA .choice-btn {
+    display: flex; flex-direction: column; gap: 3px; align-items: flex-start; width: 100%;
+    padding: 12px 16px; background: linear-gradient(180deg, rgba(45,36,26,0.9), rgba(30,24,18,0.9));
+    border: 1px solid rgba(200,168,26,0.45); border-radius: 2px;
+    font-family: var(--font-body); font-size: 14px; color: var(--clr-ink-on-dark);
+    cursor: pointer; text-align: left; min-height: 46px;
+    box-shadow: 0 1px 0 rgba(255,255,255,0.03), 0 3px 10px rgba(0,0,0,0.35);
+    transition: transform 0.08s, border-color 0.2s, box-shadow 0.2s, background 0.2s;
+  }
+  .optA .choice-btn:hover {
+    border-color: var(--clr-accent);
+    background: linear-gradient(180deg, rgba(55,44,30,0.95), rgba(38,30,22,0.95));
+    box-shadow: 0 1px 0 rgba(255,255,255,0.05), 0 6px 16px rgba(0,0,0,0.45);
+    transform: translateY(-1px);
+  }
+  .optA .choice-cost { font-size: 12px; color: #d4b94f; letter-spacing: 0.03em; line-height: 1.35; }
+  .optA .overlay-card {
+    background: linear-gradient(180deg, rgba(35,28,20,0.98), rgba(22,18,13,0.98));
+    border: 1px solid rgba(200,168,26,0.55); border-radius: 2px;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.55), 0 1px 0 rgba(255,255,255,0.04);
+    max-width: 580px; width: 92%; max-height: 85%; overflow-y: auto; padding: 24px; position: relative;
+  }
+  .optA .overlay-card::before {
+    content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 4px;
+    background: linear-gradient(180deg, var(--clr-accent), rgba(200,168,26,0.2));
+    border-top-left-radius: 2px; border-bottom-left-radius: 2px;
+  }
+  .optA h2 { font-family: var(--font-heading); font-size: 20px; color: var(--clr-ink-on-light); margin-bottom: 10px; }
+  .optA p { font-size: 14px; color: var(--clr-ink-on-dark); line-height: 1.65; }
+
+  /* OPTION B — Minimal Historical */
+  .optB .ctrl-btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    padding: 10px 24px; font-family: var(--font-heading); font-size: 14px; font-weight: 600;
+    letter-spacing: 0.06em; cursor: pointer; border-radius: 0;
+    border: 1px solid rgba(200,168,26,0.7); background: transparent; color: var(--clr-ink-on-dark);
+    min-height: 44px; text-transform: uppercase;
+    transition: background 0.2s, color 0.2s, border-color 0.2s;
+  }
+  .optB .ctrl-btn:hover { background: rgba(200,168,26,0.10); border-color: var(--clr-accent); color: var(--clr-accent); }
+  .optB .choice-btn {
+    display: flex; flex-direction: column; gap: 3px; align-items: flex-start; width: 100%;
+    padding: 14px 16px; background: transparent; border: 1px solid rgba(200,168,26,0.35);
+    border-radius: 0; font-family: var(--font-body); font-size: 14px; color: var(--clr-ink-on-dark);
+    cursor: pointer; text-align: left; min-height: 44px;
+    transition: background 0.2s, border-color 0.2s;
+  }
+  .optB .choice-btn:hover { background: rgba(200,168,26,0.06); border-color: var(--clr-accent); }
+  .optB .choice-cost { font-size: 12px; color: rgba(200,168,26,0.75); letter-spacing: 0.04em; line-height: 1.4; }
+  .optB .overlay-card {
+    background: rgba(18,15,11,0.97); border: 1px solid rgba(200,168,26,0.45); border-radius: 0;
+    box-shadow: 0 2px 20px rgba(0,0,0,0.4);
+    max-width: 580px; width: 92%; max-height: 85%; overflow-y: auto; padding: 22px; position: relative;
+  }
+  .optB .overlay-card::before {
+    content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: rgba(200,168,26,0.55);
+  }
+  .optB h2 { font-family: var(--font-heading); font-size: 20px; color: var(--clr-ink-on-light); margin-bottom: 10px; }
+  .optB p { font-size: 14px; color: var(--clr-ink-on-dark); line-height: 1.65; }
+
+  /* OPTION C — Bold Editorial */
+  .optC .ctrl-btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    padding: 12px 28px; font-family: var(--font-heading); font-size: 15px; font-weight: 700;
+    letter-spacing: 0.08em; cursor: pointer; border-radius: 0;
+    border: 2.5px solid var(--clr-accent); background: var(--clr-accent); color: var(--clr-bg);
+    min-height: 48px; text-transform: uppercase;
+    box-shadow: 0 2px 0 rgba(0,0,0,0.25);
+    transition: transform 0.06s, background 0.15s, box-shadow 0.15s;
+  }
+  .optC .ctrl-btn:hover { background: #ddb52b; box-shadow: 0 3px 0 rgba(0,0,0,0.25); transform: translateY(-1px); }
+  .optC .choice-btn {
+    display: flex; flex-direction: column; gap: 4px; align-items: flex-start; width: 100%;
+    padding: 14px 18px; background: var(--clr-bg-dark); border: 2px solid rgba(200,168,26,0.85);
+    border-radius: 0; font-family: var(--font-body); font-size: 15px; color: var(--clr-ink-on-dark);
+    cursor: pointer; text-align: left; min-height: 48px;
+    box-shadow: 0 2px 0 rgba(0,0,0,0.25);
+    transition: transform 0.06s, border-color 0.15s, box-shadow 0.15s, background 0.15s;
+  }
+  .optC .choice-btn:hover {
+    border-color: var(--clr-accent); background: rgba(200,168,26,0.10);
+    box-shadow: 0 3px 0 rgba(0,0,0,0.25); transform: translateY(-1px);
+  }
+  .optC .choice-cost { font-size: 13px; color: #e0c455; letter-spacing: 0.05em; line-height: 1.4; }
+  .optC .overlay-card {
+    background: var(--clr-panel-bg); border: 2.5px solid rgba(200,168,26,0.9); border-radius: 0;
+    box-shadow: 0 16px 48px rgba(0,0,0,0.6), 0 2px 0 rgba(255,255,255,0.03);
+    max-width: 580px; width: 92%; max-height: 85%; overflow-y: auto; padding: 26px; position: relative;
+  }
+  .optC .overlay-card::before {
+    content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 5px; background: var(--clr-accent);
+  }
+  .optC h2 { font-family: var(--font-heading); font-size: 22px; color: var(--clr-ink-on-light); margin-bottom: 12px; letter-spacing: 0.3px; }
+  .optC p { font-size: 15px; color: var(--clr-ink-on-dark); line-height: 1.7; }
+</style>
+</head>
+<body>
+  <h1>Metis Trail — UI Style Options</h1>
+  <div class="subtitle">Three directions for buttons, cards, and overlay treatment. Each keeps the existing palette.</div>
+
+  <div class="tabs">
+    <button class="tab active" onclick="show('current')">Current</button>
+    <button class="tab" onclick="show('optA')">Option A — Elevated Modern</button>
+    <button class="tab" onclick="show('optB')">Option B — Minimal Historical</button>
+    <button class="tab" onclick="show('optC')">Option C — Bold Editorial</button>
+  </div>
+
+  <!-- CURRENT -->
+  <div id="current" class="panel active">
+    <div class="col">
+      <div class="card current">
+        <div class="label">Controls</div>
+        <div class="row">
+          <button class="ctrl-btn">Travel West</button>
+          <button class="ctrl-btn" style="background:transparent;color:var(--clr-accent);">Make Camp</button>
+          <button class="ctrl-btn" disabled>Disabled</button>
+        </div>
+      </div>
+      <div class="card current">
+        <div class="label">Event Choice</div>
+        <button class="choice-btn">
+          <span>Search the cache</span>
+          <span class="choice-cost">Cost: check DC 8</span>
+        </button>
+      </div>
+      <div class="card current">
+        <div class="label">Overlay Card</div>
+        <div class="overlay-card">
+          <h2>Plains Abandoned Camp</h2>
+          <p>You pass a ring of stones where a campfire once burned…</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- OPTION A -->
+  <div id="optA" class="panel">
+    <div class="col">
+      <div class="card optA">
+        <div class="label">Controls</div>
+        <div class="row">
+          <button class="ctrl-btn">Travel West</button>
+          <button class="ctrl-btn" style="background:transparent;color:var(--clr-ink-on-dark);border-color:rgba(200,168,26,0.6);">Make Camp</button>
+          <button class="ctrl-btn" disabled>Disabled</button>
+        </div>
+      </div>
+      <div class="card optA">
+        <div class="label">Event Choice</div>
+        <button class="choice-btn">
+          <span>Search the cache</span>
+          <span class="choice-cost">Cost: check DC 8</span>
+        </button>
+      </div>
+      <div class="card optA">
+        <div class="label">Overlay Card</div>
+        <div class="overlay-card">
+          <h2>Plains Abandoned Camp</h2>
+          <p>You pass a ring of stones where a campfire once burned…</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- OPTION B -->
+  <div id="optB" class="panel">
+    <div class="col">
+      <div class="card optB">
+        <div class="label">Controls</div>
+        <div class="row">
+          <button class="ctrl-btn">Travel West</button>
+          <button class="ctrl-btn" style="background:transparent;color:var(--clr-ink-on-dark);border-color:rgba(200,168,26,0.6);">Make Camp</button>
+          <button class="ctrl-btn" disabled>Disabled</button>
+        </div>
+      </div>
+      <div class="card optB">
+        <div class="label">Event Choice</div>
+        <button class="choice-btn">
+          <span>Search the cache</span>
+          <span class="choice-cost">Cost: check DC 8</span>
+        </button>
+      </div>
+      <div class="card optB">
+        <div class="label">Overlay Card</div>
+        <div class="overlay-card">
+          <h2>Plains Abandoned Camp</h2>
+          <p>You pass a ring of stones where a campfire once burned…</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- OPTION C -->
+  <div id="optC" class="panel">
+    <div class="col">
+      <div class="card optC">
+        <div class="label">Controls</div>
+        <div class="row">
+          <button class="ctrl-btn">Travel West</button>
+          <button class="ctrl-btn" style="background:transparent;color:var(--clr-ink-on-dark);border-color:rgba(200,168,26,0.7);">Make Camp</button>
+          <button class="ctrl-btn" disabled>Disabled</button>
+        </div>
+      </div>
+      <div class="card optC">
+        <div class="label">Event Choice</div>
+        <button class="choice-btn">
+          <span>Search the cache</span>
+          <span class="choice-cost">Cost: check DC 8</span>
+        </button>
+      </div>
+      <div class="card optC">
+        <div class="label">Overlay Card</div>
+        <div class="overlay-card">
+          <h2>Plains Abandoned Camp</h2>
+          <p>You pass a ring of stones where a campfire once burned…</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <p style="color:var(--clr-muted);font-size:12px;margin-top:12px;">Open this file directly in a browser to compare. No server required.</p>
+
+  <script>
+    function show(id) {
+      document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+      event.target.classList.add('active');
+    }
+  </script>
+</body>
+</html>

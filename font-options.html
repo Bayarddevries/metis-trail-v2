@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Metis Trail — Font & Typography Options</title>
+<style>
+  :root {
+    --clr-bg: #1a1410;
+    --clr-ink-on-dark: #e8dcc8;
+    --clr-ink-on-light: #e8dcc8;
+    --clr-accent: #c8a81a;
+    --clr-bg-dark: #0f0c08;
+    --clr-panel-bg: #2d241a;
+    --clr-overlay-bg: rgba(20,18,14,0.95);
+    --clr-danger: #c85040;
+    --clr-success: #7aa85a;
+    --clr-warn: #e0c030;
+    --clr-muted: #8a7a60;
+    --clr-border: rgba(200,168,26,0.35);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: var(--font-body, 'IM Fell English', Georgia, serif);
+    color: var(--clr-ink-on-dark);
+    background: #0e0b08;
+    padding: 24px;
+    font-size: 16px;
+    line-height: 1.6;
+  }
+  h1 { font-family: var(--font-heading, 'IM Fell Double Pica', Georgia, serif); font-size: 32px; margin-bottom: 4px; color: var(--clr-accent); letter-spacing: 0.3px; }
+  .subtitle { font-size: 14px; color: var(--clr-muted); margin-bottom: 28px; font-style: italic; }
+
+  .tabs { display: flex; gap: 8px; margin-bottom: 24px; flex-wrap: wrap; }
+  .tab {
+    padding: 8px 16px;
+    background: transparent;
+    border: 1px solid var(--clr-accent);
+    color: var(--clr-accent);
+    font-family: var(--font-heading, 'IM Fell Double Pica', Georgia, serif);
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    cursor: pointer;
+  }
+  .tab.active { background: var(--clr-accent); color: var(--clr-bg); }
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  .section { margin-bottom: 32px; }
+  .section-title {
+    font-family: var(--font-heading, 'IM Fell Double Pica', Georgia, serif);
+    font-size: 14px;
+    color: var(--clr-accent);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 14px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--clr-border);
+  }
+
+  .preview-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 16px;
+  }
+  .preview-card {
+    background: var(--clr-panel-bg);
+    border: 1px solid var(--clr-border);
+    padding: 18px;
+  }
+  .preview-card h3 {
+    font-family: var(--font-heading, 'IM Fell Double Pica', Georgia, serif);
+    font-size: 12px;
+    color: var(--clr-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 12px;
+  }
+
+  .sample-text { color: var(--clr-ink-on-dark); margin-bottom: 10px; }
+  .sample-heading {
+    font-family: var(--font-heading, 'IM Fell Double Pica', Georgia, serif);
+    font-size: 24px;
+    color: var(--clr-ink-on-light);
+    margin-bottom: 8px;
+    line-height: 1.3;
+  }
+  .sample-body {
+    font-family: var(--font-body, 'IM Fell English', Georgia, serif);
+    font-size: 15px;
+    line-height: 1.7;
+    color: var(--clr-ink-on-dark);
+    margin-bottom: 8px;
+  }
+  .sample-italic {
+    font-style: italic;
+    color: var(--clr-muted);
+    font-size: 14px;
+  }
+
+  .btn-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+  .btn {
+    padding: 8px 16px;
+    font-family: var(--font-heading, 'IM Fell Double Pica', Georgia, serif);
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border: 1px solid var(--clr-accent);
+    background: var(--clr-accent);
+    color: var(--clr-bg);
+    cursor: pointer;
+  }
+  .btn.secondary {
+    background: transparent;
+    color: var(--clr-accent);
+  }
+
+  .pill {
+    display: inline-block;
+    padding: 4px 10px;
+    background: rgba(200,168,26,0.12);
+    border: 1px solid var(--clr-border);
+    font-family: var(--font-heading, 'IM Fell Double Pica', Georgia, serif);
+    font-size: 11px;
+    color: var(--clr-accent);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-right: 6px;
+    margin-bottom: 6px;
+  }
+
+  .comparison {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 16px;
+    margin-top: 14px;
+  }
+  .font-option {
+    background: rgba(0,0,0,0.2);
+    border: 1px solid var(--clr-border);
+    padding: 14px;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .font-option:hover { border-color: var(--clr-accent); background: rgba(200,168,26,0.06); }
+  .font-option.active { border-color: var(--clr-accent); background: rgba(200,168,26,0.10); }
+  .font-name {
+    font-family: Arial, sans-serif;
+    font-size: 12px;
+    color: var(--clr-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 8px;
+  }
+  .font-preview-heading {
+    font-size: 20px;
+    margin-bottom: 4px;
+    line-height: 1.3;
+  }
+  .font-preview-body {
+    font-size: 14px;
+    color: var(--clr-ink-on-dark);
+    line-height: 1.5;
+  }
+
+  .settings-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-bottom: 20px;
+    align-items: center;
+  }
+  .setting {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .setting label {
+    font-family: var(--font-heading, 'IM Fell Double Pica', Georgia, serif);
+    font-size: 11px;
+    color: var(--clr-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  .setting select, .setting input {
+    background: var(--clr-bg-dark);
+    border: 1px solid var(--clr-border);
+    color: var(--clr-ink-on-dark);
+    padding: 6px 10px;
+    font-family: var(--font-body, 'IM Fell English', Georgia, serif);
+    font-size: 13px;
+  }
+
+  .info-box {
+    background: rgba(200,168,26,0.06);
+    border: 1px solid var(--clr-border);
+    padding: 12px 14px;
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--clr-ink-on-dark);
+    margin-top: 12px;
+  }
+  .info-box strong { color: var(--clr-accent); font-family: var(--font-heading, 'IM Fell Double Pica', Georgia, serif); }
+
+  @media (max-width: 600px) {
+    body { padding: 16px; }
+    h1 { font-size: 24px; }
+    .preview-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+  <h1>Metis Trail — Font & Typography Options</h1>
+  <div class="subtitle">Preview typefaces across headings, body text, buttons, and overlay surfaces. Choose one set.</div>
+
+  <div class="settings-row">
+    <div class="setting">
+      <label>Heading Font</label>
+      <select id="headingSelect" onchange="updateAll()">
+        <option value="cormorant" selected>Cormorant Garamond</option>
+        <option value="playfair-libre">Playfair Display</option>
+        <option value="lora">Lora</option>
+        <option value="im-fell">IM Fell (legacy)</option>
+        <option value="georgia">Georgia</option>
+      </select>
+    </div>
+    <div class="setting">
+      <label>Body Font</label>
+      <select id="bodySelect" onchange="updateAll()">
+        <option value="lora" selected>Lora</option>
+        <option value="playfair-libre">Libre Baskerville</option>
+        <option value="cormorant">Cormorant Garamond</option>
+        <option value="im-fell">IM Fell (legacy)</option>
+        <option value="georgia">Georgia</option>
+      </select>
+    </div>
+    <div class="setting">
+      <label>Base Size</label>
+      <select id="sizeSelect" onchange="updateAll()">
+        <option value="14">14px</option>
+        <option value="15" selected>15px</option>
+        <option value="16">16px</option>
+        <option value="17">17px</option>
+      </select>
+    </div>
+    <div class="setting">
+      <label>Line Height</label>
+      <select id="leadingSelect" onchange="updateAll()">
+        <option value="1.55">1.55</option>
+        <option value="1.6" selected>1.60</option>
+        <option value="1.65">1.65</option>
+        <option value="1.7">1.70</option>
+        <option value="1.75">1.75</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" onclick="showTab('preview')">Live Preview</button>
+    <button class="tab" onclick="showTab('comparison')">Font Comparison</button>
+    <button class="tab" onclick="showTab('ui-elements')">UI Elements</button>
+    <button class="tab" onclick="showTab('notes')">Notes</button>
+  </div>
+
+  <!-- PREVIEW -->
+  <div id="preview" class="panel active">
+    <div class="section">
+      <div class="section-title">Headings & Body</div>
+      <div class="preview-grid">
+        <div class="preview-card">
+          <h3>Heading Level 1</h3>
+          <div class="sample-heading">The Red River Cart</div>
+          <div class="sample-body">The cart was the workhorse of the prairie. Built of wood and sinew, it carried families, furs, and freight across hundreds of miles of trackless plain.</div>
+          <div class="sample-italic">“The axle sang in the grass.”</div>
+        </div>
+        <div class="preview-card">
+          <h3>Heading Level 2</h3>
+          <div class="sample-heading" style="font-size: 20px;">Arrival at Fort Garry</div>
+          <div class="sample-body">You crest the last rise and see the fort walls outlined against the sky. Smoke rises from the blacksmith. The gate stands open.</div>
+        </div>
+        <div class="preview-card">
+          <h3>Event Journal Entry</h3>
+          <div class="sample-heading" style="font-size: 18px; color: var(--clr-accent);">Day 12 — Storm on the Plains</div>
+          <div class="sample-body">We took shelter in a grove of oak. The rain turned the trail to mud. One ox went lame. We lost half a day.</div>
+          <div class="sample-italic">Source: Norway House Journal, 1843</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Controls & Choices</div>
+      <div class="preview-grid">
+        <div class="preview-card">
+          <h3>Primary Controls</h3>
+          <div class="btn-row">
+            <button class="btn">Travel West</button>
+            <button class="btn secondary">Make Camp</button>
+          </div>
+        </div>
+        <div class="preview-card">
+          <h3>Event Choice</h3>
+          <div style="background: var(--clr-bg-dark); border: 2px solid var(--clr-accent); padding: 12px 14px; margin-top: 6px;">
+            <div style="font-family: var(--font-body); font-size: 15px; color: var(--clr-ink-on-dark); margin-bottom: 2px;"> ford the river at dusk </div>
+            <div style="font-size: 12px; color: var(--clr-muted);">Cost: check DC 9</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- COMPARISON -->
+  <div id="comparison" class="panel">
+    <div class="section">
+      <div class="section-title">Available Typefaces</div>
+      <div class="comparison" id="fontComparison"></div>
+    </div>
+  </div>
+
+  <!-- UI ELEMENTS -->
+  <div id="ui-elements" class="panel">
+    <div class="section">
+      <div class="section-title">Buttons & Pills</div>
+      <div class="preview-grid">
+        <div class="preview-card">
+          <h3>Primary Action</h3>
+          <div class="btn-row">
+            <button class="btn">Continue</button>
+          </div>
+        </div>
+        <div class="preview-card">
+          <h3>Secondary / Ghost</h3>
+          <div class="btn-row">
+            <button class="btn secondary">Read Source</button>
+            <button class="btn secondary" style="opacity: 0.7;">Later</button>
+          </div>
+        </div>
+        <div class="preview-card">
+          <h3>Status Pills</h3>
+          <div>
+            <span class="pill">Plains</span>
+            <span class="pill">Overloaded</span>
+            <span class="pill">Exhausted</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Overlay Sample</div>
+      <div class="preview-card">
+        <div style="background: var(--clr-panel-bg); border: 2px solid var(--clr-accent); padding: 18px; max-width: 520px;">
+          <div style="font-family: var(--font-heading); font-size: 20px; color: var(--clr-ink-on-light); margin-bottom: 10px; line-height: 1.3;">Abandoned Camp</div>
+          <div style="font-family: var(--font-body); font-size: 15px; line-height: 1.7; color: var(--clr-ink-on-dark); margin-bottom: 12px;">
+            You find the remnants of a camp. The fire has been cold for days, but there are tracks — fresh ones — leading west.
+          </div>
+          <div style="font-size: 12px; color: var(--clr-muted); font-style: italic; margin-bottom: 14px;">“No one leaves a good fire.” — trad.</div>
+          <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+            <button class="btn">Search</button>
+            <button class="btn secondary">Move On</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- NOTES -->
+  <div id="notes" class="panel">
+    <div class="info-box">
+      <strong>Implementation note:</strong> The game targets self-hosted web fonts in <code>src/fonts/</code> to avoid CDN dependency issues over Tailscale. If you choose a new font here, it must be added to the repo as local font files and loaded via <code>@font-face</code> in <code>src/template.html</code>.
+    </div>
+    <div class="info-box" style="margin-top: 10px;">
+      <strong>Google Fonts fallback:</strong> Playfair Display, Libre Baskerville, Lora, Cormorant Garamond, and Source Serif 4 are all available from Google Fonts and work well for historical-period UI. Georgia is a safe system-only fallback with no network dependency.
+    </div>
+  </div>
+
+  <script>
+    const FONTS = {
+    'cormorant': { heading: "'Cormorant Garamond', Georgia, serif", body: "'Lora', Georgia, serif", label: 'Recommended: Cormorant Garamond + Lora' },
+    'playfair-libre': { heading: "'Playfair Display', Georgia, serif", body: "'Libre Baskerville', Georgia, serif", label: 'Playfair Display + Libre Baskerville' },
+    'lora': { heading: "'Lora', Georgia, serif", body: "'Lora', Georgia, serif", label: 'Lora (single-family)' },
+    'im-fell': { heading: "'IM Fell Double Pica', Georgia, serif", body: "'IM Fell English', Georgia, serif", label: 'IM Fell (current)' },
+    'georgia': { heading: "Georgia, 'Times New Roman', serif", body: "Georgia, 'Times New Roman', serif", label: 'Georgia (system fallback)' }
+  };
+
+    function loadGoogleFont(key) {
+      const map = {
+        'cormorant': 'Cormorant+Garamond',
+        'playfair-libre': 'Playfair+Display,Libre+Baskerville',
+        'lora': 'Lora',
+        'im-fell': null,
+        'georgia': null
+      };
+      const family = map[key];
+      if (!family) return;
+      const existing = document.getElementById('gfont');
+      if (existing) existing.remove();
+      const link = document.createElement('link');
+      link.id = 'gfont';
+      link.rel = 'stylesheet';
+      link.href = 'https://fonts.googleapis.com/css2?family=' + family + '&display=swap';
+      document.head.appendChild(link);
+    }
+
+    function applyFont() {
+      const h = document.getElementById('headingSelect').value;
+      const b = document.getElementById('bodySelect').value;
+      const base = parseInt(document.getElementById('sizeSelect').value, 10);
+      const lead = document.getElementById('leadingSelect').value;
+
+      document.documentElement.style.setProperty('--font-heading', FONTS[h].heading);
+      document.documentElement.style.setProperty('--font-body', FONTS[b].body);
+      
+      // refresh sample typography
+      document.body.style.fontSize = base + 'px';
+      document.body.style.lineHeight = lead;
+    }
+
+    function updateAll() {
+      const h = document.getElementById('headingSelect').value;
+      const b = document.getElementById('bodySelect').value;
+      loadGoogleFont(h);
+      loadGoogleFont(b);
+      applyFont();
+    }
+
+    function showTab(id) {
+      document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+      event.target.classList.add('active');
+    }
+
+    function buildComparison() {
+      const container = document.getElementById('fontComparison');
+      container.innerHTML = '';
+      Object.entries(FONTS).forEach(([key, font]) => {
+        const div = document.createElement('div');
+        div.className = 'font-option';
+        div.innerHTML = `
+          <div class="font-name">${font.label}</div>
+          <div class="font-preview-heading" style="font-family: ${font.heading}">Heading sample</div>
+          <div class="font-preview-body" style="font-family: ${font.body}">Body sample: the prairie trail stretched on.</div>
+        `;
+        div.onclick = () => {
+          document.getElementById('headingSelect').value = key;
+          document.getElementById('bodySelect').value = key;
+          updateAll();
+          document.querySelectorAll('.font-option').forEach(x => x.classList.remove('active'));
+          div.classList.add('active');
+        };
+        container.appendChild(div);
+      });
+    }
+
+    updateAll();
+    buildComparison();
+  </script>
+</body>
+</html>

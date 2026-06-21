@@ -35,12 +35,20 @@ export async function build() {
   // Copy self-hosted fonts to dist/fonts/
   await fs.mkdir(path.join(outDir, 'fonts'), { recursive: true });
   await fs.copyFile(
-    path.join(cwd, 'src', 'fonts', 'IM-Fell-Double-Pica.ttf'),
-    path.join(outDir, 'fonts', 'IM-Fell-Double-Pica.ttf')
+    path.join(cwd, 'src', 'fonts', 'CormorantGaramond-Variable.ttf'),
+    path.join(outDir, 'fonts', 'CormorantGaramond-Variable.ttf')
   );
   await fs.copyFile(
-    path.join(cwd, 'src', 'fonts', 'IM-Fell-English.ttf'),
-    path.join(outDir, 'fonts', 'IM-Fell-English.ttf')
+    path.join(cwd, 'src', 'fonts', 'CormorantGaramond-Italic-Variable.ttf'),
+    path.join(outDir, 'fonts', 'CormorantGaramond-Italic-Variable.ttf')
+  );
+  await fs.copyFile(
+    path.join(cwd, 'src', 'fonts', 'Lora-Variable.ttf'),
+    path.join(outDir, 'fonts', 'Lora-Variable.ttf')
+  );
+  await fs.copyFile(
+    path.join(cwd, 'src', 'fonts', 'Lora-Italic-Variable.ttf'),
+    path.join(outDir, 'fonts', 'Lora-Italic-Variable.ttf')
   );
 
   const result = await esbuild.build({

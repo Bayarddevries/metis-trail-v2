@@ -9,42 +9,52 @@
 <style>
   /* critical fallbacks — applied before theme.js loads */
   :root {
-    --clr-bg: #1a1410;
-    --clr-ink-on-dark: #e8dcc8;
-    --clr-ink-on-light: #e8dcc8;
-    --clr-accent: #c8a81a;
-    --clr-bg-dark: #0f0c08;
-    --clr-panel-bg: #2d241a;
-    --clr-ink-panel: #e8dcc8;
-    --clr-overlay-bg: rgba(20,18,14,0.95);
-    --clr-danger: #c85040;
-    --clr-success: #7aa85a;
-    --clr-warn: #e0c030;
-    --clr-muted: #8a7a60;
-    --font-heading: 'IM Fell Double Pica', Georgia, 'Times New Roman', serif;
-    --font-body: 'IM Fell English', Georgia, 'Times New Roman', serif;
-    --font-italic: 'IM Fell English', Georgia, 'Times New Roman', serif;
+    --clr-bg: #efe6d3;
+    --clr-ink-on-dark: #1f1811;
+    --clr-ink-on-light: #1f1811;
+    --clr-accent: #4a6b4a;
+    --clr-accent-alt: #6b4c7a;
+    --clr-bg-dark: #2d241a;
+    --clr-panel-bg: #e3d8b8;
+    --clr-panel-bg-2: #ddd0aa;
+    --clr-overlay-bg: rgba(31,24,17,0.95);
+    --clr-danger: #8a3324;
+    --clr-success: #4a6b4a;
+    --clr-warn: #9a7b2e;
+    --clr-muted: #6b5d48;
+    --clr-border: rgba(107,76,122,0.28);
+    --clr-border-2: rgba(74,107,74,0.35);
+    --font-heading: 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
+    --font-body: 'Lora', Georgia, 'Times New Roman', serif;
+    --font-italic: 'Lora', Georgia, 'Times New Roman', serif;
   }
 
-  /* Self-hosted IM Fell fonts — regular + italic */
+  /* Self-hosted fonts — Cormorant Garamond + Lora (variable) */
   @font-face {
-    font-family: 'IM Fell Double Pica';
-    src: url('fonts/IM-Fell-Double-Pica.ttf') format('truetype');
-    font-weight: 400;
+    font-family: 'Cormorant Garamond';
+    src: url('fonts/CormorantGaramond-Variable.ttf') format('truetype');
+    font-weight: 300 700;
     font-style: normal;
     font-display: swap;
   }
   @font-face {
-    font-family: 'IM Fell English';
-    src: url('fonts/IM-Fell-English-Regular.ttf') format('truetype');
-    font-weight: 400;
+    font-family: 'Cormorant Garamond';
+    src: url('fonts/CormorantGaramond-Italic-Variable.ttf') format('truetype');
+    font-weight: 300 700;
+    font-style: italic;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: 'Lora';
+    src: url('fonts/Lora-Variable.ttf') format('truetype');
+    font-weight: 400 700;
     font-style: normal;
     font-display: swap;
   }
   @font-face {
-    font-family: 'IM Fell English';
-    src: url('fonts/IM-Fell-English.ttf') format('truetype');
-    font-weight: 400;
+    font-family: 'Lora';
+    src: url('fonts/Lora-Italic-Variable.ttf') format('truetype');
+    font-weight: 400 700;
     font-style: italic;
     font-display: swap;
   }

@@ -271,9 +271,21 @@ export function createGame(seed = null) {
         result.effects.push(`-1 ${ch.consumesItem}`);
       }
     }
+
     if (ch.extraProgress) {
       S.segmentDay += ch.extraProgress;
       result.effects.push(`+${ch.extraProgress} progress`);
+    }
+
+    // badGive: alternative give on failure
+    if (result.success === false && ch.badGive) {
+      ch.badGive.forEach((g) => {
+        const item = cart.find((i) => i.name === g.name);
+        if (item) {
+          item.count += g.amt;
+          result.effects.push(`${g.amt >= 0 ? '+' : ''}${g.amt} ${g.name}`);
+        }
+      });
     }
 
     if (ch.setsFlag) {
@@ -630,11 +642,12 @@ export function createGame(seed = null) {
       const idx = cart.findIndex((i) => i.name === itemName);
       if (idx === -1 || cart[idx].count <= 0) return null;
       cart[idx].count--;
-      const est = this.getTradeEstimate(itemName);
-      const foodGain = Math.floor(rand() * (est.max - est.min + 1)) + est.min;
-      S.food += foodGain;
+      const item = cart[idx];
+      const est = this.getTradeEstimate(itemName, 1, S.pendingSettlement?.type || item?.category || 'hbc');
+      if (!est) return null;
+      S.food += est.sellPrice;
       S.tradesMade++;
-      return { item: itemName, foodGain };
+      return { item: itemName, foodGain: est.sellPrice };
     },
 
     // ── NEW Engine API for Sprint 3 ───────────────────────────────────

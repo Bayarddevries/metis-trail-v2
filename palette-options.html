@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Metis Trail — Palette Options</title>
+<style>
+  :root {
+    --clr-bg: #1a1410;
+    --clr-ink-on-dark: #e8dcc8;
+    --clr-ink-on-light: #e8dcc8;
+    --clr-accent: #c8a81a;
+    --clr-bg-dark: #0f0c08;
+    --clr-panel-bg: #2d241a;
+    --clr-overlay-bg: rgba(20,18,14,0.95);
+    --clr-danger: #c85040;
+    --clr-success: #7aa85a;
+    --clr-warn: #e0c030;
+    --clr-muted: #8a7a60;
+    --clr-border: rgba(200,168,26,0.35);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'IM Fell English', Georgia, serif;
+    color: var(--clr-ink-on-dark);
+    background: #0e0b08;
+    padding: 24px;
+    font-size: 15px;
+    line-height: 1.6;
+  }
+  h1 { font-family: 'IM Fell Double Pica', Georgia, serif; font-size: 28px; margin-bottom: 4px; color: var(--clr-accent); }
+  .sub { font-size: 13px; color: var(--clr-muted); margin-bottom: 24px; font-style: italic; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; }
+  .swatch { padding: 16px; border: 1px solid rgba(255,255,255,0.08); }
+  .swatch h2 { font-family: 'IM Fell Double Pica', Georgia, serif; font-size: 14px; color: var(--clr-accent); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.08em; }
+  .row { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; align-items: center; }
+  .chip { width: 28px; height: 28px; border: 1px solid rgba(255,255,255,0.15); display: inline-block; }
+  .label { font-size: 11px; color: rgba(255,255,255,0.6); margin-top: 4px; font-family: monospace; }
+  .sample {
+    margin-top: 12px; padding: 12px; border: 1px solid rgba(255,255,255,0.1);
+  }
+  .sample h3 { font-family: 'IM Fell Double Pica', Georgia, serif; font-size: 16px; margin-bottom: 4px; }
+  .sample p { font-size: 13px; line-height: 1.6; margin-bottom: 8px; }
+  .btn { padding: 6px 12px; font-family: 'IM Fell Double Pica', Georgia, serif; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; border: 1px solid; cursor: pointer; }
+  .pill { display: inline-block; padding: 3px 8px; font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em; border: 1px solid; margin-right: 4px; }
+
+  /* 1 Current */
+  .palette-1 { background: #1a1410; color: #e8dcc8; }
+  .palette-1 .chip-bg { background: #1a1410; }
+  .palette-1 .chip-ink { background: #e8dcc8; }
+  .palette-1 .chip-accent { background: #c8a81a; }
+  .palette-1 .chip-panel { background: #2d241a; }
+  .palette-1 .chip-muted { background: #8a7a60; }
+  .palette-1 .chip-border { background: rgba(200,168,26,0.35); }
+  .palette-1 .sample { background: #2d241a; border-color: rgba(200,168,26,0.45); }
+  .palette-1 .btn { background: #c8a81a; color: #0f0c08; border-color: #c8a81a; }
+  .palette-1 .pill { background: rgba(200,168,26,0.12); color: #c8a81a; border-color: rgba(200,168,26,0.35); }
+
+  /* 2 Ink on Rag Paper */
+  .palette-2 { background: #f1ebd8; color: #1f1811; }
+  .palette-2 .chip-bg { background: #f1ebd8; }
+  .palette-2 .chip-ink { background: #1f1811; }
+  .palette-2 .chip-accent { background: #8a3324; }
+  .palette-2 .chip-panel { background: #e3d8b8; }
+  .palette-2 .chip-muted { background: #6b5d48; }
+  .palette-2 .chip-border { background: rgba(138,51,36,0.35); }
+  .palette-2 .sample { background: #e3d8b8; border-color: rgba(138,51,36,0.35); }
+  .palette-2 h2 { color: #8a3324; }
+  .palette-2 .btn { background: #8a3324; color: #f1ebd8; border-color: #8a3324; }
+  .palette-2 .pill { background: rgba(138,51,36,0.10); color: #6e2a1e; border-color: rgba(138,51,36,0.35); }
+
+  /* 3 Military Dispatch */
+  .palette-3 { background: #1d2328; color: #e5dece; }
+  .palette-3 .chip-bg { background: #1d2328; }
+  .palette-3 .chip-ink { background: #e5dece; }
+  .palette-3 .chip-accent { background: #b24a33; }
+  .palette-3 .chip-panel { background: #252d34; }
+  .palette-3 .chip-muted { background: #8a8a82; }
+  .palette-3 .chip-border { background: rgba(178,74,51,0.40); }
+  .palette-3 .sample { background: #252d34; border-color: rgba(178,74,51,0.45); }
+  .palette-3 h2 { color: #b24a33; }
+  .palette-3 .btn { background: #b24a33; color: #f1ebd8; border-color: #b24a33; }
+  .palette-3 .pill { background: rgba(178,74,51,0.12); color: #d48874; border-color: rgba(178,74,51,0.45); }
+
+  /* 4 HBC Trade Ledger */
+  .palette-4 { background: #16201b; color: #e1d5b8; }
+  .palette-4 .chip-bg { background: #16201b; }
+  .palette-4 .chip-ink { background: #e1d5b8; }
+  .palette-4 .chip-accent { background: #c8a81a; }
+  .palette-4 .chip-panel { background: #1f2c26; }
+  .palette-4 .chip-muted { background: #7a7560; }
+  .palette-4 .chip-border { background: rgba(200,168,26,0.35); }
+  .palette-4 .sample { background: #1f2c26; border-color: rgba(200,168,26,0.35); }
+  .palette-4 .btn { background: #c8a81a; color: #0f1a14; border-color: #c8a81a; }
+  .palette-4 .pill { background: rgba(200,168,26,0.10); color: #c8a81a; border-color: rgba(200,168,26,0.35); }
+
+  /* 5 Mission Print */
+  .palette-5 { background: #e7e0d0; color: #1e1812; }
+  .palette-5 .chip-bg { background: #e7e0d0; }
+  .palette-5 .chip-ink { background: #1e1812; }
+  .palette-5 .chip-accent { background: #3a4f6b; }
+  .palette-5 .chip-panel { background: #dcd3be; }
+  .palette-5 .chip-muted { background: #6b6050; }
+  .palette-5 .chip-border { background: rgba(58,79,107,0.35); }
+  .palette-5 .sample { background: #dcd3be; border-color: rgba(58,79,107,0.35); }
+  .palette-5 h2 { color: #3a4f6b; }
+  .palette-5 .btn { background: #3a4f6b; color: #e7e0d0; border-color: #3a4f6b; }
+  .palette-5 .pill { background: rgba(58,79,107,0.10); color: #2d3a4d; border-color: rgba(58,79,107,0.35); }
+
+  .palette-name { font-family: 'IM Fell Double Pica', Georgia, serif; font-size: 15px; margin-bottom: 4px; }
+  .palette-desc { font-size: 12px; color: var(--clr-muted); margin-bottom: 10px; font-style: italic; }
+  @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+  <h1>Metis Trail — Palette Options</h1>
+  <div class="sub">Five registers. Each keeps Cormorant Garamond + Lora in mind for readability.</div>
+
+  <div class="grid">
+    <div class="swatch palette-1">
+      <h2>1 — Brass on Cured Leather (current)</h2>
+      <div class="palette-name">Warm frontier register</div>
+      <div class="palette-desc">Best for atmosphere and period warmth.</div>
+      <div class="row"><span class="chip chip-bg"></span><span class="chip chip-ink"></span><span class="chip chip-accent"></span><span class="chip chip-panel"></span><span class="chip chip-muted"></span><span class="chip chip-border"></span></div>
+      <div class="label">bg #1a1410 · ink #e8dcc8 · accent #c8a81a · panel #2d241a · muted #8a7a60</div>
+      <div class="sample">
+        <h3>Abandoned Camp</h3>
+        <p>You pass a ring of stones where a campfire once burned...</p>
+        <div class="row"><button class="btn">Search</button><button class="btn" style="background:transparent;color:#c8a81a;border-color:rgba(200,168,26,0.5);">Move On</button></div>
+        <div style="margin-top:6px;"><span class="pill">Plains</span><span class="pill">Overloaded</span></div>
+      </div>
+    </div>
+
+    <div class="swatch palette-2">
+      <h2>2 — Ink on Rag Paper</h2>
+      <div class="palette-name">Ledger & journal register</div>
+      <div class="palette-desc">Strongest readability for long reading sessions.</div>
+      <div class="row"><span class="chip chip-bg"></span><span class="chip chip-ink"></span><span class="chip chip-accent"></span><span class="chip chip-panel"></span><span class="chip chip-muted"></span><span class="chip chip-border"></span></div>
+      <div class="label">bg #f1ebd8 · ink #1f1811 · accent #8a3324 · panel #e3d8b8 · muted #6b5d48</div>
+      <div class="sample">
+        <h3>Abandoned Camp</h3>
+        <p>You pass a ring of stones where a campfire once burned...</p>
+        <div class="row"><button class="btn">Search</button><button class="btn" style="background:transparent;color:#8a3324;border-color:rgba(138,51,36,0.5);">Move On</button></div>
+        <div style="margin-top:6px;"><span class="pill">Plains</span><span class="pill">Overloaded</span></div>
+      </div>
+    </div>
+
+    <div class="swatch palette-3">
+      <h2>3 — Military Dispatch</h2>
+      <div class="palette-name">Official/urgent register</div>
+      <div class="palette-desc">Clear contrast, less romantic, more functional.</div>
+      <div class="row"><span class="chip chip-bg"></span><span class="chip chip-ink"></span><span class="chip chip-accent"></span><span class="chip chip-panel"></span><span class="chip chip-muted"></span><span class="chip chip-border"></span></div>
+      <div class="label">bg #1d2328 · ink #e5dece · accent #b24a33 · panel #252d34 · muted #8a8a82</div>
+      <div class="sample">
+        <h3>Abandoned Camp</h3>
+        <p>You pass a ring of stones where a campfire once burned...</p>
+        <div class="row"><button class="btn">Search</button><button class="btn" style="background:transparent;color:#b24a33;border-color:rgba(178,74,51,0.5);">Move On</button></div>
+        <div style="margin-top:6px;"><span class="pill">Plains</span><span class="pill">Overloaded</span></div>
+      </div>
+    </div>
+
+    <div class="swatch palette-4">
+      <h2>4 — HBC Trade Ledger</h2>
+      <div class="palette-name">Institutional/trade register</div>
+      <div class="palette-desc">Green-black ground feels more corporate than frontier.</div>
+      <div class="row"><span class="chip chip-bg"></span><span class="chip chip-ink"></span><span class="chip chip-accent"></span><span class="chip chip-panel"></span><span class="chip chip-muted"></span><span class="chip chip-border"></span></div>
+      <div class="label">bg #16201b · ink #e1d5b8 · accent #c8a81a · panel #1f2c26 · muted #7a7560</div>
+      <div class="sample">
+        <h3>Abandoned Camp</h3>
+        <p>You pass a ring of stones where a campfire once burned...</p>
+        <div class="row"><button class="btn">Search</button><button class="btn" style="background:transparent;color:#c8a81a;border-color:rgba(200,168,26,0.5);">Move On</button></div>
+        <div style="margin-top:6px;"><span class="pill">Plains</span><span class="pill">Overloaded</span></div>
+      </div>
+    </div>
+
+    <div class="swatch palette-5">
+      <h2>5 — Mission Print</h2>
+      <div class="palette-name">Quiet, bookish, editorial</div>
+      <div class="palette-desc">Cleaner, less frontier, more printed-page.</div>
+      <div class="row"><span class="chip chip-bg"></span><span class="chip chip-ink"></span><span class="chip chip-accent"></span><span class="chip chip-panel"></span><span class="chip chip-muted"></span><span class="chip chip-border"></span></div>
+      <div class="label">bg #e7e0d0 · ink #1e1812 · accent #3a4f6b · panel #dcd3be · muted #6b6050</div>
+      <div class="sample">
+        <h3>Abandoned Camp</h3>
+        <p>You pass a ring of stones where a campfire once burned...</p>
+        <div class="row"><button class="btn">Search</button><button class="btn" style="background:transparent;color:#3a4f6b;border-color:rgba(58,79,107,0.5);">Move On</button></div>
+        <div style="margin-top:6px;"><span class="pill">Plains</span><span class="pill">Overloaded</span></div>
+      </div>
+    </div>
+  </div>
+
+  <p style="color:var(--clr-muted);font-size:12px;margin-top:12px;">Open directly to compare. No server required.</p>
+</body>
+</html>
