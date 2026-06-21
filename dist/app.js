@@ -1267,7 +1267,7 @@ var EVENT_POOLS = {
           text: "Your squealing cart draws a mounted rider from a nearby coul\xE9e.",
           choices: [
             { text: "Stand your ground", dc: 10, ok: "He is a M\xE9tis trader simply curious.", bad: "He is a rough type; you hand over a small toll.", food: -2, addsRep: { key: "metis", delta: -1 } },
-            { text: "Offer a quiet trade", dc: 9, ok: "He tips his hat and moves on.", bad: "He senses weakness and haggles hard.", food: -1 }
+            { text: "Offer a quiet trade", dc: 9, ok: "He tips his hat and moves on.", bad: "He senses weakness and haggles hard.", food: -1, okFood: 0, badFood: -1 }
           ]
         } },
         { text: "Ignore the noise", dc: null, always: "The day's miles do not lessen the complaint. The axle groans louder with every league.", alwaysWear: 2 }
@@ -1287,8 +1287,8 @@ var EVENT_POOLS = {
       text: "Smoke on the horizon, thick and brown against the blue sky. Then the wind shifts and the smell hits you \u2014 dry grass, pine, and the acrid bite of a prairie fire racing toward you. The dry grass crackles at its edge, and the wall of flame moves faster than a man can run.",
       source: getSource("LACOMBE_FIRE"),
       choices: [
-        { text: "Ride for the river bottom", dc: 14, ok: "The fire edge passes. You lose only an afternoon's travel.", bad: "The wind shifts. You lose supplies and the cart is singed.", food: -3, wear: 1, morale: -12, time: 1, okTime: 1 },
-        { text: "Light a backfire and wait it out", dc: 11, ok: "A practised escape. The backfire draws the main blaze away from your position.", bad: "The flames jump. Your cart is spared but the oxen panic.", morale: -8, time: 1 }
+        { text: "Ride for the river bottom", dc: 14, ok: "The fire edge passes. You lose only an afternoon's travel.", bad: "The wind shifts. You lose supplies and the cart is singed.", food: -3, okFood: -1, badFood: -3, wear: 1, morale: -12, okMorale: -4, badMorale: -12, time: 1, okTime: 1 },
+        { text: "Light a backfire and wait it out", dc: 11, ok: "A practised escape. The backfire draws the main blaze away from your position.", bad: "The flames jump. Your cart is spared but the oxen panic.", morale: -8, okMorale: -4, badMorale: -8, time: 1 }
       ]
     },
     {
@@ -1305,7 +1305,7 @@ var EVENT_POOLS = {
       text: "The prairie here has been burnt black \u2014 no grass, no water, and the sun is relentless. The ground is ash underfoot, and the air shimmers with heat. Bichon, the patient ox, would do his best and, failing, would lie down in the one. You must decide whether to push through or find a way around.",
       source: getSource("SCHULTZ_BURNT"),
       choices: [
-        { text: "Push through to the next water", dc: 12, ok: "You make the crossing with grit.", bad: "The oxen lag. You are forced to camp on burnt ground.", food: -2, crew: "tired" },
+        { text: "Push through to the next water", dc: 12, ok: "You make the crossing with grit.", bad: "The oxen lag. You are forced to camp on burnt ground.", food: -2, okFood: 0, badFood: -2, crew: "tired" },
         { text: "Detour to a shaded coulee", dc: null, always: "A slower, safer day. Grass and water restore the animals.", time: 1 }
       ]
     },
@@ -1314,7 +1314,7 @@ var EVENT_POOLS = {
       text: "The ground turns treacherous \u2014 old stumps hidden in tall grass, narrow coulees cutting across the path without warning. Many a worn-out axle and broken wheel attest the power of these stumps and coulees. The cart lurches and groans with every hidden obstacle.",
       source: getSource("SCHULTZ_STUMPS"),
       choices: [
-        { text: "Hug the ridge line to avoid low ground", dc: 11, ok: "Clear ground saves the cart.", bad: "A hidden stump catches the wheel hub.", wear: 1, morale: -4 },
+        { text: "Hug the ridge line to avoid low ground", dc: 11, ok: "Clear ground saves the cart.", bad: "A hidden stump catches the wheel hub.", wear: 1, morale: -4, okMorale: -2, badMorale: -6 },
         { text: "Take the direct trail", dc: null, always: "The going is rough but quick.", alwaysWear: 0 }
       ]
     },
@@ -1333,7 +1333,7 @@ var EVENT_POOLS = {
       text: "A sickening crack \u2014 the right axle shears against a hidden stone half-buried in yesterday's washout. The cart lurches and the load shifts. You are miles from the nearest post, and the tools for a proper repair are back at the settlement. A jury-rig will have to hold.",
       source: getSource("SCHULTZ_STUMPS"),
       choices: [
-        { text: "Set a splice with rope and wedges", dc: 11, ok: "A jury-rig holds. Progress is slow, but the cart is rolling again.", bad: "The splice splits by noon.", wear: 1, time: 1, morale: -4 },
+        { text: "Set a splice with rope and wedges", dc: 11, ok: "A jury-rig holds. Progress is slow, but the cart is rolling again.", bad: "The splice splits by noon.", wear: 1, time: 1, morale: -4, okMorale: -2, badMorale: -6 },
         { text: "Cache the load and press on light", dc: null, always: "You bury the crated freight and mark the spot. The cart is light, but you return poorer.", time: -1, food: -4 }
       ]
     },
@@ -1391,7 +1391,7 @@ var EVENT_POOLS = {
       source: getSource("LACOMBE_STORM"),
       choices: [
         { text: "Hobble the oxen and huddle under the cart", dc: null, always: "The storm passes in twenty minutes. Everyone is soaked but alive.", morale: -4 },
-        { text: "Push for the nearest coulee", dc: 11, ok: "Lower ground offers shelter from the wind and lightning.", bad: "A lightning-struck tree falls nearby.", wear: 1, morale: -6 }
+        { text: "Push for the nearest coulee", dc: 11, ok: "Lower ground offers shelter from the wind and lightning.", bad: "A lightning-struck tree falls nearby.", wear: 1, morale: -6, okMorale: -2, badMorale: -8 }
       ]
     },
     {
@@ -1401,7 +1401,7 @@ var EVENT_POOLS = {
       source: getSource("LACOMBE_WIND"),
       choices: [
         { text: "Lower the cart bed and wait it out", dc: null, always: "You crouch behind the cart and wait. The wind lasts hours. When it passes, the prairie is scarred with dust devils.", time: 1 },
-        { text: "Strap down the load and push into the wind", dc: 10, ok: "The oxen groan but move forward.", bad: "A gust catches the canvas. Supplies scatter.", food: -3, wear: 1 }
+        { text: "Strap down the load and push into the wind", dc: 10, ok: "The oxen groan but move forward.", bad: "A gust catches the canvas. Supplies scatter.", food: -3, okFood: -1, badFood: -3, wear: 1 }
       ]
     },
     {
@@ -1471,7 +1471,7 @@ var EVENT_POOLS = {
       choices: [
         { text: "Ford carefully", dc: 13, ok: "The ox keeps footing and you stay dry enough.", bad: "The cart tilts in the current. Repairs are needed after crossing.", wear: 1, itemBonus: { name: "Canvas Tarp", dcBonus: 2 }, requiresItem: "Rope (50ft)" },
         { text: "Wait for afternoon", dc: null, always: "You camp and cross later when the water drops.", time: 1 },
-        { text: "Scout for the horse-shoe ford upstream", dc: 11, ok: "You find the concealed path and cross safely.", bad: "The scouting costs precious daylight and energy.", morale: -4, time: 1 }
+        { text: "Scout for the horse-shoe ford upstream", dc: 11, ok: "You find the concealed path and cross safely.", bad: "The scouting costs precious daylight and energy.", morale: -4, okMorale: -2, badMorale: -6, time: 1 }
       ]
     },
     {
@@ -1513,7 +1513,7 @@ var EVENT_POOLS = {
       text: "One of your crew wakes shaking. By noon they can't stand. The river water \u2014 you knew better, but the casks were low. The trail's seen this before. It doesn't get easier.",
       source: getSource("HBC_DISEASE"),
       choices: [
-        { text: "Use the medicine pouch and rest the day", dc: 14, ok: "The crisis passes. One day lost, but the crew recovers.", bad: "The fever breaks but the crew is weak for days.", crew: "tired", morale: -8, consumesItem: "Medicine Pouch", time: 1 },
+        { text: "Use the medicine pouch and rest the day", dc: 14, ok: "The crisis passes. One day lost, but the crew recovers.", bad: "The fever breaks but the crew is weak for days.", crew: "tired", morale: -8, okMorale: -4, badMorale: -8, consumesItem: "Medicine Pouch", time: 1 },
         { text: "Push through without rest", dc: null, always: "The worst passes but the toll is steep.", morale: -20, crew: "exhausted" }
       ]
     },
@@ -1524,22 +1524,6 @@ var EVENT_POOLS = {
       choices: [
         { text: "Move camp to high ground before dark", dc: 9, ok: "The move is miserable but the night is quieter.", bad: "A wheel is twisted in the dark.", wear: 1, okMorale: 3, okTime: -1 },
         { text: "Use canvas tarps and tough it out", dc: 11, ok: "You hunker down. Morning comes.", bad: "The insects are relentless. Morale falls hard.", morale: -10, itemBonus: { name: "Canvas Tarp", dcBonus: 4 } }
-      ]
-    },
-    {
-      id: "river_cart_raft",
-      text: "The crossing here is too deep to ford. You eye the spare hides in the cart \u2014 enough to build a raft, if you know how. Four cart wheels were taken and placed dish upwards on the surface of the water. The boat was launched, and floated like a duck.",
-      source: getSource("FONSECA_RAFT"),
-      choices: [
-        { text: "Build a cart-raft with 2 bison hides", dc: 12, ok: "The improvised ferry floats. The crew swims the line across.", bad: "One hide splits mid-river; cargo gets wet.", morale: -6, food: -2, setsFlag: "built_rafts", requiresItem: { name: "Bison Hide", count: 2 }, branch: {
-          id: "river_raft_wash",
-          text: "On the far bank, an elder watches your landing and nods slowly.",
-          choices: [
-            { text: "Greet him respectfully", dc: 10, ok: "He shares drying hides and directions for the next leg.", bad: "He is suspicious and leaves without speaking.", addsRep: { key: "cree", delta: -1 }, morale: -4 },
-            { text: "Get moving without conversation", dc: null, always: "Pragmatic. The crossing cost enough time.", alwaysWear: 0 }
-          ]
-        } },
-        { text: "Ford the cart carefully", dc: 13, ok: "The ox swims straight and true; the bed stays high.", bad: "The current turns the cart. Wet freight and one damaged wheel.", wear: 2, food: -2 }
       ]
     },
     {
@@ -1556,7 +1540,7 @@ var EVENT_POOLS = {
       text: "The spring flood has turned the river into a brown, churning torrent. Debris spins in the current \u2014 branches, logs, the remains of last year's ice. The ford is barely visible, marked by two willow sticks driven into the bank. The oxen smell the water and balk.",
       source: getSource("FONSECA_FORD"),
       choices: [
-        { text: "Ford now while you can see the markers", dc: 14, ok: "The oxen find their footing. The cart tilts but holds. You reach the far bank soaked but whole.", bad: "A submerged log catches the axle. The cart spins in the current.", wear: 2, food: -2, okMorale: 4, okWear: -1 },
+        { text: "Ford now while you can see the markers", dc: 14, ok: "The oxen find their footing. The cart tilts but holds. You reach the far bank soaked but whole.", bad: "A submerged log catches the axle. The cart spins in the current.", wear: 2, food: -2, okFood: 0, badFood: -2, okMorale: 4, okWear: -1 },
         { text: "Wait for the water to drop", dc: null, always: "You camp on the high bank and wait. The river drops by morning.", time: 1 },
         { text: "Build a cart-raft with 2 Bison Hides", dc: 12, ok: "The improvised ferry floats. The crew swims the line across.", bad: "One hide splits mid-river. Cargo gets wet.", morale: -6, food: -2, requiresItem: { name: "Bison Hide", count: 2 } }
       ]
@@ -1598,7 +1582,7 @@ var EVENT_POOLS = {
       source: getSource("FONSECA_RAIN"),
       choices: [
         { text: "Wait for the water to drop", dc: null, always: "You camp on high ground. By morning the river has dropped enough to cross.", time: 1 },
-        { text: "Push through while you can", dc: 13, ok: "The oxen find footing. The cart tilts but holds.", bad: "A submerged log catches the axle.", wear: 2, food: -2, okMorale: 3, okWear: -1 }
+        { text: "Push through while you can", dc: 13, ok: "The oxen find footing. The cart tilts but holds.", bad: "A submerged log catches the axle.", wear: 2, food: -2, okFood: 0, badFood: -2, okMorale: 3, okWear: -1 }
       ]
     },
     {
@@ -1616,7 +1600,7 @@ var EVENT_POOLS = {
       text: "The river is swollen from three days of rain upstream \u2014 brown, churning, impassable as a ford. But the brigade has done this before. Women and older children help dismantle the five-foot wheels, lashing them dish-up beneath the cart box. Buffalo hides are soaked and stretched over the frame. In an hour, the cart floats. The oxen will swim. The freight, the women, and the children ride the raft across while you guide the line from the bow.",
       source: getSource("IPAC_RAFT"),
       choices: [
-        { text: "Help with the raft", dc: 11, ok: "The improvised ferry holds. You reach the far bank soaked but whole.", bad: "A hide splits mid-river. Cargo gets wet and one food sack is lost.", food: -2, morale: -4 },
+        { text: "Help with the raft", dc: 11, ok: "The improvised ferry holds. You reach the far bank soaked but whole.", bad: "A hide splits mid-river. Cargo gets wet and one food sack is lost.", food: -2, okFood: 0, badFood: -2, morale: -4, okMorale: -2, badMorale: -6 },
         { text: "Wait for the water to drop", dc: null, always: "You camp on the high bank for two days. The river drops by morning.", time: 2 }
       ]
     }
@@ -1673,7 +1657,7 @@ var EVENT_POOLS = {
       source: getSource("SCHULTZ_STUMPS"),
       choices: [
         { text: "Spade and block the wheel", dc: 11, ok: "You free the cart without damage.", bad: "The soil gives way twice.", time: 1, morale: -3, okMorale: 3, okTime: -1 },
-        { text: "Lighten and rock it free", dc: 9, ok: "A quick heave gets you out clean.", bad: "A crate lands in the muck.", food: -2, wear: 1, okMorale: 3, okTime: -1 }
+        { text: "Lighten and rock it free", dc: 9, ok: "A quick heave gets you out clean.", bad: "A crate lands in the muck.", food: -2, okFood: 0, badFood: -2, wear: 1, okMorale: 3, okTime: -1 }
       ]
     },
     {
@@ -1701,8 +1685,8 @@ var EVENT_POOLS = {
       text: "Smoke on the horizon. Then the wind shifts and the smell hits you \u2014 dry wood, pine resin, and the acrid bite of a forest fire pushing toward you. The treeline ahead glows orange. The oxen smell it too and pull at their traces. The prairie burned every afternoon, but this is different \u2014 this fire is coming for you.",
       source: getSource("LACOMBE_FIRE"),
       choices: [
-        { text: "Ride for the river bottom", dc: 12, ok: "The fire edge passes. You lose only an afternoon.", bad: "The wind shifts. You lose supplies and the cart is singed.", food: -3, wear: 1, morale: -12, time: 1, okTime: 1 },
-        { text: "Light a backfire and wait it out", dc: 10, ok: "A practised escape. The backfire draws the main blaze away from your position.", bad: "The flames jump. Your cart is spared but the oxen panic.", morale: -8, time: 1 },
+        { text: "Ride for the river bottom", dc: 12, ok: "The fire edge passes. You lose only an afternoon.", bad: "The wind shifts. You lose supplies and the cart is singed.", food: -3, okFood: -1, badFood: -3, wear: 1, morale: -12, okMorale: -4, badMorale: -12, time: 1, okTime: 1 },
+        { text: "Light a backfire and wait it out", dc: 10, ok: "A practised escape. The backfire draws the main blaze away from your position.", bad: "The flames jump. Your cart is spared but the oxen panic.", morale: -8, okMorale: -4, badMorale: -8, time: 1 },
         { text: "Use water from the slough to wet the canvas", dc: 11, ok: "The wet tarp protects the load. You wait in the smoke until the fire passes.", bad: "There is not enough water. The canvas smolders.", morale: -2, time: 1, itemBonus: { name: "Canvas Tarp", dcBonus: 3 } }
       ]
     },
@@ -1735,7 +1719,7 @@ var EVENT_POOLS = {
       choices: [
         { text: "Press through before the storm", dc: 11, ok: "You gain the far shelter with minutes to spare.", bad: "The rain catches you on exposed ground.", wear: 1, morale: -6, itemBonus: { name: "Canvas Tarp", dcBonus: 3 } },
         { text: "Hike to a rocky ledge and wait", dc: null, always: "Cold, but the cart and crew are intact.", time: 1 },
-        { text: "Wrap up in blankets and endure", dc: 10, ok: "The blankets hold the cold at bay.", bad: "The wind cuts through the wool.", morale: -8, requiresItem: "Blanket", consumesItem: "Blanket" }
+        { text: "Wrap up in blankets and endure", dc: 10, ok: "The blankets hold the cold at bay.", bad: "The wind cuts through the wool.", morale: -8, okMorale: -4, badMorale: -8, requiresItem: "Blanket", consumesItem: "Blanket" }
       ]
     },
     {
@@ -1841,7 +1825,7 @@ var EVENT_POOLS = {
             { text: "Get moving without conversation", dc: null, always: "Pragmatic. The crossing cost enough time.", alwaysWear: 0 }
           ]
         } },
-        { text: "Ford the cart carefully", dc: 13, ok: "The ox swims straight and true; the bed stays high.", bad: "The current turns the cart. Wet freight and one damaged wheel.", wear: 2, food: -2, okMorale: 3, okWear: -1 }
+        { text: "Ford the cart carefully", dc: 13, ok: "The ox swims straight and true; the bed stays high.", bad: "The current turns the cart. Wet freight and one damaged wheel.", wear: 2, food: -2, okFood: 0, badFood: -2, okMorale: 3, okWear: -1 }
       ]
     },
     {
@@ -1869,7 +1853,7 @@ var EVENT_POOLS = {
       choices: [
         { text: "Wait for the ice to clear", dc: null, always: "You camp and watch the river. By morning, the channel is clear enough.", time: 1 },
         { text: "Find an alternate crossing upstream", dc: 11, ok: "A narrower point, but the ice has passed. You cross carefully.", bad: "The bank is steep. The cart slips but holds.", wear: 1, okMorale: 3, okWear: -1, okTime: -1 },
-        { text: "Risk the crossing now", dc: 15, ok: "The oxen are strong swimmers. You make it across, ice grinding at the cart sides.", bad: "A slab of ice catches the axle. The cart tips. Cargo lost to the current.", wear: 2, food: -4 }
+        { text: "Risk the crossing now", dc: 15, ok: "The oxen are strong swimmers. You make it across, ice grinding at the cart sides.", bad: "A slab of ice catches the axle. The cart tips. Cargo lost to the current.", wear: 2, food: -4, okFood: -1, badFood: -4 }
       ]
     },
     {
@@ -1898,7 +1882,7 @@ var EVENT_POOLS = {
       source: getSource("FONSECA_RAF"),
       choices: [
         { text: "Build a cart-raft with 2 Bison Hides", dc: 12, ok: "The improvised ferry floats. The crew swims the line across.", bad: "One hide splits mid-river. Cargo gets wet.", morale: -6, food: -2, requiresItem: { name: "Bison Hide", count: 2 } },
-        { text: "Ford the cart carefully", dc: 13, ok: "The ox swims straight and true; the bed stays high.", bad: "The current turns the cart. Wet freight and one damaged wheel.", wear: 2, food: -2, okMorale: 3, okWear: -1 }
+        { text: "Ford the cart carefully", dc: 13, ok: "The ox swims straight and true; the bed stays high.", bad: "The current turns the cart. Wet freight and one damaged wheel.", wear: 2, food: -2, okFood: 0, badFood: -2, okMorale: 3, okWear: -1 }
       ]
     },
     {
@@ -1922,7 +1906,7 @@ var SETTLEMENT_EVENTS = {
       source: getSource("HBC_INSPECTION"),
       choices: [
         { text: "Submit to inspection", dc: null, always: "You open your cart and let him count. He finds nothing contraband and waves you through. The process costs you an hour.", morale: -3 },
-        { text: "Politely decline \u2014 your goods are personal", dc: 11, ok: 'The factor considers, then steps aside. "Very well. But the Company watches."', bad: 'He calls the clerk back. "Every cart gets inspected." You lose time and face.', morale: -5, time: 1 },
+        { text: "Politely decline \u2014 your goods are personal", dc: 11, ok: 'The factor considers, then steps aside. "Very well. But the Company watches."', bad: 'He calls the clerk back. "Every cart gets inspected." You lose time and face.', morale: -5, okMorale: -2, badMorale: -5, time: 1 },
         { text: "Offer a small gift to ease the process", dc: null, always: `You pass a tin of tea across the counter. The factor's expression softens almost imperceptibly. "You may proceed." Sometimes grease moves the wheel.`, morale: 2 }
       ]
     },
@@ -1934,7 +1918,7 @@ var SETTLEMENT_EVENTS = {
       choices: [
         { text: "Sell him your hides under the table", dc: 10, ok: "A quiet exchange behind the stable. His prices are fair and the factor never knows.", bad: "A Company servant spots the exchange. The factor notes your name in his ledger.", morale: 5 },
         { text: "Decline \u2014 you don't want trouble with the Company", dc: null, always: `You shake your head. The free trader shrugs. "Your choice. But the Company won't thank you for loyalty."`, morale: 2 },
-        { text: "Ask what else he knows about the trail ahead", dc: 9, ok: "He tells you about a washed-out ford two days ahead \u2014 and a detour that saves half a day. Information is its own currency.", bad: "He wants payment for what he knows. Your pemmican buys a rumor you could have figured out yourself.", morale: 1, food: -1 }
+        { text: "Ask what else he knows about the trail ahead", dc: 9, ok: "He tells you about a washed-out ford two days ahead \u2014 and a detour that saves half a day. Information is its own currency.", bad: "He wants payment for what he knows. Your pemmican buys a rumor you could have figured out yourself.", morale: 1, food: -1, okFood: 0, badFood: -1 }
       ]
     },
     {
@@ -1945,7 +1929,7 @@ var SETTLEMENT_EVENTS = {
       choices: [
         { text: "Ration carefully \u2014 the trail ahead may be lean", dc: null, always: "You tighten the belt and pack what you have. The prairie doesn't care about your hunger.", morale: -3 },
         { text: "Buy extra pemmican at the Company store", dc: null, always: "The prices are steep \u2014 the Company always charges more when supplies run thin \u2014 but full stomachs keep the crew steady.", morale: 3 },
-        { text: "Offer to hunt for the fort in exchange for provisions", dc: 10, ok: "You ride out and return with enough meat to fill your bags and then some. The factor nods \u2014 the closest thing to praise you'll get.", bad: "The prairie gives nothing freely. You return empty-handed and a day poorer.", morale: -4, food: -1 }
+        { text: "Offer to hunt for the fort in exchange for provisions", dc: 10, ok: "You ride out and return with enough meat to fill your bags and then some. The factor nods \u2014 the closest thing to praise you'll get.", bad: "The prairie gives nothing freely. You return empty-handed and a day poorer.", morale: -4, okMorale: -2, badMorale: -6, food: -1, okFood: 0, badFood: -1 }
       ]
     }
   ],
@@ -1957,7 +1941,7 @@ var SETTLEMENT_EVENTS = {
       source: getSource("NWMP_DUTY"),
       choices: [
         { text: "Present your papers and wait", dc: null, always: "The constable examines your permit, compares it to his ledger, and waves you through. The delay costs you half a day.", morale: -2, time: 1 },
-        { text: "Ask what the inspection is looking for", dc: 9, ok: `"Contraband spirits, mostly," the constable says. "There's rum-runners working the trail. You don't look like rum-runners." He waves you on.`, bad: `"That's police business." The inspection takes longer than it needs to.`, morale: -3, time: 1 },
+        { text: "Ask what the inspection is looking for", dc: 9, ok: `"Contraband spirits, mostly," the constable says. "There's rum-runners working the trail. You don't look like rum-runners." He waves you on.`, bad: `"That's police business." The inspection takes longer than it needs to.`, morale: -3, okMorale: -1, badMorale: -6, time: 1 },
         { text: "Report suspicious activity on the trail ahead", dc: null, always: 'You mention the free traders you saw crossing the river without permits. The constable writes it down. "Every detail helps." You feel like an informant, but the law appreciates the help.', morale: -2 }
       ]
     },
@@ -3369,31 +3353,33 @@ __name(getSquealEvent, "getSquealEvent");
 
 // src/ui/theme.js
 function applyTheme(root) {
-  root.style.setProperty("--clr-bg", "#1a1410");
-  root.style.setProperty("--clr-panel-bg", "#2d241a");
-  root.style.setProperty("--clr-journal-bg", "#2d241a");
-  root.style.setProperty("--clr-ink-on-dark", "#e8dcc8");
-  root.style.setProperty("--clr-ink-on-light", "#e8dcc8");
-  root.style.setProperty("--clr-ink-light", "#b8a890");
-  root.style.setProperty("--clr-ink-dark", "#e8dcc8");
-  root.style.setProperty("--clr-accent", "#c8a81a");
-  root.style.setProperty("--clr-success", "#7aa85a");
-  root.style.setProperty("--clr-danger", "#c85040");
-  root.style.setProperty("--clr-blessing", "#c8a81a");
+  root.style.setProperty("--clr-bg", "#efe6d3");
+  root.style.setProperty("--clr-panel-bg", "#e3d8b8");
+  root.style.setProperty("--clr-journal-bg", "#e3d8b8");
+  root.style.setProperty("--clr-ink-on-dark", "#1f1811");
+  root.style.setProperty("--clr-ink-on-light", "#1f1811");
+  root.style.setProperty("--clr-ink-light", "#6b5d48");
+  root.style.setProperty("--clr-ink-dark", "#1f1811");
+  root.style.setProperty("--clr-accent", "#4a6b4a");
+  root.style.setProperty("--clr-accent-alt", "#6b4c7a");
+  root.style.setProperty("--clr-success", "#4a6b4a");
+  root.style.setProperty("--clr-danger", "#8a3324");
+  root.style.setProperty("--clr-warn", "#9a7b2e");
+  root.style.setProperty("--clr-blessing", "#4a6b4a");
   root.style.setProperty("--clr-ink", "var(--clr-ink-on-dark)");
   root.style.setProperty("--clr-ink-panel", "var(--clr-ink-on-light)");
-  root.style.setProperty("--clr-bg-dark", "#0f0c08");
+  root.style.setProperty("--clr-bg-dark", "#3f3529");
   root.style.setProperty("--clr-card-bg", "var(--clr-panel-bg)");
-  root.style.setProperty("--clr-btn-bg", "var(--clr-accent)");
-  root.style.setProperty("--clr-btn-text", "#1a1410");
-  root.style.setProperty("--clr-btn-hover", "#e0c030");
+  root.style.setProperty("--clr-btn-bg", "var(--clr-panel-bg)");
+  root.style.setProperty("--clr-btn-text", "#1f1811");
+  root.style.setProperty("--clr-btn-hover", "var(--clr-panel-bg-2)");
   root.style.setProperty("--clr-status-bar-bg", "var(--clr-bg)");
   root.style.setProperty("--clr-status-text", "var(--clr-ink-on-dark)");
   root.style.setProperty("--clr-status-accent", "var(--clr-accent)");
-  root.style.setProperty("--clr-overlay-bg", "rgba(20,18,14,0.95)");
-  root.style.setProperty("--clr-border", "var(--clr-accent)");
+  root.style.setProperty("--clr-overlay-bg", "rgba(31,24,17,0.95)");
+  root.style.setProperty("--clr-border", "rgba(107,76,122,0.28)");
   root.style.setProperty("--clr-map-bg", "#1a1410");
-  root.style.setProperty("--clr-tooltip-bg", "rgba(20,18,14,0.95)");
+  root.style.setProperty("--clr-tooltip-bg", "rgba(31,24,17,0.95)");
   root.style.setProperty("--clr-tooltip-text", "var(--clr-ink-on-dark)");
   root.style.setProperty("--clr-tooltip-border", "var(--clr-accent)");
   root.style.setProperty("--clr-map-frame-shadow", "rgba(0,0,0,0.5)");
@@ -3410,7 +3396,6 @@ function applyTheme(root) {
   root.style.setProperty("--clr-settlement-mission", "#d8b840");
   root.style.setProperty("--clr-settlement-trading", "#d8b840");
   root.style.setProperty("--clr-food-low", "var(--clr-danger)");
-  root.style.setProperty("--clr-warn", "#e0c030");
   root.style.setProperty("--clr-ok", "var(--clr-success)");
   root.style.setProperty("--clr-weather-rain", "#8abce0");
   root.style.setProperty("--clr-weather-snow", "#b8c8e0");
@@ -3423,34 +3408,34 @@ function applyTheme(root) {
   root.style.setProperty("--clr-ok-bg", "rgba(122,168,90,0.15)");
   root.style.setProperty("--clr-ok-border", "#7aa85a");
   root.style.setProperty("--clr-ok-text", "#7aa85a");
-  root.style.setProperty("--clr-catitem-bg", "rgba(200,168,26,0.08)");
-  root.style.setProperty("--clr-catitem-border", "rgba(200,168,26,0.18)");
-  root.style.setProperty("--clr-muted", "#b8a890");
-  root.style.setProperty("--clr-pdrow-bg", "rgba(200,168,26,0.06)");
-  root.style.setProperty("--clr-pdrow-border", "rgba(200,168,26,0.12)");
+  root.style.setProperty("--clr-catitem-bg", "rgba(74,107,74,0.08)");
+  root.style.setProperty("--clr-catitem-border", "rgba(74,107,74,0.18)");
+  root.style.setProperty("--clr-muted", "#6b5d48");
+  root.style.setProperty("--clr-pdrow-bg", "rgba(74,107,74,0.06)");
+  root.style.setProperty("--clr-pdrow-border", "rgba(74,107,74,0.12)");
   root.style.setProperty("--clr-camp-border", "var(--clr-accent)");
-  root.style.setProperty("--clr-camp-pill-bg", "rgba(200,168,26,0.1)");
-  root.style.setProperty("--clr-camp-pill-border", "rgba(200,168,26,0.25)");
-  root.style.setProperty("--clr-camp-btn-hover", "#2a2015");
+  root.style.setProperty("--clr-camp-pill-bg", "rgba(74,107,74,0.08)");
+  root.style.setProperty("--clr-camp-pill-border", "rgba(74,107,74,0.2)");
+  root.style.setProperty("--clr-camp-btn-hover", "var(--clr-panel-bg-2)");
   root.style.setProperty("--clr-campfire-glow", "radial-gradient(ellipse at 50% 100%, rgba(180,130,20,0.4) 0%, rgba(200,168,26,0.25) 35%, transparent 70%)");
   root.style.setProperty("--clr-campfire-embers", `url("data:image/svg+xml,%3Csvg viewBox='0 0 300 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='campNoise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.025' numOctaves='5' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23campNoise)' opacity='0.1'/%3E%3C/svg%3E")`);
   root.style.setProperty("--clr-campfire-flicker", "radial-gradient(circle at 45% 75%, rgba(255,140,40,0.18) 0%, transparent 40%), radial-gradient(circle at 55% 65%, rgba(255,110,30,0.15) 0%, transparent 35%), radial-gradient(circle at 60% 80%, rgba(255,80,20,0.12) 0%, transparent 30%)");
-  root.style.setProperty("--clr-success-glow", "rgba(122,168,90,0.35)");
-  root.style.setProperty("--clr-danger-glow", "rgba(200,80,64,0.35)");
-  root.style.setProperty("--clr-choice-cost", "#a89878");
-  root.style.setProperty("--clr-source-text", "#b8a890");
-  root.style.setProperty("--clr-source-context", "#988870");
-  root.style.setProperty("--clr-placeholder", "#6a5a40");
-  root.style.setProperty("--clr-input-bg", "rgba(232,220,200,0.1)");
-  root.style.setProperty("--clr-input-bg-focus", "rgba(232,220,200,0.15)");
+  root.style.setProperty("--clr-success-glow", "rgba(74,107,74,0.35)");
+  root.style.setProperty("--clr-danger-glow", "rgba(138,51,36,0.35)");
+  root.style.setProperty("--clr-choice-cost", "#6b5d48");
+  root.style.setProperty("--clr-source-text", "#6b5d48");
+  root.style.setProperty("--clr-source-context", "#6b5d48");
+  root.style.setProperty("--clr-placeholder", "#6b5d48");
+  root.style.setProperty("--clr-input-bg", "rgba(31,24,17,0.08)");
+  root.style.setProperty("--clr-input-bg-focus", "rgba(31,24,17,0.12)");
   root.style.setProperty("--clr-silver", "#b8b8b8");
   root.style.setProperty("--clr-bronze", "#d8a060");
-  root.style.setProperty("--clr-gold-faint", "rgba(200,168,26,0.1)");
+  root.style.setProperty("--clr-gold-faint", "rgba(200,168,26,0.12)");
   root.style.setProperty("--clr-gold-light", "rgba(200,168,26,0.18)");
-  root.style.setProperty("--clr-intel-border", "rgba(200,168,26,0.15)");
-  root.style.setProperty("--font-heading", "'IM Fell Double Pica', 'Georgia', serif");
-  root.style.setProperty("--font-body", "'IM Fell English', 'Georgia', serif");
-  root.style.setProperty("--font-italic", "'IM Fell English', 'Georgia', serif");
+  root.style.setProperty("--clr-intel-border", "rgba(107,76,122,0.22)");
+  root.style.setProperty("--font-heading", "'Cormorant Garamond', Georgia, 'Times New Roman', serif");
+  root.style.setProperty("--font-body", "'Lora', Georgia, 'Times New Roman', serif");
+  root.style.setProperty("--font-italic", "'Lora', Georgia, 'Times New Roman', serif");
 }
 __name(applyTheme, "applyTheme");
 
