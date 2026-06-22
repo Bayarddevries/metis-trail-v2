@@ -75,6 +75,18 @@
 - **HBC crafting recipe unreachable**: `finished_hides` requires settlement: 'hbc' but HBC actions don't include 'craft'. Out of scope.
 - **Issue #36 (Day 1 first-travel blocks primary actions)**: Settled as a known unavoidable behavior; future sprint may add an onboarding overlay.
 
+## Pass 2 Audit Corrections (2026-06-22)
+
+Two Pass 2 findings (from the brutal-honesty audit in this session) were measurement artifacts, not bugs:
+
+1. **Map sepia filter** — Pass 2 audit flagged `.leaflet-tile-pane filter: none`. Live DOM returned `grayscale(1) contrast(1.3) brightness(0.7) sepia(0.3)` once Leaflet initialized. Filter was already applied; audit read tile-pane before Leaflet init.
+
+2. **Option C button lift** — Pass 2 audit flagged `.ctrl-btn, .start-btn, .restart-btn` as `box-shadow: none, transform: none`. Source check confirmed all three classes have `:hover { transform: translateY(-1px); box-shadow: 0 4px 0 var(--clr-accent); }` plus `:active` toggle. The audit read the **resting** state, not the hover state.
+
+**What was actually broken and shipped**: intro subtitle italic (Commit 2a), status bar font 10/12 → 11/13 (Commit 2b). Map and button code were already correct. See commits 8ec1181, 197fee0, dc8132b.
+
+**Future 2e candidate**: `.predeparture-subtitle` `font-style: italic` in `src/template.html` (~line 807) — same design-standard violation as intro subtitle.
+
 ---
 
 ## Architecture Notes for Next Agent
