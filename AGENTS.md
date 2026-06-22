@@ -99,7 +99,7 @@ balance(constants): DAILY_FOOD 1.2 → 1.35 for win rate normalization
 - **Phase 1: Pre-departure has 6 spare choices (not 10)** — starter kit auto-includes Medicine/Ammo/Tarp; plan matches actual UI.
 - **Phase 1: Pre-departure confirm must call `window.__METIS_RENDER__()`** — settlement actions need same fix (#43).
 - **Item integration fields**: Engine supports `requiresItem`, `consumesItem`, `itemBonus` on event choices — but no events use them yet. Phase 1 priority.
-- **Font readability**: IM Fell for body text is hard to read. Use system serif (Georgia/Charter/Crimson) for prose; keep IM Fell for titles only.
+- **Font readability**: Cormorant Garamond (headings) + Lora (body), both self-hosted as variable fonts in `src/fonts/`. Replace before changing variables in `src/ui/theme.js` and `src/template.html` — both must change; either alone silently loses to the other at runtime.
 - **Map contrast**: Current filter `grayscale(1) contrast(1.1) brightness(0.9)` too bright. Target `grayscale(1) contrast(1.3) brightness(0.7) sepia(0.3)` for aged parchment feel.
 - **Event math alignment**: Positive narrative outcomes must not have negative resource deltas (food/morale/wear). Audit all 55 events in Phase 1.5.
 - **Journal collapse by day**: Current collapse behavior is flaky. Keep day-grouped UX but fix toggle logic in `journalNarrative.js` / main.js.

@@ -1,5 +1,5 @@
-**Last updated:** 2026-06-19
-**Agent session:** v14.3 Balance Pass + Sim Update
+**Last updated:** 2026-06-22
+**Agent session:** v18 — audit + planning sync + dead ID cleanup + smoke test
 **Working branch:** `main`
 **Build:** `bun scripts/build.mjs` ✅ passing
 **Dev server:** `http://localhost:8081` (dist/) | Tailscale: `http://100.108.183.33:8081`
@@ -15,6 +15,10 @@
 - **Sprint C (Remaining Bug Fixes)**: ✅ Complete
 - **v14.3 Balance Pass**: ✅ Complete — sim updated, food economy tuned
 - **v14.4 Trade Grouping**: ✅ Complete — grouped settlement action cards with radio sub-options
+- **v15 Prairie Palette + Cormorant/Lora**: ✅ Complete
+- **v16 Source-quote dedupe + settlement label capitalization**: ✅ Complete
+- **v17 Roll modifier breakdown + Option C button lift**: ✅ Complete
+- **v18 Project sync (TODO/HANDOFF, dead IDs, smoke test)**: ✅ Complete
 
 ### Completed Fixes
 
@@ -68,6 +72,8 @@
 - **Settlement result redundancy**: Result card shows both flavor text and mechanical outcome, which can overlap. Minor.
 - **`badGive` not handled in engine**: Events have `badGive` fields (e.g., supply_cache bad path gives fewer items) but engine only processes `ch.give`, not `ch.badGive`. Pre-existing, out of scope.
 - **Roll display**: Die face shows raw d20 roll (standard TTRPG convention). Outcome text shows total + modifiers. Working as intended.
+- **HBC crafting recipe unreachable**: `finished_hides` requires settlement: 'hbc' but HBC actions don't include 'craft'. Out of scope.
+- **Issue #36 (Day 1 first-travel blocks primary actions)**: Settled as a known unavoidable behavior; future sprint may add an onboarding overlay.
 
 ---
 
@@ -132,11 +138,19 @@ EVENT_CHANCE: 0.45
 HUNT_RARITY_WEIGHTS: { food: 0.70, common: 0.25, rare: 0.05 }
 ```
 
-### Sim Harness (tests/simulate-entry.js)
+### Sim Harness (tests/simulate-entry.js, tests/balance-sim.mjs)
 - Run: `bun tests/simulate-entry.js [count]` (default 200)
 - Handles events, settlements, game-over correctly
 - Weighted choice AI for camp actions, settlement actions, event choices
 - Outputs balance report with win rate, tier distribution, death breakdown, node-by-node death map
+
+**Note (2026-06-22):** `tests/balance-sim.mjs` is currently reporting 100% starvation because it doesn't call `confirmPreDeparture()` + `addFood()` — the sim runs without the player's starting food, then dies on day 1. This file's numbers are not meaningful until it's fixed. Out of scope here.
+
+### Smoke Test (tests/smoke.mjs)
+- Run: `node tests/smoke.mjs` (or `bun tests/smoke.mjs`)
+- 30-line pre-push gate. Creates a game, runs 14 travel turns, counts uncaught exceptions. Exits 0 = clean, 1 = broken.
+- Mirrors the engine's UI lifecycle: confirmPreDeparture + addFood(15).
+- Catches "engine API broken" regressions before they reach deploy.
 
 ---
 

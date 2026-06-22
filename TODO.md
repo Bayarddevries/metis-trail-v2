@@ -1,33 +1,30 @@
 # TODO — Metis Trail V2
 
-## Current State: Sprint A/B — Post-V13 Bug Fixes
+**Status last updated:** 2026-06-22
+**Last released:** v17 (grouped trade + prairie palette + roll modifier breakdown)
 
-V13 UI Overhaul Sessions 1–4 complete. Now fixing gameplay bugs and UX issues from playtest feedback.
+## Open work
 
-### Completed: V13 UI Overhaul
-- [x] Session 1: Layout shell, stat-tap, settings, journal expansion
-- [x] Session 2: Narrative wiring (journalNarrative.js → journalLog)
-- [x] Session 3: Mobile responsive, 100svh, stat-tap affordance
-- [x] Session 4: Polish + edge cases — overlay stacking, journal empty state, leaderboard z-index, full playtest
+### In progress: v18 audit + project sync
+- [x] Audit + critique (Pass 1–4, see CHANGELOG)
+- [ ] Commit 1: planning docs + dead ID removal + smoke test
+- [ ] Commit 2a–2d: visual polish
+- [ ] Commit 3a: endings rewritten in first-person plural
+- [ ] *Hold* Commit 4: Day 1 onboarding overlay — discuss before implementing
 
-### In Progress: Sprint A — Critical Bug Fixes
-- [ ] A1: Event Resolution System — food-on-failure, itemBonus DC, roll display, effects rendering
-- [ ] A2: Settlement Action System — cost/risk, rest in all settlements, fort trade collapse, flavour CSS
-- [ ] A3: End Screen — field name mismatches, New Game button
-- [ ] A4: CSS dark-on-Dark text — bump --clr-muted, italics audit
-- [ ] A5: Settlement arrival status display
+### Backlog
+- Holocene Map leak in AGENTS.md *(none — false flag from prior session cache; file is Metis-specific)*
+- HBC crafting recipe unreachable (skill pitfall, key `finished_hides`)
+- Leave-behind UI for overloaded cart
+- Issue #36: Day 1 first-travel → settlement blocks primary actions
 
-### Pending: Sprint B — Content Quality
-- [ ] B1: Journal narrative voice audit (3rd → 1st person)
-- [ ] B2: Source-quote alignment (thematic tags)
-- [ ] B3: Hunt text/outcome mismatch
-- [ ] B4: Item integration in events (mosquito tarp DC, NWMP delay cost)
-- [ ] B5: Trail Intel clarity
-- [ ] B6: Hall of Fame fallback
-
-### Backlog (Post-Sprint)
-- [ ] Balance pass — 1000-sim verification after A1 changes (food economy will shift)
-- [ ] Leave-behind UI for overloaded cart
-- [ ] Cultural review of narrative content (issue #25)
-- [ ] HBC crafting recipe fix (finish_hides unreachable)
-- [ ] Add second half of Carlton Trail nodes (issue #43)
+## Done
+- V13 UI Overhaul (Sessions 1–4)
+- Sprint A (Critical Bugs)
+- Sprint B (Content Quality)
+- Sprint C (Remaining Bug Fixes)
+- v14.3 Balance Pass (DAILY_FOOD 0.6 → 0.65, food 18 → 15)
+- v14.4 Trade Grouping (radio sub-options in single card)
+- v15 Prairie Palette (root variables + theme.js)
+- v16 Source-quote dedupe, settlement label capitalization
+- v17 Roll modifier breakdown + Option C button lift

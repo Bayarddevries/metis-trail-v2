@@ -210,10 +210,6 @@ function wearMod(wear) {
   return CONSTANTS.WEAR_MOD[wear] ?? -5;
 }
 __name(wearMod, "wearMod");
-function totalMod(state) {
-  return crewMod(state) + wearMod(state.wear) + (state.blessingDays > 0 ? 1 : 0);
-}
-__name(totalMod, "totalMod");
 
 // src/core/calendar.js
 var DAYS_IN_MONTH = [0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
@@ -2168,13 +2164,21 @@ function createGame(seed = null) {
     }
     if (ch.dc !== null) {
       const roll = d();
+      const crewBonus = crewMod(S2);
+      const wearBonus = wearMod(S2.wear);
+      const blessingBonus = S2.blessingDays > 0 ? 1 : 0;
       const effectiveDC = ch.dc - dcReduction;
-      const total = roll + totalMod(S2);
+      const total = roll + crewBonus + wearBonus + blessingBonus;
       const success2 = total >= effectiveDC;
       result.roll = roll;
       result.total = total;
       result.dc = effectiveDC;
       result.success = success2;
+      result.mod = total - roll;
+      result.modBreakdown = [];
+      if (crewBonus) result.modBreakdown.push(`Crew ${crewBonus >= 0 ? "+" : ""}${crewBonus}`);
+      if (wearBonus) result.modBreakdown.push(`Wear ${wearBonus >= 0 ? "+" : ""}${wearBonus}`);
+      if (blessingBonus) result.modBreakdown.push("Blessing +1");
       result.text = success2 ? `Success. ${ch.ok}` : `Failure. ${ch.bad}`;
       if (bonusItemName) {
         result.effects.push(`(${bonusItemName} \u2212${dcReduction} DC)`);
@@ -2525,7 +2529,7 @@ function createGame(seed = null) {
         const receiveDesc = trade.receive.map((r) => `${r.count} ${displayName(r.name)}`).join(", ");
         actions.push({
           id: actionId,
-          label: actionId.replace(/_/g, " ").replace(/\\b\\w/g, (c) => c.toUpperCase()),
+          label: actionId.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()),
           cost: giveDesc || "Free",
           risk: receiveDesc,
           flavor: trade.flavor,
@@ -20035,7 +20039,7 @@ function revealDiceOutcome(diceResult) {
   const outcomeEl = document.getElementById("event-dice-outcome");
   if (outcomeEl) {
     const mod = result.total - result.roll;
-    const modStr = mod !== 0 ? ` (${mod >= 0 ? "+" : ""}${mod})` : "";
+    const modStr = mod !== 0 ? ` (${mod >= 0 ? "+" : ""}${mod}${result.modBreakdown && result.modBreakdown.length ? ": " + result.modBreakdown.join(", ") : ""})` : "";
     const rollHtml = `<span class="outcome-roll">Rolled ${result.roll}${modStr} = ${result.total} \u2014 need ${result.dc}+</span>`;
     const resultHtml = result.success ? '<span class="outcome-pass">Success</span>' : '<span class="outcome-fail">Failure</span>';
     let flavorText = result.text || "";
@@ -20075,7 +20079,8 @@ function showEvent(game) {
   const sourceEl = document.getElementById("event-source");
   if (sourceEl) {
     if (ev.source && ev.source.quote) {
-      const quote = ev.source.quote;
+      const rawQuote = ev.source.quote;
+      const quote = rawQuote.replace(/^"|"$/g, "");
       const author = ev.source.author || "";
       const work = ev.source.work || "";
       const year = ev.source.year || "";
@@ -20134,7 +20139,7 @@ function showEvent(game) {
           date: monthName(after.month) + " " + after.day,
           title: eventData.classification || "Event",
           text: buildEventReflection(eventData, res, weather, cart),
-          dice: res && res.roll !== null ? `Rolled ${res.roll}${res.total - res.roll !== 0 ? ` (${res.total - res.roll >= 0 ? "+" : ""}${res.total - res.roll})` : ""} = ${res.total} \u2014 need ${res.dc}+ \u2014 ${res.success ? "\u2713 Success" : "\u2717 Failure"}` : null,
+          dice: res && res.roll !== null ? `Rolled ${res.roll}${res.total - res.roll !== 0 ? ` (${res.total - res.roll >= 0 ? "+" : ""}${res.total - res.roll}${res.modBreakdown && res.modBreakdown.length ? ": " + res.modBreakdown.join(", ") : ""})` : ""} = ${res.total} \u2014 need ${res.dc}+ \u2014 ${res.success ? "\u2713 Success" : "\u2717 Failure"}` : null,
           mech: mechParts.join(" \xB7 "),
           collapsed: false
         });
@@ -20248,7 +20253,7 @@ function buildEventChoiceOutcome(stepLog, before, after) {
   const res = entry && entry.result ? entry.result : entry;
   if (res && res.roll !== null && res.dc !== null) {
     const mod = res.total - res.roll;
-    const modStr = mod !== 0 ? ` (${mod >= 0 ? "+" : ""}${mod})` : "";
+    const modStr = mod !== 0 ? ` (${mod >= 0 ? "+" : ""}${mod}${res.modBreakdown && res.modBreakdown.length ? ": " + res.modBreakdown.join(", ") : ""})` : "";
     msgs.push(`Rolled ${res.roll}${modStr} = ${res.total} (needed ${res.dc}+): ${res.success ? "Success" : "Failure"}`);
   }
   if (res && res.text) msgs.push(res.text);
@@ -20342,8 +20347,6 @@ function showSettlement(game) {
         return st2.food >= 2;
       case "rest_blessing":
         return true;
-      case "buy_ammo":
-        return cart.some((i) => (i.type === "trade" || i.category === "furs") && i.count > 0);
       case "heal_crew":
         return (cart.find((i) => i.name === "Medicine Pouch")?.count || 0) >= 1 || st2.food >= 2;
       default:
@@ -20472,7 +20475,7 @@ function showSettlement(game) {
   }
   __name(renderGroupedCard, "renderGroupedCard");
   function intelText(id) {
-    return ["get_intel", "trade_gossip", "gossip", "buy_info", "rumours"].includes(id);
+    return ["get_intel", "trade_gossip", "gossip"].includes(id);
   }
   __name(intelText, "intelText");
   function renderSingleCard(action) {
@@ -21264,11 +21267,13 @@ function showEnd(game) {
   if (sourceEl) {
     const quoteData = isHighScore && ending.quoteHigh ? ending.quoteHigh : ending.quote;
     if (quoteData && quoteData.quote) {
+      const rawQuote = quoteData.quote;
+      const quote = rawQuote.replace(/^"|"$/g, "");
       const author = quoteData.author || "";
       const work = quoteData.work || "";
       const year = quoteData.year || "";
       const attrib = [author, work, year].filter(Boolean).join(", ");
-      sourceEl.innerHTML = `<span class="src-quote">"${quoteData.quote}"</span>` + (attrib ? `<span class="src-attrib">\u2014 ${attrib}</span>` : "") + (quoteData.context ? `<span class="src-context">${quoteData.context}</span>` : "");
+      sourceEl.innerHTML = `<span class="src-quote">"${quote}"</span>` + (attrib ? `<span class="src-attrib">\u2014 ${attrib}</span>` : "") + (quoteData.context ? `<span class="src-context">${quoteData.context}</span>` : "");
       sourceEl.style.display = "block";
     } else {
       sourceEl.style.display = "none";

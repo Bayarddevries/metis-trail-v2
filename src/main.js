@@ -1013,7 +1013,6 @@ function showSettlement(game) {
       case 'dance': return st.food >= 1;
       case 'share_food': return st.food >= 2;
       case 'rest_blessing': return true;
-      case 'buy_ammo': return cart.some(i => (i.type === 'trade' || i.category === 'furs') && i.count > 0);
       case 'heal_crew': return (cart.find(i => i.name === 'Medicine Pouch')?.count || 0) >= 1 || st.food >= 2;
       default: return true;
     }
@@ -1168,7 +1167,7 @@ function showSettlement(game) {
 
   // Helper for intel check
   function intelText(id) {
-    return ['get_intel','trade_gossip','gossip','buy_info','rumours'].includes(id);
+    return ['get_intel','trade_gossip','gossip'].includes(id);
   }
 
   // Render a single ungrouped action card
