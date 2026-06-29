@@ -1,7 +1,8 @@
-**Last updated:** 2026-06-22
-**Agent session:** v18 — audit + planning sync + dead ID cleanup + smoke test
+**Last updated:** 2026-06-29
+**Agent session:** v19 — score/UI fixes (final score on loss, trade goods win-only, settlement ✕ removal)
 **Working branch:** `main`
 **Build:** `bun scripts/build.mjs` ✅ passing
+**Live:** `https://bayarddevries.github.io/metis-trail-v2/` (app.js?v=20)
 **Dev server:** `http://localhost:8081` (dist/) | Tailscale: `http://100.108.183.33:8081`
 
 ---
