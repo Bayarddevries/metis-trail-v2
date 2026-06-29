@@ -2,6 +2,14 @@
 
 All notable changes are documented here. Format loosely follows Keep a Changelog.
 
+## [Unreleased] — 2026-06-29
+
+### fix(score): show final score on loss, trade goods only count on win
+- `engine.js` `getEndgameScore()`: removed ternary that zeroed `total` when `state.won === false`. Breakdown always computed — players see real final score even on defeat.
+- `engine.js`: trade goods scoring loop wrapped in `if (state.won)`. No more phantom +750 for goods never delivered to Endmonton.
+- `main.js`: removed 26-line `settlement-close` click handler. Settlement overlay no longer has ✕ button — user must make a selection (by design).
+- Loss message updated: "Journey ended before reaching Edmonton — trade goods not delivered."
+
 ## [v12] — 2026-06-17
 
 ### Phase 1 Plan Documented — Item Integration, Narrative Depth & Polish
