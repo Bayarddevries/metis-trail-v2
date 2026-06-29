@@ -2670,19 +2670,21 @@ function createGame(seed = null) {
       let tradeGoodsCount = 0;
       let primeCount = 0;
       let typesCollected = /* @__PURE__ */ new Set();
-      const tradeItems = cart.filter((i) => i.type === "trade" || i.category === "furs");
-      for (const item of tradeItems) {
-        const mult = RARITY_MULT[item.name] || 1;
-        tradeBonus += item.count * 50 * mult;
-        tradeGoodsCount += item.count;
-        if (mult >= 5) primeCount += item.count;
-        typesCollected.add(item.name);
+      if (state.won) {
+        const tradeItems = cart.filter((i) => i.type === "trade" || i.category === "furs");
+        for (const item of tradeItems) {
+          const mult = RARITY_MULT[item.name] || 1;
+          tradeBonus += item.count * 50 * mult;
+          tradeGoodsCount += item.count;
+          if (mult >= 5) primeCount += item.count;
+          typesCollected.add(item.name);
+        }
       }
       const moraleBonus = Math.floor(state.morale / 2);
       const blessingBonus = (state.blessingDays || 0) * 10;
       const speedBonus = state.day <= 40 ? 100 : state.day <= 50 ? 50 : 0;
       const foodScore = foodBonus * 12;
-      const total = state.won ? baseScore + tradeBonus + foodScore + crewBonus + moraleBonus + blessingBonus + speedBonus - daysPenalty - wearPenalty : 0;
+      const total = baseScore + tradeBonus + foodScore + crewBonus + moraleBonus + blessingBonus + speedBonus - daysPenalty - wearPenalty;
       let tier = "Defeat";
       if (state.won) {
         const hasAllTypes = typesCollected.size >= 4;
@@ -19864,29 +19866,6 @@ function bootstrap(seed = null) {
     document.getElementById("settlement-overlay")?.classList.remove("active");
     window.__METIS_RENDER__();
   };
-  const settlementClose = document.getElementById("settlement-close");
-  if (settlementClose) settlementClose.onclick = () => {
-    const st2 = game.getState().pendingSettlement;
-    const after = game.getState();
-    if (st2) {
-      const cart = game.getCart();
-      const weather = after.weather || "clear";
-      const isFirstVisit = !visitedSettlements.has(st2.name);
-      if (isFirstVisit) visitedSettlements.add(st2.name);
-      const text = isFirstVisit ? buildSettlementArrivalEntry(st2) : buildSettlementJourneyEntry(st2, weather, cart);
-      journalLog({
-        day: after.day,
-        date: monthName(after.month) + " " + after.day,
-        title: `Arrived at ${st2.name}`,
-        text,
-        mech: "",
-        collapsed: false
-      });
-    }
-    game.settlementAction("continue");
-    document.getElementById("settlement-overlay")?.classList.remove("active");
-    window.__METIS_RENDER__();
-  };
   const cartClose = document.getElementById("cart-close-btn");
   const cartClose2 = document.getElementById("cart-close-btn-2");
   if (cartClose) cartClose.onclick = () => document.getElementById("cart-overlay")?.classList.remove("active");
@@ -21323,7 +21302,7 @@ function showEnd(game) {
       <span class="label">Final Score</span>
       <span>${Math.max(0, totalScore)}</span>
     </div>
-    ${!isVictory ? `<div class="stat-row" style="color:#8B2500;font-style:italic;margin-top:8px;">No trade goods delivered \u2014 score forfeit.</div>` : ""}
+    ${!isVictory ? `<div class="stat-row" style="color:#8B2500;font-style:italic;margin-top:8px;">Journey ended before reaching Edmonton \u2014 trade goods not delivered.</div>` : ""}
     <div style="margin-top:10px;padding:8px;background:rgba(184,134,11,0.08);border-left:2px solid #B8860B;font-size:11px;color:#5a4a3a;line-height:1.5;">
       ${ending.tip}
     </div>
