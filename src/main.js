@@ -231,32 +231,6 @@ export function bootstrap(seed = null) {
     window.__METIS_RENDER__();
   };
 
-  const settlementClose = document.getElementById('settlement-close');
-  if (settlementClose) settlementClose.onclick = () => {
-    const st = game.getState().pendingSettlement;
-    const after = game.getState();
-    if (st) {
-      const cart = game.getCart();
-      const weather = after.weather || 'clear';
-      const isFirstVisit = !visitedSettlements.has(st.name);
-      if (isFirstVisit) visitedSettlements.add(st.name);
-      const text = isFirstVisit
-        ? buildSettlementArrivalEntry(st)
-        : buildSettlementJourneyEntry(st, weather, cart);
-      journalLog({
-        day: after.day,
-        date: monthName(after.month) + ' ' + after.day,
-        title: `Arrived at ${st.name}`,
-        text: text,
-        mech: '',
-        collapsed: false,
-      });
-    }
-    game.settlementAction('continue');
-    document.getElementById('settlement-overlay')?.classList.remove('active');
-    window.__METIS_RENDER__();
-  };
-
   const cartClose = document.getElementById('cart-close-btn');
   const cartClose2 = document.getElementById('cart-close-btn-2');
   if (cartClose) cartClose.onclick = () => document.getElementById('cart-overlay')?.classList.remove('active');
@@ -2106,7 +2080,7 @@ function showEnd(game) {
       <span class="label">Final Score</span>
       <span>${Math.max(0, totalScore)}</span>
     </div>
-    ${!isVictory ? `<div class="stat-row" style="color:#8B2500;font-style:italic;margin-top:8px;">No trade goods delivered — score forfeit.</div>` : ''}
+    ${!isVictory ? `<div class="stat-row" style="color:#8B2500;font-style:italic;margin-top:8px;">Journey ended before reaching Edmonton — trade goods not delivered.</div>` : ''}
     <div style="margin-top:10px;padding:8px;background:rgba(184,134,11,0.08);border-left:2px solid #B8860B;font-size:11px;color:#5a4a3a;line-height:1.5;">
       ${ending.tip}
     </div>

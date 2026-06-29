@@ -708,17 +708,20 @@ export function createGame(seed = null) {
       };
 
       // Calculate trade goods score with rarity multipliers
+      // Trade goods only count toward score if the player reached Edmonton (won)
       let tradeBonus = 0;
       let tradeGoodsCount = 0;
       let primeCount = 0;
       let typesCollected = new Set();
-      const tradeItems = cart.filter(i => i.type === 'trade' || i.category === 'furs');
-      for (const item of tradeItems) {
-        const mult = RARITY_MULT[item.name] || 1;
-        tradeBonus += item.count * 50 * mult;
-        tradeGoodsCount += item.count;
-        if (mult >= 5) primeCount += item.count;
-        typesCollected.add(item.name);
+      if (state.won) {
+        const tradeItems = cart.filter(i => i.type === 'trade' || i.category === 'furs');
+        for (const item of tradeItems) {
+          const mult = RARITY_MULT[item.name] || 1;
+          tradeBonus += item.count * 50 * mult;
+          tradeGoodsCount += item.count;
+          if (mult >= 5) primeCount += item.count;
+          typesCollected.add(item.name);
+        }
       }
 
       // Survival bonuses
@@ -728,9 +731,7 @@ export function createGame(seed = null) {
 
       const foodScore = foodBonus * 12;
 
-      const total = state.won
-        ? baseScore + tradeBonus + foodScore + crewBonus + moraleBonus + blessingBonus + speedBonus - daysPenalty - wearPenalty
-        : 0;
+      const total = baseScore + tradeBonus + foodScore + crewBonus + moraleBonus + blessingBonus + speedBonus - daysPenalty - wearPenalty;
 
       // Tiered win conditions (PHASE_0_PLAN)
       let tier = 'Defeat';
