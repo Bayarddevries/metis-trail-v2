@@ -349,6 +349,9 @@ export function createGame(seed = null) {
       }
     }
 
+    // Deduplicate effects — same string appearing more than once is a bug
+    result.effects = result.effects.filter((e, i, arr) => arr.indexOf(e) === i);
+
     if (ch.extraProgress) {
       S.segmentDay += ch.extraProgress;
       result.effects.push(`+${ch.extraProgress} progress`);
