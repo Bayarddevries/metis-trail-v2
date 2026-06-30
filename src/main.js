@@ -9,9 +9,10 @@ import Haptics from './ui/haptics.js';
 import { getItemIcon } from './ui/icons.js';
 import {
   buildTravelReflection,
-  buildEventAutoEntry, buildEventReflection,
+  buildEventAutoEntry, buildEventReflection, buildCampEntry,
   buildSettlementArrivalEntry, buildSettlementJourneyEntry, buildSettlementActionEntry, buildSettlementReflection,
 } from './ui/journalNarrative.js';
+import { ENDINGS } from './data/endings.js';
 
 // Sync any locally-saved scores on page load
 
