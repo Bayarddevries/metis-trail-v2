@@ -123,6 +123,20 @@ export async function build() {
   if (assets.length) {
     await fs.writeFile(path.join(outDir, 'manifest.json'), manifest);
   }
+  // Copy settlement images to dist
+  const settlementsSrc = path.join(cwd, 'art', 'settlements');
+  const settlementsDst = path.join(outDir, 'settlements');
+  try {
+    await fs.mkdir(settlementsDst, { recursive: true });
+    const files = await fs.readdir(settlementsSrc);
+    for (const f of files) {
+      if (f.endsWith('.png') || f.endsWith('.jpg') || f.endsWith('.webp')) {
+        await fs.copyFile(path.join(settlementsSrc, f), path.join(settlementsDst, f));
+      }
+    }
+    console.log(`[build] copied ${files.length} settlement images`);
+  } catch (e) { console.warn('[build] no settlement art found:', e.message); }
+
   // Copy art assets referenced in CSS
   const artSrc = path.join(cwd, 'art', 'campfire.png');
   const artDst = path.join(outDir, 'campfire.png');

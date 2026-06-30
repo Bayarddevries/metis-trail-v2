@@ -788,11 +788,8 @@ function showEvent(game) {
         const res = diceResult.result;
         const cart = game.getCart();
         const weather = after.weather || 'clear';
-        const mechParts = [];
-        if (after.food !== diceResult.before.food) mechParts.push(`${after.food - diceResult.before.food >= 0 ? '+' : ''}${(after.food - diceResult.before.food).toFixed(1)} Food`);
-        if (after.wear !== diceResult.before.wear) mechParts.push(`Wear ${after.wear - diceResult.before.wear >= 0 ? '+' : ''}${after.wear - diceResult.before.wear}`);
-        if (after.morale !== diceResult.before.morale) mechParts.push(`Morale ${after.morale - diceResult.before.morale >= 0 ? '+' : ''}${after.morale - diceResult.before.morale}`);
-        if (after.crew !== diceResult.before.crew) mechParts.push(`Crew: ${diceResult.before.crew} → ${after.crew}`);
+        // Use engine effects as single source of truth for journal too
+        const mechParts = (res && res.effects) ? [...res.effects] : [];
         journalLog({
           day: after.day,
           date: monthName(after.month) + ' ' + after.day,
@@ -924,17 +921,7 @@ function buildEventChoiceOutcome(stepLog, before, after) {
     msgs.push(`Rolled ${res.roll}${modStr} = ${res.total} (needed ${res.dc}+): ${res.success ? 'Success' : 'Failure'}`);
   }
   if (res && res.text) msgs.push(res.text);
-  if (after.food !== before.food) msgs.push(`${after.food - before.food >= 0 ? '+' : ''}${after.food - before.food} Food`);
-  if (after.wear !== before.wear) msgs.push(`Wear ${after.wear - before.wear >= 0 ? '+' : ''}${after.wear - before.wear}`);
-  if (after.morale !== before.morale) msgs.push(`Morale ${after.morale - before.morale >= 0 ? '+' : ''}${after.morale - before.morale}`);
-  if (after.crew !== before.crew) msgs.push(`Crew: ${before.crew} -> ${after.crew}`);
-  if (after.node !== before.node) msgs.push(`Arrived at: ${NODES[after.node]?.name || 'unknown'}`);
-  if (res && res.flags && res.flags.length) msgs.push(`Flag: ${res.flags[0]}`);
-  if (res && res.reps && res.reps.length) {
-    const r = res.reps[0];
-    msgs.push(`Reputation ${r.key}: ${r.delta >= 0 ? '+' : ''}${r.delta} (now ${r.value})`);
-  }
-  // Item give/consume and other effects from the engine
+  // Item give/consume and other effects from the engine (single source of truth)
   if (res && res.effects && res.effects.length) {
     msgs.push(...res.effects);
   }
