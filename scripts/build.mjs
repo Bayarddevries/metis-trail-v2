@@ -123,24 +123,30 @@ export async function build() {
   if (assets.length) {
     await fs.writeFile(path.join(outDir, 'manifest.json'), manifest);
   }
-  // Copy settlement images to dist
-  const settlementsSrc = path.join(cwd, 'art', 'settlements');
-  const settlementsDst = path.join(outDir, 'settlements');
+  // Copy all art subdirectories to dist (events, settlements, etc.)
+  const artDir = path.join(cwd, 'art');
   try {
-    await fs.mkdir(settlementsDst, { recursive: true });
-    const files = await fs.readdir(settlementsSrc);
-    for (const f of files) {
-      if (f.endsWith('.png') || f.endsWith('.jpg') || f.endsWith('.webp')) {
-        await fs.copyFile(path.join(settlementsSrc, f), path.join(settlementsDst, f));
+    const artEntries = await fs.readdir(artDir, { withFileTypes: true });
+    for (const entry of artEntries) {
+      if (entry.isDirectory()) {
+        const srcDir = path.join(artDir, entry.name);
+        const dstDir = path.join(outDir, entry.name);
+        await fs.mkdir(dstDir, { recursive: true });
+        const files = await fs.readdir(srcDir);
+        let count = 0;
+        for (const f of files) {
+          if (f.endsWith('.png') || f.endsWith('.jpg') || f.endsWith('.webp')) {
+            await fs.copyFile(path.join(srcDir, f), path.join(dstDir, f));
+            count++;
+          }
+        }
+        if (count > 0) console.log(`[build] copied ${count} images from art/${entry.name}/`);
+      } else if (entry.isFile() && (entry.name.endsWith('.png') || entry.name.endsWith('.jpg') || entry.name.endsWith('.svg'))) {
+        await fs.copyFile(path.join(artDir, entry.name), path.join(outDir, entry.name));
       }
     }
-    console.log(`[build] copied ${files.length} settlement images`);
-  } catch (e) { console.warn('[build] no settlement art found:', e.message); }
+  } catch (e) { console.warn('[build] no art directory found:', e.message); }
 
-  // Copy art assets referenced in CSS
-  const artSrc = path.join(cwd, 'art', 'campfire.png');
-  const artDst = path.join(outDir, 'campfire.png');
-  try { await fs.copyFile(artSrc, artDst); } catch(_) {}
   return outDir;
 }
 
