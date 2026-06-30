@@ -641,12 +641,6 @@ function revealDiceOutcome(diceResult) {
 
     // Compact mechanical summary (stat changes only)
     const mechMsgs = [];
-    const after = window._metisGame.getState();
-    const before = diceResult.before;
-    if (after.food !== before.food) mechMsgs.push(`${after.food - before.food >= 0 ? '+' : ''}${after.food - before.food} Food`);
-    if (after.wear !== before.wear) mechMsgs.push(`Wear ${after.wear - before.wear >= 0 ? '+' : ''}${after.wear - before.wear}`);
-    if (after.morale !== before.morale) mechMsgs.push(`Morale ${after.morale - before.morale >= 0 ? '+' : ''}${after.morale - before.morale}`);
-    if (after.crew !== before.crew) mechMsgs.push(`Crew: ${before.crew} → ${after.crew}`);
     // Item give/consume and other effects from the engine
     if (result.effects && result.effects.length) {
       mechMsgs.push(...result.effects);
@@ -891,12 +885,7 @@ function showEvent(game) {
           html += `<p class="outcome-flavor neutral">${flavorText}</p>`;
         }
         // Compact mechanical summary
-        const afterState = game.getState();
         const mechMsgs = [];
-        if (afterState.food !== prev.food) mechMsgs.push(`${afterState.food - prev.food >= 0 ? '+' : ''}${afterState.food - prev.food} Food`);
-        if (afterState.wear !== prev.wear) mechMsgs.push(`Wear ${afterState.wear - prev.wear >= 0 ? '+' : ''}${afterState.wear - prev.wear}`);
-        if (afterState.morale !== prev.morale) mechMsgs.push(`Morale ${afterState.morale - prev.morale >= 0 ? '+' : ''}${afterState.morale - prev.morale}`);
-        if (afterState.crew !== prev.crew) mechMsgs.push(`Crew: ${prev.crew} → ${afterState.crew}`);
         // Item give/consume and other effects from the engine
         if (res && res.effects && res.effects.length) {
           mechMsgs.push(...res.effects);
