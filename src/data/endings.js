@@ -10,7 +10,6 @@ export const ENDINGS = {
     },
     quote: getSource('FORT_EDMONTON'),
     quoteHigh: getSource('SAWYER_TRIAL'),
-    tip: "Tip: Trade goods (furs, hides) at settlements for food and repairs. Keep your trade goods count high when you reach Edmonton — each is worth 50 points. Repair wear early — letting the cart degrade costs points fast.",
   },
 
   no_trade: {
@@ -21,7 +20,6 @@ export const ENDINGS = {
       humble: "The gates of Fort Edmonton are open before us, but there is nothing to show for the journey. No furs, no hides, no trade goods to our name. We spent everything to keep the crew alive through the hardest stretches. We survived — but the ledger will not remember this trip.",
     },
     quote: getSource('HBC_JOURNAL'),
-    tip: "Tip: Barter goods for supplies at settlements, then hold onto trade goods (furs, hides) for the end score. Keep your trade goods count above 5 when you reach Edmonton. Balance survival with profit — forage and hunt to supplement food instead of bartering away all your cargo.",
   },
 
   starvation: {
@@ -32,7 +30,6 @@ export const ENDINGS = {
       humble: "We count the last of the pemmican and divide it into portions too small to matter. Three days later, there is nothing. The crew sits by the cart, too weak to walk. The prairie stretches in every direction, indifferent to our hunger. The trail has claimed another party.",
     },
     quote: getSource('PEMMICAN_FAMINE'),
-    tip: "Tip: Food is your most critical resource. Trade for it at every settlement. Forage when the crew is rested. Never let your food drop below 5 — the trail between settlements is longer than you think.",
   },
 
   cart_failure: {
@@ -43,7 +40,6 @@ export const ENDINGS = {
       humble: "We knew the cart was failing. The squeal grew louder each day, the wheels wobbled, the frame groaned. But we pushed on, hoping to reach the next settlement. The axle finally gives out on open prairie, miles from anywhere. The cart will not roll again.",
     },
     quote: getSource('BREHAUT_CART'),
-    tip: "Tip: Repair wear at every settlement. Use shaganappi to reduce wear before it reaches critical levels. If your cart squeals, stop and fix it — ignoring wear is the fastest way to end up stranded. A spare axle weighs 15 kg but could save your journey.",
   },
 
   winter: {
@@ -54,7 +50,6 @@ export const ENDINGS = {
       humble: "October winds carry the first frost, and the sky turns the color of old iron. Winter is coming, and we are still on the open prairie between posts. The trail ahead will soon be buried. We make camp for the last time, knowing the journey ends here.",
     },
     quote: getSource('WINTER_TRAIL'),
-    tip: "Tip: Speed matters. Every day on the trail brings winter closer. Don't linger too long at settlements — rest and repair quickly, then move. The trail from Fort Garry to Fort Edmonton takes roughly 35-50 days. Leave early and keep moving.",
   },
 
   abandoned: {
@@ -65,6 +60,5 @@ export const ENDINGS = {
       humble: "One morning, the crew simply will not rise. They sit by the dead fire and stare at the horizon. No amount of encouragement can move them. The journey has ground them down to nothing. We are alone on the Carlton Trail with a cart full of goods and no one willing to pull it.",
     },
     quote: getSource('MORALE'),
-    tip: "Tip: Keep your crew's morale up. Make camp to rest when tired. Share meals at settlements. Don't push through exhaustion — a rested crew travels faster and survives longer. Morale is invisible until it's gone.",
   },
 };

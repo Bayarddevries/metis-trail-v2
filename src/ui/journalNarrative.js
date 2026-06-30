@@ -82,54 +82,54 @@ const TRAVEL_WEATHER_LINES = {
 const EVENT_CHOICE_RAIN_SUCCESS = [
   (choiceText) => `The rain hammered down but ${choiceText.toLowerCase()}. The ground was slick, boots heavy, but the work got done.`,
   (choiceText) => `Rain-soaked ground made every step a fight, yet ${choiceText.toLowerCase()}. The tarp shed water like a duck's back.`,
-  (choiceText) => `Midday deluge. You ${choiceText.toLowerCase()} through the downpour. Canvas kept the powder dry — that mattered.`,
+  (choiceText) => `Midday deluge. We ${choiceText.toLowerCase()} through the downpour. Canvas kept the powder dry — that mattered.`,
 ];
 
 const EVENT_CHOICE_RAIN_FAILURE = [
-  (choiceText) => `The rain turned the trail to soup. You tried to ${choiceText.toLowerCase()} but the mud won. Boots stuck, temper frayed.`,
-  (choiceText) => `Cold rain all day. ${choiceText} failed — the ground went to grease and the wagon slid sideways.`,
-  (choiceText) => `Rain found every seam. You ${choiceText.toLowerCase()} but the wet powder fouled. A miserable failure.`,
+(choiceText) => `The rain turned the trail to soup. We tried to ${choiceText.toLowerCase()} but the mud won. Boots stuck, temper frayed.`,
+(choiceText) => `Cold rain all day. ${choiceText} failed — the ground went to grease and the wagon slid sideways.`,
+(choiceText) => `Rain found every seam. We ${choiceText.toLowerCase()} but the wet powder fouled. A miserable failure.`,
 ];
 
 const EVENT_CHOICE_STORM_SUCCESS = [
-  (choiceText) => `Thunder cracked overhead. You ${choiceText.toLowerCase()} with lightning at your back. The oxen held — barely.`,
-  (choiceText) => `Storm winds howled. Still you ${choiceText.toLowerCase()}. The tarp snapped but held. The work is done.`,
-  (choiceText) => `Black sky, white lightning. You ${choiceText.toLowerCase()} and the gods didn't strike you down.`,
+(choiceText) => `Thunder cracked overhead. We ${choiceText.toLowerCase()} with lightning at our backs. The oxen held — barely.`,
+(choiceText) => `Storm winds howled. Still we ${choiceText.toLowerCase()}. The tarp snapped but held. The work is done.`,
+(choiceText) => `Black sky, white lightning. We ${choiceText.toLowerCase()} and the storm didn't break us.`,
 ];
 
 const EVENT_CHOICE_STORM_FAILURE = [
-  (choiceText) => `The storm broke right when you needed calm. ${choiceText} went wrong — lightning spooked the oxen, wind scattered your focus.`,
-  (choiceText) => `Thunder rolled like drumbeats of doom. You ${choiceText.toLowerCase()} but the elements swallowed the effort.`,
-  (choiceText) => `A flash, a crack, the oxen bolted. ${choiceText} — abandoned. The storm took its due.`,
+(choiceText) => `The storm broke right when we needed calm. ${choiceText} went wrong — lightning spooked the oxen, wind scattered our focus.`,
+(choiceText) => `Thunder rolled like drumbeats of doom. We ${choiceText.toLowerCase()} but the elements swallowed the effort.`,
+(choiceText) => `A flash, a crack, the oxen bolted. ${choiceText} — abandoned. The storm took its due.`,
 ];
 
 const EVENT_CHOICE_SNOW_SUCCESS = [
-  (choiceText) => `Snow muffled the world. You ${choiceText.toLowerCase()} in the white quiet. Blankets and firewood kept the chill at bay.`,
-  (choiceText) => `First snow dusted the trail. You ${choiceText.toLowerCase()} with cold fingers but steady hands. The fire waited at camp.`,
-  (choiceText) => `White fingers of winter in the grass. Still you ${choiceText.toLowerCase()} and the work held.`,
+(choiceText) => `Snow muffled the world. We ${choiceText.toLowerCase()} in the white quiet. Blankets and firewood kept the chill at bay.`,
+(choiceText) => `First snow dusted the trail. We ${choiceText.toLowerCase()} with cold fingers but steady hands. The fire waited at camp.`,
+(choiceText) => `White fingers of winter in the grass. Still we ${choiceText.toLowerCase()} and the work held.`,
 ];
 
 const EVENT_CHOICE_SNOW_FAILURE = [
-  (choiceText) => `Snow blinded the way. You tried to ${choiceText.toLowerCase()} but the cold stole feeling from fingers. The work slipped.`,
-  (choiceText) => `Frost bit deep. ${choiceText} failed — no firewood, no blankets, just the cold and the failure.`,
-  (choiceText) => `The snow came down thick. You ${choiceText.toLowerCase()} but the world went white. Nothing gained.`,
+(choiceText) => `Snow blinded the way. We tried to ${choiceText.toLowerCase()} but the cold stole feeling from fingers. The work slipped.`,
+(choiceText) => `Frost bit deep. ${choiceText} failed — no firewood, no blankets, just the cold and the failure.`,
+(choiceText) => `The snow came down thick. We ${choiceText.toLowerCase()} but the world went white. Nothing gained.`,
 ];
 
 const EVENT_CHOICE_OVERCAST_SUCCESS = [
-  (choiceText) => `Grey sky, flat light. You ${choiceText.toLowerCase()} in the gloom. No rain, no sun — just the work.`,
-  (choiceText) => `The clouds pressed low. You ${choiceText.toLowerCase()} without drama. Steady does it.`,
+(choiceText) => `Grey sky, flat light. We ${choiceText.toLowerCase()} in the gloom. No rain, no sun — just the work.`,
+(choiceText) => `The clouds pressed low. We ${choiceText.toLowerCase()} without drama. Steady does it.`,
 ];
 
 const EVENT_CHOICE_OVERCAST_FAILURE = [
-  (choiceText) => `The grey day drained the spirit. You ${choiceText.toLowerCase()} but the weight of the sky wore you down.`,
-  (choiceText) => `Overcast and heavy. ${choiceText} came to nothing. The light never broke through.`,
+(choiceText) => `The grey day drained the spirit. We ${choiceText.toLowerCase()} but the weight of the sky wore us down.`,
+(choiceText) => `Overcast and heavy. ${choiceText} came to nothing. The light never broke through.`,
 ];
 
 // Item-aware prose for "always" outcomes (no choice, automatic)
 const EVENT_AUTO_RAIN_TARP = [
   'Rain came on hard. The tarp was up in seconds — dry underneath while the prairie drowned.',
   'The canvas Tarp earned its weight today. Water ran off in sheets. Crew stayed dry, powder stayed ready.',
-  'A proper soaking rain. But the tarp held. You watched the water bead and roll off. Good gear.',
+  'A proper soaking rain. But the tarp held. We watched the water bead and roll off. Good gear.',
 ];
 
 const EVENT_AUTO_STORM_TARP = [
@@ -390,12 +390,12 @@ const LEAVE_BEHIND = [
 // ── First-person reflection templates (diary depth) ───────────────────
 
 const TRAVEL_REFLECTIONS = [
-  'My back aches from the jolting. The younger hands complain but they keep pace. I wonder how many more days this body has in it.',
-  'The officer at the last post said the trail gets harder north of the Assiniboine. I believe him. Every mile feels earned now.',
+  'Our backs ache from the jolting. The younger hands complain but they keep pace. We wonder how many more days this body has in it.',
+  'The officer at the last post said the trail gets harder north of the Assiniboine. We believe him. Every mile feels earned now.',
   'We passed a grave today. Just a wooden cross, weathered grey. No name. The prairie keeps its dead close.',
   'The cart creaks a new rhythm. Hub on the near side needs attention. Shaganappi will hold it for now.',
   'Strange to think the river flows north while we chase the sunset. The world turns different out here.',
-  'The crew talks less each day. Not from anger — just the weight of distance. I hear them hum old songs sometimes.',
+  'The crew talks less each day. Not from anger — just the weight of distance. We hear them hum old songs sometimes.',
   'A half-breed trapper shared firewater last night. Said the bison are moving west. Said the trail is changing. He was not wrong.',
   'Dreams of Red River feel like another life. The fort, the bells, the women laughing on the landing. All behind us now.',
 ];
@@ -404,7 +404,7 @@ const CAMP_REFLECTIONS = {
   rest: [
     'Fire dimming. The oxen breathe slow. Tomorrow we do it again. God willing, the wheels hold.',
     'Stars so thick you could scoop them. The quiet is the loudest thing on the trail.',
-    'Wrote a letter in my head to Marie. Burned it in the fire. Some words aren\'t meant to travel.',
+    'Wrote a letter in our heads to loved ones. Burned it in the fire. Some words aren\'t meant to travel.',
   ],
   forage: [
     'Hands smell of earth and onion. Good work today, if the pot holds out.',
@@ -412,7 +412,7 @@ const CAMP_REFLECTIONS = {
   ],
   hunt: [
     'Blood on the knife, steam in the cold. The animal gave its life. We waste nothing — hide, meat, sinew, bone.',
-    'The shot rings in my ears still. Clean kill. The crew works fast now. They know the rhythm.',
+    'The shot rings in our ears still. Clean kill. The crew works fast now. They know the rhythm.',
   ],
   repair: [
     'Shaganappi binds more than wood. It binds the journey together. One more day the cart rolls.',
@@ -424,7 +424,7 @@ const CAMP_REFLECTIONS = {
   ],
   dance: [
     'The fiddle quiet now. Feet sore, heart lighter. We laughed at nothing and everything.',
-    'Old Pierre played the tune my father taught me. For a moment I was a boy again at St. Boniface.',
+    'Old Pierre played the tune our fathers taught us. For a moment we were children again at St. Boniface.',
   ],
   cook: [
     'Steam rises, bellies fill. This is the wealth of the trail — hot food and hands that made it.',
@@ -432,14 +432,14 @@ const CAMP_REFLECTIONS = {
   ],
   push_on: [
     'No fire tonight. The dark presses close. We gained miles but lost something softer.',
-    'The oxen\'s breath clouds the lantern light. They do not complain. Neither should I.',
+    'The oxen\'s breath clouds the lantern light. They do not complain. Neither should we.',
   ],
 };
 
 const EVENT_REFLECTIONS = {
   success: [
-    'Fortune favored us today. I will not question why — only give thanks and keep moving.',
-    'The dice fell right. Tomorrow they may not. I store this luck like pemmican for lean days.',
+    'Fortune favored us today. We will not question why — only give thanks and keep moving.',
+    'The dice fell right. Tomorrow they may not. We store this luck like pemmican for lean days.',
   ],
   failure: [
     'The trail teaches hard lessons. This one stings. We carry the scar and the wisdom both.',
@@ -447,12 +447,12 @@ const EVENT_REFLECTIONS = {
   ],
   critical: [
     'The world broke open today. What we lost cannot be named in numbers. We walk differently now.',
-    'A day that will wake me in winters to come. The crew watches me. I must not show the crack.',
+    'A day that will wake us in winters to come. The crew watches us. We must not show the crack.',
   ],
 };
 
 const SETTLEMENT_REFLECTIONS = [
-  (name, day) => `${name} behind us. Day ${day} on the trail. The map shrinks in my hands but the distance feels longer.`,
+  (name, day) => `${name} behind us. Day ${day} on the trail. The map shrinks in our hands but the distance feels longer.`,
   (name, day) => `Traded, rested, prayed at ${name}. The ledger balances but the soul's account is harder to tally. Day ${day}.`,
   (name, day) => `Left ${name} with full bellies and lighter hearts. The trail waits for no man. Day ${day} and counting.`,
   (name, day) => `The factor's scales were honest. The priest's blessing felt true. Even the Mountie nodded respect. Day ${day}.`,

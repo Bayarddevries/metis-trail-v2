@@ -187,7 +187,8 @@ export function createGame(seed = null) {
       }
     }
 
-    if (ch.time) {
+    // ── Time: non-dice choices only (dice choices use okTime/badTime below) ──
+    if (result.success === null && ch.time) {
       if (ch.time > 0) {
         advance();
         result.effects.push(`+${ch.time} day(s)`);
@@ -198,14 +199,12 @@ export function createGame(seed = null) {
       }
     }
 
-    // ── Food/Morale/Crew: conditional on success/failure ──
-    // If ok*/bad* fields exist, use them conditionally.
-    // Otherwise fall back to always-applying base fields (legacy behavior).
+    // ── Food/Morale/Crew/Time/Rep: conditional on success/failure ──
     const success = result.success === true;
     const failure = result.success === false;
 
     if (success) {
-      // Success path: use okFood/okMorale if defined, else fall back to base food/morale
+      // ── Success path: ok* fields with fallback to base fields ──
       if (ch.okFood !== undefined) {
         S.food += ch.okFood;
         result.effects.push(`${ch.okFood > 0 ? '+' : ''}${ch.okFood} Food`);
@@ -220,13 +219,33 @@ export function createGame(seed = null) {
         S.morale = Math.max(0, Math.min(100, S.morale + ch.morale));
         result.effects.push(`${ch.morale >= 0 ? '+' : ''}${ch.morale} Morale`);
       }
-      // okCrew: only apply crew change on success if explicitly defined
+      // Time on success: okTime with fallback to base time
+      if (ch.okTime !== undefined) {
+        if (ch.okTime > 0) { advance(); result.effects.push(`+${ch.okTime} day(s)`); }
+        else if (ch.okTime < 0) { S.segmentDay = Math.max(0, S.segmentDay + ch.okTime); result.effects.push(`${ch.okTime} day(s)`); }
+      } else if (ch.time) {
+        if (ch.time > 0) { advance(); result.effects.push(`+${ch.time} day(s)`); }
+        if (ch.time < 0) { S.segmentDay = Math.max(0, S.segmentDay + ch.time); result.effects.push(`${ch.time} day(s)`); }
+      }
+      // Crew on success: okCrew with fallback to base crew
       if (ch.okCrew) {
         S.crew = ch.okCrew;
         result.effects.push(`Crew: ${ch.okCrew}`);
+      } else if (ch.crew) {
+        S.crew = ch.crew;
+        result.effects.push(`Crew: ${ch.crew}`);
+      }
+      // Reputation on success
+      if (ch.addsRep) {
+        S.reputation[ch.addsRep.key] = (S.reputation[ch.addsRep.key] || 0) + ch.addsRep.delta;
+        result.reps.push({ key: ch.addsRep.key, delta: ch.addsRep.delta, value: S.reputation[ch.addsRep.key] });
+      }
+      if (ch.okRep) {
+        S.reputation[ch.okRep.key] = (S.reputation[ch.okRep.key] || 0) + ch.okRep.delta;
+        result.reps.push({ key: ch.okRep.key, delta: ch.okRep.delta, value: S.reputation[ch.okRep.key] });
       }
     } else if (failure) {
-      // Failure path: use badFood/badMorale if defined, else fall back to base food/morale
+      // ── Failure path: bad* fields with fallback to base fields ──
       if (ch.badFood !== undefined) {
         S.food += ch.badFood;
         result.effects.push(`${ch.badFood > 0 ? '+' : ''}${ch.badFood} Food`);
@@ -241,14 +260,25 @@ export function createGame(seed = null) {
         S.morale = Math.max(0, Math.min(100, S.morale + ch.morale));
         result.effects.push(`${ch.morale >= 0 ? '+' : ''}${ch.morale} Morale`);
       }
-      // badCrew: only apply crew change on failure if explicitly defined
+      // Time on failure: badTime with fallback to base time
+      if (ch.badTime !== undefined) {
+        if (ch.badTime > 0) { advance(); result.effects.push(`+${ch.badTime} day(s)`); }
+        else if (ch.badTime < 0) { S.segmentDay = Math.max(0, S.segmentDay + ch.badTime); result.effects.push(`${ch.badTime} day(s)`); }
+      } else if (ch.time) {
+        if (ch.time > 0) { advance(); result.effects.push(`+${ch.time} day(s)`); }
+        if (ch.time < 0) { S.segmentDay = Math.max(0, S.segmentDay + ch.time); result.effects.push(`${ch.time} day(s)`); }
+      }
+      // Crew on failure: badCrew with fallback to base crew
       if (ch.badCrew) {
         S.crew = ch.badCrew;
         result.effects.push(`Crew: ${ch.badCrew}`);
+      } else if (ch.crew) {
+        S.crew = ch.crew;
+        result.effects.push(`Crew: ${ch.crew}`);
       }
     }
-    // Non-dice (always) path: apply base fields unconditionally
-    if (result.success === null || (ch.dc === null && !ch.always)) {
+    // Non-dice path: apply base fields unconditionally
+    if (result.success === null) {
       if (ch.food) {
         S.food += ch.food;
         result.effects.push(`${ch.food > 0 ? '+' : ''}${ch.food} Food`);
@@ -261,6 +291,11 @@ export function createGame(seed = null) {
         S.crew = ch.crew;
         result.effects.push(`Crew: ${ch.crew}`);
       }
+      // Reputation on non-dice path
+      if (ch.addsRep) {
+        S.reputation[ch.addsRep.key] = (S.reputation[ch.addsRep.key] || 0) + ch.addsRep.delta;
+        result.reps.push({ key: ch.addsRep.key, delta: ch.addsRep.delta, value: S.reputation[ch.addsRep.key] });
+      }
     }
 
     if (ch.give) {
@@ -269,6 +304,40 @@ export function createGame(seed = null) {
         if (item) {
           item.count += g.amt;
           result.effects.push(`+${g.amt} ${g.name}`);
+        } else if (g.amt > 0) {
+          // Item not in cart yet — create it from template
+          const template = ITEMS.find((i) => i.name === g.name);
+          cart.push({
+            name: g.name,
+            count: g.amt,
+            wt: template ? template.wt : 0,
+            icon: template ? template.icon : '📦',
+            type: template ? template.type : 'provisions',
+            category: template ? template.category : 'general',
+            desc: template ? template.desc : '',
+          });
+          result.effects.push(`+${g.amt} ${g.name}`);
+        }
+      });
+    }
+    if (ch.take) {
+      ch.take.forEach((t) => {
+        const item = cart.find((i) => i.name === t.name);
+        if (item) {
+          item.count += t.amt;
+          result.effects.push(`+${t.amt} ${t.name}`);
+        } else if (t.amt > 0) {
+          const template = ITEMS.find((i) => i.name === t.name);
+          cart.push({
+            name: t.name,
+            count: t.amt,
+            wt: template ? template.wt : 0,
+            icon: template ? template.icon : '📦',
+            type: template ? template.type : 'provisions',
+            category: template ? template.category : 'general',
+            desc: template ? template.desc : '',
+          });
+          result.effects.push(`+${t.amt} ${t.name}`);
         }
       });
     }
@@ -300,11 +369,6 @@ export function createGame(seed = null) {
       S.flags[ch.setsFlag] = true;
       result.flags.push(ch.setsFlag);
     }
-    if (ch.addsRep) {
-      S.reputation[ch.addsRep.key] = (S.reputation[ch.addsRep.key] || 0) + ch.addsRep.delta;
-      result.reps.push({ key: ch.addsRep.key, delta: ch.addsRep.delta, value: S.reputation[ch.addsRep.key] });
-    }
-
     if (ch.branch && !S.pendingEvent) {
       const branched = typeof ch.branch === 'function' ? ch.branch({ flags: S.flags, reputation: S.reputation, rng: rand }) : ch.branch;
       if (branched) S.pendingEvent = branched;
@@ -343,7 +407,7 @@ export function createGame(seed = null) {
     score -= daysPenalty * 5;
     score -= wearPenalty * 25;
     score -= noRestPenalty;
-    return Math.max(0, Math.round(score));
+    return Math.max(1, Math.round(score));
   }
 
   const stepLog = [];
@@ -754,7 +818,7 @@ export function createGame(seed = null) {
       }
 
       return {
-        score: Math.max(0, Math.round(total)),
+        score: Math.max(1, Math.round(total)),
         breakdown: {
           base: Math.round(baseScore),
           tradeGoods: Math.round(tradeBonus),
@@ -1061,17 +1125,17 @@ export function createGame(seed = null) {
         roll = d();
         rollTotal = roll + crewMod(S);
         if (rollTotal >= 12) {
-          const gained = Math.floor(Math.random() * 8) + 10;
+          const gained = Math.floor(Math.random() * 4) + 5; // 5-8 pemmican
           S.food += gained;
-          S.morale = Math.max(0, Math.min(100, S.morale + 10));
-          effects.push(`The women work fast — slicing, pounding, rendering tallow. +${gained} Pemmican`, 'Morale +10');
+          S.morale = Math.max(0, Math.min(100, S.morale + 5));
+          effects.push(`The women work fast — slicing, pounding, rendering tallow. +${gained} Pemmican`, 'Morale +5');
         } else if (rollTotal >= 7) {
-          const gained = Math.floor(Math.random() * 5) + 5;
+          const gained = Math.floor(Math.random() * 3) + 3; // 3-5 pemmican
           S.food += gained;
           effects.push(`Lean processing. +${gained} Pemmican`);
         } else {
-          effects.push('The work is slow and the yield is poor. +2 Pemmican');
-          S.food += 2;
+          effects.push('The work is slow and the yield is poor. +1 Pemmican');
+          S.food += 1;
         }
       } else if (action === 'deeprest') {
         if (S.food < 2) return { error: 'Need 2 Food for a deep rest.' };

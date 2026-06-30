@@ -1,29 +1,19 @@
 import { createGame } from './systems/engine.js';
 import { mount, find } from './ui/shell.js';
 import { renderStatusBar, journalLog, initMap, updateMap, monthName } from './ui/renderer.js';
-import { saveGame, loadGame, clearSave } from './ui/persistence.js';
+import { clearSave } from './ui/persistence.js';
 import { mountDebugUI } from './ui/debug.js';
 import { applyTheme } from './ui/theme.js';
 import { NODES } from './data/nodes.js';
-import { ENDINGS } from './data/endings.js';
-import { CONSTANTS } from './core/constants.js';
-import { saveScore, getTopScores, getMyScores, syncLocalScores } from './firebase.js';
 import Haptics from './ui/haptics.js';
 import { getItemIcon } from './ui/icons.js';
 import {
-  buildTravelEntry, buildTravelReflection,
-  buildEventChoiceEntry, buildEventAutoEntry, buildEventReflection,
-  buildCampEntry, buildCampReflection,
+  buildTravelReflection,
+  buildEventAutoEntry, buildEventReflection,
   buildSettlementArrivalEntry, buildSettlementJourneyEntry, buildSettlementActionEntry, buildSettlementReflection,
-  buildItemUseEntry, buildLeaveBehindEntry,
 } from './ui/journalNarrative.js';
 
 // Sync any locally-saved scores on page load
-syncLocalScores();
-
-// (buildTravelJournalEntry removed — using buildTravelEntry + buildTravelReflection from journalNarrative.js)
-
-// (buildEventJournalEntry removed — using buildEventChoiceEntry + buildEventReflection from journalNarrative.js)
 
 export function bootstrap(seed = null) {
   const game = createGame(seed);
@@ -587,9 +577,6 @@ function hideOverlays() {
   });
 }
 
-function rollDiceOnce() {
-  return Math.floor(Math.random() * 20) + 1;
-}
 
 function renderDicePill(result) {
   const rc = document.getElementById('event-roll-display');
@@ -679,6 +666,47 @@ function revealDiceOutcome(diceResult) {
   }
 }
 
+// Event image mapping — picks the right category image for each event
+const EVENT_IMAGE_MAP = {
+  // By classification
+  'Weather': 'events/event_storm.png',
+  'Supply Find': 'events/event_supplies.png',
+  'Survival': 'events/event_cart.png',
+  'Disease': 'events/event_sick.png',
+  'Trade & Regulation': 'events/event_people.png',
+  'Free Trade': 'events/event_people.png',
+  'Supply & Scarcity': 'events/event_supplies.png',
+  'Law & Order': 'events/event_people.png',
+  'Law & Desertion': 'events/event_people.png',
+  'Community & Hospitality': 'events/event_camp.png',
+  'Trail Justice': 'events/event_people.png',
+  'Charity & Healing': 'events/event_sick.png',
+  'Hardship & Loss': 'events/event_sick.png',
+  'Trail News': 'events/event_people.png',
+  'Freight & Trade': 'events/event_people.png',
+};
+
+// Fallback by keyword in event ID for unclassified events
+function pickEventImage(ev) {
+  // Classification match first
+  if (ev.classification && EVENT_IMAGE_MAP[ev.classification]) {
+    return EVENT_IMAGE_MAP[ev.classification];
+  }
+  const id = ev.id || '';
+  // Keyword fallback for common unclassified events
+  if (/fire|wind|storm|hail|thunder/.test(id)) return 'events/event_storm.png';
+  if (/river|ford|ferry|boat|crossing|flood|ice_break/.test(id)) return 'events/event_river.png';
+  if (/buffalo|bison|hunt/.test(id)) return 'events/event_buffalo.png';
+  if (/camp|cookery|night|dance|prayer/.test(id)) return 'events/event_camp.png';
+  if (/axle|wheel|cart_fort|sandbar|cart_raft|cache/.test(id)) return 'events/event_cart.png';
+  if (/trader|scout|cree|elder|nwmp|mp_check|inspection|rivalry|court|welcome|charity|news|boat|brigade/.test(id)) return 'events/event_people.png';
+  if (/cholera|smallpox|snow_blind|frost|deserter/.test(id)) return 'events/event_sick.png';
+  if (/cache|find|herb|bee|tree|blanket|gather|beaver|ammo|firewood/.test(id)) return 'events/event_supplies.png';
+  // Terrain-based default
+  if (/river/.test(id)) return 'events/event_river.png';
+  return 'events/event_prairie.png'; // broadest fallback
+}
+
 function showEvent(game) {
   const ev = game.getPendingEvent();
   if (!ev) return;
@@ -687,6 +715,18 @@ function showEvent(game) {
   const choicesEl = document.getElementById('event-choices');
   const continueEl = document.getElementById('event-continue');
   if (!textEl || !choicesEl) return;
+
+  // Map event to category image
+  const eventArtEl = document.getElementById('event-art');
+  if (eventArtEl) {
+    const img = pickEventImage(ev);
+    if (img) {
+      eventArtEl.src = img;
+      eventArtEl.style.display = 'block';
+    } else {
+      eventArtEl.style.display = 'none';
+    }
+  }
 
   textEl.textContent = ev.text;
 
@@ -928,6 +968,17 @@ function showSettlement(game) {
   const resultEl = document.getElementById('settlement-result');
   const continueEl = document.getElementById('settlement-continue');
   if (!nameEl || !badgeEl || !distanceEl || !descEl || !actionsEl) return;
+
+  // Set settlement image
+  const artEl = document.getElementById('settlement-art');
+  if (artEl) {
+    if (node.art) {
+      artEl.src = node.art;
+      artEl.style.display = 'block';
+    } else {
+      artEl.style.display = 'none';
+    }
+  }
 
   // Reset UI
   nameEl.textContent = node.name;

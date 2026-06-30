@@ -57,6 +57,7 @@ export const EVENT_POOLS = {
       ]
     },
     {
+    id: 'plains_squeal_cart',
     text: 'The dry wood of the hub screams against the axle — a blood-curdling sound that carries for miles across the open prairie. Every traveller on the trail knows that squeal. It means a loaded cart is coming, and the sound alone is enough to make oxen nervous and strangers take notice.',
     source: getSource('BREHAUT_CART'),
     choices: [
@@ -64,7 +65,7 @@ export const EVENT_POOLS = {
         id: 'plains_squeal_draw_attention',
         text: 'Your squealing cart draws a mounted rider from a nearby coulée.',
         choices: [
-          { text: 'Stand your ground', dc: 10, ok: 'He is a Métis trader simply curious.', bad: 'He is a rough type; you hand over a small toll.', food: -2, addsRep: { key: 'metis', delta: -1 } },
+          { text: 'Stand your ground', dc: 10, ok: 'He is a Métis trader simply curious.', bad: 'He is a rough type; you hand over a small toll.', food: -2 },
           { text: 'Offer a quiet trade', dc: 9, ok: 'He tips his hat and moves on.', bad: 'He senses weakness and haggles hard.', food: -1, okFood: 0, badFood: -1 }
         ]
       } },
@@ -349,7 +350,7 @@ export const EVENT_POOLS = {
       text: 'A lone trader crests the rise ahead, his cart loaded with bundles wrapped in oilcloth. He waves — a free trader, independent of the Company, carrying goods from settlement to settlement. His prices are his own, and his news is fresh.',
       source: getSource('SAWYER_TRIAL'),
       choices: [
-        { text: 'Trade with him', dc: null, always: 'You exchange one of his goods for one of yours. Fair value, no questions asked.', morale: 5, give: [{ name: 'Bison Hide', amt: 1 }], take: [{ name: 'Shaganappi', amt: 1 }] },
+        { text: 'Trade with him', dc: null, always: 'You exchange one of his goods for one of yours. Fair value, no questions asked.', morale: 5, consumesItem: 'Bison Hide', take: [{ name: 'Shaganappi', amt: 1 }] },
         { text: 'Buy information about the trail ahead', dc: 8, ok: 'He shares what he knows — which posts have supplies, which trails are washed out.', bad: 'He is close-mouth about conditions ahead. You learn little.', morale: 3, badMorale: -2 },
         { text: 'Refuse and keep moving', dc: null, always: 'You tip your hat and press on. Not all strangers are friends.' }
       ]
@@ -660,7 +661,7 @@ export const EVENT_POOLS = {
       text: 'A York boat rounds the bend, its oars flashing in the sun. HBC markings on the hull — a supply boat heading downstream from the northern posts. The crew waves. They have news, and they have trade goods that have not seen a settlement in months.',
       source: getSource('HBC_JOURNAL'),
       choices: [
-        { text: 'Trade with the boat crew', dc: null, always: 'You exchange news and goods. The boatmen are glad for fresh supplies from the south.', morale: 5, give: [{ name: 'Bison Hide', amt: 1 }], take: [{ name: 'Shaganappi', amt: 1 }] },
+        { text: 'Trade with the boat crew', dc: null, always: 'You exchange news and goods. The boatmen are glad for fresh supplies from the south.', morale: 5, consumesItem: 'Bison Hide', take: [{ name: 'Shaganappi', amt: 1 }] },
         { text: 'Ask for news of the trail ahead', dc: 8, ok: 'They tell you which posts are well-stocked and which trails have washed out. Valuable intelligence.', bad: 'They are close-mouth about Company business. You learn little.', morale: 3, badMorale: -2 },
         { text: 'Wave and continue on your way', dc: null, always: 'You are heading west, they are heading east. Your paths cross and diverge.' }
       ]
@@ -678,7 +679,7 @@ export const EVENT_POOLS = {
     {
     id: 'river_cart_raft_crossing',
     text: 'The crossing here is too deep to ford. You eye the spare hides in the cart — enough to build a raft, if you know how. The river is wide and the current steady. On the far bank, the trail continues west.',
-    source: getSource('FONSECA_RAF'),
+    source: getSource('FONSECA_RAFT'),
     choices: [
       { text: 'Build a cart-raft with 2 Bison Hides', dc: 12, ok: 'The improvised ferry floats. The crew swims the line across.', bad: 'One hide splits mid-river. Cargo gets wet.', morale: -6, food: -2, requiresItem: { name: 'Bison Hide', count: 2 } },
       { text: 'Ford the cart carefully', dc: 13, ok: 'The ox swims straight and true; the bed stays high.', bad: 'The current turns the cart. Wet freight and one damaged wheel.', wear: 2, food: -2, okFood: 0, badFood: -2, okMorale: 3, okWear: -1 }

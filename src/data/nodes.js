@@ -2,6 +2,7 @@ export const NODES = [
   {
     id: 'fort_garry',
     name: 'Fort Garry',
+    art: 'settlements/fort_garry.png',
     lat: 49.89,
     lon: -97.14,
     type: 'hbc',
@@ -23,6 +24,7 @@ export const NODES = [
   {
     id: 'st_boniface',
     name: 'St. Boniface',
+    art: 'settlements/st_boniface.png',
     lat: 49.88,
     lon: -97.11,
     type: 'mission',
@@ -44,6 +46,7 @@ export const NODES = [
   {
     id: 'st_norbert',
     name: 'St. Norbert',
+    art: 'settlements/st_norbert.png',
     lat: 49.77,
     lon: -97.15,
     type: 'metis',
@@ -64,6 +67,7 @@ export const NODES = [
   {
     id: 'st_francois_xavier',
     name: 'St. François Xavier',
+    art: 'settlements/st_francois_xavier.png',
     lat: 49.92,
     lon: -97.55,
     type: 'metis',
@@ -84,6 +88,7 @@ export const NODES = [
   {
     id: 'portage',
     name: 'Portage la Prairie',
+    art: 'settlements/portage_la_prairie.png',
     lat: 49.97,
     lon: -98.29,
     type: 'trading',
@@ -105,6 +110,7 @@ export const NODES = [
   {
     id: 'fort_ellice',
     name: 'Fort Ellice',
+    art: 'settlements/fort_ellice.png',
     lat: 50.4,
     lon: -101.3,
     type: 'hbc',
@@ -126,6 +132,7 @@ export const NODES = [
   {
     id: 'fort_quappelle',
     name: "Fort Qu'Appelle",
+    art: 'settlements/fort_quappelle.png',
     lat: 50.55,
     lon: -103.85,
     type: 'nwmp',
@@ -146,6 +153,7 @@ export const NODES = [
   {
     id: 'touchwood',
     name: 'Touchwood Hills',
+    art: 'settlements/touchwood_hills.png',
     lat: 51.2,
     lon: -104.2,
     type: 'trading',
@@ -166,6 +174,7 @@ export const NODES = [
   {
     id: 'humboldt',
     name: 'Humboldt Mission',
+    art: 'settlements/humboldt_mission.png',
     lat: 52.2,
     lon: -105.12,
     type: 'mission',
@@ -186,6 +195,7 @@ export const NODES = [
   {
     id: 'batoche',
     name: 'Batoche',
+    art: 'settlements/batoche.png',
     lat: 52.75,
     lon: -106.1,
     type: 'metis',
@@ -206,6 +216,7 @@ export const NODES = [
   {
     id: 'gabriels_crossing',
     name: "Gabriel's Crossing",
+    art: 'settlements/gabriels_crossing.png',
     lat: 52.7,
     lon: -105.75,
     type: 'river',
@@ -226,6 +237,7 @@ export const NODES = [
   {
     id: 'fort_carlton',
     name: 'Fort Carlton',
+    art: 'settlements/fort_carlton.png',
     lat: 52.8,
     lon: -106.5,
     type: 'hbc',
@@ -246,6 +258,7 @@ export const NODES = [
   {
     id: 'fort_pitt',
     name: 'Fort Pitt',
+    art: 'settlements/fort_pitt.png',
     lat: 53.65,
     lon: -109.75,
     type: 'hbc',
@@ -267,6 +280,7 @@ export const NODES = [
   {
     id: 'fort_edmonton',
     name: 'Fort Edmonton',
+    art: 'settlements/fort_edmonton.png',
     lat: 53.54,
     lon: -113.5,
     type: 'hbc',

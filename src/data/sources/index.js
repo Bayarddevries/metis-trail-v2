@@ -1,18 +1,4 @@
 const SOURCES = {
-  LACOMBE_JOURNALS: {
-    quote: 'The prairie burned every afternoon... the oxen grew restless in the smoke.',
-    author: 'Father Albert Lacombe',
-    work: 'Missionary Journals',
-    year: 1878,
-    url: 'https://github.com/Bayarddevries/metis-research-wiki',
-  },
-  HBC_JOURNALS: {
-    quote: 'Pemmican stores declining. The Company feels the pressure of the free traders.',
-    author: 'HBC Fort Edmonton Post Journal',
-    work: 'Archives of Manitoba',
-    year: 1878,
-    url: 'https://archive.org/stream/P000279/P000279_djvu.txt',
-  },
   SAWYER_TRIAL: {
     quote: '"I have broken no law. I have only traded with my own people." — Pierre Guillaume Sayer, upon his arrest at the Red River Settlement, 1849. The jury found him guilty but the judge imposed no penalty, and the crowd outside the courthouse cheered. The HBC\'s monopoly on trade was broken that day.',
     author: 'court transcript, Red River Settlement',
@@ -28,22 +14,6 @@ const SOURCES = {
     year: 1875,
     type: 'secondary',
     url: 'https://github.com/Bayarddevries/metis-research-wiki',
-  },
-  MCCONNELL_NW: {
-    quote: '"Fort Garry stands at the junction of the Red and Assiniboine rivers, and is the principal depot of the Hudson\'s Bay Company for the distribution of goods throughout the North-West. The settlement around it is the largest in the territory."',
-    author: 'R. G. McConnell',
-    work: 'Notes on the North-West of Canada',
-    year: 1885,
-    type: 'secondary',
-    url: 'https://archive.org/stream/toredriverbeyond00marb/toredriverbeyond00marb_djvu.txt',
-  },
-  CARLTON_TRAIL: {
-    quote: '"The trail from Fort Garry to Fort Edmonton is marked by the carts. Two parallel ruts, one for each wheel, worn into the prairie sod — in places a foot deep. The distance is near eight hundred miles, and the carts make it in six weeks." — a description of the Carlton Trail route, as recorded in early accounts.',
-    author: 'Antoine Blanc',
-    work: 'The Carlton Trail (Manitoba History)',
-    year: 1959,
-    type: 'secondary',
-    url: 'https://archive.org/stream/P000411/P000411_djvu.txt',
   },
   MACLEOD_NWMP: {
     quote: '"The establishment of the Mounted Police at Fort Macleod and along the western trails has had a marked effect upon the traffic. Duties are now collected on all goods passing through, and every cart is subject to inspection — a regulation which the free traders do not always relish."',
@@ -68,7 +38,7 @@ const SOURCES = {
     type: 'secondary',
     url: 'https://www.mhs.mb.ca/docs/transactions/3/redrivercart.shtml',
   },
-  BREHAUNT_TRAILS: {
+  BREHAUT_TRAILS: {
     quote: '"The wheels of the Red River carts, moving in the same track year after year, gradually wore two deep ruts into the prairie. These ruts became the trails — visible for miles across the flat grassland, and followed by every traveller who came after."',
     author: 'Harry Baker Brehaut',
     work: 'The Red River Cart and Trails: The Origins and Construction of an Iconic Vehicle',
@@ -218,14 +188,7 @@ const SOURCES = {
     year: 1878,
     url: 'https://archive.org/stream/P000279/P000279_djvu.txt',
   },
-  BLANC_TRAIL: {
-    quote: '"From Fort Garry to Edmonton, the cart ruts mark the longest overland route in the Northwest. The trail follows the north bank of the Saskatchewan, crossing the South Branch at the ferry below Batoche, and the North Branch above Fort Pitt. Eight hundred miles of prairie, river, and woodland — and the carts have worn it into the earth."',
-    author: 'Antoine Blanc',
-    work: 'The Carlton Trail (Manitoba History)',
-    year: 1959,
-    type: 'secondary',
-    url: 'https://archive.org/stream/P000411/P000411_djvu.txt',
-  },
+
   SCHULTZ_ALKALI: {
     quote: 'The water holes in the uplands were often ringed with white alkali crust. The oxen refused to drink, and the men had to choose between pressing on to clean water or waiting for the animals to adjust.',
     author: 'John C. Schultz',
@@ -310,14 +273,7 @@ const SOURCES = {
     type: 'secondary',
     url: 'https://www.mhs.mb.ca/docs/transactions/3/redrivercart.shtml',
   },
-  GOULET_HIDE: {
-    quote: '"The bison hide was the currency of the prairie. A single prime hide could buy a week\'s provisions at any post, and a cartload of hides was a fortune. Travellers cached them along the trail like buried treasure, wrapped in oilcloth and marked with a cairn." — from accounts of the Métis hide trade.',
-    author: 'Terry Goulet & George Goulet',
-    work: 'The Métis: Memorable Events and Memorable People',
-    year: 2005,
-    type: 'secondary',
-    url: 'https://github.com/Bayarddevries/metis-research-wiki',
-  },
+
   LACOMBE_STORM: {
     quote: 'The thunder rolled across the prairie like cannon fire. Lightning split the sky to the west, and the oxen bellowed in terror.',
     author: 'Father Albert Lacombe',
@@ -346,21 +302,7 @@ const SOURCES = {
     year: 1878,
     url: 'https://github.com/Bayarddevries/metis-research-wiki',
   },
-  BREHAUT_WET_AXE: {
-    quote: '"Wet weather swelled the wooden axles of the Red River carts, making the wheels bind against the box. A cart that rolled freely in dry weather could become nearly immovable after a rain. Experienced carters carried spare axles and kept their hubs well-greased against the damp."',
-    author: 'Harry Baker Brehaut',
-    work: 'The Red River Cart and Trails: Maintenance and Misfortune',
-    year: 1972,
-    type: 'secondary',
-    url: 'https://www.mhs.mb.ca/docs/transactions/3/redrivercart.shtml',
-  },
-  FONSECA_OVERCAST: {
-    quote: 'A grey sky hung low over the prairie for days. The air was heavy and still, and the oxen moved as if they could sense a storm coming.',
-    author: 'William G. Fonseca',
-    work: 'On the St. Paul Trail in the Sixties',
-    year: 1900,
-    url: 'https://www.mhs.mb.ca/docs/transactions/3/stpaultrail.shtml',
-  },
+
   LACOMBE_HERBS: {
     quote: 'The prairie is a pharmacy for those who know it. Sage for fever, willow bark for pain, and wild mint for the stomach — the land provides for those who read it.',
     author: 'Father Albert Lacombe',
@@ -405,21 +347,7 @@ const SOURCES = {
     year: 1900,
     url: 'https://www.mhs.mb.ca/docs/transactions/3/stpaultrail.shtml',
   },
-  CALHOON_PEMM: {
-    quote: '"When the hunt was over, the women would go out to help bring the meat in. Then the slicing began — the meat cut into thin strips, dried over a slow fire, and the tallow rendered. A woman could process a whole buffalo in a day if she had to. That was our work, and we were proud of it." — Victoria Callihoo (Métis elder, 1901–1984), oral history.',
-    author: 'Victoria Callihoo (Métis elder, 1901–1984)',
-    work: 'oral history, as transcribed in "The Pemmican Trade: A Métis Woman\'s Account"',
-    year: 2022,
-    type: 'secondary',
-    url: 'https://letsfindoutpodcast.com/wp-content/uploads/2022/05/hist-699-pemmican-paper-final-draft.docx',
-  },
-  SIMPSON_BRIGADE: {
-    quote: 'Their cavalcade extended over a mile. Each family had two or three carts, together with a band of horses, cattle and dogs. The men and the lads travelled on the saddle, while the carts, which were covered with awnings against the sun and rain, carried the women and young children.',
-    author: 'Sir George Simpson, "Narrative of a Journey Round the World"',
-    work: 'cited in Manitoba Pageant, via MHS Transactions',
-    year: 1847,
-    url: 'https://www.mhs.mb.ca/docs/pageant/01/redrivercart.shtml',
-  },
+
   CALHOON_CART_FORT: {
     quote: '"When the threat came, the brigade formed a tight circle of carts — a fortress on the open prairie. Inside, the women and children were secured while the men took up positions along the perimeter with whatever weapons they had. The carts were our walls, and we defended them." — Victoria Callihoo (Métis elder, 1901–1984), oral history, corroborated by the Indigenous Peoples Atlas of Canada.',
     author: 'Victoria Callihoo (Métis elder, 1901–1984)',
